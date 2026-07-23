@@ -31,7 +31,7 @@
     @stack('head')
 </head>
 
-<body class="public-site {{ $bodyClass ?? '' }}">
+<body class="public-site {{ $bodyClass ?? '' }}" class="{{ request()->routeIs('home') ? 'home-page' : 'inner-page' }}">
 
     <!-- AZARI_PRELOADER_START -->
     
@@ -55,7 +55,11 @@
     @include('public.partials.navigation')
 
     <main id="main-content">
-        {{ $slot }}
+        @isset($slot)
+            {{ $slot }}
+        @else
+            @yield('content')
+        @endisset
     </main>
 
     @include('public.partials.footer')
@@ -76,5 +80,7 @@
     @include('public.partials.drawer-root')
 
     @stack('scripts')
+    <x-azari-feedback />
+    ("components.azari-flash-toasts")
 </body>
 </html>

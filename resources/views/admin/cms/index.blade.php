@@ -1,4 +1,5 @@
-<x-admin.layout title="CMS and branding">
+@extends('admin.layouts.app')
+@section('content')
     <div class="admin-heading">
         <div>
             <span>SPRINT 03</span>
@@ -278,4 +279,4 @@
             @endforelse
         </div>
     </section>
-</x-admin.layout>
+@endsection

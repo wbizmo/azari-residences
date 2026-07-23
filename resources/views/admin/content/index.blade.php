@@ -1,4 +1,5 @@
-<x-admin.layout title="Content">
+@extends('admin.layouts.app')
+@section('content')
     <div class="admin-heading"><div><span>CMS</span><h1>Frontend content</h1></div></div>
     <div class="admin-stack">
         @foreach($blocks as $block)
@@ -16,4 +17,4 @@
             </form>
         @endforeach
     </div>
-</x-admin.layout>
+@endsection

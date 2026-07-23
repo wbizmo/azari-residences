@@ -1,4 +1,5 @@
-<x-admin.layout :title="$property->exists ? 'Edit property' : 'Add property'">
+@extends('admin.layouts.app')
+@section('content')exists ? 'Edit property' : 'Add property'">
     <div class="admin-heading">
         <div><span>PROPERTY EDITOR</span><h1>{{ $property->exists ? $property->name : 'Add property' }}</h1><p>Every control below uses the Azari administration design system.</p></div>
         <a class="button button-secondary" href="{{ route('azari.admin.inventory.index') }}">Back to inventory</a>
@@ -139,4 +140,4 @@
             </div>
         </section>
     @endif
-</x-admin.layout>
+@endsection

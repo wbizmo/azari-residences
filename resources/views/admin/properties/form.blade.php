@@ -1,4 +1,5 @@
-<x-admin.layout :title="$property->exists ? 'Edit property' : 'Add property'">
+@extends('admin.layouts.app')
+@section('content')exists ? 'Edit property' : 'Add property'">
     <div class="admin-heading"><div><span>Inventory</span><h1>{{ $property->exists ? 'Edit property' : 'Add property' }}</h1></div></div>
     <form class="admin-form admin-form-grid" method="POST" enctype="multipart/form-data"
           action="{{ $property->exists ? route('azari.admin.properties.update', $property) : route('azari.admin.properties.store') }}">
@@ -35,4 +36,4 @@
         <label class="admin-checkbox"><input type="checkbox" name="is_published" value="1" @checked(old('is_published', $property->is_published))> Published</label>
         <div class="admin-span-2"><button class="button button-primary" type="submit">Save property</button></div>
     </form>
-</x-admin.layout>
+@endsection

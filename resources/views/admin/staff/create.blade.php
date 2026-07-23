@@ -1,4 +1,5 @@
-<x-admin.layout title="Add staff">
+@extends('admin.layouts.app')
+@section('content')
     <div class="admin-heading"><div><span>Security</span><h1>Create staff account</h1></div></div>
     <form class="admin-form" method="POST" action="{{ route('azari.admin.staff.store') }}" enctype="multipart/form-data">
         @csrf
@@ -20,4 +21,4 @@
         <label>Confirm password<input id="staff-password-confirmation" type="text" name="password_confirmation" minlength="12" required></label>
         <button class="button button-primary" type="submit">Create staff account</button>
     </form>
-</x-admin.layout>
+@endsection

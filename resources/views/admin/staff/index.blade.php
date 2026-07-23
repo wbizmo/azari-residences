@@ -1,4 +1,5 @@
-<x-admin.layout title="Staff">
+@extends('admin.layouts.app')
+@section('content')
     <div class="admin-heading">
         <div><span>Security</span><h1>Staff accounts</h1></div>
         <a class="button button-primary" href="{{ route('azari.admin.staff.create') }}">Add staff</a>
@@ -26,4 +27,4 @@
             </tbody>
         </table>
     </div>
-</x-admin.layout>
+@endsection

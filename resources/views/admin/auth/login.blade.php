@@ -1,43 +1,46 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Administrator Login | Azari Residences</title>
-    <link rel="stylesheet" href="{{ asset('css/azari-admin-extension.css') }}">
+    <title>Sign in | {{ config('app.name', 'Azari Residences') }}</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="az-admin-login-page">
-<main class="az-login-shell">
-    <section class="az-login-card">
-        <a href="{{ route('home') }}" class="az-brand">Azari Residences</a>
-        <p class="az-eyebrow">Secure administrator access</p>
-        <h1>Welcome back</h1>
-        <p class="az-muted">Sign in with your administrator username or email address.</p>
+<body class="auth-page auth-page--admin">
+    <main class="auth-shell">
+        <section class="auth-card" aria-labelledby="admin-login-title">
+            <header class="auth-card__header">
+                <h1 id="admin-login-title">Sign in</h1>
+            </header>
 
-        @if ($errors->any())
-            <div class="az-error" role="alert">{{ $errors->first() }}</div>
-        @endif
+            <form method="POST" action="{{ route('azari.admin.login.store') }}" class="azari-form" data-working-form>
+                @csrf
 
-        <form method="POST" action="{{ route('azari.admin.login.store') }}" class="az-form-stack">
-            @csrf
+                <div class="field-group">
+                    <label for="admin-login">Email or username</label>
+                    <input id="admin-login" name="login" type="text" value="{{ old('login') }}" autocomplete="username" required autofocus>
+                    @error('login')<p class="field-error">{{ $message }}</p>@enderror
+                </div>
 
-            <label for="admin-login">Username or email
-                <input id="admin-login" name="login" value="{{ old('login') }}" autocomplete="username" required autofocus>
-            </label>
+                <div class="field-group">
+                    <label for="admin-password">Password</label>
+                    <input id="admin-password" name="password" type="password" autocomplete="current-password" required>
+                    @error('password')<p class="field-error">{{ $message }}</p>@enderror
+                </div>
 
-            <label for="admin-password">Password
-                <input id="admin-password" type="password" name="password" autocomplete="current-password" required>
-            </label>
+                <label class="toggle-control" for="admin-remember">
+                    <input id="admin-remember" name="remember" type="checkbox" value="1" @checked(old('remember'))>
+                    <span class="toggle-control__track" aria-hidden="true"><span class="toggle-control__thumb"></span></span>
+                    <span class="toggle-control__label">Remember me</span>
+                </label>
 
-            <label class="az-check" for="admin-remember">
-                <input id="admin-remember" type="checkbox" name="remember" value="1">
-                <span>Keep me signed in</span>
-            </label>
-
-            <button type="submit" class="az-button">Sign in to administration</button>
-        </form>
-    </section>
-</main>
+                <button type="submit" class="button button--primary button--block" data-working-text="Signing in…">
+                    <span data-button-label>Sign in</span>
+                </button>
+            </form>
+        </section>
+    </main>
+    @includeIf('components.azari-flash-toasts')
 </body>
 </html>

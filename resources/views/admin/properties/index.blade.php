@@ -1,4 +1,5 @@
-<x-admin.layout title="Properties">
+@extends('admin.layouts.app')
+@section('content')
     <div class="admin-heading">
         <div><span>Inventory</span><h1>Properties</h1></div>
         <a class="button button-primary" href="{{ route('azari.admin.properties.create') }}">Add property</a>
@@ -20,4 +21,4 @@
             </tbody>
         </table>
     </div>
-</x-admin.layout>
+@endsection

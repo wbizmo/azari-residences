@@ -49,6 +49,8 @@
     </div>
 
     @stack('scripts')
+    <x-azari-feedback />
+    ("components.azari-flash-toasts")
 </body>
 </html>
 

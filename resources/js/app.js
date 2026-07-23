@@ -678,3 +678,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 /* AZARI_ADMIN_EXPERIENCE_END */
+
+import './azari-interactions';
+
+import './azari-ui-hotfix';
+
+import './azari-production-ui';

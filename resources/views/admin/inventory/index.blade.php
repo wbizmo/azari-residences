@@ -1,4 +1,5 @@
-<x-admin.layout title="Property management">
+@extends('admin.layouts.app')
+@section('content')
     <div class="admin-heading">
         <div>
             <span>SPRINT 04</span>
@@ -122,4 +123,4 @@
             @endforeach
         </div>
     </section>
-</x-admin.layout>
+@endsection

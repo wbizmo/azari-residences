@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use Illuminate\Pagination\Paginator;
+
 use App\Contracts\Communication\SmsProvider;
 use App\Models\SiteSetting;
 use App\Services\Communication\TwilioSmsService;

@@ -1,4 +1,5 @@
-<x-admin.layout title="Branding">
+@extends('admin.layouts.app')
+@section('content')
     <div class="admin-heading"><div><span>CMS</span><h1>Branding and identity</h1></div></div>
     <form class="admin-form" method="POST" action="{{ route('azari.admin.settings.update') }}" enctype="multipart/form-data">
         @csrf
@@ -10,4 +11,4 @@
         <label>Favicon<input type="file" name="favicon" accept=".png,.ico,.svg,image/*"></label>
         <button class="button button-primary" type="submit">Save branding</button>
     </form>
-</x-admin.layout>
+@endsection
