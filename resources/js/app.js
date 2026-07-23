@@ -575,3 +575,106 @@ document.querySelectorAll('[data-sortable]').forEach((container) => {
 });
 
 /* AZARI_SPRINT_03_04_ADMIN_END */
+
+/* AZARI_ADMIN_EXPERIENCE_START */
+document.addEventListener('DOMContentLoaded', () => {
+    const sidebar = document.querySelector('[data-admin-sidebar]');
+    const sidebarOpen = document.querySelector('[data-sidebar-open]');
+    const sidebarClose = document.querySelector('[data-sidebar-close]');
+    const sidebarBackdrop = document.querySelector('[data-sidebar-backdrop]');
+
+    const openSidebar = () => {
+        if (!sidebar) return;
+        sidebar.classList.add('is-open');
+        sidebarBackdrop?.removeAttribute('hidden');
+        sidebarOpen?.setAttribute('aria-expanded', 'true');
+        document.body.style.overflow = 'hidden';
+    };
+
+    const closeSidebar = () => {
+        if (!sidebar) return;
+        sidebar.classList.remove('is-open');
+        sidebarBackdrop?.setAttribute('hidden', '');
+        sidebarOpen?.setAttribute('aria-expanded', 'false');
+        document.body.style.overflow = '';
+    };
+
+    sidebarOpen?.addEventListener('click', openSidebar);
+    sidebarClose?.addEventListener('click', closeSidebar);
+    sidebarBackdrop?.addEventListener('click', closeSidebar);
+
+    document.querySelectorAll('.az-nav-link').forEach((link) => {
+        link.addEventListener('click', () => {
+            if (window.matchMedia('(max-width: 900px)').matches) {
+                closeSidebar();
+            }
+        });
+    });
+
+    const profileMenu = document.querySelector('[data-profile-menu]');
+    const profileTrigger = document.querySelector('[data-profile-trigger]');
+    const profileDropdown = document.querySelector('[data-profile-dropdown]');
+
+    const closeProfile = () => {
+        profileDropdown?.setAttribute('hidden', '');
+        profileTrigger?.setAttribute('aria-expanded', 'false');
+    };
+
+    const openProfile = () => {
+        profileDropdown?.removeAttribute('hidden');
+        profileTrigger?.setAttribute('aria-expanded', 'true');
+        profileDropdown?.querySelector('a, button')?.focus();
+    };
+
+    profileTrigger?.addEventListener('click', (event) => {
+        event.stopPropagation();
+        const isOpen = profileTrigger.getAttribute('aria-expanded') === 'true';
+        isOpen ? closeProfile() : openProfile();
+    });
+
+    profileDropdown?.addEventListener('click', (event) => event.stopPropagation());
+    document.addEventListener('click', closeProfile);
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            closeProfile();
+            closeSidebar();
+            profileTrigger?.focus();
+        }
+    });
+
+    const themeToggle = document.querySelector('[data-theme-toggle]');
+    const root = document.documentElement;
+    const savedTheme = localStorage.getItem('azari-admin-theme');
+
+    if (savedTheme === 'dark' || savedTheme === 'light') {
+        root.dataset.adminTheme = savedTheme;
+    }
+
+    const updateThemeIcon = () => {
+        const icon = themeToggle?.querySelector('.material-symbols-outlined');
+        if (!icon) return;
+        icon.textContent = root.dataset.adminTheme === 'dark' ? 'light_mode' : 'dark_mode';
+    };
+
+    updateThemeIcon();
+
+    themeToggle?.addEventListener('click', () => {
+        const nextTheme = root.dataset.adminTheme === 'dark' ? 'light' : 'dark';
+        root.dataset.adminTheme = nextTheme;
+        localStorage.setItem('azari-admin-theme', nextTheme);
+        updateThemeIcon();
+    });
+
+    const searchInput = document.querySelector('.az-admin-search input');
+
+    document.addEventListener('keydown', (event) => {
+        const shortcut = (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k';
+
+        if (shortcut && searchInput) {
+            event.preventDefault();
+            searchInput.focus();
+        }
+    });
+});
+/* AZARI_ADMIN_EXPERIENCE_END */

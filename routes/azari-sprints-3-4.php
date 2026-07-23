@@ -4,7 +4,7 @@ use App\Http\Controllers\Admin\Cms\CmsController;
 use App\Http\Controllers\Admin\Inventory\InventoryController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'azari.staff'])
+Route::middleware(['azari.staff'])
     ->prefix('azari-admin')
     ->name('azari.admin.')
     ->group(function (): void {

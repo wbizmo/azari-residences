@@ -14,13 +14,15 @@ class EnsureAzariStaff
 
         abort_unless(
             $user
-            && $user->is_active
-            && in_array($user->staff_role, ['administrator', 'support'], true),
-            403
-        );
+            && (bool) $user->is_active
+            && (
+                (bool) $user->is_admin
+                || in_array($user->staff_role, ['administrator', 'support'], true)
+            ), 403);
 
-        if ($roles !== [] && ! in_array($user->staff_role, $roles, true)) {
-            abort(403);
+        if ($roles !== []) {
+            $effectiveRole = $user->staff_role ?: ((bool) $user->is_admin ? 'administrator' : null);
+            abort_unless(in_array($effectiveRole, $roles, true), 403);
         }
 
         return $next($request);

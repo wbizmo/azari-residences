@@ -1,6 +1,7 @@
 @props([
     'title' => 'Azari Residences',
     'description' => null,
+    'bodyClass' => '',
 ])
 
 <!DOCTYPE html>
@@ -30,7 +31,7 @@
     @stack('head')
 </head>
 
-<body class="public-site {{ $bodyClass }}">
+<body class="public-site {{ $bodyClass ?? '' }}">
 
     <!-- AZARI_PRELOADER_START -->
     

@@ -54,7 +54,7 @@ class StaffController extends Controller
     public function toggle(User $user): RedirectResponse
     {
         abort_if($user->id === auth()->id(), 422, 'You cannot deactivate your own account.');
-        abort_unless($user->staff_role, 403);
+        abort_unless($user->staff_role, 404);
 
         $user->update(['is_active' => ! $user->is_active]);
 

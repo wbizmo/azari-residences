@@ -39,7 +39,7 @@ Route::get('/azaridevadmin', function () {
     abort_unless(
         $user->is_active
         && ((bool) $user->is_admin || in_array($user->staff_role, ['administrator', 'support'], true)),
-        403
+        404
     );
 
     return app(DashboardController::class)();
