@@ -1,13 +1,1 @@
-<x-layouts.base :title="$title">
-    <main class="azari-container" style="display:grid;min-height:100vh;place-items:center;padding-block:4rem;">
-        <x-ui.card style="max-width:42rem;padding:3rem;text-align:center;">
-            <x-ui.icon :name="$icon" style="font-size:3rem;" />
-            <p>{{ $code }}</p>
-            <h1>{{ $title }}</h1>
-            <p>{{ $message }}</p>
-            <x-ui.button :href="url('/')">
-                Return home
-            </x-ui.button>
-        </x-ui.card>
-    </main>
-</x-layouts.base>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Something went wrong | Azari Residences</title><link rel="stylesheet" href="{{ asset('css/azari-admin-extension.css') }}"></head><body><main class="az-login-shell"><section class="az-login-card"><div class="az-brand">Azari Residences</div><p class="az-eyebrow">Unexpected error</p><h1>Something went wrong</h1><p>Do not worry. Our team is looking into it and will provide an update.</p><a class="az-button" href="{{ url('/') }}">Return home</a></section></main></body></html>

@@ -17,7 +17,11 @@
         <nav>
             <a href="{{ route('azari.admin.properties.index') }}">Properties</a>
             <a href="{{ route('azari.admin.content.index') }}">Content</a>
-            <a href="{{ route('azari.admin.settings.edit') }}">Branding</a>
+            
+        <a href="{{ route('azari.admin.cms.index') }}">CMS</a>
+        <a href="{{ route('azari.admin.inventory.index') }}">Inventory</a>
+<a href="{{ route('azari.admin.settings.edit') }}">Branding</a>
+    
             @if(auth()->user()->staff_role === 'administrator')
                 <a href="{{ route('azari.admin.staff.index') }}">Staff</a>
             @endif

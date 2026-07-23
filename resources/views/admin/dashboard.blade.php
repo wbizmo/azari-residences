@@ -1,11 +1,9 @@
-<x-admin.layout title="Dashboard">
-    <div class="admin-heading">
-        <div><span>Overview</span><h1>Administration dashboard</h1></div>
-    </div>
-    <div class="admin-stat-grid">
-        <article><strong>{{ $propertyCount }}</strong><span>Properties</span></article>
-        <article><strong>{{ $featuredCount }}</strong><span>Featured</span></article>
-        <article><strong>{{ $contentCount }}</strong><span>Content blocks</span></article>
-        <article><strong>{{ $staffCount }}</strong><span>Staff accounts</span></article>
-    </div>
-</x-admin.layout>
+@extends('admin.layouts.app')
+@section('title', 'Dashboard')
+@section('content')
+<div class="az-page-heading"><div><p class="az-eyebrow">Administration</p><h1>Dashboard</h1></div></div>
+<div class="az-stat-grid">
+    <article><span>Total users</span><strong>{{ number_format($userCount) }}</strong></article>
+    <article><span>Administrators</span><strong>{{ number_format($adminCount) }}</strong></article>
+</div>
+@endsection

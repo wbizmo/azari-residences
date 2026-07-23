@@ -482,3 +482,96 @@ if (document.readyState === 'complete') {
 window.setTimeout(dismissPublicPreloader, 5000);
 
 /* AZARI_FINAL_PRELOADER_JS_END */
+
+/* AZARI_SPRINT_03_04_ADMIN_START */
+
+document.querySelectorAll('[data-admin-tabs]').forEach((tabs) => {
+    const buttons = [...tabs.querySelectorAll('[data-tab-target]')];
+    const panels = [...document.querySelectorAll('[data-tab-panel]')];
+
+    buttons.forEach((button) => {
+        button.addEventListener('click', () => {
+            const target = button.dataset.tabTarget;
+
+            buttons.forEach((item) => item.classList.toggle('is-active', item === button));
+            panels.forEach((panel) => {
+                panel.classList.toggle('is-active', panel.dataset.tabPanel === target);
+            });
+        });
+    });
+});
+
+document.querySelectorAll('.az-upload input[type="file"]').forEach((input) => {
+    input.addEventListener('change', () => {
+        const label = input.closest('.az-upload')?.querySelector('[data-file-label]');
+        if (!label) return;
+
+        const files = [...input.files];
+        label.textContent = files.length === 0
+            ? 'Select a file'
+            : files.length === 1
+                ? files[0].name
+                : `${files.length} files selected`;
+    });
+});
+
+document.querySelectorAll('.az-color-control input[type="color"]').forEach((input) => {
+    const output = input.closest('.az-color-control')?.querySelector('output');
+    input.addEventListener('input', () => {
+        if (output) output.textContent = input.value.toUpperCase();
+    });
+});
+
+document.querySelectorAll('.az-range-field input[type="range"]').forEach((input) => {
+    const output = input.closest('.az-range-field')?.querySelector('output');
+    const update = () => {
+        if (!output) return;
+        output.textContent = `${input.value}${input.name === 'hero_overlay' ? '%' : 'px'}`;
+    };
+    input.addEventListener('input', update);
+    update();
+});
+
+document.querySelectorAll('[data-sortable]').forEach((container) => {
+    let dragging = null;
+
+    const items = () => [...container.querySelectorAll('[data-sort-id]')];
+
+    items().forEach((item) => {
+        item.addEventListener('dragstart', () => {
+            dragging = item;
+            item.classList.add('is-dragging');
+        });
+
+        item.addEventListener('dragend', () => {
+            item.classList.remove('is-dragging');
+            dragging = null;
+        });
+
+        item.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            if (!dragging || dragging === item) return;
+
+            const bounds = item.getBoundingClientRect();
+            const after = event.clientY > bounds.top + bounds.height / 2;
+            container.insertBefore(dragging, after ? item.nextSibling : item);
+        });
+    });
+
+    const form = container.closest('[data-sort-form]');
+    form?.addEventListener('submit', () => {
+        const holder = form.querySelector('[data-sort-inputs]');
+        if (!holder) return;
+
+        holder.innerHTML = '';
+        items().forEach((item) => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'items[]';
+            input.value = item.dataset.sortId;
+            holder.appendChild(input);
+        });
+    });
+});
+
+/* AZARI_SPRINT_03_04_ADMIN_END */

@@ -7,7 +7,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Amenity extends Model
 {
-    protected $fillable = ['name', 'icon'];
+    protected $fillable = [
+        'name', 'icon', 'description', 'sort_order', 'is_active',
+    ];
+
+    protected function casts(): array
+    {
+        return ['is_active' => 'boolean'];
+    }
 
     public function properties(): BelongsToMany
     {
