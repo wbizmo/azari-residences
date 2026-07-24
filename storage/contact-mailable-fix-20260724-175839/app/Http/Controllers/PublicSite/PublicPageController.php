@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\PublicSite;
 
 use App\Http\Controllers\Controller;
-use App\Mail\ContactEnquiry;
 use App\Models\Location;
 use App\Models\Property;
 use App\Models\RoomType;
@@ -78,7 +77,14 @@ class PublicPageController extends Controller
 
         $recipient = (string) config('mail.contact_to', config('mail.from.address'));
 
-        Mail::to($recipient)->send(new ContactEnquiry($data));
+        Mail::raw(
+            "New Azari website enquiry\n\nName: {$data['name']}\nEmail: {$data['email']}\nPhone: ".($data['phone'] ?: 'Not supplied')."\nSubject: {$data['subject']}\n\nMessage:\n{$data['message']}",
+            function ($message) use ($data, $recipient): void {
+                $message->to($recipient)
+                    ->replyTo($data['email'], $data['name'])
+                    ->subject('[Azari Contact] '.$data['subject']);
+            }
+        );
 
         return back()->with('success', 'Your message has been sent. The Azari team will respond as soon as possible.');
     }

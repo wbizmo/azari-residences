@@ -58,7 +58,3 @@ Route::prefix('azaridevadmin')
             ->parameters(['room-types' => 'roomType'])
             ->names('room-types');
     });
-
-Route::post('/contact', [PublicPageController::class, 'contact'])
-    ->middleware('throttle:6,1')
-    ->name('public.contact.submit');

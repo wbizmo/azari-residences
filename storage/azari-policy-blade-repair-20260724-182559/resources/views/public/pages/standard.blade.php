@@ -79,8 +79,8 @@
                 </div>
             </div>
         </section>
-    @elseif(in_array($key, ['booking-terms', 'cancellation-policy', 'privacy-policy', 'terms'], true))
-        @include('public.pages.partials.policies')
+    @elseif(in_array($key, [\x27booking-terms\x27, \x27cancellation-policy\x27, \x27privacy-policy\x27, \x27terms\x27], true))
+        @include(\x27public.pages.partials.policies\x27)
     @else
         <section class="az-policy-section"><div class="site-container"><div class="az-policy-card"><span class="eyebrow">Guest information</span><h2>{{ $title }}</h2><p>{{ $intro }}</p><p>For assistance, contact the Azari Residences guest-support team through an official channel.</p></div></div></section>
     @endif

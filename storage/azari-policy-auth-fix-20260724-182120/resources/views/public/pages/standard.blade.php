@@ -79,10 +79,8 @@
                 </div>
             </div>
         </section>
-    @elseif(in_array($key, ['booking-terms', 'cancellation-policy', 'privacy-policy', 'terms'], true))
-        @include('public.pages.partials.policies')
     @else
-        <section class="az-policy-section"><div class="site-container"><div class="az-policy-card"><span class="eyebrow">Guest information</span><h2>{{ $title }}</h2><p>{{ $intro }}</p><p>For assistance, contact the Azari Residences guest-support team through an official channel.</p></div></div></section>
+        <section class="az-policy-section"><div class="site-container"><div class="az-policy-card"><span class="eyebrow">Guest information</span><h2>{{ $title }}</h2><p>{{ $intro }}</p><p>Detailed policy content remains managed through the Azari content system and will be published here by authorised administrators.</p></div></div></section>
     @endif
 </main>
 @endsection
