@@ -8,6 +8,6 @@
     </header>
 
     <main>
-        @yield('content')
+        {{ $slot }}
     </main>
 </x-layouts.base>

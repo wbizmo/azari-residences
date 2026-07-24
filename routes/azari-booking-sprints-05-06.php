@@ -5,7 +5,6 @@ use App\Http\Controllers\PublicSite\AzariBookingFlowController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('web')->group(function () {
-    Route::get('/availability/results',[AzariAvailabilityController::class,'index'])->name('azari.availability.results');
     Route::post('/availability/{property}/hold',[AzariAvailabilityController::class,'hold'])->name('azari.availability.hold');
     Route::post('/availability/{property}/quote',[AzariAvailabilityController::class,'quote'])->middleware('throttle:60,1')->name('azari.availability.quote');
     Route::get('/booking/checkout/{token}',[AzariBookingFlowController::class,'checkout'])->name('azari.booking.checkout');
@@ -20,3 +19,6 @@ Route::middleware('web')->group(function () {
         Route::delete('/maintenance-periods/{maintenancePeriod}',[AzariBookingOperationsController::class,'destroyMaintenance'])->name('maintenance.destroy');
     });
 });
+
+Route::get('/azari/availability/results', [AzariAvailabilityController::class, 'index'])
+    ->name('azari.availability.results');

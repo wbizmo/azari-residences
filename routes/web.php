@@ -13,7 +13,7 @@ use App\Http\Controllers\PublicSite\PropertyController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
-Route::get('/availability/search', AvailabilitySearchController::class)->name('availability.search');
+// Availability routes are registered in azari-public-completion.php
 Route::get('/residences/{property}', [PropertyController::class, 'show'])->name('properties.show');
 
 Route::get('/favicon.svg', function () {
@@ -86,6 +86,8 @@ require __DIR__.'/azari-sprints-3-4.php';
 
 require __DIR__.'/azari-sprints-05-06.php';
 
-require __DIR__.'/azari-public-link-hotfix.php';
 
-require __DIR__.'/azari_sprints_05_06.php';
+require __DIR__.'/azari-booking-sprints-05-06.php';
+
+
+require __DIR__.'/azari-public-completion.php';

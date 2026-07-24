@@ -72,6 +72,8 @@
                     <span class="material-symbols-outlined" aria-hidden="true">apartment</span>
                     <span>Properties</span>
                 </a>
+<a href="{{ route('azari.admin.locations.index') }}">Locations</a>
+<a href="{{ route('azari.admin.room-types.index') }}">Residence categories</a>
             @endif
 
             <a href="{{ url('/azari-admin/inventory') }}" class="az-nav-link {{ request()->is('azari-admin/inventory*') ? 'is-active' : '' }}">

@@ -2,7 +2,7 @@
         
 <x-public-site.layout
     title="Azari Residences | Home"
-    :description="$content['hero_body']"
+    :description="$content['hero_body'] ?? 'Luxury serviced apartments by Azari Residences.'"
 >
     
     
@@ -34,7 +34,7 @@
 
                 <div class="azari-home-hero__actions">
                     <a
-                        href="#availability"
+                        href="{{ route('availability.index') }}"
                         class="button azari-home-hero__primary"
                     >
                         <span>Check availability</span>
@@ -62,7 +62,7 @@
         </div>
 
         <a
-            href="#availability"
+            href="{{ route('availability.index') }}"
             class="azari-home-hero__scroll"
             aria-label="Scroll to availability search"
         >
@@ -89,7 +89,7 @@
                 <form
                     class="availability-form"
                     method="GET"
-                    action="{{ route('availability.search') }}"
+                    action="{{ route('availability.results') }}"
                     data-availability-form
                     novalidate
                 >
@@ -240,7 +240,22 @@
                     </div>
 
                     <div class="search-field">
-                        <label for="property_type">Residence type</label>
+                        <label for="location_id">Location</label>
+
+                        <div class="input-shell select-shell">
+                            <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
+
+                            <select id="location_id" name="location_id">
+                                <option value="">All available locations</option>
+                                @foreach($locations as $location)
+                                    <option value="{{ $location->id }}">{{ $location->name }}, {{ $location->city }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="search-field">
+                        <label for="room_type_id">Residence type</label>
 
                         <div class="input-shell select-shell">
                             <span
@@ -249,14 +264,13 @@
                             >apartment</span>
 
                             <select
-                                id="property_type"
-                                name="property_type"
+                                id="room_type_id"
+                                name="room_type_id"
                             >
-                                <option value="">Any type</option>
-                                <option value="apartment">Apartment</option>
-                                <option value="room">Room</option>
-                                <option value="studio">Studio</option>
-                                <option value="penthouse">Penthouse</option>
+                                <option value="">Any category</option>
+                                @foreach($roomTypes as $roomType)
+                                    <option value="{{ $roomType->id }}">{{ $roomType->name }}</option>
+                                @endforeach
                             </select>
                         </div>
                     </div>

@@ -1,44 +1,229 @@
 <?php
+
 namespace App\Http\Controllers\PublicSite;
 
 use App\Http\Controllers\Controller;
+use App\Models\Location;
 use App\Models\Property;
+use App\Models\RoomType;
 use App\Services\Bookings\AzariAvailabilityEngine;
 use App\Services\Bookings\AzariPricingEngine;
 use Carbon\CarbonImmutable;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+use Illuminate\View\View;
 
-class AzariAvailabilityController extends Controller {
-    public function index(Request $r, AzariAvailabilityEngine $a, AzariPricingEngine $p) {
-        $d=$r->validate([
-            'check_in'=>['required','date'],'check_out'=>['required','date','after:check_in'],
-            'adults'=>['required','integer','min:1'],'children'=>['nullable','integer','min:0'],
-            'rooms'=>['nullable','integer','min:1'],'property_type'=>['nullable','string'],'location'=>['nullable','string'],
+class AzariAvailabilityController extends Controller
+{
+    public function index(
+        Request $request,
+        AzariAvailabilityEngine $availability,
+        AzariPricingEngine $pricing
+    ): View {
+        $filters = $request->validate([
+            'check_in' => ['required', 'date', 'after_or_equal:today'],
+            'check_out' => ['required', 'date', 'after:check_in'],
+            'adults' => ['required', 'integer', 'min:1', 'max:40'],
+            'children' => ['nullable', 'integer', 'min:0', 'max:40'],
+            'rooms' => ['nullable', 'integer', 'min:1', 'max:20'],
+            'location_id' => ['nullable', 'integer', 'exists:locations,id'],
+            'room_type_id' => ['nullable', 'integer', 'exists:room_types,id'],
+            'property_type' => ['nullable', 'string', 'max:80'],
         ]);
-        $in=CarbonImmutable::parse($d['check_in']); $out=CarbonImmutable::parse($d['check_out']);
-        $q=Property::query()->where('is_published',true)
-            ->when($d['property_type'] ?? null,fn($q,$v)=>$q->where('property_type',$v))
-            ->when($d['location'] ?? null,fn($q,$v)=>$q->where('location',$v))
-            ->orderBy('name')->get()->filter(function($property) use($a,$in,$out,$d){
-                try{$a->assertRules($property,$in,$out,(int)$d['adults'],(int)($d['children']??0),(int)($d['rooms']??1));}
-                catch(\Illuminate\Validation\ValidationException){return false;}
-                return $a->available($property->getKey(),$in,$out);
-            })->values();
-        $results=$q->map(fn($property)=>['property'=>$property,'quote'=>$p->quote($property,$in,$out)]);
-        $locations=Property::query()->where('is_published',true)->whereNotNull('location')->distinct()->orderBy('location')->pluck('location');
-        return view('public.bookings.availability',compact('results','locations'))->with('filters',$d);
+
+        $checkIn = CarbonImmutable::parse($filters['check_in'])->startOfDay();
+        $checkOut = CarbonImmutable::parse($filters['check_out'])->startOfDay();
+        $adults = (int) $filters['adults'];
+        $children = (int) ($filters['children'] ?? 0);
+        $rooms = (int) ($filters['rooms'] ?? 1);
+
+        $properties = Property::query()
+            ->with(['locationRecord', 'roomType', 'amenities'])
+            ->where('is_published', true)
+            ->where('status', '!=', 'inactive')
+            ->when($filters['location_id'] ?? null, fn ($query, $locationId) =>
+                $query->where('location_id', $locationId))
+            ->when($filters['room_type_id'] ?? null, fn ($query, $roomTypeId) =>
+                $query->where('room_type_id', $roomTypeId))
+            ->when($filters['property_type'] ?? null, fn ($query, $type) =>
+                $query->whereRaw('LOWER(property_type) = ?', [mb_strtolower($type)]))
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
+
+        $results = $properties
+            ->filter(function (Property $property) use (
+                $availability,
+                $checkIn,
+                $checkOut,
+                $adults,
+                $children,
+                $rooms
+            ): bool {
+                try {
+                    $availability->assertRules(
+                        $property,
+                        $checkIn,
+                        $checkOut,
+                        $adults,
+                        $children,
+                        $rooms
+                    );
+                } catch (ValidationException) {
+                    return false;
+                }
+
+                return $availability->available($property->getKey(), $checkIn, $checkOut);
+            })
+            ->map(fn (Property $property) => [
+                'property' => $property,
+                'quote' => $pricing->quote($property, $checkIn, $checkOut),
+            ])
+            ->values();
+
+        $availableLocations = $results
+            ->map(fn (array $result) => $result['property']->locationRecord)
+            ->filter()
+            ->unique('id')
+            ->values();
+
+        $alternatives = collect();
+        if ($results->isEmpty()) {
+            $alternatives = $this->findAlternatives(
+                $properties,
+                $availability,
+                $pricing,
+                $checkIn,
+                $checkOut,
+                $adults,
+                $children,
+                $rooms
+            );
+        }
+
+        return view('public.bookings.availability', [
+            'results' => $results,
+            'alternatives' => $alternatives,
+            'availableLocations' => $availableLocations,
+            'locations' => Location::query()
+                ->where('is_active', true)
+                ->orderBy('sort_order')
+                ->orderBy('name')
+                ->get(),
+            'roomTypes' => RoomType::query()
+                ->where('is_active', true)
+                ->orderBy('sort_order')
+                ->orderBy('name')
+                ->get(),
+            'filters' => $filters,
+        ]);
     }
 
-    public function hold(Request $r, Property $property, AzariAvailabilityEngine $a) {
-        $d=$r->validate(['check_in'=>['required','date'],'check_out'=>['required','date','after:check_in'],'adults'=>['required','integer','min:1'],'children'=>['nullable','integer','min:0'],'rooms'=>['nullable','integer','min:1']]);
-        $h=$a->hold($property,CarbonImmutable::parse($d['check_in']),CarbonImmutable::parse($d['check_out']),(int)$d['adults'],(int)($d['children']??0),(int)($d['rooms']??1),$r->user()?->getKey());
-        return redirect()->route('azari.booking.checkout',$h->token);
+    public function hold(
+        Request $request,
+        Property $property,
+        AzariAvailabilityEngine $availability
+    ): RedirectResponse {
+        $data = $request->validate([
+            'check_in' => ['required', 'date', 'after_or_equal:today'],
+            'check_out' => ['required', 'date', 'after:check_in'],
+            'adults' => ['required', 'integer', 'min:1'],
+            'children' => ['nullable', 'integer', 'min:0'],
+            'rooms' => ['nullable', 'integer', 'min:1'],
+        ]);
+
+        abort_unless($property->is_published && $property->status !== 'inactive', 404);
+
+        $hold = $availability->hold(
+            $property,
+            CarbonImmutable::parse($data['check_in']),
+            CarbonImmutable::parse($data['check_out']),
+            (int) $data['adults'],
+            (int) ($data['children'] ?? 0),
+            (int) ($data['rooms'] ?? 1),
+            $request->user()?->getKey()
+        );
+
+        return redirect()->route('azari.booking.checkout', $hold->token);
     }
 
-    public function quote(Request $r, Property $property, AzariAvailabilityEngine $a, AzariPricingEngine $p) {
-        $d=$r->validate(['check_in'=>['required','date'],'check_out'=>['required','date','after:check_in'],'adults'=>['required','integer','min:1'],'children'=>['nullable','integer','min:0'],'rooms'=>['nullable','integer','min:1'],'add_ons'=>['nullable','array']]);
-        $in=CarbonImmutable::parse($d['check_in']); $out=CarbonImmutable::parse($d['check_out']);
-        $a->assertRules($property,$in,$out,(int)$d['adults'],(int)($d['children']??0),(int)($d['rooms']??1));
-        return response()->json(['available'=>$a->available($property->getKey(),$in,$out),'quote'=>$p->quote($property,$in,$out,$d['add_ons']??[])]);
+    public function quote(
+        Request $request,
+        Property $property,
+        AzariAvailabilityEngine $availability,
+        AzariPricingEngine $pricing
+    ) {
+        $data = $request->validate([
+            'check_in' => ['required', 'date', 'after_or_equal:today'],
+            'check_out' => ['required', 'date', 'after:check_in'],
+            'adults' => ['required', 'integer', 'min:1'],
+            'children' => ['nullable', 'integer', 'min:0'],
+            'rooms' => ['nullable', 'integer', 'min:1'],
+            'add_ons' => ['nullable', 'array'],
+        ]);
+
+        $checkIn = CarbonImmutable::parse($data['check_in']);
+        $checkOut = CarbonImmutable::parse($data['check_out']);
+
+        $availability->assertRules(
+            $property,
+            $checkIn,
+            $checkOut,
+            (int) $data['adults'],
+            (int) ($data['children'] ?? 0),
+            (int) ($data['rooms'] ?? 1)
+        );
+
+        return response()->json([
+            'available' => $availability->available($property->getKey(), $checkIn, $checkOut),
+            'quote' => $pricing->quote($property, $checkIn, $checkOut, $data['add_ons'] ?? []),
+        ]);
+    }
+
+    private function findAlternatives(
+        $properties,
+        AzariAvailabilityEngine $availability,
+        AzariPricingEngine $pricing,
+        CarbonImmutable $requestedIn,
+        CarbonImmutable $requestedOut,
+        int $adults,
+        int $children,
+        int $rooms
+    ) {
+        $nights = max(1, $requestedIn->diffInDays($requestedOut));
+        $alternatives = collect();
+
+        foreach ($properties as $property) {
+            for ($offset = 1; $offset <= 30; $offset++) {
+                $checkIn = $requestedIn->addDays($offset);
+                $checkOut = $checkIn->addDays($nights);
+
+                try {
+                    $availability->assertRules(
+                        $property,
+                        $checkIn,
+                        $checkOut,
+                        $adults,
+                        $children,
+                        $rooms
+                    );
+                } catch (ValidationException) {
+                    continue;
+                }
+
+                if ($availability->available($property->getKey(), $checkIn, $checkOut)) {
+                    $alternatives->push([
+                        'property' => $property,
+                        'check_in' => $checkIn,
+                        'check_out' => $checkOut,
+                        'quote' => $pricing->quote($property, $checkIn, $checkOut),
+                    ]);
+                    break;
+                }
+            }
+        }
+
+        return $alternatives->take(6)->values();
     }
 }

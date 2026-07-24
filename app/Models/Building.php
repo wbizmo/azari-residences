@@ -2,22 +2,32 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Building extends Model
 {
+    use HasFactory;
+
     protected $perPage = 10;
 
     protected $fillable = [
-        'location_id', 'name', 'code', 'description',
-        'floors', 'is_active', 'sort_order',
+        'location_id',
+        'name',
+        'code',
+        'description',
+        'floors',
+        'is_active',
+        'sort_order',
     ];
 
     protected function casts(): array
     {
-        return ['is_active' => 'boolean'];
+        return [
+            'is_active' => 'boolean',
+        ];
     }
 
     public function location(): BelongsTo

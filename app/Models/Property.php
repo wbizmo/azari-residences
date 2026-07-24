@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -10,19 +11,52 @@ use Illuminate\Support\Str;
 
 class Property extends Model
 {
+    use HasFactory;
+
     protected $perPage = 10;
 
     protected $fillable = [
-        'location_id', 'building_id', 'room_type_id', 'name', 'slug',
-        'code', 'unit_number', 'floor', 'location', 'country',
-        'property_type', 'bedrooms', 'bathrooms', 'max_guests',
-        'adult_capacity', 'child_capacity', 'bed_configuration',
-        'room_size', 'check_in_time', 'check_out_time', 'nightly_rate',
-        'weekend_rate', 'cleaning_fee', 'security_deposit',
-        'service_charge', 'tax_rate', 'currency', 'short_description',
-        'description', 'cover_image', 'gallery', 'video_url',
-        'virtual_tour_url', 'status', 'internal_notes', 'is_featured',
-        'is_published', 'sort_order',
+        'location_id',
+        'building_id',
+        'room_type_id',
+        'name',
+        'slug',
+        'code',
+        'unit_number',
+        'floor',
+        'location',
+        'country',
+        'property_type',
+        'bedrooms',
+        'bathrooms',
+        'max_guests',
+        'adult_capacity',
+        'child_capacity',
+        'bed_configuration',
+        'room_size',
+        'check_in_time',
+        'check_out_time',
+        'nightly_rate',
+        'weekend_rate',
+        'cleaning_fee',
+        'security_deposit',
+        'service_charge',
+        'tax_rate',
+        'currency',
+        'short_description',
+        'description',
+        'cover_image',
+        'gallery',
+        'video_url',
+        'virtual_tour_url',
+        'minimum_stay',
+        'maximum_stay',
+        'same_day_booking',
+        'status',
+        'internal_notes',
+        'is_featured',
+        'is_published',
+        'sort_order',
     ];
 
     protected function casts(): array
@@ -37,6 +71,7 @@ class Property extends Model
             'security_deposit' => 'decimal:2',
             'service_charge' => 'decimal:2',
             'tax_rate' => 'decimal:3',
+            'same_day_booking' => 'boolean',
         ];
     }
 
