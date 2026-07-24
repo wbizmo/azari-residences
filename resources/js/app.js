@@ -684,3 +684,61 @@ import './azari-interactions';
 import './azari-production-hotfix';
 
 import './azari-date-picker-v3';
+
+document.querySelectorAll('[data-server-toast]').forEach((toast) => {
+    const remove = () => toast.remove();
+    toast.querySelector('button')?.addEventListener('click', remove);
+    window.setTimeout(remove, 6000);
+});
+
+/*
+ * Permanent Azari public-header state.
+ * Non-hero pages always use the readable solid dark-green treatment.
+ * Hero pages may use their intentional overlay state only while the hero
+ * physically remains beneath the header.
+ */
+const initialiseAzariPublicHeader = () => {
+    const body = document.body;
+    const hero = document.querySelector('.azari-home-hero');
+    const header = document.querySelector(
+        '.site-header, .public-site-header, .azari-site-header, [data-site-header]'
+    );
+
+    if (!body || !header) {
+        return;
+    }
+
+    const updateHeaderState = () => {
+        if (!hero) {
+            body.classList.add('azari-solid-header');
+            body.classList.remove('azari-header-over-hero');
+
+            return;
+        }
+
+        const heroBottom = hero.getBoundingClientRect().bottom;
+        const headerHeight = header.getBoundingClientRect().height;
+        const isOverHero = heroBottom > headerHeight + 12;
+
+        body.classList.toggle('azari-header-over-hero', isOverHero);
+        body.classList.toggle('azari-solid-header', !isOverHero);
+    };
+
+    updateHeaderState();
+
+    window.addEventListener('scroll', updateHeaderState, {
+        passive: true,
+    });
+
+    window.addEventListener('resize', updateHeaderState);
+};
+
+if (document.readyState === 'loading') {
+    document.addEventListener(
+        'DOMContentLoaded',
+        initialiseAzariPublicHeader,
+        { once: true }
+    );
+} else {
+    initialiseAzariPublicHeader();
+}

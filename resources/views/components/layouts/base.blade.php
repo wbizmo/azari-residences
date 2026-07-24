@@ -28,5 +28,6 @@
     </div>
 
     @stack('scripts')
+    <x-azari-toasts />
 </body>
 </html>

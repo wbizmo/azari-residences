@@ -6525,3 +6525,512 @@ html,body,button,input,select,textarea{font-weight:400}h1,h2,h3,h4,h5,h6,label,t
 
 /* AZARI SPRINTS 05-06 COMPLETION */
 .az-s56-page{padding-block:8rem 5rem}.az-s56-filter,.az-s56-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}.az-s56-filter{grid-template-columns:repeat(4,minmax(0,1fr)) auto;align-items:end;padding:1rem;border:1px solid rgba(20,35,29,.12);border-radius:1rem;background:#fff}.az-s56-filter label,.az-s56-form label{display:grid;gap:.4rem}.az-s56-filter input,.az-s56-filter select,.az-s56-form input,.az-s56-form select,.az-s56-form textarea{width:100%;min-height:46px;padding:.7rem;border:1px solid rgba(20,35,29,.15);border-radius:.7rem;background:#fff;font:inherit}.az-s56-results{display:grid;gap:1rem;margin-top:1.5rem}.az-s56-card{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:1rem;padding:1.2rem;border:1px solid rgba(20,35,29,.12);border-radius:1rem;background:#fff}.az-s56-checkout{display:grid;grid-template-columns:1.3fr .7fr;gap:1.5rem}.az-s56-form,.az-s56-summary{padding:1.4rem;border:1px solid rgba(20,35,29,.12);border-radius:1rem;background:#fff}.az-s56-admin-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem}.admin-table form{display:grid;gap:.35rem;min-width:13rem}@media(max-width:1000px){.az-s56-filter{grid-template-columns:repeat(2,1fr)}.az-s56-card,.az-s56-checkout,.az-s56-admin-grid{grid-template-columns:1fr}}@media(max-width:650px){.az-s56-filter,.az-s56-form{grid-template-columns:1fr}}
+
+/* Sprint 6B: authentication, booking completion and feedback */
+.az-auth-body{margin:0;min-height:100dvh;background:radial-gradient(circle at top right,rgba(187,138,62,.14),transparent 34%),#f7f3eb;color:#17140f;font-family:Inter,system-ui,sans-serif}.az-auth-shell{min-height:100dvh;display:grid;place-items:center;padding:32px 20px;position:relative}.az-auth-brand{position:absolute;top:28px;left:clamp(20px,5vw,64px);color:#17140f;text-decoration:none;text-transform:uppercase;letter-spacing:.18em;font-weight:800;font-size:13px}.az-auth-card{width:min(100%,520px);background:#fffdf8;border:1px solid rgba(23,20,15,.1);border-radius:24px;padding:clamp(28px,5vw,52px);box-shadow:0 24px 80px rgba(45,36,24,.1)}.az-auth-card h1{margin:.5rem 0 1rem;font:500 clamp(36px,6vw,54px)/1 Georgia,serif}.az-auth-card>p{color:#746d62;line-height:1.7}.az-auth-form{display:grid;gap:18px;margin-top:28px}.az-auth-form label,.az-form-grid label{display:grid;gap:8px;font-weight:700;font-size:13px}.az-auth-form input,.az-form-grid input,.az-form-grid select,.az-form-grid textarea{width:100%;box-sizing:border-box;border:1px solid rgba(23,20,15,.16);border-radius:13px;background:#fff;padding:14px 15px;font:inherit}.az-auth-form small{color:#a13f35}.az-auth-form button,.az-auth-actions button{min-height:50px;border:0;border-radius:13px;background:#17140f;color:#fff;font-weight:800;padding:0 20px;cursor:pointer}.az-auth-form>a{color:#815a2c;text-align:center;text-decoration:none;font-weight:700}.az-auth-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}.az-auth-actions .secondary{background:#eee8dd;color:#17140f}.az-toast-region{position:fixed;z-index:9999;top:20px;right:20px;width:min(390px,calc(100vw - 40px));display:grid;gap:10px}.az-toast{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:15px 17px;border-radius:14px;background:#fff;box-shadow:0 16px 50px rgba(0,0,0,.16);border-left:4px solid #6a6258}.az-toast--success{border-color:#39745a}.az-toast--error{border-color:#a13f35}.az-toast--warning{border-color:#b47720}.az-toast button{border:0;background:transparent;font-size:22px;cursor:pointer}.az-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.az-form-grid .wide{grid-column:1/-1}.az-panel{background:#fff;border:1px solid rgba(23,20,15,.1);border-radius:20px;padding:clamp(20px,3vw,32px);margin:18px 0}.az-guest-card{padding:20px 0;border-top:1px solid rgba(23,20,15,.1)}.az-guest-card:first-of-type{border-top:0}.az-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.az-definition-list{display:grid;grid-template-columns:minmax(120px,.4fr) 1fr;gap:12px 20px}.az-definition-list dt{font-weight:800}.az-definition-list dd{margin:0;color:#6d665d}.az-filter-bar{display:grid;grid-template-columns:minmax(240px,1fr) 220px auto;gap:14px;align-items:end;margin-bottom:24px}.az-check{display:flex!important;align-items:center;gap:10px}.az-check input{width:auto!important}.az-booking-total{display:grid;gap:12px}@media(max-width:760px){.az-form-grid,.az-detail-grid,.az-filter-bar{grid-template-columns:1fr}.az-form-grid .wide{grid-column:auto}.az-definition-list{grid-template-columns:1fr}.az-auth-brand{position:static;margin-bottom:24px}.az-auth-shell{display:block;padding-top:24px}.az-toast-region{top:12px;right:12px;width:calc(100vw - 24px)}}
+
+/* =========================================================
+   Permanent public header, Book Now and authentication fixes
+   ========================================================= */
+
+:root {
+    --azari-deep-green: #09271f;
+    --azari-deep-green-hover: #123d31;
+    --azari-gold: #bd8c38;
+    --azari-cream: #f5efe3;
+    --azari-paper: #fffdf8;
+    --azari-ink: #17140f;
+}
+
+/*
+ * Public navigation must remain readable by default.
+ * Hero-specific treatments may override only when explicitly applied.
+ */
+body:not(.azari-header-over-hero) .site-header,
+body:not(.azari-header-over-hero) .public-site-header,
+body:not(.azari-header-over-hero) .azari-site-header,
+body:not(.azari-header-over-hero) [data-site-header],
+body.azari-solid-header .site-header,
+body.azari-solid-header .public-site-header,
+body.azari-solid-header .azari-site-header,
+body.azari-solid-header [data-site-header] {
+    color: var(--azari-deep-green) !important;
+}
+
+body:not(.azari-header-over-hero) .site-header a,
+body:not(.azari-header-over-hero) .site-header button,
+body:not(.azari-header-over-hero) .public-site-header a,
+body:not(.azari-header-over-hero) .public-site-header button,
+body:not(.azari-header-over-hero) .azari-site-header a,
+body:not(.azari-header-over-hero) .azari-site-header button,
+body:not(.azari-header-over-hero) [data-site-header] a,
+body:not(.azari-header-over-hero) [data-site-header] button,
+body.azari-solid-header .site-header a,
+body.azari-solid-header .site-header button,
+body.azari-solid-header .public-site-header a,
+body.azari-solid-header .public-site-header button,
+body.azari-solid-header .azari-site-header a,
+body.azari-solid-header .azari-site-header button,
+body.azari-solid-header [data-site-header] a,
+body.azari-solid-header [data-site-header] button {
+    color: var(--azari-deep-green) !important;
+    -webkit-text-fill-color: var(--azari-deep-green) !important;
+}
+
+body:not(.azari-header-over-hero) .site-header svg,
+body:not(.azari-header-over-hero) .public-site-header svg,
+body:not(.azari-header-over-hero) .azari-site-header svg,
+body:not(.azari-header-over-hero) [data-site-header] svg,
+body.azari-solid-header .site-header svg,
+body.azari-solid-header .public-site-header svg,
+body.azari-solid-header .azari-site-header svg,
+body.azari-solid-header [data-site-header] svg {
+    color: var(--azari-deep-green) !important;
+    fill: currentColor;
+    stroke: currentColor;
+}
+
+.site-header .menu-toggle,
+.site-header .mobile-menu-toggle,
+.site-header .hamburger,
+.site-header [data-menu-toggle],
+.public-site-header .menu-toggle,
+.public-site-header .mobile-menu-toggle,
+.public-site-header .hamburger,
+.public-site-header [data-menu-toggle],
+.azari-site-header .menu-toggle,
+.azari-site-header .mobile-menu-toggle,
+.azari-site-header .hamburger,
+.azari-site-header [data-menu-toggle],
+[data-site-header] .menu-toggle,
+[data-site-header] .mobile-menu-toggle,
+[data-site-header] .hamburger,
+[data-site-header] [data-menu-toggle] {
+    color: var(--azari-deep-green) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    -webkit-text-fill-color: var(--azari-deep-green) !important;
+}
+
+.site-header .hamburger span,
+.site-header .menu-toggle span:not(.material-symbols-outlined),
+.site-header [data-menu-toggle] span:not(.material-symbols-outlined),
+.public-site-header .hamburger span,
+.public-site-header .menu-toggle span:not(.material-symbols-outlined),
+.public-site-header [data-menu-toggle] span:not(.material-symbols-outlined),
+.azari-site-header .hamburger span,
+.azari-site-header .menu-toggle span:not(.material-symbols-outlined),
+.azari-site-header [data-menu-toggle] span:not(.material-symbols-outlined),
+[data-site-header] .hamburger span,
+[data-site-header] .menu-toggle span:not(.material-symbols-outlined),
+[data-site-header] [data-menu-toggle] span:not(.material-symbols-outlined) {
+    background-color: var(--azari-deep-green) !important;
+    border-color: var(--azari-deep-green) !important;
+    opacity: 1 !important;
+}
+
+@media (max-width: 1100px) {
+    .site-header,
+    .public-site-header,
+    .azari-site-header,
+    [data-site-header] {
+        color: var(--azari-deep-green) !important;
+    }
+
+    .site-header a,
+    .site-header button,
+    .public-site-header a,
+    .public-site-header button,
+    .azari-site-header a,
+    .azari-site-header button,
+    [data-site-header] a,
+    [data-site-header] button {
+        color: var(--azari-deep-green) !important;
+        -webkit-text-fill-color: var(--azari-deep-green) !important;
+    }
+
+    .site-header nav,
+    .site-header .mobile-navigation,
+    .public-site-header nav,
+    .public-site-header .mobile-navigation,
+    .azari-site-header nav,
+    .azari-site-header .mobile-navigation,
+    [data-site-header] nav,
+    [data-site-header] .mobile-navigation {
+        color: var(--azari-deep-green) !important;
+    }
+}
+
+/* Book Now page */
+.az-book-page {
+    min-height: 100vh;
+    background:
+        radial-gradient(
+            circle at 8% 8%,
+            rgba(189, 140, 56, 0.11),
+            transparent 30rem
+        ),
+        var(--azari-cream);
+}
+
+.az-book-hero {
+    padding:
+        clamp(8.5rem, 13vw, 11rem)
+        0
+        clamp(4rem, 8vw, 7rem);
+}
+
+.az-book-intro {
+    width: min(760px, 100%);
+    margin-bottom: clamp(2rem, 5vw, 3.75rem);
+}
+
+.az-book-intro h1 {
+    max-width: 720px;
+    margin: 0.55rem 0 1rem;
+    color: var(--azari-deep-green);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(2.8rem, 6vw, 5.7rem);
+    font-weight: 500;
+    line-height: 0.98;
+    letter-spacing: -0.045em;
+}
+
+.az-book-intro p {
+    max-width: 650px;
+    margin: 0;
+    color: rgba(9, 39, 31, 0.72);
+    font-size: clamp(1rem, 1.4vw, 1.18rem);
+    line-height: 1.75;
+}
+
+.az-book-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.88fr) minmax(520px, 1.12fr);
+    overflow: hidden;
+    min-height: 690px;
+    border: 1px solid rgba(9, 39, 31, 0.1);
+    border-radius: 30px;
+    background: var(--azari-paper);
+    box-shadow: 0 30px 90px rgba(39, 31, 19, 0.12);
+}
+
+.az-book-media {
+    position: relative;
+    min-height: 100%;
+    overflow: hidden;
+    background: var(--azari-deep-green);
+}
+
+.az-book-media img {
+    width: 100%;
+    height: 100%;
+    min-height: 690px;
+    object-fit: cover;
+}
+
+.az-book-media__overlay {
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(
+            180deg,
+            rgba(9, 39, 31, 0.04) 28%,
+            rgba(9, 39, 31, 0.86) 100%
+        );
+}
+
+.az-book-media__copy {
+    position: absolute;
+    right: clamp(1.5rem, 4vw, 3rem);
+    bottom: clamp(1.5rem, 4vw, 3rem);
+    left: clamp(1.5rem, 4vw, 3rem);
+    display: grid;
+    gap: 0.75rem;
+    color: #fff;
+}
+
+.az-book-media__copy span {
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.19em;
+    text-transform: uppercase;
+}
+
+.az-book-media__copy strong {
+    max-width: 420px;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(1.75rem, 3vw, 2.75rem);
+    font-weight: 500;
+    line-height: 1.12;
+}
+
+.az-book-panel {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: clamp(2rem, 5vw, 4.5rem);
+}
+
+.az-book-panel__heading {
+    margin-bottom: 2rem;
+}
+
+.az-book-panel__heading h2 {
+    margin: 0.55rem 0 0.7rem;
+    color: var(--azari-deep-green);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(2.1rem, 4vw, 3.4rem);
+    font-weight: 500;
+    line-height: 1;
+}
+
+.az-book-panel__heading p {
+    max-width: 520px;
+    margin: 0;
+    color: rgba(23, 20, 15, 0.65);
+    line-height: 1.65;
+}
+
+.az-book-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
+}
+
+.az-book-form__dates {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
+}
+
+.az-book-form .search-field {
+    min-width: 0;
+}
+
+.az-book-form .search-field label,
+.az-book-form .field-label {
+    display: block;
+    margin-bottom: 0.6rem;
+    color: var(--azari-deep-green);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.az-book-form .input-shell {
+    width: 100%;
+    min-height: 58px;
+    box-sizing: border-box;
+    border: 1px solid rgba(9, 39, 31, 0.16);
+    border-radius: 14px;
+    background: #fff;
+}
+
+.az-book-form input,
+.az-book-form select,
+.az-book-form button {
+    font: inherit;
+}
+
+.az-book-form .guest-selector-panel {
+    z-index: 40;
+}
+
+.az-book-submit {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-height: 60px;
+    margin-top: 0.35rem;
+    border-radius: 14px;
+    background: var(--azari-deep-green);
+    color: #fff;
+}
+
+.az-book-submit:hover {
+    background: var(--azari-deep-green-hover);
+}
+
+.az-book-assurance {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    padding-top: 1.35rem;
+    border-top: 1px solid rgba(9, 39, 31, 0.1);
+    color: rgba(9, 39, 31, 0.7);
+}
+
+.az-book-assurance .material-symbols-outlined {
+    color: var(--azari-gold);
+}
+
+.az-book-assurance p {
+    margin: 0;
+    line-height: 1.55;
+}
+
+/* Authentication pages */
+.az-auth-body {
+    min-height: 100dvh;
+    margin: 0;
+    background:
+        radial-gradient(
+            circle at top right,
+            rgba(189, 140, 56, 0.14),
+            transparent 35rem
+        ),
+        var(--azari-cream);
+    color: var(--azari-ink);
+}
+
+.az-auth-page {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    min-height: 100dvh;
+}
+
+.az-auth-header {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    min-height: 88px;
+    padding: 0 clamp(1.25rem, 5vw, 4rem);
+}
+
+.az-auth-brand {
+    color: var(--azari-deep-green);
+    font-size: 0.78rem;
+    font-weight: 850;
+    letter-spacing: 0.18em;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+.az-auth-main {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    box-sizing: border-box;
+    padding:
+        clamp(1.5rem, 4vw, 3rem)
+        1.25rem
+        clamp(3rem, 8vw, 6rem);
+}
+
+.az-auth-card {
+    width: min(100%, 540px);
+    box-sizing: border-box;
+    margin: auto;
+    padding: clamp(2rem, 5vw, 3.5rem);
+    border: 1px solid rgba(23, 20, 15, 0.1);
+    border-radius: 24px;
+    background: var(--azari-paper);
+    box-shadow: 0 25px 80px rgba(45, 36, 24, 0.11);
+}
+
+.az-auth-card h1 {
+    overflow-wrap: anywhere;
+    margin: 0.6rem 0 1rem;
+    color: var(--azari-deep-green);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(2.35rem, 6vw, 3.5rem);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.035em;
+}
+
+.az-auth-card > p {
+    max-width: 440px;
+    color: rgba(23, 20, 15, 0.65);
+    line-height: 1.7;
+}
+
+.az-auth-form {
+    width: 100%;
+}
+
+.az-auth-form input {
+    min-height: 52px;
+}
+
+.az-auth-form button,
+.az-auth-actions button {
+    width: 100%;
+}
+
+.az-auth-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+}
+
+@media (max-width: 1050px) {
+    .az-book-grid {
+        grid-template-columns: minmax(0, 0.8fr) minmax(450px, 1.2fr);
+    }
+
+    .az-book-panel {
+        padding: 2.5rem;
+    }
+}
+
+@media (max-width: 860px) {
+    .az-book-hero {
+        padding-top: 7.5rem;
+    }
+
+    .az-book-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .az-book-media {
+        min-height: 360px;
+    }
+
+    .az-book-media img {
+        min-height: 360px;
+        max-height: 460px;
+    }
+}
+
+@media (max-width: 640px) {
+    .az-book-hero {
+        padding-top: 6.5rem;
+    }
+
+    .az-book-grid {
+        border-radius: 20px;
+    }
+
+    .az-book-panel {
+        padding: 1.5rem;
+    }
+
+    .az-book-form,
+    .az-book-form__dates {
+        grid-template-columns: 1fr;
+    }
+
+    .az-auth-header {
+        min-height: 72px;
+        padding-inline: 1.25rem;
+    }
+
+    .az-auth-main {
+        place-items: start center;
+        padding-top: 1rem;
+    }
+
+    .az-auth-card {
+        padding: 1.75rem 1.35rem;
+        border-radius: 18px;
+    }
+
+    .az-auth-card h1 {
+        font-size: clamp(2.15rem, 11vw, 3rem);
+    }
+}

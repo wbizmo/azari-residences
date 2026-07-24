@@ -1,15 +1,16 @@
 @extends('admin.layouts.app')
 @section('title','Bookings')
 @section('content')
-<section class="az-page-heading az-page-heading--image"><div><h1>Booking operations</h1><a class="az-button az-button--light" href="{{ route('azari.admin.bookings.calendar') }}">Open calendar</a></div><img src="{{ asset('images/azari-booking-suite.png') }}" alt="Refined Azari residence prepared for arrival"></section>
+<section class="az-page-heading"><div><span class="eyebrow">Reservations</span><h1>Bookings</h1><p>Search by booking reference or guest information, then open the complete record.</p></div></section>
+<form method="GET" class="az-filter-bar" action="{{ route('azari.admin.bookings.index') }}">
+    <label class="az-field"><span>Booking search</span><input name="search" value="{{ $search }}" placeholder="Booking number, guest, email or phone"></label>
+    <label class="az-field"><span>Status</span><select name="status"><option value="">All statuses</option>@foreach(['pending','confirmed','checked_in','checked_out','cancelled'] as $status)<option value="{{ $status }}" @selected(request('status')===$status)>{{ ucwords(str_replace('_',' ',$status)) }}</option>@endforeach</select></label>
+    <button class="az-button az-button--primary" type="submit">Search</button>
+</form>
 <div class="az-booking-grid">
 @forelse($bookings as $booking)
-<article class="az-booking-card"><span>{{ $booking->reference }}</span><h2>{{ $booking->guest_name }}</h2><p>{{ $booking->check_in->format('d M Y') }} to {{ $booking->check_out->format('d M Y') }}</p>
-<label class="az-field"><span>New status</span><select id="booking-status-{{ $booking->id }}">@foreach(['pending','approved','confirmed','checked_in','checked_out','cancelled'] as $status)<option value="{{ $status }}" @selected($booking->status===$status)>{{ ucwords(str_replace('_',' ',$status)) }}</option>@endforeach</select></label>
-<button type="button" class="az-button az-button--primary" data-az-booking-modal="booking-status-modal" data-select="booking-status-{{ $booking->id }}" data-action="{{ route('azari.admin.bookings.transition',$booking) }}" data-reference="{{ $booking->reference }}">Review status change</button>
-</article>
-@empty<div class="az-empty-state">No bookings yet.</div>@endforelse
-</div>{{ $bookings->links() }}
-
-<x-azari-confirm-modal id="booking-status-modal" />
+<article class="az-booking-card"><span>{{ $booking->reference }}</span><h2>{{ $booking->guest_name }}</h2><p>{{ $booking->property?->name }}</p><p>{{ $booking->check_in->format('d M Y') }} to {{ $booking->check_out->format('d M Y') }}</p><p>{{ ucfirst(str_replace('_',' ',$booking->status)) }}</p><a class="az-button az-button--primary" href="{{ route('azari.admin.bookings.show',$booking) }}">View booking</a></article>
+@empty<div class="az-empty-state">No bookings matched your search.</div>@endforelse
+</div>
+{{ $bookings->links() }}
 @endsection

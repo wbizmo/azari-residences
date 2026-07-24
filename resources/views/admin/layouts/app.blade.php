@@ -51,6 +51,7 @@
     @stack('scripts')
     <x-azari-feedback />
     
+    <x-azari-toasts />
 </body>
 </html>
 

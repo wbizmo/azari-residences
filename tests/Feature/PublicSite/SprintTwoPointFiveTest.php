@@ -54,7 +54,7 @@ class SprintTwoPointFiveTest extends TestCase
     {
         $user = User::factory()->create(['staff_role' => null]);
 
-        $this->actingAs($user)->get('/azaridevadmin')->assertForbidden();
+        $this->actingAs($user)->get('/azaridevadmin')->assertNotFound();
     }
 
     public function test_active_administrator_can_access_staff_admin(): void

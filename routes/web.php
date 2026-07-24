@@ -7,7 +7,6 @@ use App\Http\Controllers\Admin\SiteSettingController;
 use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Auth\AzariAdminLoginController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\PublicSite\AvailabilitySearchController;
 use App\Http\Controllers\PublicSite\HomeController;
 use App\Http\Controllers\PublicSite\PropertyController;
 use Illuminate\Support\Facades\Route;
@@ -31,19 +30,7 @@ Route::middleware('guest')->prefix('azaridevadmin')->group(function (): void {
         ->name('azari.admin.login.store');
 });
 
-Route::get('/azaridevadmin', function () {
-    if (! auth()->check()) {
-        return redirect()->route('azari.admin.login');
-    }
-    $user = auth()->user();
-    abort_unless(
-        $user->is_active
-        && ((bool) $user->is_admin || in_array($user->staff_role, ['administrator', 'support'], true)),
-        403
-    );
-
-    return app(DashboardController::class)();
-})->name('azari.admin.dashboard');
+Route::get('/azaridevadmin', DashboardController::class)->middleware('azari.staff')->name('azari.admin.dashboard');
 
 Route::prefix('azaridevadmin')->middleware(['azari.staff'])->group(function (): void {
     Route::post('/logout', [AzariAdminLoginController::class, 'destroy'])->name('azari.admin.logout');
@@ -84,10 +71,7 @@ require __DIR__.'/auth.php';
 
 require __DIR__.'/azari-sprints-3-4.php';
 
-
-
 require __DIR__.'/azari-sprints-05-06.php';
 require __DIR__.'/azari-booking-sprints-05-06.php';
-
 
 require __DIR__.'/azari-public-completion.php';

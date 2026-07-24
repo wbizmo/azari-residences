@@ -1,0 +1,13 @@
+<x-layouts.base title="Azari Residences | Premium Serviced Apartments & Luxury Stays">
+    <header>
+        <div class="azari-container">
+            <a href="{{ url('/') }}" aria-label="{{ config('app.name') }}">
+                <span>{{ config('app.name') }}</span>
+            </a>
+        </div>
+    </header>
+
+    <main>
+        {{ $slot }}
+    </main>
+</x-layouts.base>
