@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ThemeRevision extends Model
 {
+    protected $perPage = 10;
+
     protected $fillable = [
         'name', 'settings', 'status', 'created_by', 'published_at',
     ];

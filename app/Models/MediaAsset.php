@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Storage;
 
 class MediaAsset extends Model
 {
+    protected $perPage = 10;
+
     protected $fillable = [
         'disk', 'path', 'original_name', 'mime_type', 'size',
         'title', 'alt_text', 'caption', 'description', 'is_archived',

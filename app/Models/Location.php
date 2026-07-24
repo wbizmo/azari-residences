@@ -8,6 +8,8 @@ use Illuminate\Support\Str;
 
 class Location extends Model
 {
+    protected $perPage = 10;
+
     protected $fillable = [
         'name', 'slug', 'country', 'city', 'address',
         'timezone', 'is_active', 'sort_order',

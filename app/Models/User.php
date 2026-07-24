@@ -14,6 +14,8 @@ use Illuminate\Notifications\Notifiable;
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
+    protected $perPage = 10;
+
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 

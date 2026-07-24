@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PropertyImage extends Model
 {
+    protected $perPage = 10;
+
     protected $fillable = [
         'property_id', 'path', 'title', 'alt_text',
         'caption', 'sort_order', 'is_cover',

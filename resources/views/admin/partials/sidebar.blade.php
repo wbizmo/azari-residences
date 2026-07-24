@@ -184,7 +184,14 @@
                 </a>
             @endif
         </section>
-    </nav>
+    @if (Route::has('azari.admin.s56.bookings.index'))
+<a class="az-nav-link {{ request()->routeIs('azari.admin.s56.bookings.*') ? 'is-active' : '' }}" href="{{ route('azari.admin.s56.bookings.index') }}"><span class="material-symbols-outlined">event_note</span><span>Booking operations</span></a>
+@endif
+@if (Route::has('azari.admin.s56.calendar'))
+<a class="az-nav-link {{ request()->routeIs('azari.admin.s56.calendar') ? 'is-active' : '' }}" href="{{ route('azari.admin.s56.calendar') }}"><span class="material-symbols-outlined">calendar_month</span><span>Availability calendar</span></a>
+@endif
+
+</nav>
 
     <div class="az-sidebar-footer">
         <span class="material-symbols-outlined" aria-hidden="true">verified_user</span>

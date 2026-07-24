@@ -10,6 +10,8 @@ use Illuminate\Support\Str;
 
 class Property extends Model
 {
+    protected $perPage = 10;
+
     protected $fillable = [
         'location_id', 'building_id', 'room_type_id', 'name', 'slug',
         'code', 'unit_number', 'floor', 'location', 'country',

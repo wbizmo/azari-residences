@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Building extends Model
 {
+    protected $perPage = 10;
+
     protected $fillable = [
         'location_id', 'name', 'code', 'description',
         'floors', 'is_active', 'sort_order',

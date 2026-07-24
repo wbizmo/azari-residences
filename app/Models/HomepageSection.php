@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class HomepageSection extends Model
 {
+    protected $perPage = 10;
+
     protected $fillable = [
         'key', 'name', 'type', 'content', 'background_media',
         'status', 'sort_order', 'is_active',

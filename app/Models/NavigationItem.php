@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class NavigationItem extends Model
 {
+    protected $perPage = 10;
+
     protected $fillable = [
         'label', 'url', 'location', 'target', 'icon',
         'parent_id', 'sort_order', 'is_active',

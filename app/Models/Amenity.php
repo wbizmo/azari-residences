@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Amenity extends Model
 {
+    protected $perPage = 10;
+
     protected $fillable = [
         'name', 'icon', 'description', 'sort_order', 'is_active',
     ];

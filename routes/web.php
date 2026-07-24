@@ -87,3 +87,5 @@ require __DIR__.'/azari-sprints-3-4.php';
 require __DIR__.'/azari-sprints-05-06.php';
 
 require __DIR__.'/azari-public-link-hotfix.php';
+
+require __DIR__.'/azari_sprints_05_06.php';

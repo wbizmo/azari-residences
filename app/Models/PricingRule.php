@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PricingRule extends Model
 {
+    protected $perPage = 10;
+
     protected $fillable = [
         'property_id', 'name', 'rule_type', 'starts_on', 'ends_on',
         'days_of_week', 'amount', 'percentage', 'minimum_stay',

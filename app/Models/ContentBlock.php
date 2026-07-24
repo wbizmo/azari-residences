@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Schema;
 
 class ContentBlock extends Model
 {
+    protected $perPage = 10;
+
     protected $fillable = [
         'page',
         'key',

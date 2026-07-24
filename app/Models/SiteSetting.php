@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Schema;
 
 class SiteSetting extends Model
 {
+    protected $perPage = 10;
+
     protected $fillable = ['key', 'value', 'type', 'group'];
 
     public static function valueFor(string $key, mixed $default = null): mixed

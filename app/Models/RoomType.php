@@ -8,6 +8,8 @@ use Illuminate\Support\Str;
 
 class RoomType extends Model
 {
+    protected $perPage = 10;
+
     protected $fillable = [
         'name', 'slug', 'description', 'icon', 'is_active', 'sort_order',
     ];
