@@ -1,10 +1,1 @@
-@extends('errors.layout')
-
-@section('title', 'Page not found')
-@section('code', '404')
-@section('eyebrow', 'Nothing at this address')
-@section('heading', 'The page you requested could not be found.')
-@section('message')
-    The address may be incorrect, the page may have moved, or the content may no longer be available.
-@endsection
-@section('support', 'Check the address, return to the previous page, or continue from the homepage.')
+<!DOCTYPE html><html lang="{{ str_replace('_', '-', app()->getLocale()) }}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Page not found</title>@vite(['resources/css/app.css'])</head><body class="az-error-page"><main class="az-error-card"><p class="az-error-code">404</p><h1>Page not found</h1><p>The page you requested could not be found.</p><a href="{{ url('/') }}" class="button button--secondary">Return home</a></main></body></html>

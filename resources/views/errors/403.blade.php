@@ -1,10 +1,1 @@
-@extends('errors.layout')
-
-@section('title', 'Access denied')
-@section('code', '403')
-@section('eyebrow', 'Access restricted')
-@section('heading', 'You do not have permission to view this page.')
-@section('message')
-    Your account is signed in, but it does not have the required access for this section.
-@endsection
-@section('support', 'Return to the previous page or contact an administrator if you believe this restriction is incorrect.')
+<!DOCTYPE html><html lang="{{ str_replace('_', '-', app()->getLocale()) }}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Access denied</title>@vite(['resources/css/app.css'])</head><body class="az-error-page"><main class="az-error-card"><p class="az-error-code">403</p><h1>Access denied</h1><p>You do not have permission to view this page.</p><a href="{{ url('/') }}" class="button button--secondary">Return home</a></main></body></html>

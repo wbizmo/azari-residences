@@ -21,6 +21,7 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        Paginator::defaultView('vendor.pagination.azari');
         // site-setting-public-composer
         View::composer([
             'components.public.layout',

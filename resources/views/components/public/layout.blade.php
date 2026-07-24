@@ -31,7 +31,7 @@
     @stack('head')
 </head>
 
-<body class="public-site {{ $bodyClass ?? '' }}" class="{{ request()->routeIs('home') ? 'home-page' : 'inner-page' }}">
+<body class="public-site {{ $bodyClass ?? '' }}"  class="{{ request()->routeIs('home') ? 'home-page' : 'inner-page' }} {{ request()->routeIs('home') ? 'azari-home-page' : 'azari-inner-page' }}">
 
     <!-- AZARI_PRELOADER_START -->
     
@@ -81,6 +81,6 @@
 
     @stack('scripts')
     <x-azari-feedback />
-    ("components.azari-flash-toasts")
+    
 </body>
 </html>

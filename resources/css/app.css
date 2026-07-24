@@ -1,3 +1,5 @@
+@import './azari-production-ui.css';
+
 @import 'material-symbols/outlined.css';
 
 @tailwind base;
@@ -6101,5 +6103,422 @@ input[type="range"]::-webkit-slider-thumb {
     .az-modal__footer .az-button { flex: 1; }
     .az-toast-region { top: auto; right: 1rem; bottom: 1rem; }
 }
+/* AZARI UNIFIED PRODUCTION HOTFIX START */
+:root{--az-ui-text:#1b211f;--az-ui-muted:#68706c;--az-ui-border:rgba(27,33,31,.16);--az-ui-primary:#173f35;--az-ui-focus:rgba(23,63,53,.14)}
+html,body,button,input,select,textarea{font-weight:400}h1,h2,h3,h4,h5,h6,label,th,strong,b,button,.button{font-weight:500}.material-symbols-outlined,.material-icons{font-variation-settings:'FILL' 0,'wght' 200,'GRAD' 0,'opsz' 24!important;font-weight:200!important}
+.azari-inner-page :is(.site-header,.public-header,header[data-site-header]):not(.is-scrolled){color:var(--az-ui-text);background:rgba(255,255,255,.96);border-bottom:1px solid rgba(27,33,31,.08);backdrop-filter:blur(14px)}.azari-inner-page :is(.site-header,.public-header,header[data-site-header]):not(.is-scrolled) :is(a,button,.material-symbols-outlined){color:var(--az-ui-text)}
+:where(input:not([type=checkbox]):not([type=radio]):not([type=hidden]),textarea,select){width:100%;min-height:46px;padding:.75rem .9rem;color:var(--az-ui-text);background:#fff;border:1px solid var(--az-ui-border);border-radius:.72rem;box-shadow:none;outline:0;font:inherit;transition:.16s}:where(input:not([type=checkbox]):not([type=radio]):not([type=hidden]),textarea,select):focus{border-color:var(--az-ui-primary);box-shadow:0 0 0 4px var(--az-ui-focus)}textarea{min-height:120px;resize:vertical}select{appearance:none;padding-right:2.6rem;background-image:linear-gradient(45deg,transparent 50%,var(--az-ui-primary) 50%),linear-gradient(135deg,var(--az-ui-primary) 50%,transparent 50%);background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;background-repeat:no-repeat;background-size:5px 5px}
+.az-switch{display:inline-flex!important;align-items:center;gap:.65rem;cursor:pointer;user-select:none}.az-switch>input[type=checkbox],input[type=checkbox][data-az-switch-ready=true]{position:absolute!important;width:1px!important;height:1px!important;margin:-1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;clip-path:inset(50%)!important;white-space:nowrap!important;border:0!important}.az-switch__track{position:relative;flex:0 0 auto;width:2.7rem;height:1.48rem;border:1px solid rgba(27,33,31,.22);border-radius:999px;background:#dedfda;transition:.16s}.az-switch__thumb{position:absolute;top:50%;left:.17rem;width:1.06rem;height:1.06rem;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.18);transform:translateY(-50%);transition:.16s}.az-switch>input:checked+.az-switch__track,input[type=checkbox][data-az-switch-ready=true]:checked+.az-switch__track{border-color:var(--az-ui-primary);background:var(--az-ui-primary)}.az-switch>input:checked+.az-switch__track .az-switch__thumb,input[type=checkbox][data-az-switch-ready=true]:checked+.az-switch__track .az-switch__thumb{transform:translate(1.18rem,-50%)}button[disabled],input[type=submit][disabled],[aria-busy=true]{opacity:.66;cursor:wait;pointer-events:none}
+.az-verification-page{min-height:66vh;display:grid;place-items:center;padding:clamp(7rem,10vw,10rem) 1rem 4rem}.az-verification-card{width:min(100%,36rem);padding:clamp(1.25rem,4vw,2rem);border:1px solid var(--az-ui-border);border-radius:1rem;background:#fff;box-shadow:0 1.5rem 4rem rgba(17,24,21,.07)}.az-verification-card h1{margin:0 0 1.25rem;font-size:clamp(1.5rem,3vw,2rem);font-weight:500}.az-form,.az-field{display:grid;gap:.7rem}.az-form{gap:1rem}.az-field-error{margin:0;color:#a32922;font-size:.875rem}.az-verification-result{margin-top:1.25rem;padding:1rem;border-radius:.75rem;background:#f5f6f3}.az-verification-result dl{display:grid;gap:.75rem;margin:0}.az-verification-result dl>div{display:flex;justify-content:space-between;gap:1rem}.az-verification-result dt{color:var(--az-ui-muted)}.az-verification-result dd{margin:0;font-weight:500;text-align:right}.az-verification-result--error{border:1px solid rgba(163,41,34,.18)}.az-verification-result--error p{margin:0}
+.az-admin-auth-page{min-height:100vh;display:grid;place-items:center;padding:1rem;color:var(--az-ui-text);background:#f4f5f2}.az-admin-auth-shell{width:min(100%,28rem)}.az-admin-auth-card{padding:clamp(1.4rem,4vw,2rem);border:1px solid var(--az-ui-border);border-radius:1rem;background:#fff;box-shadow:0 1.5rem 4rem rgba(17,24,21,.07)}.az-admin-auth-card h1{margin:0 0 1.4rem;font-size:1.65rem;font-weight:500}
+.az-pagination{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-top:1.5rem}.az-pagination__summary{margin:0;color:var(--az-ui-muted);font-size:.9rem}.az-pagination__items{display:flex;align-items:center;gap:.35rem;flex-wrap:wrap}.az-pagination__link,.az-pagination__gap{min-width:2.25rem;min-height:2.25rem;display:inline-grid;place-items:center;padding:.4rem .7rem;border:1px solid var(--az-ui-border);border-radius:.55rem;color:inherit;background:#fff;text-decoration:none;font-size:.9rem}.az-pagination__link.is-current{color:#fff;border-color:var(--az-ui-primary);background:var(--az-ui-primary)}.az-pagination__link.is-disabled{opacity:.45;cursor:not-allowed}.az-pagination__gap{border-color:transparent;background:transparent}
+.az-error-page{min-height:100vh;display:grid;place-items:center;padding:1.5rem;color:var(--az-ui-text);background:#f5f6f3}.az-error-card{width:min(100%,29rem);text-align:center}.az-error-code{margin:0 0 .45rem;color:var(--az-ui-muted);font-size:.875rem;letter-spacing:.08em}.az-error-card h1{margin:0 0 .65rem;font-size:clamp(1.4rem,4vw,1.9rem);font-weight:500}.az-error-card>p:not(.az-error-code){margin:0 auto 1.2rem;color:var(--az-ui-muted);line-height:1.6}
+/* AZARI UNIFIED PRODUCTION HOTFIX END */
 
-@import './azari-production-ui.css';
+/* AZARI UI OVERHAUL V3 START */
+:root {
+    --az-v3-text: #17201c;
+    --az-v3-muted: #737a76;
+    --az-v3-border: rgba(23, 32, 28, .13);
+    --az-v3-green: #0e2b23;
+    --az-v3-panel: #f3ecdc;
+}
+
+.az-date-v3__native {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0 0 0 0) !important;
+    clip-path: inset(50%) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+.az-date-v3 {
+    position: relative;
+    min-width: 0;
+}
+
+.az-date-v3__trigger {
+    width: 100%;
+    min-height: 46px;
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    padding: .65rem .75rem;
+    color: inherit;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: .7rem;
+    font: inherit;
+    text-align: left;
+}
+
+.az-date-v3__trigger:hover {
+    background: rgba(255, 255, 255, .18);
+}
+
+.az-date-v3__trigger:focus-visible {
+    outline: 0;
+    border-color: rgba(14, 43, 35, .3);
+    box-shadow: 0 0 0 4px rgba(14, 43, 35, .08);
+}
+
+.az-date-v3__icon {
+    flex: 0 0 auto;
+    font-size: 1.15rem;
+    font-variation-settings: 'FILL' 0, 'wght' 200, 'GRAD' 0, 'opsz' 20 !important;
+}
+
+.az-date-v3__value {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.az-date-v3__panel {
+    position: absolute;
+    z-index: 1000;
+    top: calc(100% + .55rem);
+    left: 0;
+    width: min(20rem, calc(100vw - 2rem));
+    padding: .9rem;
+    color: var(--az-v3-text);
+    background: rgba(255, 255, 255, .98);
+    border: 1px solid var(--az-v3-border);
+    border-radius: .9rem;
+    box-shadow: 0 1.2rem 3rem rgba(16, 24, 20, .16);
+    backdrop-filter: blur(16px);
+}
+
+.az-date-v3__panel[hidden] {
+    display: none !important;
+}
+
+.az-date-v3__header,
+.az-date-v3__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem;
+}
+
+.az-date-v3__header {
+    margin-bottom: .65rem;
+}
+
+.az-date-v3__title {
+    font-size: .95rem;
+    font-weight: 500;
+}
+
+.az-date-v3__nav,
+.az-date-v3__text-button {
+    border: 0;
+    color: inherit;
+    background: transparent;
+    font: inherit;
+}
+
+.az-date-v3__nav {
+    width: 2.25rem;
+    height: 2.25rem;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+}
+
+.az-date-v3__nav:hover,
+.az-date-v3__text-button:hover {
+    background: rgba(14, 43, 35, .07);
+}
+
+.az-date-v3__weekdays,
+.az-date-v3__grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+}
+
+.az-date-v3__weekdays {
+    margin-bottom: .25rem;
+    color: var(--az-v3-muted);
+    font-size: .72rem;
+    text-align: center;
+}
+
+.az-date-v3__weekdays span {
+    padding-block: .35rem;
+}
+
+.az-date-v3__grid {
+    gap: .14rem;
+}
+
+.az-date-v3__day {
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    color: inherit;
+    background: transparent;
+    font: inherit;
+    font-size: .86rem;
+}
+
+.az-date-v3__day:hover:not(:disabled) {
+    background: rgba(14, 43, 35, .08);
+}
+
+.az-date-v3__day.is-outside {
+    color: #a7aca9;
+}
+
+.az-date-v3__day.is-today {
+    box-shadow: inset 0 0 0 1px rgba(14, 43, 35, .4);
+}
+
+.az-date-v3__day.is-selected {
+    color: #fff;
+    background: var(--az-v3-green);
+}
+
+.az-date-v3__day:disabled {
+    opacity: .3;
+    cursor: not-allowed;
+}
+
+.az-date-v3__footer {
+    margin-top: .7rem;
+    padding-top: .65rem;
+    border-top: 1px solid var(--az-v3-border);
+}
+
+.az-date-v3__text-button {
+    min-height: 2rem;
+    padding: .25rem .55rem;
+    border-radius: .45rem;
+    font-size: .82rem;
+}
+
+/* Booking form stays visually unified on wide screens. */
+:where(
+    .booking-search form,
+    .booking-search-form,
+    .booking-widget form,
+    .availability-search form,
+    .hero-booking form,
+    .az-booking-search form,
+    .direct-booking form,
+    [data-booking-search-form]
+) {
+    display: grid !important;
+    
+    grid-template-columns:
+        minmax(9rem, .95fr)
+        minmax(9rem, .95fr)
+        minmax(8rem, .78fr)
+        minmax(13rem, 1.35fr)
+        auto;
+
+    align-items: end;
+    gap: 0;
+    width: 100%;
+}
+
+:where(
+    .booking-search form,
+    .booking-search-form,
+    .booking-widget form,
+    .availability-search form,
+    .hero-booking form,
+    .az-booking-search form,
+    .direct-booking form,
+    [data-booking-search-form]
+) > :where(div, fieldset, label):not(:last-child) {
+    min-width: 0;
+    padding-inline: 1rem;
+    border-right: 1px solid rgba(23, 32, 28, .11);
+}
+
+:where(
+    .booking-search,
+    .booking-widget,
+    .availability-search,
+    .hero-booking,
+    .az-booking-search,
+    .direct-booking,
+    [data-booking-search]
+) :where(
+    input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+    select,
+    textarea,
+    .az-date-v3__trigger
+) {
+    min-height: 46px;
+    padding-inline: 0;
+    color: inherit;
+    background: transparent !important;
+    border-color: transparent !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+:where(
+    .booking-search,
+    .booking-widget,
+    .availability-search,
+    .hero-booking,
+    .az-booking-search,
+    .direct-booking,
+    [data-booking-search]
+) :where(
+    button[type="submit"],
+    input[type="submit"],
+    .button--primary
+) {
+    min-height: 62px;
+    align-self: stretch;
+    white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    :where(
+        .booking-search,
+        .booking-search-form,
+        .booking-widget,
+        .availability-search,
+        .hero-booking,
+        .az-booking-search,
+        .direct-booking
+    ) {
+        animation: az-v3-rise .5s cubic-bezier(.2, .8, .2, 1) both;
+    }
+
+    :where(
+        button,
+        .button,
+        a,
+        input,
+        select,
+        textarea,
+        .az-date-v3__trigger,
+        .az-date-v3__panel,
+        .az-date-v3__day
+    ) {
+        transition:
+            background-color .18s ease,
+            border-color .18s ease,
+            color .18s ease,
+            box-shadow .18s ease,
+            opacity .18s ease,
+            transform .18s ease;
+    }
+
+    :where(button, .button, [role="button"]):not(:disabled):active {
+        transform: translateY(1px) scale(.992);
+    }
+
+    .az-date-v3.is-open .az-date-v3__panel {
+        animation: az-v3-calendar-in .16s cubic-bezier(.2, .8, .2, 1) both;
+    }
+
+    @keyframes az-v3-rise {
+        from {
+            opacity: 0;
+            transform: translateY(12px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes az-v3-calendar-in {
+        from {
+            opacity: 0;
+            transform: translateY(6px) scale(.985);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+}
+
+@media (max-width: 1100px) {
+    :where(
+        .booking-search form,
+        .booking-search-form,
+        .booking-widget form,
+        .availability-search form,
+        .hero-booking form,
+        .az-booking-search form,
+        .direct-booking form,
+        [data-booking-search-form]
+    ) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: .85rem;
+    }
+
+    :where(
+        .booking-search form,
+        .booking-search-form,
+        .booking-widget form,
+        .availability-search form,
+        .hero-booking form,
+        .az-booking-search form,
+        .direct-booking form,
+        [data-booking-search-form]
+    ) > :where(div, fieldset, label):not(:last-child) {
+        padding-inline: 0;
+        border-right: 0;
+    }
+
+    :where(
+        .booking-search,
+        .booking-widget,
+        .availability-search,
+        .hero-booking,
+        .az-booking-search,
+        .direct-booking,
+        [data-booking-search]
+    ) :where(
+        input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]),
+        select,
+        textarea,
+        .az-date-v3__trigger
+    ) {
+        padding-inline: .75rem;
+        background: rgba(255, 255, 255, .24) !important;
+        border: 1px solid rgba(23, 32, 28, .12) !important;
+        border-radius: .7rem !important;
+    }
+}
+
+@media (max-width: 680px) {
+    :where(
+        .booking-search form,
+        .booking-search-form,
+        .booking-widget form,
+        .availability-search form,
+        .hero-booking form,
+        .az-booking-search form,
+        .direct-booking form,
+        [data-booking-search-form]
+    ) {
+        grid-template-columns: 1fr;
+    }
+
+    .az-date-v3__panel {
+        position: fixed;
+        inset: auto 1rem 1rem;
+        width: auto;
+        max-height: min(80vh, 34rem);
+        overflow: auto;
+    }
+}
+/* AZARI UI OVERHAUL V3 END */

@@ -681,6 +681,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 import './azari-interactions';
 
-import './azari-ui-hotfix';
+import './azari-production-hotfix';
 
-import './azari-production-ui';
+import './azari-date-picker-v3';

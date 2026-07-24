@@ -1,10 +1,1 @@
-@extends('errors.layout')
-
-@section('title', 'Internal server error')
-@section('code', '500')
-@section('eyebrow', 'Unexpected interruption')
-@section('heading', 'Something went wrong on our side.')
-@section('message')
-    We could not complete your request. The issue has been recorded where application logging is available, and it will be reviewed.
-@endsection
-@section('support', 'Please try again shortly. Avoid repeating a payment unless you have confirmed that the previous attempt failed.')
+<!DOCTYPE html><html lang="{{ str_replace('_', '-', app()->getLocale()) }}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Something went wrong</title>@vite(['resources/css/app.css'])</head><body class="az-error-page"><main class="az-error-card"><p class="az-error-code">500</p><h1>Something went wrong</h1><p>The request could not be completed.</p><a href="{{ url('/') }}" class="button button--secondary">Return home</a></main></body></html>

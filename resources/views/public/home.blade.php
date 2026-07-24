@@ -82,7 +82,7 @@
                     <span class="eyebrow">Direct booking</span>
                     <h2>Find your residence</h2>
                     <p>
-                        Search by dates, guests, destination and residence type.
+                        Search by dates, guests and residence type.
                     </p>
                 </div>
 
@@ -93,24 +93,7 @@
                     data-availability-form
                     novalidate
                 >
-                    <div class="search-field search-field-location">
-                        <label for="location">Destination</label>
-
-                        <div class="input-shell">
-                            <span
-                                class="material-symbols-outlined"
-                                aria-hidden="true"
-                            >location_on</span>
-
-                            <input
-                                id="location"
-                                name="location"
-                                type="text"
-                                placeholder="Any destination"
-                            >
-                        </div>
-                    </div>
-
+                    
                     <div class="search-field">
                         <label for="check_in">Check in</label>
 

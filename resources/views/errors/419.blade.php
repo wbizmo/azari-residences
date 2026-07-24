@@ -1,10 +1,1 @@
-@extends('errors.layout')
-
-@section('title', 'Session expired')
-@section('code', '419')
-@section('eyebrow', 'Session expired')
-@section('heading', 'Your session has expired.')
-@section('message')
-    For security, this form can no longer be submitted. Return to the page, refresh it, and try again.
-@endsection
-@section('support', 'Any unsaved information may need to be entered again.')
+<!DOCTYPE html><html lang="{{ str_replace('_', '-', app()->getLocale()) }}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Page expired</title>@vite(['resources/css/app.css'])</head><body class="az-error-page"><main class="az-error-card"><p class="az-error-code">419</p><h1>Page expired</h1><p>Refresh the page and try again.</p><a href="{{ url('/') }}" class="button button--secondary">Return home</a></main></body></html>
