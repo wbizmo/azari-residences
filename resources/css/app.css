@@ -2783,7 +2783,7 @@ main .property-description {
             rgb(0 0 0 / 58%),
             rgb(0 0 0 / 18%)
         ),
-        url("/images/azari-hero.png") center / cover no-repeat;
+        url("../images/azari-hero.png") center / cover no-repeat;
 }
 
 .hero,
@@ -7242,4 +7242,24 @@ body.az-auth-page {
     .az-policy-aside {
         position: static;
     }
+}
+
+/* Auth pages: allow full forms without nested scroll containers */
+.az-auth-page {
+    min-height: 100dvh;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.az-auth-page .az-auth-main {
+    min-height: 100dvh;
+    height: auto;
+    overflow: visible;
+}
+
+.az-auth-page .az-auth-card,
+.az-auth-page .az-standalone-auth-card {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
 }

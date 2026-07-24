@@ -27,17 +27,7 @@
         </div>
     </div>
 
-    <div class="az-topbar-actions">
-        <button
-            type="button"
-            class="az-icon-button"
-            data-theme-toggle
-            aria-label="Change colour theme"
-        >
-            <span class="material-symbols-outlined" aria-hidden="true">dark_mode</span>
-        </button>
-
-        <div class="az-profile-menu" data-profile-menu>
+    <div class="az-topbar-actions"><div class="az-profile-menu" data-profile-menu>
             <button
                 type="button"
                 class="az-profile-trigger"

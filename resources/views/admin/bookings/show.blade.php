@@ -8,3 +8,9 @@
 </div>
 <section class="az-panel"><h2>Guests and identity documents</h2><div class="az-booking-grid">@foreach($booking->guests as $guest)<article class="az-booking-card"><span>{{ ucfirst($guest->type) }} {{ $guest->position }}</span><h3>{{ $guest->full_name }}</h3>@if($guest->identityDocument)<p>{{ ucwords(str_replace('_',' ',$guest->identityDocument->document_type)) }}</p><a class="az-button" href="{{ route('azari.admin.bookings.document',[$booking,$guest->identityDocument]) }}">Open identity document</a>@elseif($guest->type==='adult')<p>No identity document stored.</p>@else<p>Identity document not required.</p>@endif</article>@endforeach</div></section>
 @endsection
+@if(!in_array($booking->status, ['cancelled', 'completed'], true))
+<section class="az-panel"><h2>Administrative cancellation</h2><p>Customers cannot cancel bookings. Use this only when the residence must release the dates.</p><form method="POST" action="{{ route('azari.admin.bookings.cancel', $booking) }}" class="az-form-grid">@csrf @method('PUT')<label class="az-field az-span-2"><span>Cancellation reason</span><textarea name="reason" required maxlength="1000"></textarea></label><div class="az-form-actions az-span-2"><button class="az-button az-button--danger" type="submit">Cancel booking</button></div></form></section>
+@endif
+@if(!in_array($booking->status, ['cancelled', 'completed'], true))
+<section class="az-panel"><h2>Administrative cancellation</h2><p>Customers cannot cancel bookings. Use this only when the residence must release the dates.</p><form method="POST" action="{{ route('azari.admin.bookings.cancel', $booking) }}" class="az-form-grid">@csrf @method('PUT')<label class="az-field az-span-2"><span>Cancellation reason</span><textarea name="reason" required maxlength="1000"></textarea></label><div class="az-form-actions az-span-2"><button class="az-button az-button--danger" type="submit">Cancel booking</button></div></form></section>
+@endif

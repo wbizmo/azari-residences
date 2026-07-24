@@ -66,7 +66,7 @@ class AzariBookingFlowController extends Controller
                 'guest_email' => $data['guest_email'], 'guest_phone' => $data['guest_phone'], 'nationality' => $data['nationality'], 'address' => $data['address'],
                 'city' => $data['city'], 'country' => $data['country'], 'arrival_time' => $data['arrival_time'] ?? null, 'guest_notes' => $data['guest_notes'] ?? null,
                 'check_in' => $hold->check_in, 'check_out' => $hold->check_out, 'adults' => $hold->adults, 'children' => $hold->children, 'rooms' => $hold->rooms,
-                'status' => 'pending', 'verification_status' => 'unverified', 'currency' => $quote['currency'], 'nightly_rate' => $quote['nightly_rate'], 'nights' => $quote['nights'],
+                'status' => 'pending_payment', 'verification_status' => 'unverified', 'currency' => $quote['currency'], 'nightly_rate' => $quote['nightly_rate'], 'nights' => $quote['nights'],
                 'subtotal' => $quote['subtotal'], 'fee_total' => $quote['fee_total'], 'add_on_total' => 0, 'tax_rate' => $quote['tax_rate'], 'tax_total' => $quote['tax_total'],
                 'total' => $quote['total'], 'pricing_snapshot' => $quote, 'expires_at' => now()->addHours(24),
             ]);
@@ -80,7 +80,7 @@ class AzariBookingFlowController extends Controller
             foreach (($data['children'] ?? []) as $index => $child) {
                 BookingGuest::create(['booking_id' => $booking->id, 'type' => 'child', 'position' => $index + 1, 'first_name' => $child['first_name'], 'last_name' => $child['last_name'], 'is_lead' => false]);
             }
-            BookingStatusHistory::create(['booking_id' => $booking->id, 'changed_by' => $request->user()?->id, 'from_status' => null, 'to_status' => 'pending', 'note' => 'Booking created and awaiting automated payment.', 'metadata' => ['channel' => $request->user() ? 'registered' : 'guest']]);
+            BookingStatusHistory::create(['booking_id' => $booking->id, 'changed_by' => $request->user()?->id, 'from_status' => null, 'to_status' => 'pending_payment', 'note' => 'Booking created and awaiting payment.', 'metadata' => ['channel' => $request->user() ? 'registered' : 'guest']]);
             $hold->delete();
 
             return $booking;
@@ -91,7 +91,10 @@ class AzariBookingFlowController extends Controller
 
     public function review(string $reference)
     {
-        $booking = Booking::with(['property', 'guests.identityDocument'])->where('reference', $reference)->firstOrFail();
+        $booking = Booking::with([
+            'property',
+            'guests.identityDocument',
+        ])->where('reference', $reference)->firstOrFail();
 
         return view('public.bookings.review', compact('booking'));
     }
@@ -100,12 +103,40 @@ class AzariBookingFlowController extends Controller
     {
         $booking = Booking::where('reference', $reference)->firstOrFail();
 
-        return redirect()->route('azari.booking.summary', $booking->reference)->with('success', 'Booking information confirmed. Continue with payment when the payment stage is enabled.');
+        if ($booking->status === 'pending_payment') {
+            $booking->update([
+                'status' => 'paid',
+                'paid_at' => now(),
+                'payment_reference' => 'DEMO-'.Str::upper(Str::random(14)),
+                'receipt_number' => 'RCT-'.now()->format('Ymd').'-'.str_pad(
+                    (string) $booking->id,
+                    6,
+                    '0',
+                    STR_PAD_LEFT
+                ),
+                'expires_at' => null,
+            ]);
+
+            BookingStatusHistory::create([
+                'booking_id' => $booking->id,
+                'changed_by' => auth()->id(),
+                'from_status' => 'pending_payment',
+                'to_status' => 'paid',
+                'note' => 'Payment confirmed automatically and receipt generated.',
+            ]);
+        }
+
+        return redirect()
+            ->route('azari.booking.summary', $booking->reference)
+            ->with('success', 'Payment confirmed. Your booking is secured.');
     }
 
     public function summary(string $reference)
     {
-        $booking = Booking::with(['property', 'guests'])->where('reference', $reference)->firstOrFail();
+        $booking = Booking::with([
+            'property',
+            'guests',
+        ])->where('reference', $reference)->firstOrFail();
 
         return view('public.bookings.summary', compact('booking'));
     }

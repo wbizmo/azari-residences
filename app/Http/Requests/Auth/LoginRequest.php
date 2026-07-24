@@ -50,6 +50,38 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        $user = Auth::user();
+        if (! $user || $user->isStaff() || $user->isSuspended()) {
+            Auth::logout();
+            RateLimiter::hit($this->throttleKey());
+            throw ValidationException::withMessages(['email' => 'This account cannot use the customer portal.']);
+        }
+
+        $user->forceFill(['last_login_at' => now(), 'last_active_at' => now()])->saveQuietly();
+        $user = Auth::user();
+        if (! $user || $user->isStaff() || $user->isSuspended()) {
+            Auth::logout();
+            RateLimiter::hit($this->throttleKey());
+            throw ValidationException::withMessages(['email' => 'This account cannot use the customer portal.']);
+        }
+
+        $user->forceFill(['last_login_at' => now(), 'last_active_at' => now()])->saveQuietly();
+        $user = Auth::user();
+        if (! $user || $user->isStaff() || $user->isSuspended()) {
+            Auth::logout();
+            RateLimiter::hit($this->throttleKey());
+            throw ValidationException::withMessages(['email' => 'This account cannot use the customer portal.']);
+        }
+
+        $user->forceFill(['last_login_at' => now(), 'last_active_at' => now()])->saveQuietly();
+        $user = Auth::user();
+        if (! $user || $user->isStaff() || $user->isSuspended()) {
+            Auth::logout();
+            RateLimiter::hit($this->throttleKey());
+            throw ValidationException::withMessages(['email' => 'This account cannot use the customer portal.']);
+        }
+
+        $user->forceFill(['last_login_at' => now(), 'last_active_at' => now()])->saveQuietly();
         RateLimiter::clear($this->throttleKey());
     }
 

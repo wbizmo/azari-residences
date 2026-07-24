@@ -11,6 +11,8 @@ class DatabaseSeeder extends Seeder
         $seeders = [
             AzariProductionSeeder::class,
             AzariSprintThreeFourSeeder::class,
+            AzariSprintFiveSixDemoSeeder::class,
+            AzariSprintFiveSixDemoSeeder::class,
         ];
 
         foreach ($seeders as $seeder) {

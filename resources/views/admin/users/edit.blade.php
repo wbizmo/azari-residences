@@ -1,16 +1,15 @@
 @extends('admin.layouts.app')
-@section('title', 'Edit User')
+@section('title', $user->exists ? 'Edit customer' : 'Add customer')
 @section('content')
-<div class="az-page-heading"><div><p class="az-eyebrow">Account control</p><h1>Edit {{ $user->name }}</h1></div></div>
-<form method="POST" action="{{ route('azari.admin.users.update', $user) }}" class="az-card az-form-grid">@csrf @method('PUT')
-<label>Name<input name="name" value="{{ old('name', $user->name) }}" required></label>
-<label>Username<input name="username" value="{{ old('username', $user->username) }}" required></label>
-<label>Email<input type="email" name="email" value="{{ old('email', $user->email) }}" required></label>
-<label>Phone<input name="phone" value="{{ old('phone', $user->phone) }}"></label>
-<label>New password<input type="password" name="password"></label>
-<label>Confirm password<input type="password" name="password_confirmation"></label>
-<label class="az-toggle"><input type="checkbox" name="is_active" value="1" @checked(old('is_active', $user->is_active))><span></span>Active account</label>
-<label class="az-toggle"><input type="checkbox" name="is_admin" value="1" @checked(old('is_admin', $user->is_admin))><span></span>Administrator</label>
-<div class="az-form-actions"><button class="az-button">Save user</button></div>
+<div class="az-page-heading"><div><p class="az-eyebrow">Customer account</p><h1>{{ $user->exists ? 'Edit customer' : 'Add customer' }}</h1><p>Keep account details simple and focused on bookings.</p></div></div>
+<form class="az-card az-form-grid" method="POST" action="{{ $user->exists ? route('azari.admin.users.update', $user) : route('azari.admin.users.store') }}">
+@csrf
+@if($user->exists) @method('PUT') @endif
+<label class="az-field"><span>Full name</span><input name="name" value="{{ old('name', $user->name) }}" required></label>
+<label class="az-field"><span>Email address</span><input type="email" name="email" value="{{ old('email', $user->email) }}" required></label>
+<label class="az-field"><span>Phone</span><input name="phone" value="{{ old('phone', $user->phone) }}"></label>
+<label class="az-field"><span>{{ $user->exists ? 'New password (optional)' : 'Password' }}</span><input type="password" name="password" {{ $user->exists ? '' : 'required' }}></label>
+<label class="az-field"><span>Confirm password</span><input type="password" name="password_confirmation" {{ $user->exists ? '' : 'required' }}></label>
+<div class="az-form-actions az-span-2"><a class="az-button az-button--secondary" href="{{ route('azari.admin.users.index') }}">Cancel</a><button class="az-button" type="submit">Save customer</button></div>
 </form>
 @endsection

@@ -58,7 +58,7 @@ Route::prefix('azaridevadmin')->middleware(['azari.staff'])->group(function (): 
 });
 
 Route::get('/dashboard', fn () => view('dashboard'))
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'azari.customer'])
     ->name('dashboard');
 
 Route::middleware('auth')->group(function (): void {

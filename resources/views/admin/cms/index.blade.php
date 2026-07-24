@@ -52,11 +52,6 @@
                 <input type="tel" name="support_phone" value="{{ old('support_phone', $settings['support_phone'] ?? '') }}">
             </label>
 
-            <label class="az-field az-span-2">
-                <span>Physical address</span>
-                <textarea name="physical_address" rows="3">{{ old('physical_address', $settings['physical_address'] ?? '') }}</textarea>
-            </label>
-
             @foreach([
                 'site_logo' => 'Primary logo',
                 'light_logo' => 'Light logo',
