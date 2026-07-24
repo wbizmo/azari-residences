@@ -28,6 +28,7 @@ class AzariAvailabilityController extends Controller
             'children' => ['nullable', 'integer', 'min:0', 'max:40'],
             'rooms' => ['nullable', 'integer', 'min:1', 'max:20'],
             'location_id' => ['nullable', 'integer', 'exists:locations,id'],
+            'location' => ['nullable', 'string', 'max:120'],
             'room_type_id' => ['nullable', 'integer', 'exists:room_types,id'],
             'property_type' => ['nullable', 'string', 'max:80'],
         ]);

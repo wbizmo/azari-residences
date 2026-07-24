@@ -1,10 +1,8 @@
 <?php
 use App\Http\Controllers\Admin\BookingManagementController;
 use App\Http\Controllers\Admin\UserManagementController;
-use App\Http\Controllers\Auth\CustomerAuthController;
 use App\Http\Controllers\PublicSite\BookingController;
 use Illuminate\Support\Facades\Route;
-Route::middleware('guest')->group(function(){ Route::get('/customer/register',[CustomerAuthController::class,'create'])->name('customer.register'); Route::post('/customer/register',[CustomerAuthController::class,'store'])->name('customer.register.store'); });
 // Replaced by routes/azari-public-completion.php
 Route::post('/bookings',[BookingController::class,'store'])->name('bookings.store');
 Route::get('/bookings/{reference}',[BookingController::class,'show'])->name('bookings.show');
