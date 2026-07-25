@@ -36,7 +36,7 @@ class AzariSprintFiveSixFinalizationTest extends TestCase
 
         $this->actingAs($admin)
             ->get('/dashboard')
-            ->assertNotFound();
+            ->assertForbidden();
     }
 
     public function test_booking_automation_opens_check_in_and_completes_departed_stays(): void

@@ -64,6 +64,8 @@ class User extends Authenticatable implements MustVerifyEmail
     public function currentIdentity(): HasOne { return $this->hasOne(UserIdentityDocument::class)->where('is_current', true)->latestOfMany(); }
     public function staffLoginHistories(): HasMany { return $this->hasMany(StaffLoginHistory::class); }
     public function serviceRequests(): HasMany { return $this->hasMany(ServiceRequest::class); }
+    public function supportTickets(): HasMany { return $this->hasMany(SupportTicket::class); }
+    public function reviews(): HasMany { return $this->hasMany(Review::class); }
 
     public function isStaff(): bool
     {
@@ -77,7 +79,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function isSuspended(): bool
     {
-        return ! $this->is_active || $this->status === 'suspended' || $this->suspended_at !== null;
+        return $this->is_active === false || $this->status === 'suspended' || $this->suspended_at !== null;
     }
 
     public function hasPermission(string $permission): bool

@@ -190,7 +190,32 @@
 <a class="az-nav-link {{ request()->routeIs('azari.admin.s56.calendar') ? 'is-active' : '' }}" href="{{ route('azari.admin.s56.calendar') }}"><span class="material-symbols-outlined">calendar_month</span><span>Availability calendar</span></a>
 @endif
 
-<a href="{{ route('azari.admin.service-requests.index') }}"><span class="material-symbols-outlined">room_service</span><span>Service requests</span></a></nav>
+
+        <section class="az-nav-section" aria-labelledby="az-nav-roadmap-completion">
+            <h2 id="az-nav-roadmap-completion">Guest &amp; system operations</h2>
+
+            @foreach ([
+                ['azari.admin.service-requests.index', 'room_service', 'Service requests', 'service-requests.view'],
+                ['azari.admin.support.index', 'support_agent', 'Support tickets', 'support-tickets.view'],
+                ['azari.admin.reviews.index', 'reviews', 'Reviews', 'reviews.view'],
+                ['azari.admin.promotions.index', 'campaign', 'Promotions', 'promotions.view'],
+                ['azari.admin.reports.index', 'monitoring', 'Reports', 'reports.view'],
+                ['azari.admin.audit-logs.index', 'history', 'Audit logs', 'audit-logs.view'],
+                ['azari.admin.system-health.index', 'health_metrics', 'System health', 'system-health.view'],
+            ] as [$route, $icon, $label, $permission])
+                @if (Route::has($route) && ($adminActor?->isAdministrator() || $adminActor?->hasPermission($permission)))
+                    <a
+                        class="az-nav-link {{ request()->routeIs(str_replace('.index', '.*', $route)) ? 'is-active' : '' }}"
+                        href="{{ route($route) }}"
+                    >
+                        <span class="material-symbols-outlined" aria-hidden="true">{{ $icon }}</span>
+                        <span>{{ $label }}</span>
+                    </a>
+                @endif
+            @endforeach
+        </section>
+
+</nav>
 
     <div class="az-sidebar-footer">
         <span class="material-symbols-outlined" aria-hidden="true">verified_user</span>

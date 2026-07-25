@@ -7285,35 +7285,6 @@ body.az-auth-page {
 
 .material-symbols-outlined{min-width:1em;min-height:1em;color:transparent;overflow:hidden}.az-icons-ready .material-symbols-outlined{color:inherit}
 
-/* AZARI_ICON_RENDERING_GUARD_START */
-/* Azari icon rendering guard: preserve layout while the local variable font initializes. */
-.material-symbols-outlined,
-.material-symbols-rounded,
-.material-symbols-sharp {
-    display: inline-block;
-    width: 1em;
-    min-width: 1em;
-    height: 1em;
-    overflow: hidden;
-    white-space: nowrap;
-    vertical-align: -0.125em;
-    text-transform: none;
-    letter-spacing: normal;
-    word-wrap: normal;
-    direction: ltr;
-    -webkit-font-feature-settings: 'liga';
-    -webkit-font-smoothing: antialiased;
-    font-feature-settings: 'liga';
-    contain: layout paint;
-}
-
-html.azari-icons-ready .material-symbols-outlined,
-html.azari-icons-ready .material-symbols-rounded,
-html.azari-icons-ready .material-symbols-sharp {
-    visibility: visible;
-}
-/* AZARI_ICON_RENDERING_GUARD_END */
-
 /* AZARI_PUBLIC_SHELL_POLISH_START */
 
 /* The service symbols sit on a dark section and must remain pure white. */

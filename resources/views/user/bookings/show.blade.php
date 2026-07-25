@@ -5,8 +5,8 @@
     $successful = $booking->successfulPayment();
     $latestPayment = $booking->payments->sortByDesc("created_at")->first();
     $isPaid = $booking->isPaid();
-    $canPay = $booking->canAcceptPayment();
-    $canDownloadReceipt = $booking->receiptAvailable();
+    $canPaySecurely = $booking->canAcceptPayment();
+    $receiptAvailable = $booking->receiptAvailable();
 @endphp
 
 <div class="az-user-actions" style="margin-bottom:18px">

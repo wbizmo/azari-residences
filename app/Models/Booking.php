@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Booking extends Model
 {
@@ -52,6 +53,8 @@ class Booking extends Model
     public function identityLinks(): HasMany { return $this->hasMany(BookingIdentityLink::class); }
     public function lifecycleEvents(): HasMany { return $this->hasMany(StayLifecycleEvent::class)->latest(); }
     public function serviceRequests(): HasMany { return $this->hasMany(ServiceRequest::class)->latest(); }
+    public function supportTickets(): HasMany { return $this->hasMany(SupportTicket::class)->latest(); }
+    public function review(): HasOne { return $this->hasOne(Review::class); }
 
     public function addOns(): BelongsToMany
     {
