@@ -1,5 +1,4 @@
 @extends('errors.layout')
-
 @section('title', 'Action not allowed')
 @section('code', '405')
 @section('eyebrow', 'Unsupported action')
@@ -7,4 +6,4 @@
 @section('message')
     The page exists, but it cannot accept the type of request that was sent.
 @endsection
-@section('support', 'Return to the previous page and try the action again from the appropriate control.')
+@section('support', 'Return to the previous page and retry the action using the appropriate control.')

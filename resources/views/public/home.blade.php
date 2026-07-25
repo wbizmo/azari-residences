@@ -45,10 +45,9 @@
                         >arrow_forward</span>
                     </a>
 
-                    <button
-                        type="button"
+                    <a
+                        href="{{ route('bookings.verify') }}"
                         class="button azari-home-hero__secondary"
-                        data-modal-open="verification-modal"
                     >
                         <span
                             class="material-symbols-outlined"
@@ -56,7 +55,7 @@
                         >verified</span>
 
                         <span>Verify a booking</span>
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>

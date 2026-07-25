@@ -1,1 +1,9 @@
-<!DOCTYPE html><html lang="{{ str_replace('_', '-', app()->getLocale()) }}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Temporarily unavailable</title>@vite(['resources/css/app.css'])</head><body class="az-error-page"><main class="az-error-card"><p class="az-error-code">503</p><h1>Temporarily unavailable</h1><p>Please try again shortly.</p><a href="{{ url('/') }}" class="button button--secondary">Return home</a></main></body></html>
+@extends('errors.layout')
+@section('title', 'Temporarily unavailable')
+@section('code', '503')
+@section('eyebrow', 'Service temporarily unavailable')
+@section('heading', 'Azari Residences is temporarily unavailable.')
+@section('message')
+    The service may be undergoing maintenance or recovering from a temporary interruption.
+@endsection
+@section('support', 'Please try again shortly.')

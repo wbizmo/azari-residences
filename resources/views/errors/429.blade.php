@@ -1,1 +1,9 @@
-<!DOCTYPE html><html lang="{{ str_replace('_', '-', app()->getLocale()) }}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Too many requests</title>@vite(['resources/css/app.css'])</head><body class="az-error-page"><main class="az-error-card"><p class="az-error-code">429</p><h1>Too many requests</h1><p>Please wait briefly and try again.</p><a href="{{ url('/') }}" class="button button--secondary">Return home</a></main></body></html>
+@extends('errors.layout')
+@section('title', 'Too many requests')
+@section('code', '429')
+@section('eyebrow', 'Please slow down')
+@section('heading', 'Too many requests were sent in a short period.')
+@section('message')
+    We temporarily paused this request to protect the service.
+@endsection
+@section('support', 'Wait briefly before trying again.')

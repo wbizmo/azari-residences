@@ -1,5 +1,4 @@
 @extends('errors.layout')
-
 @section('title', 'Unable to process request')
 @section('code', '422')
 @section('eyebrow', 'Request needs attention')

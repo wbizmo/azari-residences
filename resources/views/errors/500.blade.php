@@ -1,1 +1,9 @@
-<!DOCTYPE html><html lang="{{ str_replace('_', '-', app()->getLocale()) }}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Something went wrong</title>@vite(['resources/css/app.css'])</head><body class="az-error-page"><main class="az-error-card"><p class="az-error-code">500</p><h1>Something went wrong</h1><p>The request could not be completed.</p><a href="{{ url('/') }}" class="button button--secondary">Return home</a></main></body></html>
+@extends('errors.layout')
+@section('title', 'Something went wrong')
+@section('code', '500')
+@section('eyebrow', 'Unexpected interruption')
+@section('heading', 'An error occurred on our side.')
+@section('message')
+    We could not complete your request. We are aware that something went wrong and are working to resolve it.
+@endsection
+@section('support', 'Please try again shortly. Before retrying a payment or booking action, verify its current status.')

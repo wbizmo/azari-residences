@@ -1,1 +1,9 @@
-<!DOCTYPE html><html lang="{{ str_replace('_', '-', app()->getLocale()) }}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Page expired</title>@vite(['resources/css/app.css'])</head><body class="az-error-page"><main class="az-error-card"><p class="az-error-code">419</p><h1>Page expired</h1><p>Refresh the page and try again.</p><a href="{{ url('/') }}" class="button button--secondary">Return home</a></main></body></html>
+@extends('errors.layout')
+@section('title', 'Page expired')
+@section('code', '419')
+@section('eyebrow', 'Session expired')
+@section('heading', 'This page has expired.')
+@section('message')
+    Your session or security token expired before the request could be completed.
+@endsection
+@section('support', 'Refresh the page, sign in again when required, and retry the action.')

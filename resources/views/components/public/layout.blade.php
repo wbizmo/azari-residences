@@ -75,8 +75,6 @@
     </button>
 
     <div class="toast-region" data-toast-region aria-live="polite" aria-atomic="true"></div>
-
-    @include('public.partials.modal-root')
     @include('public.partials.drawer-root')
 
     @stack('scripts')

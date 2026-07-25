@@ -13,11 +13,14 @@ class PublicInteractionMarkupTest extends TestCase
     {
         $this->get('/')
             ->assertOk()
-            ->assertSee('data-modal', false)
             ->assertSee('data-drawer', false)
+            ->assertSee('data-drawer-open', false)
+            ->assertSee('data-drawer-close', false)
             ->assertSee('data-toast-region', false)
             ->assertSee('data-popover', false)
-            ->assertSee('data-back-to-top', false);
+            ->assertSee('data-back-to-top', false)
+            ->assertDontSee('data-modal-open="verification-modal"', false)
+            ->assertDontSee('id="verification-modal"', false);
     }
 
     public function test_booking_form_uses_custom_guest_selector(): void

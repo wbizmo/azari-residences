@@ -33,20 +33,6 @@
             </div>
         </div>
 
-        <div class="footer-newsletter">
-            <div>
-                <span class="eyebrow">Private invitations</span>
-                <h2>Stay close to new residences and seasonal offers.</h2>
-            </div>
-            <form class="newsletter-form" data-demo-form
-                  data-success-message="Thank you. Your interest has been recorded.">
-                <label class="sr-only" for="newsletter-email">Email address</label>
-                <input class="luxury-input" id="newsletter-email" name="email"
-                       type="email" placeholder="Email address" required>
-                <button class="button button-brass" type="submit">Join the list</button>
-            </form>
-        </div>
-
         <div class="footer-legal">
             <span>&copy; {{ now()->year }} Azari Residences.</span>
             <span>Azari Luxury Properties LTD.</span>
