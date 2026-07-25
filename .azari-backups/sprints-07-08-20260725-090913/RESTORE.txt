@@ -1,4 +1,0 @@
-This backup was created before installing Azari Residences Sprints 7 and 8.
-Existing files are under: files/
-Files that did not exist before installation are listed in: new-files.txt
-Database migrations are not automatically reversed by restoring files.
