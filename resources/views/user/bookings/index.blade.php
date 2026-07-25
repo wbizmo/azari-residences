@@ -1,0 +1,10 @@
+@extends('layouts.user')
+@section('title','My bookings')
+@section('kicker','Stay history')
+@section('page_title','My bookings')
+@section('content')
+<nav class="az-user-tabs" aria-label="Booking filters">@foreach(['all'=>'All','upcoming'=>'Upcoming','active'=>'Active','completed'=>'Completed','cancelled'=>'Cancelled','pending-payment'=>'Pending payment'] as $key=>$label)<a class="az-user-tab {{ $status===$key?'is-active':'' }}" href="{{ route('user.bookings.index',['status'=>$key]) }}">{{ $label }}</a>@endforeach</nav>
+<section class="az-user-panel"><header class="az-user-panel-header"><div><h2 class="az-user-panel-title">Reservation history</h2><p class="az-user-panel-subtitle">Ten bookings per page with filters preserved</p></div><a class="az-user-button az-user-button--dark" href="{{ route('availability.index') }}">Book another stay</a></header><div class="az-user-panel-body">
+@if($bookings->isEmpty())<div class="az-user-empty"><span class="material-symbols-outlined">calendar_month</span><h3>No bookings in this view</h3><p>Change the filter or search for another residence.</p></div>@else<div class="az-user-list">@foreach($bookings as $booking)@php($paid=$booking->payments->firstWhere('status','successful'))<a class="az-user-list-item" href="{{ route('user.bookings.show',$booking->reference) }}"><div><h3>{{ $booking->property?->name ?? 'Azari Residence' }} · {{ $booking->reference }}</h3><p>{{ $booking->check_in?->format('j M Y') }} to {{ $booking->check_out?->format('j M Y') }} · {{ $booking->currency }} {{ number_format((float)$booking->total,2) }} · Payment: {{ $paid?'successful':str_replace('_',' ',$booking->payments->first()?->status ?? 'not started') }}</p></div><span class="az-user-status {{ in_array($booking->status,['pending','pending_payment'])?'az-user-status--warning':($booking->status==='cancelled'?'az-user-status--danger':'') }}">{{ str_replace('_',' ',$booking->status) }}</span></a>@endforeach</div>{{ $bookings->links() }}@endif
+</div></section>
+@endsection

@@ -7,9 +7,9 @@ use App\Models\Booking;
 use App\Models\BookingGuest;
 use App\Models\BookingHold;
 use App\Models\BookingStatusHistory;
-use App\Models\GuestIdentityDocument;
 use App\Services\Bookings\AzariAvailabilityEngine;
 use App\Services\Bookings\AzariPricingEngine;
+use App\Services\Identity\IdentityDocumentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -18,20 +18,22 @@ use Illuminate\Validation\ValidationException;
 
 class AzariBookingFlowController extends Controller
 {
-    public function checkout(string $token, AzariPricingEngine $pricing)
+    public function checkout(Request $request, string $token, AzariPricingEngine $pricing)
     {
         $hold = BookingHold::query()->with('property')->active()->where('token', $token)->firstOrFail();
-
-        return view('public.bookings.checkout', ['hold' => $hold, 'quote' => $pricing->quote($hold->property, $hold->check_in, $hold->check_out)]);
+        return view('public.bookings.checkout', [
+            'hold' => $hold,
+            'quote' => $pricing->quote($hold->property, $hold->check_in, $hold->check_out),
+            'accountIdentity' => $request->user()?->currentIdentity()->with('identityType')->first(),
+        ]);
     }
 
-    public function store(Request $request, AzariAvailabilityEngine $availability, AzariPricingEngine $pricing)
+    public function store(Request $request, AzariAvailabilityEngine $availability, AzariPricingEngine $pricing, IdentityDocumentService $identityService)
     {
         $hold = BookingHold::query()->with('property')->active()->where('token', $request->input('hold_token'))->first();
-        if (! $hold) {
-            throw ValidationException::withMessages(['hold_token' => 'Your reservation hold expired. Please search again.']);
-        }
+        if (! $hold) throw ValidationException::withMessages(['hold_token' => 'Your reservation hold expired. Please search again.']);
 
+        $hasAccountIdentity = (bool) $request->user()?->currentIdentity()->exists();
         $rules = [
             'hold_token' => ['required', 'uuid'], 'first_name' => ['required', 'string', 'max:80'], 'last_name' => ['required', 'string', 'max:80'],
             'guest_email' => ['required', 'email:rfc', 'max:190'], 'guest_phone' => ['required', 'string', 'max:40'],
@@ -39,13 +41,13 @@ class AzariBookingFlowController extends Controller
             'country' => ['required', 'string', 'max:120'], 'arrival_time' => ['nullable', 'date_format:H:i'], 'guest_notes' => ['nullable', 'string', 'max:3000'],
             'adults' => ['required', 'array', 'size:'.$hold->adults], 'children' => ['nullable', 'array', 'size:'.$hold->children], 'terms' => ['accepted'],
         ];
-        foreach (range(0, max(0, $hold->adults - 1)) as $i) {
+        for ($i = 0; $i < $hold->adults; $i++) {
             $rules["adults.$i.first_name"] = ['required', 'string', 'max:80'];
             $rules["adults.$i.last_name"] = ['required', 'string', 'max:80'];
-            $rules["adults.$i.document_type"] = ['required', Rule::in(['passport', 'national_id', 'drivers_licence'])];
-            $rules["adults.$i.document"] = ['required', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:10240'];
+            $rules["adults.$i.document_type"] = [$i === 0 && $hasAccountIdentity ? 'nullable' : 'required', Rule::in(['passport', 'national_id', 'drivers_licence', 'other_government_id'])];
+            $rules["adults.$i.document"] = [$i === 0 && $hasAccountIdentity ? 'nullable' : 'required', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'mimetypes:image/jpeg,image/png,image/webp,application/pdf', 'max:10240'];
         }
-        foreach (range(0, max(0, $hold->children - 1)) as $i) {
+        for ($i = 0; $i < $hold->children; $i++) {
             $rules["children.$i.first_name"] = ['required', 'string', 'max:80'];
             $rules["children.$i.last_name"] = ['required', 'string', 'max:80'];
         }
@@ -56,11 +58,11 @@ class AzariBookingFlowController extends Controller
         }
         $quote = $pricing->quote($hold->property, $hold->check_in, $hold->check_out);
 
-        $booking = DB::transaction(function () use ($request, $data, $hold, $quote): Booking {
-            do {
-                $reference = 'AZR-'.now()->format('ymd').'-'.Str::upper(Str::random(7));
-            } while (Booking::where('reference', $reference)->exists());
-            $booking = Booking::create([
+        $booking = DB::transaction(function () use ($request, $data, $hold, $quote, $identityService, $hasAccountIdentity): Booking {
+            do { $reference = 'AZR-'.now()->format('ymd').'-'.Str::upper(Str::random(7)); }
+            while (Booking::query()->where('reference', $reference)->exists());
+
+            $booking = Booking::query()->create([
                 'reference' => $reference, 'user_id' => $request->user()?->id, 'property_id' => $hold->property_id, 'hold_token' => $hold->token,
                 'guest_name' => $data['first_name'].' '.$data['last_name'], 'guest_first_name' => $data['first_name'], 'guest_last_name' => $data['last_name'],
                 'guest_email' => $data['guest_email'], 'guest_phone' => $data['guest_phone'], 'nationality' => $data['nationality'], 'address' => $data['address'],
@@ -72,72 +74,60 @@ class AzariBookingFlowController extends Controller
             ]);
 
             foreach ($data['adults'] as $index => $adult) {
-                $guest = BookingGuest::create(['booking_id' => $booking->id, 'type' => 'adult', 'position' => $index + 1, 'first_name' => $adult['first_name'], 'last_name' => $adult['last_name'], 'is_lead' => $index === 0]);
-                $file = $request->file("adults.$index.document");
-                $path = $file->store("booking-identities/{$booking->reference}", 'local');
-                GuestIdentityDocument::create(['booking_guest_id' => $guest->id, 'document_type' => $adult['document_type'], 'disk' => 'local', 'path' => $path, 'original_name' => $file->getClientOriginalName(), 'mime_type' => $file->getMimeType() ?: 'application/octet-stream', 'size_bytes' => $file->getSize(), 'sha256' => hash_file('sha256', $file->getRealPath())]);
+                $guest = BookingGuest::query()->create([
+                    'booking_id' => $booking->id, 'type' => 'adult', 'position' => $index + 1,
+                    'first_name' => $adult['first_name'], 'last_name' => $adult['last_name'], 'is_lead' => $index === 0,
+                ]);
+                if ($index === 0 && $hasAccountIdentity && $request->user()) {
+                    $identityService->attachOwnerIdentity($booking, $request->user(), $guest);
+                } else {
+                    $identityService->storeGuestIdentity($booking, $guest, $adult['document_type'], $request->file("adults.$index.document"), $request->user()?->id);
+                }
             }
             foreach (($data['children'] ?? []) as $index => $child) {
-                BookingGuest::create(['booking_id' => $booking->id, 'type' => 'child', 'position' => $index + 1, 'first_name' => $child['first_name'], 'last_name' => $child['last_name'], 'is_lead' => false]);
+                BookingGuest::query()->create(['booking_id' => $booking->id, 'type' => 'child', 'position' => $index + 1, 'first_name' => $child['first_name'], 'last_name' => $child['last_name'], 'is_lead' => false]);
             }
-            BookingStatusHistory::create(['booking_id' => $booking->id, 'changed_by' => $request->user()?->id, 'from_status' => null, 'to_status' => 'pending_payment', 'note' => 'Booking created and awaiting payment.', 'metadata' => ['channel' => $request->user() ? 'registered' : 'guest']]);
+            BookingStatusHistory::query()->create([
+                'booking_id' => $booking->id, 'changed_by' => $request->user()?->id,
+                'from_status' => null, 'to_status' => 'pending_payment', 'note' => 'Booking created and awaiting payment.',
+                'metadata' => ['channel' => $request->user() ? 'registered' : 'guest'],
+            ]);
             $hold->delete();
-
             return $booking;
         }, 3);
 
+        $request->session()->put('azari_guest_bookings.'.$booking->reference, true);
         return redirect()->route('azari.booking.review', $booking->reference)->with('success', 'Guest details saved. Review the booking before payment.');
     }
 
-    public function review(string $reference)
+    public function review(Request $request, string $reference)
     {
-        $booking = Booking::with([
-            'property',
-            'guests.identityDocument',
-        ])->where('reference', $reference)->firstOrFail();
-
+        $booking = Booking::query()->with(['property', 'guests.identityDocument', 'guests.identityLink.userIdentityDocument.identityType'])->where('reference', $reference)->firstOrFail();
+        $this->authorizeBooking($request, $booking);
         return view('public.bookings.review', compact('booking'));
     }
 
-    public function confirm(string $reference)
+    public function confirm(Request $request, string $reference)
     {
-        $booking = Booking::where('reference', $reference)->firstOrFail();
-
-        if ($booking->status === 'pending_payment') {
-            $booking->update([
-                'status' => 'paid',
-                'paid_at' => now(),
-                'payment_reference' => 'DEMO-'.Str::upper(Str::random(14)),
-                'receipt_number' => 'RCT-'.now()->format('Ymd').'-'.str_pad(
-                    (string) $booking->id,
-                    6,
-                    '0',
-                    STR_PAD_LEFT
-                ),
-                'expires_at' => null,
-            ]);
-
-            BookingStatusHistory::create([
-                'booking_id' => $booking->id,
-                'changed_by' => auth()->id(),
-                'from_status' => 'pending_payment',
-                'to_status' => 'paid',
-                'note' => 'Payment confirmed automatically and receipt generated.',
-            ]);
-        }
-
-        return redirect()
-            ->route('azari.booking.summary', $booking->reference)
-            ->with('success', 'Payment confirmed. Your booking is secured.');
+        $booking = Booking::query()->where('reference', $reference)->firstOrFail();
+        $this->authorizeBooking($request, $booking);
+        abort_unless(in_array($booking->status, ['pending', 'pending_payment'], true), 422);
+        return redirect()->route('public.payment.select', $booking->reference);
     }
 
-    public function summary(string $reference)
+    public function summary(Request $request, string $reference)
     {
-        $booking = Booking::with([
-            'property',
-            'guests',
-        ])->where('reference', $reference)->firstOrFail();
-
+        $booking = Booking::query()->with(['property', 'guests', 'payments'])->where('reference', $reference)->firstOrFail();
+        $this->authorizeBooking($request, $booking);
         return view('public.bookings.summary', compact('booking'));
+    }
+
+    private function authorizeBooking(Request $request, Booking $booking): void
+    {
+        if ($request->user()) {
+            abort_unless(! $request->user()->isStaff() && $booking->user_id === $request->user()->id, 403);
+            return;
+        }
+        abort_unless((bool) $request->session()->get('azari_guest_bookings.'.$booking->reference, false), 403);
     }
 }

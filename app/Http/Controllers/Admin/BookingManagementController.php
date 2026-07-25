@@ -7,6 +7,7 @@ use App\Models\Booking;
 use App\Models\GuestIdentityDocument;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class BookingManagementController extends Controller
@@ -25,16 +26,26 @@ class BookingManagementController extends Controller
                 });
             })
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')))
-            ->latest()->paginate(config('azari.pagination.per_page', 10))->withQueryString();
+            ->latest()
+            ->paginate(config('azari.pagination.per_page', 10))
+            ->withQueryString();
 
         return view('admin.bookings.index', compact('bookings', 'search'));
     }
 
     public function show(Booking $booking)
     {
-        $booking->load(['property', 'guests.identityDocument']);
+        $booking->load(['property', 'guests.identityDocument', 'payments']);
 
         return view('admin.bookings.show', compact('booking'));
+    }
+
+    public function receipt(Booking $booking): Response
+    {
+        $booking->load(['property', 'payments']);
+        $payment = $booking->payments->sortByDesc(fn ($record) => $record->paid_at ?: $record->created_at)->first();
+
+        return response()->view('bookings.receipt', compact('booking', 'payment'));
     }
 
     public function document(Booking $booking, GuestIdentityDocument $document): StreamedResponse
@@ -47,6 +58,8 @@ class BookingManagementController extends Controller
 
     public function calendar()
     {
-        return view('admin.bookings.calendar', ['bookings' => Booking::whereNot('status', 'cancelled')->orderBy('check_in')->paginate(10)]);
+        return view('admin.bookings.calendar', [
+            'bookings' => Booking::whereNot('status', 'cancelled')->orderBy('check_in')->paginate(10),
+        ]);
     }
 }

@@ -39,7 +39,22 @@ class PublicPageController extends Controller
 
     public function rooms(): View
     {
-        return $this->collection('Rooms', 'room', 'azari-booking-suite.png', 'Refined rooms prepared for focused business stays, short visits and effortless city breaks.');
+        $properties = Property::query()
+            ->with(['locationRecord', 'roomType', 'amenities'])
+            ->where('is_published', true)
+            ->whereIn('status', ['available', 'published', 'active'])
+            ->whereNotNull('room_type_id')
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->paginate(4)->withQueryString();
+
+        return view('public.pages.collection', [
+            'title' => 'Rooms',
+            'type' => 'room',
+            'properties' => $properties,
+            'image' => 'azari-booking-suite.png',
+            'intro' => 'Refined rooms prepared for focused business stays, short visits and effortless city breaks.',
+        ]);
     }
 
     public function page(string $key): View
@@ -95,7 +110,7 @@ class PublicPageController extends Controller
                         ->whereRaw('LOWER(name) LIKE ?', ['%'.$type.'%']));
             })
             ->orderBy('sort_order')->orderBy('name')
-            ->paginate(config('azari.pagination.per_page', 10));
+            ->paginate(4)->withQueryString();
 
         return view('public.pages.collection', compact('title', 'type', 'properties', 'image', 'intro'));
     }

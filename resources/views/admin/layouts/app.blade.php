@@ -22,12 +22,14 @@
             @include('admin.partials.topbar')
 
             <main id="az-admin-content" class="az-admin-content" tabindex="-1">
-                @if (session('status'))
-                    <div class="az-alert az-alert--success" role="status">
-                        <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
-                        <span>{{ session('status') }}</span>
-                    </div>
-                @endif
+                @foreach (['status' => 'success', 'success' => 'success', 'warning' => 'warning', 'error' => 'danger'] as $flashKey => $flashTone)
+                    @if (session($flashKey))
+                        <div class="az-alert az-alert--{{ $flashTone }}" role="status">
+                            <span class="material-symbols-outlined" aria-hidden="true">{{ $flashTone === 'danger' ? 'error' : ($flashTone === 'warning' ? 'warning' : 'check_circle') }}</span>
+                            <span>{{ session($flashKey) }}</span>
+                        </div>
+                    @endif
+                @endforeach
 
                 @if ($errors->any())
                     <div class="az-alert az-alert--danger" role="alert">

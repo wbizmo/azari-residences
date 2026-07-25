@@ -23,7 +23,7 @@ Route::get('/favicon.svg', function () {
     );
 })->name('public.favicon');
 
-Route::middleware('guest')->prefix('azaridevadmin')->group(function (): void {
+Route::prefix('azaridevadmin')->group(function (): void {
     Route::get('/login', [AzariAdminLoginController::class, 'create'])->name('azari.admin.login');
     Route::post('/login', [AzariAdminLoginController::class, 'store'])
         ->middleware('throttle:5,1')
@@ -49,7 +49,7 @@ Route::prefix('azaridevadmin')->middleware(['azari.staff'])->group(function (): 
         ->except(['show', 'destroy'])
         ->names('azari.admin.properties');
 
-    Route::middleware('azari.staff:administrator')->group(function (): void {
+    Route::middleware('azari.admin')->group(function (): void {
         Route::get('/staff', [StaffController::class, 'index'])->name('azari.admin.staff.index');
         Route::get('/staff/create', [StaffController::class, 'create'])->name('azari.admin.staff.create');
         Route::post('/staff', [StaffController::class, 'store'])->name('azari.admin.staff.store');
@@ -57,11 +57,11 @@ Route::prefix('azaridevadmin')->middleware(['azari.staff'])->group(function (): 
     });
 });
 
-Route::get('/dashboard', fn () => view('dashboard'))
+Route::get('/dashboard', fn () => redirect()->route('user.dashboard'))
     ->middleware(['auth', 'verified', 'azari.customer'])
     ->name('dashboard');
 
-Route::middleware('auth')->group(function (): void {
+Route::middleware(['auth', 'azari.customer'])->group(function (): void {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -75,3 +75,4 @@ require __DIR__.'/azari-sprints-05-06.php';
 require __DIR__.'/azari-booking-sprints-05-06.php';
 
 require __DIR__.'/azari-public-completion.php';
+require __DIR__.'/azari-sprints-07-08.php';

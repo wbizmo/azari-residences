@@ -12,7 +12,7 @@ class DatabaseSeeder extends Seeder
             AzariProductionSeeder::class,
             AzariSprintThreeFourSeeder::class,
             AzariSprintFiveSixDemoSeeder::class,
-            AzariSprintFiveSixDemoSeeder::class,
+            AzariSprintSevenEightSeeder::class,
         ];
 
         foreach ($seeders as $seeder) {

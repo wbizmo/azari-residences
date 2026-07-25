@@ -22,9 +22,10 @@ class Booking extends Model
         'currency', 'nightly_rate', 'nights', 'subtotal', 'fee_total',
         'add_on_total', 'tax_rate', 'tax_total', 'total', 'pricing_snapshot',
         'guest_notes', 'admin_notes', 'paid_at', 'receipt_number', 'payment_reference',
-        'cancelled_at', 'cancellation_reason', 'checked_in_at', 'completed_at',
-        'room_assignment_locked_at', 'payment_transfer_locked_at', 'modified_at',
-        'expires_at',
+        'cancelled_at', 'cancellation_reason', 'cancellation_internal_note',
+        'cancellation_payment_note', 'external_refund_reference', 'cancelled_by',
+        'checked_in_at', 'completed_at', 'room_assignment_locked_at',
+        'payment_transfer_locked_at', 'modified_at', 'expires_at',
     ];
 
     protected function casts(): array
@@ -44,8 +45,12 @@ class Booking extends Model
 
     public function property(): BelongsTo { return $this->belongsTo(Property::class); }
     public function user(): BelongsTo { return $this->belongsTo(User::class); }
+    public function cancelledBy(): BelongsTo { return $this->belongsTo(User::class, 'cancelled_by'); }
     public function guests(): HasMany { return $this->hasMany(BookingGuest::class)->orderBy('type')->orderBy('position'); }
     public function statusHistory(): HasMany { return $this->hasMany(BookingStatusHistory::class)->latest(); }
+    public function payments(): HasMany { return $this->hasMany(Payment::class)->latest(); }
+    public function identityLinks(): HasMany { return $this->hasMany(BookingIdentityLink::class); }
+
     public function addOns(): BelongsToMany
     {
         return $this->belongsToMany(BookingAddOn::class)
@@ -54,6 +59,16 @@ class Booking extends Model
 
     public function scopeBlocksAvailability($query)
     {
-        return $query->whereIn('status', ['paid', 'check_in']);
+        return $query->whereIn('status', ['paid', 'confirmed', 'check_in', 'checked_in']);
+    }
+
+    public function successfulPaymentsTotal(): float
+    {
+        return (float) $this->payments()->where('status', Payment::SUCCESSFUL)->sum('amount');
+    }
+
+    public function balanceDue(): float
+    {
+        return max(0, round((float) $this->total - $this->successfulPaymentsTotal(), 2));
     }
 }

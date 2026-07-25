@@ -1,30 +1,5 @@
 @extends('admin.layouts.app')
+@section('title','Staff accounts')
 @section('content')
-    <div class="admin-heading">
-        <div><span>Security</span><h1>Staff accounts</h1></div>
-        <a class="button button-primary" href="{{ route('azari.admin.staff.create') }}">Add staff</a>
-    </div>
-    <div class="admin-table-wrap">
-        <table class="admin-table">
-            <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th></th></tr></thead>
-            <tbody>
-            @foreach($staff as $member)
-                <tr>
-                    <td>{{ $member->name }}</td>
-                    <td>{{ $member->email }}</td>
-                    <td>{{ ucfirst($member->staff_role) }}</td>
-                    <td>{{ $member->is_active ? 'Active' : 'Disabled' }}</td>
-                    <td>
-                        @if($member->id !== auth()->id())
-                            <form method="POST" action="{{ route('azari.admin.staff.toggle', $member) }}">
-                                @csrf @method('PATCH')
-                                <button type="submit">{{ $member->is_active ? 'Disable' : 'Enable' }}</button>
-                            </form>
-                        @endif
-                    </td>
-                </tr>
-            @endforeach
-            </tbody>
-        </table>
-    </div>
+<section class="az-page-heading"><div><p class="az-eyebrow">Access control</p><h1>Staff accounts</h1><p>Administrator-managed staff profiles, module permissions, status and login history.</p></div><a class="az-button az-button--primary" href="{{ route('azari.admin.staff.create') }}">Add staff</a></section><form class="az-s78-toolbar" method="GET"><label class="az-s78-field"><span>Search</span><input name="search" value="{{ request('search') }}" placeholder="Name, username or email"></label><button class="az-button az-button--primary" type="submit">Search</button></form><div class="az-s78-table-wrap"><table class="az-s78-table"><thead><tr><th>Staff</th><th>Username</th><th>Role</th><th>Permissions</th><th>Status</th><th>Last login</th><th>Actions</th></tr></thead><tbody>@forelse($staff as $member)<tr><td><strong>{{ $member->name }}</strong><small>{{ $member->email }}</small></td><td>{{ $member->username }}</td><td>{{ ucfirst($member->staff_role ?: 'administrator') }}</td><td>{{ $member->isAdministrator()?'All modules':$member->directPermissions()->count().' direct permission(s)' }}</td><td><span class="az-s78-badge {{ !$member->is_active?'is-danger':'' }}">{{ $member->is_active?'Active':'Suspended' }}</span></td><td>{{ $member->last_login_at?->format('d M Y H:i') ?: 'Never' }}</td><td><div class="az-s78-inline"><a class="az-button az-button--secondary" href="{{ route('azari.admin.staff.edit',$member) }}">Edit</a><a class="az-button az-button--secondary" href="{{ route('azari.admin.staff.activity',$member) }}">Activity</a>@if($member->id!==auth()->id())@if($member->is_active)<form method="POST" action="{{ route('azari.admin.staff.suspend',$member) }}">@csrf @method('PUT')<input type="hidden" name="reason" value="Suspended by administrator"><button class="az-button az-button--danger" type="submit">Suspend</button></form>@else<form method="POST" action="{{ route('azari.admin.staff.reactivate',$member) }}">@csrf @method('PUT')<button class="az-button az-button--secondary" type="submit">Reactivate</button></form>@endif @endif</div></td></tr>@empty<tr><td colspan="7" class="az-s78-empty">No staff accounts found.</td></tr>@endforelse</tbody></table></div>{{ $staff->links() }}
 @endsection

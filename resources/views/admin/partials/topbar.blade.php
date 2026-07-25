@@ -5,7 +5,7 @@
         ? str($adminUser->staff_role)->headline()
         : ((bool) ($adminUser?->is_admin ?? false) ? 'Administrator' : 'Staff');
 
-    $avatarPath = $adminUser?->avatar_path ?? null;
+    $avatarPath = $adminUser?->profile_photo_path ?: $adminUser?->avatar_path;
 @endphp
 
 <header class="az-admin-topbar">
@@ -27,7 +27,7 @@
         </div>
     </div>
 
-    <div class="az-topbar-actions"><div class="az-profile-menu" data-profile-menu>
+    <div class="az-topbar-actions"><span class="az-s78-operational-timezone">Azari operational timezone: {{ config('azari.timezone','Africa/Lagos') }}</span><div class="az-profile-menu" data-profile-menu>
             <button
                 type="button"
                 class="az-profile-trigger"
@@ -71,10 +71,10 @@
 
                 <div class="az-profile-divider"></div>
 
-                @if (Route::has('profile.edit'))
-                    <a href="{{ route('profile.edit') }}" role="menuitem">
+                @if ($adminUser?->isAdministrator() && Route::has('azari.admin.staff.edit'))
+                    <a href="{{ route('azari.admin.staff.edit', $adminUser) }}" role="menuitem">
                         <span class="material-symbols-outlined" aria-hidden="true">person</span>
-                        <span>My profile</span>
+                        <span>My staff profile</span>
                     </a>
                 @endif
 

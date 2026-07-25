@@ -25,7 +25,7 @@
         <div class="site-container">
             <header class="az-section-heading az-section-heading--split">
                 <div><span class="eyebrow">Available residences</span><h2>Designed around the way you stay.</h2></div>
-                <p>Every published residence below is loaded directly from Azari's managed inventory.</p>
+                <p>Explore available Azari residences.</p>
             </header>
 
             <div class="az-luxury-property-grid">
@@ -52,13 +52,12 @@
                     </article>
                 @empty
                     <div class="az-visual-empty-state">
-                        <img src="{{ asset('images/azari-availability-empty.png') }}" alt="No published residences">
-                        <div><span class="eyebrow">Collection update</span><h2>No published {{ strtolower($title) }} yet.</h2><p>New inventory will appear here automatically when it is published.</p><a class="button button-primary" href="{{ route('availability.index') }}">Search all availability</a></div>
+                        <div><h2>No residences available</h2><p>Check availability for other dates or contact the Azari team.</p><a class="button button-primary" href="{{ route('availability.index') }}">Search availability</a></div>
                     </div>
                 @endforelse
             </div>
 
-            <div class="az-pagination-wrap">{{ $properties->links('vendor.pagination.azari') }}</div>
+            <div class="az-pagination-wrap">{{ $properties->links('vendor.pagination.azari-fancy') }}</div>
         </div>
     </section>
 </main>

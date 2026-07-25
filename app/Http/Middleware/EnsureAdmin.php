@@ -10,7 +10,8 @@ class EnsureAdmin
 {
     public function handle(Request $request, Closure $next): Response
     {
-        abort_unless(auth()->check() && (bool) auth()->user()->is_admin, 403);
+        $user = $request->user();
+        abort_unless($user && $user->isStaff() && $user->isAdministrator() && ! $user->isSuspended(), 404);
         return $next($request);
     }
 }

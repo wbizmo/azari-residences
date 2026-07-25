@@ -1,0 +1,8 @@
+@extends('layouts.user')
+@section('title','Payments')
+@section('kicker','Financial history')
+@section('page_title','Payments')
+@section('content')
+<nav class="az-user-tabs">@foreach(['all'=>'All','pending'=>'Pending','failed'=>'Failed','successful'=>'Completed'] as $key=>$label)<a class="az-user-tab {{ $status===$key?'is-active':'' }}" href="{{ route('user.payments.index',['status'=>$key]) }}">{{ $label }}</a>@endforeach</nav>
+<section class="az-user-panel"><header class="az-user-panel-header"><div><h2 class="az-user-panel-title">Payment history</h2><p class="az-user-panel-subtitle">Verified provider and manual-payment records</p></div></header><div class="az-user-panel-body">@if($payments->isEmpty())<div class="az-user-empty"><span class="material-symbols-outlined">account_balance_wallet</span><p>No payments match this filter.</p></div>@else<div class="az-user-table-wrap"><table class="az-user-table"><thead><tr><th>Reference</th><th>Booking</th><th>Provider</th><th>Amount</th><th>Status</th><th>Date</th><th></th></tr></thead><tbody>@foreach($payments as $payment)<tr><td>{{ $payment->reference }}</td><td>{{ $payment->booking?->reference }}</td><td>{{ ucfirst($payment->provider) }}</td><td>{{ $payment->currency }} {{ number_format((float)$payment->amount,2) }}</td><td><span class="az-user-status {{ $payment->status==='failed'?'az-user-status--danger':($payment->status!=='successful'?'az-user-status--warning':'') }}">{{ $payment->status }}</span></td><td><x-user-local-time :value="$payment->paid_at ?: $payment->created_at" mode="date" /></td><td><a href="{{ route('user.payments.show',$payment) }}">View</a></td></tr>@endforeach</tbody></table></div>{{ $payments->links() }}@endif</div></section>
+@endsection

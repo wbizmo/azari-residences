@@ -1,7 +1,9 @@
 <?php
 
-use App\Http\Middleware\EnsureAzariStaff;
+use App\Http\Middleware\EnsureAdmin;
 use App\Http\Middleware\EnsureAzariCustomer;
+use App\Http\Middleware\EnsureAzariStaff;
+use App\Http\Middleware\EnsureStaffPermission;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -17,12 +19,17 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'azari.staff' => EnsureAzariStaff::class,
             'azari.customer' => EnsureAzariCustomer::class,
+            'azari.admin' => EnsureAdmin::class,
+            'azari.permission' => EnsureStaffPermission::class,
+        ]);
+        $middleware->validateCsrfTokens(except: [
+            'payments/*/webhook',
+            'payments/*/callback/*',
         ]);
         $middleware->trustProxies(at: '*');
-        //
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
-            fn (Request $request) => $request->is('api/*'),
+            fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
     })->create();

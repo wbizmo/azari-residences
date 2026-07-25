@@ -1,0 +1,10 @@
+Azari Residences Sprints 7 and 8 were installed on 2026-07-25T09:09:25+00:00.
+Files installed: 110
+Backup: /home/runner/workspace/.azari-backups/sprints-07-08-20260725-090913
+
+The installer does not write provider secrets into .env.
+Configure the required variables listed in .env.example for:
+- FLUTTERWAVE_*
+- PESAPAL_*
+- INTOUCH_*
+- AZARI_TIMEZONE

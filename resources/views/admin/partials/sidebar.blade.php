@@ -1,6 +1,7 @@
 @php
     $configuredLogo = null;
     $siteName = 'Azari Residences';
+    $adminActor = auth()->user();
 
     if (class_exists(\App\Models\SiteSetting::class)) {
         $siteName = \App\Models\SiteSetting::valueFor('site_name', 'Azari Residences');
@@ -92,10 +93,17 @@
                 </a>
             @endif
 
-            @if (Route::has('azari.admin.staff.index'))
+            @if (Route::has('azari.admin.staff.index') && $adminActor?->isAdministrator())
                 <a href="{{ route('azari.admin.staff.index') }}" class="az-nav-link {{ request()->routeIs('azari.admin.staff.*') ? 'is-active' : '' }}">
                     <span class="material-symbols-outlined" aria-hidden="true">badge</span>
                     <span>Staff</span>
+                </a>
+            @endif
+
+            @if (Route::has('azari.admin.identities.index') && ($adminActor?->isAdministrator() || $adminActor?->hasPermission('guest-identities.view')))
+                <a href="{{ route('azari.admin.identities.index') }}" class="az-nav-link {{ request()->routeIs('azari.admin.identities.*') ? 'is-active' : '' }}">
+                    <span class="material-symbols-outlined" aria-hidden="true">id_card</span>
+                    <span>Guest identities</span>
                 </a>
             @endif
 
@@ -140,9 +148,9 @@
         <section class="az-nav-section" aria-labelledby="az-nav-business">
             <h2 id="az-nav-business">Business</h2>
 
-            @if (Route::has('azari.admin.payments.index'))
+            @if (Route::has('azari.admin.payments.index') && ($adminActor?->isAdministrator() || $adminActor?->hasPermission('payments.view')))
                 <a href="{{ route('azari.admin.payments.index') }}" class="az-nav-link {{ request()->routeIs('azari.admin.payments.*') ? 'is-active' : '' }}">
-                    <span class="material-symbols-outlined" aria-hidden="true">payments</span>
+                    <span class="material-symbols-outlined" aria-hidden="true">account_balance_wallet</span>
                     <span>Payments</span>
                 </a>
             @endif

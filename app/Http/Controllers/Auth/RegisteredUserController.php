@@ -40,6 +40,10 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'account_type' => 'customer',
+            'status' => 'active',
+            'is_active' => true,
+            'timezone' => config('azari.timezone', 'Africa/Lagos'),
         ]);
 
         event(new Registered($user));

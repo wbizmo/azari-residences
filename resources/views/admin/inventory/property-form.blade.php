@@ -42,7 +42,7 @@
         <label class="az-field"><span>Check-in time</span><input type="time" name="check_in_time" value="{{ old('check_in_time', $property->check_in_time) }}"></label>
         <label class="az-field"><span>Check-out time</span><input type="time" name="check_out_time" value="{{ old('check_out_time', $property->check_out_time) }}"></label>
 
-        <div class="az-form-section-head"><span class="material-symbols-outlined">payments</span><div><h2>Base pricing</h2><p>Seasonal and promotional rules can be added after saving.</p></div></div>
+        <div class="az-form-section-head"><span class="material-symbols-outlined">account_balance_wallet</span><div><h2>Base pricing</h2><p>Seasonal and promotional rules can be added after saving.</p></div></div>
 
         <label class="az-field"><span>Currency</span><select name="currency"><option value="NGN" @selected(old('currency', $property->currency ?: 'NGN') === 'NGN')>NGN</option><option value="RWF" @selected(old('currency', $property->currency) === 'RWF')>RWF</option><option value="USD" @selected(old('currency', $property->currency) === 'USD')>USD</option></select></label>
         <label class="az-field"><span>Nightly rate</span><input type="number" step="0.01" min="0" name="nightly_rate" value="{{ old('nightly_rate', $property->nightly_rate ?: 0) }}" required></label>

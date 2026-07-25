@@ -7,16 +7,11 @@ use InvalidArgumentException;
 
 final class PaymentManager
 {
-    /**
-     * @var array<string, PaymentProvider>
-     */
+    /** @var array<string, PaymentProvider> */
     private array $providers;
 
-    public function __construct(
-        FlutterwaveService $flutterwave,
-        PesapalService $pesapal,
-        InTouchService $intouch,
-    ) {
+    public function __construct(FlutterwaveService $flutterwave, PesapalService $pesapal, InTouchService $intouch)
+    {
         $this->providers = [
             $flutterwave->name() => $flutterwave,
             $pesapal->name() => $pesapal,
@@ -26,15 +21,15 @@ final class PaymentManager
 
     public function driver(string $provider): PaymentProvider
     {
-        return $this->providers[$provider]
-            ?? throw new InvalidArgumentException("Unsupported payment provider: {$provider}");
+        return $this->providers[strtolower($provider)] ?? throw new InvalidArgumentException("Unsupported payment provider: {$provider}");
     }
 
-    /**
-     * @return array<string, PaymentProvider>
-     */
-    public function providers(): array
+    /** @return array<string, PaymentProvider> */
+    public function providers(): array { return $this->providers; }
+
+    /** @return array<string, PaymentProvider> */
+    public function enabledProviders(): array
     {
-        return $this->providers;
+        return array_filter($this->providers, fn (PaymentProvider $provider) => $provider->enabled());
     }
 }

@@ -3,30 +3,29 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\PaymentProviderStatus;
 use App\Models\SystemSetting;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class SystemSettingsController extends Controller
 {
     public function edit()
     {
-        $settings = SystemSetting::pluck('value', 'key');
-        return view('admin.settings.integrations', compact('settings'));
+        $settings = SystemSetting::query()
+            ->whereNotIn('key', $this->secretKeys())
+            ->pluck('value', 'key');
+
+        return view('admin.settings.integrations', [
+            'settings' => $settings,
+            'providers' => PaymentProviderStatus::query()->orderBy('provider')->get(),
+        ]);
     }
 
     public function update(Request $request)
     {
         $data = $request->validate([
-            'payment_default_gateway' => ['nullable', 'string', 'max:40'],
-            'paystack_public_key' => ['nullable', 'string'],
-            'paystack_secret_key' => ['nullable', 'string'],
-            'flutterwave_public_key' => ['nullable', 'string'],
-            'flutterwave_secret_key' => ['nullable', 'string'],
-            'stripe_public_key' => ['nullable', 'string'],
-            'stripe_secret_key' => ['nullable', 'string'],
-            'twilio_sid' => ['nullable', 'string'],
-            'twilio_token' => ['nullable', 'string'],
-            'twilio_from' => ['nullable', 'string'],
+            'payment_default_gateway' => ['nullable', Rule::in(['flutterwave', 'pesapal', 'intouch'])],
             'mail_from_address' => ['nullable', 'email'],
             'mail_from_name' => ['nullable', 'string', 'max:120'],
             'invoice_prefix' => ['nullable', 'string', 'max:20'],
@@ -39,7 +38,21 @@ class SystemSettingsController extends Controller
         foreach ($data as $key => $value) {
             SystemSetting::updateOrCreate(['key' => $key], ['value' => $value]);
         }
+        SystemSetting::query()->whereIn('key', $this->secretKeys())->delete();
 
-        return back()->with('status', 'Integration and document settings saved.');
+        return back()->with('status', 'Safe integration and document settings saved.');
+    }
+
+    /** @return list<string> */
+    private function secretKeys(): array
+    {
+        return [
+            'paystack_public_key', 'paystack_secret_key',
+            'stripe_public_key', 'stripe_secret_key',
+            'flutterwave_public_key', 'flutterwave_secret_key', 'flutterwave_encryption_key', 'flutterwave_webhook_secret',
+            'pesapal_consumer_key', 'pesapal_consumer_secret', 'pesapal_notification_id',
+            'intouch_merchant_id', 'intouch_username', 'intouch_password', 'intouch_secret', 'intouch_webhook_secret',
+            'twilio_sid', 'twilio_token', 'twilio_from',
+        ];
     }
 }
