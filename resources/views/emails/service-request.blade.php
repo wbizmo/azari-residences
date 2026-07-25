@@ -1,0 +1,1 @@
+<div style="font-family:Arial,sans-serif;max-width:640px;margin:auto;padding:32px"><img src="{{ asset('images/logo-dark.png') }}" alt="Azari" style="height:48px"><h1>New service request</h1><p><strong>{{ $sr->reference }}</strong></p><p>Booking: {{ $booking->reference }}</p><p>Type: {{ ucwords(str_replace('_',' ',$sr->type)) }}</p><p>{{ $sr->notes }}</p></div>

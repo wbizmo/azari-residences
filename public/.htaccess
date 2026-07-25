@@ -1,3 +1,36 @@
+# AZARI AUTOMATIC WEBP START
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Keep existing PNG/JPEG URLs unchanged while serving a matching WebP
+    # file to browsers that advertise WebP support.
+    RewriteCond %{HTTP_ACCEPT} image/webp
+    RewriteCond %{DOCUMENT_ROOT}/$1.webp -f
+    RewriteRule ^(.+)\.(?:png|jpe?g)$ $1.webp [T=image/webp,L]
+</IfModule>
+
+<IfModule mod_mime.c>
+    AddType image/webp .webp
+</IfModule>
+
+<IfModule mod_headers.c>
+    <FilesMatch "\.(png|jpe?g)$">
+        Header append Vary Accept
+    </FilesMatch>
+
+    <FilesMatch "\.(png|jpe?g|webp)$">
+        Header set Cache-Control "public, max-age=3600, stale-while-revalidate=86400"
+    </FilesMatch>
+</IfModule>
+
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/png "access plus 1 hour"
+    ExpiresByType image/jpeg "access plus 1 hour"
+    ExpiresByType image/webp "access plus 1 hour"
+</IfModule>
+# AZARI AUTOMATIC WEBP END
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes

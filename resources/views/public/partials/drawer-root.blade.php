@@ -27,7 +27,7 @@
 
         <div class="drawer-actions">
             @auth
-                <a href="{{ route('dashboard') }}" class="button button-primary button-block">Guest dashboard</a>
+                <a href="{{ auth()->user()->isStaff() ? route('azari.admin.dashboard') : route('user.dashboard') }}" class="button button-primary button-block">{{ auth()->user()->isStaff() ? 'Admin dashboard' : 'Guest dashboard' }}</a>
             @else
                 <a href="{{ route('login') }}" class="button button-secondary button-block">Login</a>
                 <a href="{{ route('register') }}" class="button button-primary button-block">Create account</a>

@@ -11,7 +11,10 @@ use Illuminate\Validation\ValidationException;
 
 class PaymentInitiator
 {
-    public function __construct(private readonly PaymentManager $manager) {}
+    public function __construct(
+        private readonly PaymentManager $manager,
+        private readonly PaymentEligibilityService $eligibility,
+    ) {}
 
     public function create(Booking $booking, string $provider, ?int $actorId = null): Payment
     {
@@ -19,12 +22,11 @@ class PaymentInitiator
         if (! $driver->enabled()) {
             throw ValidationException::withMessages(['provider' => ucfirst($provider).' is not currently available.']);
         }
-        if (in_array($booking->status, ['cancelled', 'completed', 'checked_out', 'no_show'], true)) {
-            throw ValidationException::withMessages(['booking' => 'This booking cannot accept a payment.']);
-        }
+        $this->eligibility->assertCanInitiate($booking);
 
         [$payment, $new] = DB::transaction(function () use ($booking, $provider, $actorId): array {
             $lockedBooking = Booking::query()->whereKey($booking->id)->lockForUpdate()->firstOrFail();
+            $this->eligibility->assertCanInitiate($lockedBooking);
             $balance = $lockedBooking->balanceDue();
             if ($balance <= 0) {
                 throw ValidationException::withMessages(['booking' => 'This booking is already fully paid.']);

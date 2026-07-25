@@ -39,7 +39,7 @@
             <a href="{{ route('bookings.verify') }}" class="nav-text-action">Verify booking</a>
 
             @auth
-                <a href="{{ route('dashboard') }}" class="nav-text-action">Dashboard</a>
+                <a href="{{ auth()->user()->isStaff() ? route('azari.admin.dashboard') : route('user.dashboard') }}" class="nav-text-action">Dashboard</a>
             @else
                 <a href="{{ route('login') }}" class="nav-text-action">Login</a>
             @endauth

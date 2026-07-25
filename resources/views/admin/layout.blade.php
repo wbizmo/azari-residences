@@ -7,12 +7,14 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/azari-favicon.png') }}">
     
                 
             <title>{{ $title ?? 'Azari Residences' }}</title>
         
             
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script>document.fonts.load('24px Material Symbols Outlined').then(()=>document.documentElement.classList.add('az-icons-ready')).catch(()=>document.documentElement.classList.add('az-icons-ready'));</script>
 </head>
 <body class="admin-shell">
     <header class="admin-topbar">
@@ -32,7 +34,7 @@
                 @csrf
                 <button type="submit">Logout</button>
             </form>
-        </nav>
+        <a href="{{ route('azari.admin.service-requests.index') }}"><span class="material-symbols-outlined">room_service</span><span>Service requests</span></a></nav>
     </header>
 
     <main class="admin-main">

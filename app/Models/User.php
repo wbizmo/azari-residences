@@ -63,6 +63,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function identityDocuments(): HasMany { return $this->hasMany(UserIdentityDocument::class); }
     public function currentIdentity(): HasOne { return $this->hasOne(UserIdentityDocument::class)->where('is_current', true)->latestOfMany(); }
     public function staffLoginHistories(): HasMany { return $this->hasMany(StaffLoginHistory::class); }
+    public function serviceRequests(): HasMany { return $this->hasMany(ServiceRequest::class); }
 
     public function isStaff(): bool
     {

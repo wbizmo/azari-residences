@@ -1,0 +1,3 @@
+Restore with:
+cp -a "/home/runner/workspace/.azari-backups/sprints-09-12-20260725-121557"/. "/home/runner/workspace"/
+Then run: composer install && php artisan optimize:clear && npm run build

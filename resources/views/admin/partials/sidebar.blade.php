@@ -1,27 +1,16 @@
 @php
-    $configuredLogo = null;
     $siteName = 'Azari Residences';
     $adminActor = auth()->user();
 
     if (class_exists(\App\Models\SiteSetting::class)) {
         $siteName = \App\Models\SiteSetting::valueFor('site_name', 'Azari Residences');
-        $configuredLogo = \App\Models\SiteSetting::valueFor('admin_panel_logo')
-            ?: \App\Models\SiteSetting::valueFor('site_logo');
     }
-
-    $logoUrl = $configuredLogo
-        ? \Illuminate\Support\Facades\Storage::url($configuredLogo)
-        : null;
 @endphp
 
 <aside class="az-admin-sidebar" id="az-admin-sidebar" data-admin-sidebar aria-label="Administration navigation">
     <div class="az-sidebar-brand">
         <a href="{{ route('azari.admin.dashboard') }}" class="az-sidebar-brand__link" aria-label="{{ $siteName }} dashboard">
-            @if ($logoUrl)
-                <img src="{{ $logoUrl }}" alt="{{ $siteName }}" class="az-sidebar-brand__logo">
-            @else
-                <span class="az-sidebar-brand__text">{{ $siteName }}</span>
-            @endif
+            <img src="{{ asset('images/logo-dark.png') }}" alt="{{ $siteName }}" class="az-sidebar-brand__logo" loading="eager" decoding="async">
         </a>
 
         <button
@@ -201,7 +190,7 @@
 <a class="az-nav-link {{ request()->routeIs('azari.admin.s56.calendar') ? 'is-active' : '' }}" href="{{ route('azari.admin.s56.calendar') }}"><span class="material-symbols-outlined">calendar_month</span><span>Availability calendar</span></a>
 @endif
 
-</nav>
+<a href="{{ route('azari.admin.service-requests.index') }}"><span class="material-symbols-outlined">room_service</span><span>Service requests</span></a></nav>
 
     <div class="az-sidebar-footer">
         <span class="material-symbols-outlined" aria-hidden="true">verified_user</span>

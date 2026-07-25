@@ -2,16 +2,36 @@
 @section('title', 'Booking '.$booking->reference)
 @section('content')
 @php
-    $successful = $booking->payments->firstWhere('status', 'successful');
-    $latestPayment = $booking->payments->sortByDesc('created_at')->first();
+    $successful = $booking->successfulPayment();
+    $latestPayment = $booking->payments->sortByDesc("created_at")->first();
+    $isPaid = $booking->isPaid();
+    $canPay = $booking->canAcceptPayment();
+    $canDownloadReceipt = $booking->receiptAvailable();
 @endphp
 
 <div class="az-user-actions" style="margin-bottom:18px">
     <a class="az-user-button az-user-button--dark" href="{{ route('user.bookings.receipt', $booking->reference) }}" target="_blank">
         <span class="material-symbols-outlined">description</span> Print invoice
     </a>
-    @if($booking->balanceDue() > 0)
+
+    @if($canPaySecurely)
         <a class="az-user-button az-user-button--primary" href="{{ route('public.payment.select', $booking->reference) }}">Pay securely</a>
+    @endif
+</div>
+
+<div class="az-user-actions" style="margin-bottom:18px">
+    <a class="az-user-button az-user-button--light" target="_blank" href="{{ route('user.bookings.documents', [$booking->reference, 'confirmation']) }}">Booking confirmation</a>
+    <a class="az-user-button az-user-button--light" target="_blank" href="{{ route('user.bookings.documents', [$booking->reference, 'invoice']) }}">Invoice PDF</a>
+
+    @if($receiptAvailable)
+        <a class="az-user-button az-user-button--light" target="_blank" href="{{ route('user.bookings.documents', [$booking->reference, 'receipt']) }}">Receipt PDF</a>
+    @endif
+
+    @if($booking->isCheckInEligible())
+        <form method="post" action="{{ route('user.bookings.check-in', $booking->reference) }}">
+            @csrf
+            <button class="az-user-button az-user-button--primary">Check in</button>
+        </form>
     @endif
 </div>
 
@@ -80,7 +100,7 @@
         <header class="az-user-panel-header"><div><h2 class="az-user-panel-title">Booking links</h2></div></header>
         <div class="az-user-panel-body az-user-list">
             <a class="az-user-list-item" href="{{ route('user.payments.index') }}"><div><h3>Payments</h3><p>{{ $booking->payments_count }} payment record(s)</p></div><span class="material-symbols-outlined">chevron_right</span></a>
-            <a class="az-user-list-item" href="{{ route('user.documents.index') }}"><div><h3>Receipts and invoices</h3><p>{{ $successful ? 'Receipt available' : 'Available after successful payment' }}</p></div><span class="material-symbols-outlined">chevron_right</span></a>
+            <a class="az-user-list-item" href="{{ route('user.documents.index') }}"><div><h3>Receipts and invoices</h3><p>{{ $receiptAvailable ? 'Receipt available' : 'Available after successful payment' }}</p></div><span class="material-symbols-outlined">chevron_right</span></a>
             <a class="az-user-list-item" href="{{ route('user.contact') }}"><div><h3>Contact Azari</h3><p>Get help with this booking</p></div><span class="material-symbols-outlined">chevron_right</span></a>
         </div>
     </div>

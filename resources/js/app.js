@@ -743,3 +743,21 @@ if (document.readyState === 'loading') {
 } else {
     initialiseAzariPublicHeader();
 }
+
+// AZARI_ICON_RUNTIME_START
+// Reveal locally bundled Material Symbols only after their font has initialized.
+const azariRevealMaterialSymbols = () => {
+    document.documentElement.classList.add('azari-icons-ready');
+};
+
+if (document.fonts?.load) {
+    Promise.race([
+        document.fonts.load('24px "Material Symbols Outlined"'),
+        new Promise((resolve) => window.setTimeout(resolve, 1200)),
+    ]).then(azariRevealMaterialSymbols).catch(azariRevealMaterialSymbols);
+} else {
+    azariRevealMaterialSymbols();
+}
+
+window.addEventListener('pageshow', azariRevealMaterialSymbols, { once: true });
+// AZARI_ICON_RUNTIME_END

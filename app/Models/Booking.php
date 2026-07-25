@@ -24,7 +24,7 @@ class Booking extends Model
         'guest_notes', 'admin_notes', 'paid_at', 'receipt_number', 'payment_reference',
         'cancelled_at', 'cancellation_reason', 'cancellation_internal_note',
         'cancellation_payment_note', 'external_refund_reference', 'cancelled_by',
-        'checked_in_at', 'completed_at', 'room_assignment_locked_at',
+        'checked_in_at', 'checked_out_at', 'no_show_at', 'check_in_reversed_at', 'completed_at', 'room_assignment_locked_at',
         'payment_transfer_locked_at', 'modified_at', 'expires_at',
     ];
 
@@ -33,7 +33,7 @@ class Booking extends Model
         return [
             'check_in' => 'date', 'check_out' => 'date', 'arrival_time' => 'datetime:H:i',
             'paid_at' => 'datetime', 'cancelled_at' => 'datetime',
-            'checked_in_at' => 'datetime', 'completed_at' => 'datetime',
+            'checked_in_at' => 'datetime', 'checked_out_at' => 'datetime', 'no_show_at' => 'datetime', 'check_in_reversed_at' => 'datetime', 'completed_at' => 'datetime',
             'room_assignment_locked_at' => 'datetime', 'payment_transfer_locked_at' => 'datetime',
             'modified_at' => 'datetime', 'expires_at' => 'datetime',
             'pricing_snapshot' => 'array', 'nightly_rate' => 'decimal:2',
@@ -50,6 +50,8 @@ class Booking extends Model
     public function statusHistory(): HasMany { return $this->hasMany(BookingStatusHistory::class)->latest(); }
     public function payments(): HasMany { return $this->hasMany(Payment::class)->latest(); }
     public function identityLinks(): HasMany { return $this->hasMany(BookingIdentityLink::class); }
+    public function lifecycleEvents(): HasMany { return $this->hasMany(StayLifecycleEvent::class)->latest(); }
+    public function serviceRequests(): HasMany { return $this->hasMany(ServiceRequest::class)->latest(); }
 
     public function addOns(): BelongsToMany
     {
@@ -62,13 +64,102 @@ class Booking extends Model
         return $query->whereIn('status', ['paid', 'confirmed', 'check_in', 'checked_in']);
     }
 
+    public function successfulPayment(): ?Payment
+    {
+        if ($this->relationLoaded("payments")) {
+            return $this->payments
+                ->where("status", Payment::SUCCESSFUL)
+                ->sortByDesc(fn (Payment $payment) => $payment->paid_at ?: $payment->created_at)
+                ->first();
+        }
+
+        return $this->payments()
+            ->where("status", Payment::SUCCESSFUL)
+            ->orderByDesc("paid_at")
+            ->orderByDesc("created_at")
+            ->first();
+    }
+
+    public function isCancelled(): bool
+    {
+        return $this->status === "cancelled" || $this->cancelled_at !== null;
+    }
+
+    public function hasLegacyPaidRecord(): bool
+    {
+        return ! $this->isCancelled()
+            && in_array($this->status, ["paid", "confirmed", "check_in", "checked_in", "checked_out", "completed"], true)
+            && $this->paid_at !== null
+            && (filled($this->payment_reference) || filled($this->receipt_number));
+    }
+
+    public function isPaid(): bool
+    {
+        $successfulTotal = (float) $this->payments()
+            ->where("status", Payment::SUCCESSFUL)
+            ->sum("amount");
+
+        return ! $this->isCancelled()
+            && ($successfulTotal + 0.009 >= (float) $this->total || $this->hasLegacyPaidRecord());
+    }
+
+    public function receiptAvailable(): bool
+    {
+        return $this->isPaid();
+    }
+
+    public function canAcceptPayment(): bool
+    {
+        return ! $this->isCancelled() && ! $this->isPaid() && $this->balanceDue() > 0;
+    }
+
     public function successfulPaymentsTotal(): float
     {
-        return (float) $this->payments()->where('status', Payment::SUCCESSFUL)->sum('amount');
+        $total = (float) $this->payments()
+            ->where("status", Payment::SUCCESSFUL)
+            ->sum("amount");
+
+        return $total <= 0 && $this->hasLegacyPaidRecord()
+            ? (float) $this->total
+            : $total;
+    }
+
+    public function documentPayment(): ?Payment
+    {
+        if ($payment = $this->successfulPayment()) {
+            return $payment;
+        }
+
+        if (! $this->hasLegacyPaidRecord()) {
+            return null;
+        }
+
+        return new Payment([
+            "reference" => $this->payment_reference ?: "LEGACY-".$this->reference,
+            "provider_reference" => $this->payment_reference,
+            "provider" => "manual",
+            "payment_method" => "Recorded payment",
+            "amount" => (float) $this->total,
+            "currency" => $this->currency,
+            "status" => Payment::SUCCESSFUL,
+            "receipt_number" => $this->receipt_number,
+            "paid_at" => $this->paid_at,
+            "verified_at" => $this->paid_at,
+        ]);
+    }
+
+    public function isCheckInEligible(): bool
+    {
+        return in_array($this->status, ['confirmed','paid'], true) && $this->balanceDue() <= 0 && ! $this->cancelled_at && ! $this->checked_in_at && now(config('azari.timezone','Africa/Lagos'))->toDateString() === optional($this->check_in)->toDateString() && ! $this->guests()->where('type','adult')->whereDoesntHave('identityDocument')->whereDoesntHave('identityLink')->exists();
     }
 
     public function balanceDue(): float
     {
+        if ($this->isPaid()) {
+            return 0.0;
+        }
+
         return max(0, round((float) $this->total - $this->successfulPaymentsTotal(), 2));
     }
+
 }

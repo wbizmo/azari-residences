@@ -35,4 +35,5 @@ return [
         ],
     ],
 
+    'twilio' => ['enabled' => env('TWILIO_ENABLED', false), 'sid' => env('TWILIO_ACCOUNT_SID'), 'token' => env('TWILIO_AUTH_TOKEN'), 'messaging_service_sid' => env('TWILIO_MESSAGING_SERVICE_SID'), 'from' => env('TWILIO_FROM_NUMBER'), 'status_callback' => env('TWILIO_STATUS_CALLBACK_URL')],
 ];

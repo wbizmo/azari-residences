@@ -7282,3 +7282,140 @@ body.az-auth-page {
 @media(max-width:600px){.az-checkout-provider{grid-template-columns:auto 1fr}.az-checkout-provider-button{grid-column:1/-1;justify-content:center;width:100%}}
 
 .az-luxury-property-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.az-fancy-pagination{display:flex;align-items:center;justify-content:space-between;gap:18px;width:100%;margin-top:32px;padding:16px 18px;border:1px solid rgba(25,55,45,.13);border-radius:18px;background:rgba(255,255,255,.9);box-shadow:0 16px 40px rgba(22,42,35,.08)}.az-fancy-pagination__summary{display:flex;align-items:center;gap:6px;color:#6d756f;font-size:.86rem}.az-fancy-pagination__summary strong{color:#18372f}.az-fancy-pagination__controls,.az-fancy-pagination__pages{display:flex;align-items:center;gap:8px}.az-fancy-pagination__button,.az-fancy-pagination__page{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:42px;border:1px solid rgba(25,55,45,.14);border-radius:12px;background:#fff;color:#18372f;text-decoration:none;font-weight:700;transition:.2s ease}.az-fancy-pagination__button{padding:0 14px}.az-fancy-pagination__page{min-width:42px;padding:0 10px}.az-fancy-pagination__button:hover,.az-fancy-pagination__page:hover{border-color:#b98b3b;transform:translateY(-1px)}.az-fancy-pagination__page.is-current{border-color:#18372f;background:#18372f;color:#fff}.az-fancy-pagination__button.is-disabled{opacity:.42;cursor:not-allowed}.az-fancy-pagination__ellipsis{padding:0 3px;color:#7b837f}.az-fancy-pagination .material-symbols-outlined{font-size:18px}@media(max-width:760px){.az-luxury-property-grid{grid-template-columns:1fr!important}.az-fancy-pagination{align-items:stretch;flex-direction:column}.az-fancy-pagination__controls{justify-content:space-between}.az-fancy-pagination__pages{display:none}.az-fancy-pagination__button{flex:1}}
+
+.material-symbols-outlined{min-width:1em;min-height:1em;color:transparent;overflow:hidden}.az-icons-ready .material-symbols-outlined{color:inherit}
+
+/* AZARI_ICON_RENDERING_GUARD_START */
+/* Azari icon rendering guard: preserve layout while the local variable font initializes. */
+.material-symbols-outlined,
+.material-symbols-rounded,
+.material-symbols-sharp {
+    display: inline-block;
+    width: 1em;
+    min-width: 1em;
+    height: 1em;
+    overflow: hidden;
+    white-space: nowrap;
+    vertical-align: -0.125em;
+    text-transform: none;
+    letter-spacing: normal;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: 'liga';
+    contain: layout paint;
+}
+
+html.azari-icons-ready .material-symbols-outlined,
+html.azari-icons-ready .material-symbols-rounded,
+html.azari-icons-ready .material-symbols-sharp {
+    visibility: visible;
+}
+/* AZARI_ICON_RENDERING_GUARD_END */
+
+/* AZARI_PUBLIC_SHELL_POLISH_START */
+
+/* The service symbols sit on a dark section and must remain pure white. */
+.services-section .service-card .service-icon,
+.services-section .service-card > .material-symbols-outlined.service-icon {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff;
+}
+
+/* Uploaded logo artwork must not inherit the old placeholder frame or tracing. */
+.site-header .brand-logo-slot,
+.site-header .azari-brand__logo-slot,
+.site-footer .brand-logo-slot,
+.site-footer .footer-logo-slot,
+.site-footer .azari-brand__logo-slot {
+    width: auto;
+    height: auto;
+    min-height: 0;
+    border: 0 !important;
+    outline: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    filter: none !important;
+    padding: 0 !important;
+}
+
+.site-header .brand-image,
+.site-header .azari-brand__image,
+.site-footer .brand-image,
+.site-footer .footer-brand-image,
+.site-footer .azari-brand__image {
+    border: 0 !important;
+    outline: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    filter: none !important;
+    text-shadow: none !important;
+}
+
+/* Larger preloader with a stationary favicon contained inside a rotating ring. */
+.azari-preloader > .azari-preloader__mark {
+    position: relative;
+    display: grid !important;
+    width: 76px;
+    height: 76px;
+    place-items: center;
+}
+
+.azari-preloader .azari-preloader__mark > img {
+    position: relative;
+    z-index: 2;
+    display: block !important;
+    width: 42px !important;
+    height: 42px !important;
+    max-width: 42px !important;
+    max-height: 42px !important;
+    object-fit: contain;
+    transform: none !important;
+    animation: none !important;
+    opacity: 1 !important;
+}
+
+.azari-preloader .azari-preloader__mark > .azari-preloader__spinner {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: block !important;
+    box-sizing: border-box;
+    width: 76px;
+    height: 76px;
+    border: 2px solid rgba(23, 60, 48, 0.16);
+    border-top-color: #173c30;
+    border-right-color: #173c30;
+    border-bottom-color: rgba(187, 138, 62, 0.52);
+    border-radius: 50%;
+    animation: azariContainedPreloaderSpin 760ms linear infinite;
+}
+
+@keyframes azariContainedPreloaderSpin {
+    to { transform: rotate(360deg); }
+}
+
+@media (max-width: 640px) {
+    .azari-preloader > .azari-preloader__mark,
+    .azari-preloader .azari-preloader__mark > .azari-preloader__spinner {
+        width: 68px;
+        height: 68px;
+    }
+
+    .azari-preloader .azari-preloader__mark > img {
+        width: 38px !important;
+        height: 38px !important;
+        max-width: 38px !important;
+        max-height: 38px !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .azari-preloader .azari-preloader__mark > .azari-preloader__spinner {
+        animation-duration: 1.5s;
+    }
+}
+
+/* AZARI_PUBLIC_SHELL_POLISH_END */

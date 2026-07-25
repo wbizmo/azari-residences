@@ -15,13 +15,7 @@ Route::get('/', HomeController::class)->name('home');
 // Availability routes are registered in azari-public-completion.php
 Route::get('/residences/{property}', [PropertyController::class, 'show'])->name('properties.show');
 
-Route::get('/favicon.svg', function () {
-    return response(
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#12211b"/><path d="M32 9l6.6 13.4 14.8 2.1-10.7 10.4 2.5 14.7L32 42.7 18.8 49.6l2.5-14.7L10.6 24.5l14.8-2.1L32 9z" fill="#bb8a3e"/></svg>',
-        200,
-        ['Content-Type' => 'image/svg+xml', 'Cache-Control' => 'public, max-age=86400']
-    );
-})->name('public.favicon');
+Route::get('/favicon.svg', fn () => redirect('/images/azari-favicon.png'))->name('public.favicon');
 
 Route::prefix('azaridevadmin')->group(function (): void {
     Route::get('/login', [AzariAdminLoginController::class, 'create'])->name('azari.admin.login');
@@ -76,3 +70,5 @@ require __DIR__.'/azari-booking-sprints-05-06.php';
 
 require __DIR__.'/azari-public-completion.php';
 require __DIR__.'/azari-sprints-07-08.php';
+
+require __DIR__.'/azari-sprints-09-12.php';

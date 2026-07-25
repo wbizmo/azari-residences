@@ -1,23 +1,26 @@
 <!doctype html>
 <html lang="{{ str_replace('_','-',app()->getLocale()) }}">
 <head>
+    @include('partials.azari-head-assets')
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/azari-favicon.png') }}">
     <title>@yield('title', 'Guest area') | {{ $siteSettings['site_name'] ?? 'Azari Residences' }}</title>
     @vite(['resources/css/app.css','resources/js/app.js'])
     @stack('head')
+    <script>document.fonts.load('24px Material Symbols Outlined').then(()=>document.documentElement.classList.add('az-icons-ready')).catch(()=>document.documentElement.classList.add('az-icons-ready'));</script>
 </head>
 <body class="az-user-body">
 <div class="az-user-shell">
     <aside class="az-user-sidebar" aria-label="Guest account navigation">
-        <div class="az-user-brand-area"><x-brand-logo variant="guest-sidebar" :dark="true" /></div>
+        <div class="az-user-brand-area"><a href="{{ route('user.dashboard') }}" class="brand brand-dark azari-brand azari-brand--guest-sidebar" aria-label="Azari Residences guest dashboard"><span class="brand-logo-slot azari-brand__logo-slot guest-brand-logo-slot"><img src="{{ asset('images/logo-dark.png') }}" alt="Azari Residences" class="brand-image azari-brand__image guest-brand-image" loading="eager" decoding="async"></span></a></div>
         <div class="az-user-sidebar-scroll">@include('user.partials.navigation')</div>
     </aside>
 
     <div class="az-user-mobile-backdrop" data-user-drawer-close></div>
     <aside class="az-user-mobile-drawer" aria-label="Mobile guest navigation">
-        <div class="az-user-drawer-header"><div><x-brand-logo variant="guest-drawer" :dark="true" /></div><button class="az-user-drawer-close" type="button" data-user-drawer-close aria-label="Close navigation"><span class="material-symbols-outlined">close</span></button></div>
+        <div class="az-user-drawer-header"><div><a href="{{ route('user.dashboard') }}" class="brand brand-dark azari-brand azari-brand--guest-sidebar" aria-label="Azari Residences guest dashboard"><span class="brand-logo-slot azari-brand__logo-slot guest-brand-logo-slot"><img src="{{ asset('images/logo-dark.png') }}" alt="Azari Residences" class="brand-image azari-brand__image guest-brand-image" loading="eager" decoding="async"></span></a></div><button class="az-user-drawer-close" type="button" data-user-drawer-close aria-label="Close navigation"><span class="material-symbols-outlined">close</span></button></div>
         @include('user.partials.navigation')
     </aside>
 

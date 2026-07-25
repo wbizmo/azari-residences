@@ -4,6 +4,7 @@ namespace App\Http\Controllers\UserArea;
 
 use App\Http\Controllers\Controller;
 use App\Models\Payment;
+use App\Services\Payments\PaymentEligibilityService;
 use App\Services\Payments\PaymentInitiator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -29,10 +30,11 @@ class UserPaymentController extends Controller
         return view('user.payments.show', compact('payment', 'verificationAttempts', 'events'));
     }
 
-    public function retry(Request $request, Payment $payment, PaymentInitiator $initiator): RedirectResponse
+    public function retry(Request $request, Payment $payment, PaymentInitiator $initiator, PaymentEligibilityService $eligibility): RedirectResponse
     {
         abort_unless($payment->booking()->where('user_id', $request->user()->id)->exists(), 403);
         abort_unless($payment->canRetry(), 422);
+        $eligibility->assertCanInitiate($payment->booking);
         $newPayment = $initiator->create($payment->booking, $payment->provider);
         return redirect()->away($newPayment->checkout_url);
     }

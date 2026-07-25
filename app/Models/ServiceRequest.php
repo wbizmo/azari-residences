@@ -1,0 +1,3 @@
+<?php
+namespace App\Models; use Illuminate\Database\Eloquent\Model;
+class ServiceRequest extends Model {protected $perPage=10; protected $fillable=['reference','booking_id','user_id','assigned_to','type','title','status','requested_at','details','notes','internal_notes','guest_reply','attachment_path']; protected function casts():array{return ['requested_at'=>'datetime','details'=>'array'];} public function booking(){return $this->belongsTo(Booking::class);} public function user(){return $this->belongsTo(User::class);} public function assignee(){return $this->belongsTo(User::class,'assigned_to');} public function events(){return $this->hasMany(ServiceRequestEvent::class)->latest();}}

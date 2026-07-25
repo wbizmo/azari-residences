@@ -10,6 +10,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/azari-favicon.png') }}">
 
     
                 
@@ -20,7 +21,7 @@
         
         
             
-    <link rel="icon" href="{{ !empty($siteSettings['favicon_url']) ? $siteSettings['favicon_url'] : route('public.favicon') }}">
+    @include('partials.azari-head-assets')
     <meta name="description" content="{{ $description ?? 'Private, fully serviced residences in Lagos with direct booking and dedicated guest support.' }}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -29,6 +30,7 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('head')
+    <script>document.fonts.load('24px Material Symbols Outlined').then(()=>document.documentElement.classList.add('az-icons-ready')).catch(()=>document.documentElement.classList.add('az-icons-ready'));</script>
 </head>
 
 <body class="public-site {{ request()->routeIs('home') ? 'home-page azari-home-page' : 'inner-page azari-inner-page azari-solid-header' }} {{ $bodyClass ?? '' }}">
@@ -39,10 +41,20 @@
         class="azari-preloader"
         data-public-preloader
         role="status"
-        aria-label="Loading"
+        aria-label="Loading Azari Residences"
     >
-        <span class="azari-preloader__spinner" aria-hidden="true"></span>
-</div>
+        <span class="azari-preloader__mark" aria-hidden="true">
+            <span class="azari-preloader__spinner"></span>
+            <img
+                src="{{ asset('images/azari-favicon.png') }}"
+                alt=""
+                width="42"
+                height="42"
+                loading="eager"
+                decoding="sync"
+            >
+        </span>
+    </div>
     
     <!-- AZARI_PRELOADER_END -->
     

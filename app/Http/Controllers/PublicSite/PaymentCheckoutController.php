@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\Payment;
 use App\Models\PaymentEvent;
+use App\Services\Payments\PaymentEligibilityService;
 use App\Services\Payments\PaymentFinalizer;
 use App\Services\Payments\PaymentInitiator;
 use App\Services\Payments\PaymentManager;
@@ -20,9 +21,10 @@ use Symfony\Component\HttpFoundation\Response;
 
 class PaymentCheckoutController extends Controller
 {
-    public function select(Request $request, string $reference, PaymentManager $manager): View
+    public function select(Request $request, string $reference, PaymentManager $manager, PaymentEligibilityService $eligibility): View
     {
         $booking = Booking::query()->with(['property', 'payments'])->where('reference', $reference)->firstOrFail();
+        $eligibility->assertCheckoutAccessible($booking);
 
         return view('public.payments.select', [
             'booking' => $booking,
@@ -31,9 +33,15 @@ class PaymentCheckoutController extends Controller
         ]);
     }
 
-    public function initialise(Request $request, string $reference, PaymentInitiator $initiator, PaymentManager $manager): RedirectResponse
+    public function initialise(Request $request, string $reference, PaymentInitiator $initiator, PaymentManager $manager, PaymentEligibilityService $eligibility): RedirectResponse
     {
         $booking = Booking::query()->where('reference', $reference)->firstOrFail();
+
+        if ($eligibility->isCancelled($booking)) {
+            abort(404);
+        }
+
+        $eligibility->assertCanInitiate($booking);
         $request->validate(['provider' => ['required', Rule::in(array_keys($manager->enabledProviders()))]]);
 
         try {

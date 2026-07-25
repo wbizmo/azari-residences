@@ -55,4 +55,8 @@ return [
     'twilio' => [
         'enabled' => filter_var(env('TWILIO_ENABLED', false), FILTER_VALIDATE_BOOL),
     ],
+    'service_request_email' => env('AZARI_SERVICE_REQUEST_EMAIL'),
+    'support_ticket_email' => env('AZARI_SUPPORT_TICKET_EMAIL'),
+    'contact_recipient_email' => env('AZARI_CONTACT_RECIPIENT_EMAIL'),
+    'booking_notification_email' => env('AZARI_BOOKING_NOTIFICATION_EMAIL'),
 ];

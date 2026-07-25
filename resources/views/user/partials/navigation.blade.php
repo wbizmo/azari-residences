@@ -16,7 +16,7 @@
 <section class="az-user-nav-group">
     <p class="az-user-nav-label">Services</p>
     <nav class="az-user-nav-list">
-        <a class="az-user-nav-link {{ request()->routeIs('user.service-requests') ? 'is-active' : '' }}" href="{{ route('user.service-requests') }}"><span class="material-symbols-outlined">room_service</span><span>Service requests</span></a>
+        <a class="az-user-nav-link {{ request()->routeIs('user.service-requests') ? 'is-active' : '' }}" href="{{ route('user.service-requests.index') }}"><span class="material-symbols-outlined">room_service</span><span>Service requests</span></a>
         <a class="az-user-nav-link {{ request()->routeIs('user.support-tickets') ? 'is-active' : '' }}" href="{{ route('user.support-tickets') }}"><span class="material-symbols-outlined">support_agent</span><span>Support tickets</span></a>
         <a class="az-user-nav-link {{ request()->routeIs('user.notifications.*') ? 'is-active' : '' }}" href="{{ route('user.notifications.index') }}"><span class="material-symbols-outlined">notifications</span><span>Notifications</span>@if($unread)<span class="az-user-nav-badge">{{ min($unread,99) }}</span>@endif</a>
     </nav>
