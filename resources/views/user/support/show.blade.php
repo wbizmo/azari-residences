@@ -10,4 +10,5 @@
 @endforeach
 @if($ticket->status!=='closed')<form method="post" enctype="multipart/form-data" action="{{ route('user.support.reply',$ticket) }}" class="az-user-form">@csrf<textarea name="body" rows="5" required></textarea><input type="file" name="attachment" accept=".jpg,.jpeg,.png,.pdf,.doc,.docx"><button class="az-user-button az-user-button--primary">Send reply</button></form><form method="post" action="{{ route('user.support.close',$ticket) }}">@csrf @method('patch')<button class="az-user-button">Close ticket</button></form>@else<form method="post" action="{{ route('user.support.reopen',$ticket) }}">@csrf @method('patch')<button class="az-user-button">Reopen ticket</button></form>@endif
 </div></section>
+<x-azari-pagination-stack :items="get_defined_vars()" />
 @endsection

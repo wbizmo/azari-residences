@@ -1,5 +1,8 @@
-<x-admin.layout title="Reports">
-<div class="space-y-6">
+
+        @extends('admin.layout')
+        @section('title', 'Reports')
+        @section('content')
+    <div class="space-y-6">
  <div><h1 class="text-3xl font-semibold">Reports and exports</h1><p class="text-sm opacity-70">Azari operational timezone: {{ config('azari.timezone','Africa/Lagos') }}</p></div>
  <form method="GET" class="grid gap-3 rounded-2xl border p-4 md:grid-cols-4">
   <select name="type">@foreach($types as $item)<option value="{{ $item }}" @selected($type===$item)>{{ str($item)->replace('_',' ')->title() }}</option>@endforeach</select>
@@ -18,4 +21,7 @@
  @else<tbody><tr><td class="p-8 text-center">No report records match the selected filters.</td></tr></tbody>@endif
  </table></div>{{ $rows->links() }}
 </div>
-</x-admin.layout>
+        
+@endsection
+
+    

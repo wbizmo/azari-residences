@@ -1,5 +1,6 @@
 @extends('admin.layouts.app')
-@section('content')exists ? 'Edit property' : 'Add property'">
+@section('title', ->exists ? 'Edit property' : 'Add property')
+@section('content')
     <div class="admin-heading">
         <div><span>PROPERTY EDITOR</span><h1>{{ $property->exists ? $property->name : 'Add property' }}</h1><p>Every control below uses the Azari administration design system.</p></div>
         <a class="button button-secondary" href="{{ route('azari.admin.inventory.index') }}">Back to inventory</a>

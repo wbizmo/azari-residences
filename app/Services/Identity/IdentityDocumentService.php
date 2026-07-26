@@ -20,7 +20,14 @@ class IdentityDocumentService
     public function replaceUserIdentity(User $user, IdentityType $type, UploadedFile $file): UserIdentityDocument
     {
         return DB::transaction(function () use ($user, $type, $file): UserIdentityDocument {
-            $current = $user->currentIdentity()->lockForUpdate()->first();
+            $current = 
+        $user->currentIdentity()
+                ->when(
+                    DB::connection()->getDriverName() !== 'sqlite',
+                    fn ($query) => $query->lockForUpdate()
+                )
+                ->first()
+    ;
             $path = $file->store("identities/users/{$user->id}", 'private');
             $document = UserIdentityDocument::query()->create([
                 'user_id' => $user->id,

@@ -1,6 +1,21 @@
 <header class="site-header" data-site-header>
     <div class="site-container nav-shell">
-        <x-brand-logo />
+        <a href="{{ url('/') }}" class="brand azari-brand azari-brand--header azari-header-logo" aria-label="{{ config('app.name', 'The Azari Residences') }} home">
+            
+        <span class="brand-logo-slot azari-brand__logo-slot azari-header-logo__slot">
+                <img
+                    src="{{ asset('images/logo-dark.png') }}"
+                    data-azari-public-logo
+                    data-dark-logo="{{ asset('images/logo-dark.png') }}"
+                    data-light-logo="{{ asset('images/logo-light.png') }}"
+                    alt="{{ config('app.name', 'The Azari Residences') }}"
+                    class="brand-image azari-brand__image azari-header-logo__image"
+                    loading="eager"
+                    decoding="async"
+                >
+            </span>
+    
+        </a>
 
         <nav class="desktop-navigation" aria-label="Primary navigation">
             <a href="{{ route('public.apartments') }}">Apartments</a>
@@ -46,9 +61,19 @@
 
             <a href="{{ route('public.book-now') }}" class="button button-brass">Book now</a>
 
-            <button type="button" class="mobile-menu-button"
-                    data-drawer-open="mobile-navigation" aria-label="Open navigation">
-                <span class="material-symbols-outlined" aria-hidden="true">menu</span>
+            <button
+                type="button"
+                class="mobile-menu-button azari-menu-toggle"
+                data-drawer-open="mobile-navigation"
+                data-azari-menu-toggle
+                aria-label="Open navigation"
+                aria-expanded="false"
+            >
+                <span class="azari-menu-toggle__icon" aria-hidden="true">
+                    <span class="azari-menu-toggle__line azari-menu-toggle__line--top"></span>
+                    <span class="azari-menu-toggle__line azari-menu-toggle__line--middle"></span>
+                    <span class="azari-menu-toggle__line azari-menu-toggle__line--bottom"></span>
+                </span>
             </button>
         </div>
     </div>

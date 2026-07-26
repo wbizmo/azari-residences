@@ -21,15 +21,11 @@ class InventoryController extends Controller
     public function index(): View
     {
         return view('admin.inventory.index', [
-            'locations' => Location::query()->withCount(['buildings', 'properties'])->orderBy('sort_order')->get(),
-            'buildings' => Building::query()->with('location')->withCount('properties')->orderBy('sort_order')->get(),
-            'roomTypes' => RoomType::query()->withCount('properties')->orderBy('sort_order')->get(),
-            'properties' => Property::query()
-                ->with(['locationRecord', 'building', 'roomType', 'amenities', 'images', 'pricingRules'])
-                ->orderBy('sort_order')
-                ->latest()
-                ->get(),
-            'amenities' => Amenity::query()->withCount('properties')->orderBy('sort_order')->get(),
+            'locations' => Location::query()->withCount(['buildings', 'properties'])->orderBy('sort_order')->paginate(10, ['*'], 'locations')->withQueryString(),
+            'buildings' => Building::query()->with('location')->withCount('properties')->orderBy('sort_order')->paginate(10, ['*'], 'buildings')->withQueryString(),
+            'roomTypes' => RoomType::query()->withCount('properties')->orderBy('sort_order')->paginate(10, ['*'], 'room_types')->withQueryString(),
+            'properties' => Property::query()->with(['locationRecord', 'building', 'roomType', 'amenities', 'images', 'pricingRules'])->orderBy('sort_order')->latest()->paginate(10, ['*'], 'properties')->withQueryString(),
+            'amenities' => Amenity::query()->withCount('properties')->orderBy('sort_order')->paginate(10, ['*'], 'amenities')->withQueryString(),
         ]);
     }
 

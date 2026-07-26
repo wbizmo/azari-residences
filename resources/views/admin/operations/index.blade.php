@@ -1,4 +1,8 @@
-<x-admin.layout title="System health"><div class="space-y-8">
+
+        @extends('admin.layout')
+        @section('title', 'System health')
+        @section('content')
+    <div class="space-y-8">
 <div><h1 class="text-3xl font-semibold">System health and operations</h1><p class="text-sm opacity-70">Safe summaries only. Secrets and raw environment values are never displayed.</p></div>
 <section><h2 class="text-xl font-semibold">Health</h2><div class="mt-3 grid gap-3 md:grid-cols-3">@foreach($health as $key=>$value)<div class="rounded-2xl border p-4"><div class="text-xs uppercase opacity-60">{{ str($key)->replace('_',' ') }}</div><div class="mt-2 break-words font-medium">{{ is_array($value)?json_encode($value):($value instanceof \DateTimeInterface?$value->format('c'):var_export($value,true)) }}</div></div>@endforeach</div></section>
 <section><div class="flex items-center justify-between"><h2 class="text-xl font-semibold">Backups</h2><form method="POST" action="{{ route('azari.admin.system-health.backup') }}">@csrf<button class="rounded-xl bg-emerald-950 px-4 py-2 text-white">Create and verify backup</button></form></div>
@@ -7,4 +11,8 @@
 <section><h2 class="text-xl font-semibold">Communication delivery</h2>@foreach($communications as $log)<div class="rounded-xl border p-3">{{ $log->channel }} · {{ $log->template }} · {{ $log->masked_recipient }} · {{ $log->status }}</div>@endforeach{{ $communications->links() }}</section>
 <section><h2 class="text-xl font-semibold">Scheduled tasks</h2>@foreach($tasks as $task)<div class="rounded-xl border p-3">{{ $task->task }} · {{ $task->status }} · {{ $task->finished_at }}</div>@endforeach{{ $tasks->links() }}</section>
 @if($failedJobs)<section><h2 class="text-xl font-semibold">Failed jobs</h2>@foreach($failedJobs as $job)<div class="rounded-xl border p-3">Job #{{ $job->id }} · {{ $job->failed_at }}</div>@endforeach{{ $failedJobs->links() }}</section>@endif
-</div></x-admin.layout>
+</div>
+        
+@endsection
+
+    

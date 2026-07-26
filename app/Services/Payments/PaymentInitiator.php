@@ -25,7 +25,15 @@ class PaymentInitiator
         $this->eligibility->assertCanInitiate($booking);
 
         [$payment, $new] = DB::transaction(function () use ($booking, $provider, $actorId): array {
-            $lockedBooking = Booking::query()->whereKey($booking->id)->lockForUpdate()->firstOrFail();
+            $lockedBooking = 
+        Booking::query()
+            ->whereKey($booking->id)
+            ->when(
+                DB::connection()->getDriverName() !== 'sqlite',
+                fn ($query) => $query->lockForUpdate()
+            )
+            ->firstOrFail()
+    ;
             $this->eligibility->assertCanInitiate($lockedBooking);
             $balance = $lockedBooking->balanceDue();
             if ($balance <= 0) {

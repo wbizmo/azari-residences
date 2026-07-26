@@ -79,10 +79,25 @@ class PaymentFinalizer
         }
 
         return DB::transaction(function () use ($payment, $verification, $source): Payment {
-            $locked = Payment::query()->whereKey($payment->id)->lockForUpdate()->firstOrFail();
+            $locked = 
+        Payment::query()
+                ->whereKey($payment->id)
+                ->when(
+                    DB::connection()->getDriverName() !== 'sqlite',
+                    fn ($query) => $query->lockForUpdate()
+                )
+                ->firstOrFail()
+    ;
             if ($locked->isSuccessful() || $locked->status === 'successful_excess') return $locked;
 
-            $booking = $locked->booking()->lockForUpdate()->firstOrFail();
+            $booking = 
+        $locked->booking()
+                ->when(
+                    DB::connection()->getDriverName() !== 'sqlite',
+                    fn ($query) => $query->lockForUpdate()
+                )
+                ->firstOrFail()
+    ;
             $alreadyAllocated = (float) $booking->payments()
                 ->where('status', Payment::SUCCESSFUL)
                 ->where('id', '!=', $locked->id)

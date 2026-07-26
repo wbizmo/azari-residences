@@ -34,7 +34,25 @@ class ReportController extends Controller {
   if($type==='support_tickets')return $this->apply(SupportTicket::query()->select('reference','user_id','booking_id','assigned_to','category','subject','status','priority','first_responded_at','resolved_at','created_at'),$r);
   if(in_array($type,['email_delivery','sms_delivery'],true))return $this->apply(CommunicationLog::query()->where('channel',$type==='email_delivery'?'email':'sms')->select('template','booking_id','user_id','masked_recipient','provider','status','retry_count','queued_at','sent_at','delivered_at','failed_at','created_at'),$r);
   if($type==='provider_performance')return PaymentProviderStatus::query()->select('provider','enabled','mode','connection_status','last_webhook_at','last_successful_payment_at','last_error','updated_at as created_at')->latest();
-  if(in_array($type,['property_performance','occupancy','revenue'],true))return Booking::query()->selectRaw('property_id, currency, COUNT(*) as bookings_count, SUM(CASE WHEN status IN ("confirmed","checked_in","active","checked_out","completed") THEN 1 ELSE 0 END) as occupied_count, SUM(CASE WHEN payment_status IN ("paid","completed","successful") THEN total ELSE 0 END) as revenue_total, MIN(created_at) as period_start, MAX(created_at) as period_end, MAX(created_at) as created_at')->groupBy('property_id','currency')->orderByDesc('created_at');
+  if(in_array($type,['property_performance','occupancy','revenue'],true))return Booking::query()->selectRaw(
+   'property_id, currency,
+    COUNT(*) as bookings_count,
+    SUM(CASE WHEN status IN (?, ?, ?, ?, ?) THEN 1 ELSE 0 END) as occupied_count,
+    SUM(CASE WHEN payment_status IN (?, ?, ?) THEN total ELSE 0 END) as revenue_total,
+    MIN(created_at) as period_start,
+    MAX(created_at) as period_end,
+    MAX(created_at) as created_at',
+   [
+    'confirmed',
+    'checked_in',
+    'active',
+    'checked_out',
+    'completed',
+    'paid',
+    'completed',
+    'successful',
+   ]
+  )->groupBy('property_id','currency')->orderByDesc('created_at');
   return $this->apply(Booking::query()->select('reference','property_id','user_id','guest_name','status','payment_status','currency','total','check_in','check_out','created_at'),$r);
  }
  private function scalar(mixed $v):mixed{return is_scalar($v)||$v===null?$v:json_encode($v);}

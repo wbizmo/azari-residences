@@ -111,9 +111,24 @@
         page-break-inside: avoid;
     }
 
-    .qr svg {
+    .qr-image {
+        display: block;
         width: 135px;
         height: 135px;
+        padding: 8px;
+        border: 1px solid #d8c39e;
+        background: #fff;
+    }
+
+    .qr-fallback {
+        width: 135px;
+        min-height: 105px;
+        padding: 15px 10px;
+        border: 2px dashed #b68a4a;
+        background: #f7f4ee;
+        color: #44524c;
+        text-align: center;
+        font-size: 9px;
     }
 
     .qr p {
@@ -139,6 +154,134 @@
         font-size: 9px;
         color: #667;
     }
+
+
+/* Premium document verification panel */
+.verification-panel {
+    width: 100%;
+    margin-top: 24px;
+    border: 1px solid #d8c39e;
+    background: #f8f6f1;
+    border-collapse: collapse;
+    page-break-inside: avoid;
+}
+
+.verification-panel td {
+    vertical-align: middle;
+}
+
+.verification-copy {
+    width: 68%;
+    padding: 22px 24px;
+    border-right: 1px solid #e3d6bd;
+    background: #f8f6f1;
+}
+
+.verification-eyebrow {
+    margin: 0 0 7px;
+    color: #a77b3f;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+.verification-title {
+    margin: 0 0 8px;
+    color: #173b31;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.verification-note {
+    margin: 0 0 12px;
+    color: #53615c;
+    font-size: 9.5px;
+    line-height: 1.55;
+}
+
+.verification-reference {
+    display: inline-block;
+    margin-top: 2px;
+    padding: 6px 10px;
+    border: 1px solid #d6c29d;
+    background: #ffffff;
+    color: #173b31;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .65px;
+}
+
+.verification-security {
+    margin: 11px 0 0;
+    color: #7c6748;
+    font-size: 8px;
+    line-height: 1.45;
+}
+
+.verification-url {
+    margin: 10px 0 0;
+    color: #7b817e;
+    font-size: 6.8px;
+    line-height: 1.35;
+    word-break: break-all;
+}
+
+.verification-qr-cell {
+    width: 32%;
+    padding: 18px;
+    text-align: right;
+    background: #ffffff;
+}
+
+.verification-qr-card {
+    display: inline-block;
+    width: 146px;
+    padding: 9px;
+    border: 1px solid #c9a96e;
+    background: #ffffff;
+    text-align: center;
+}
+
+.verification-qr-card .qr-image {
+    display: block;
+    width: 128px;
+    height: 128px;
+    margin: 0 auto;
+    padding: 0;
+    border: 0;
+    background: #ffffff;
+}
+
+.verification-qr-card .qr-fallback {
+    width: 110px;
+    min-height: 88px;
+    margin: 0 auto;
+    padding: 18px 8px;
+    border: 2px dashed #b68a4a;
+    background: #f7f4ee;
+    color: #44524c;
+    text-align: center;
+    font-size: 8px;
+    line-height: 1.45;
+}
+
+.verification-scan-label {
+    margin: 8px 0 2px;
+    color: #173b31;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: .7px;
+    text-transform: uppercase;
+}
+
+.verification-scan-help {
+    margin: 0;
+    color: #7b817e;
+    font-size: 7px;
+    line-height: 1.35;
+}
+
 </style>
 
 </head>
@@ -380,12 +523,102 @@
     </div>
 @endif
 
-@if(!empty($qr))
-    <div class="qr">
-        {!! $qr !!}
-        <p>Scan to verify this booking.</p>
-    </div>
-@endif
+
+@php
+    $documentKind = strtolower(str_replace(['_', ' '], '-', $type));
+
+    $verificationContent = match ($documentKind) {
+        'receipt' => [
+            'eyebrow' => 'Payment authenticated',
+            'title' => 'This receipt is digitally verifiable',
+            'note' => 'This receipt confirms that payment has been recorded successfully against the booking shown above. Scan the code to verify the booking reference and confirm its current status directly from The Azari Residences.',
+            'security' => 'For your protection, validate this receipt before relying on printed or forwarded copies.',
+        ],
+
+        'invoice' => [
+            'eyebrow' => 'Secure invoice verification',
+            'title' => 'Confirm this invoice before payment',
+            'note' => 'Scan the code to confirm that this invoice belongs to the stated booking and to review its latest booking and payment status. Always verify the reference before completing any payment.',
+            'security' => 'Payment status may change after this document is issued. The online booking record remains authoritative.',
+        ],
+
+        'booking-confirmation', 'confirmation' => [
+            'eyebrow' => 'Stay confirmation',
+            'title' => 'Verify your reservation instantly',
+            'note' => 'Scan the code to confirm the reservation reference, residence, stay dates and current booking status. Keep this confirmation available for arrival and check-in assistance.',
+            'security' => 'Guests may be asked to present a valid identity document matching the booking record.',
+        ],
+
+        default => [
+            'eyebrow' => 'Document verification',
+            'title' => 'Verify this booking document',
+            'note' => 'Scan the code to open the official booking verification page and confirm the reference and current status shown in The Azari Residences records.',
+            'security' => 'The live booking record remains the authoritative source for this document.',
+        ],
+    };
+@endphp
+
+<table class="verification-panel" role="presentation">
+    <tr>
+        <td class="verification-copy">
+            <p class="verification-eyebrow">
+                {{ $verificationContent['eyebrow'] }}
+            </p>
+
+            <h3 class="verification-title">
+                {{ $verificationContent['title'] }}
+            </h3>
+
+            <p class="verification-note">
+                {{ $verificationContent['note'] }}
+            </p>
+
+            <div class="verification-reference">
+                BOOKING REFERENCE: {{ $booking->reference }}
+            </div>
+
+            <p class="verification-security">
+                {{ $verificationContent['security'] }}
+            </p>
+
+            <p class="verification-url">
+                {{ $verificationUrl }}
+            </p>
+        </td>
+
+        <td class="verification-qr-cell">
+            <div class="verification-qr-card">
+                @if(!empty($qrDataUri))
+                    <img
+                        class="qr-image"
+                        src="{{ $qrDataUri }}"
+                        alt="Booking verification QR code"
+                    >
+                @elseif(!empty($qrFallbackUrls))
+                    <img
+                        class="qr-image"
+                        src="{{ $qrFallbackUrls[0] }}"
+                        alt="Booking verification QR code"
+                    >
+                @else
+                    <div class="qr-fallback">
+                        Could not generate the QR code.<br>
+                        Please verify the booking details manually.
+                    </div>
+                @endif
+
+                <p class="verification-scan-label">
+                    Scan to verify
+                </p>
+
+                <p class="verification-scan-help">
+                    Opens the official booking record
+                </p>
+            </div>
+        </td>
+    </tr>
+</table>
+
 
 <div class="foot">
     Times use {{ config('azari.timezone', 'Africa/Lagos') }}.

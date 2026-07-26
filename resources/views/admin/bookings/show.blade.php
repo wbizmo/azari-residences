@@ -27,4 +27,5 @@
     </form>
 </section>
 @endif
+<x-azari-pagination-stack :items="get_defined_vars()" />
 @endsection

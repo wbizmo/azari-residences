@@ -18,4 +18,4 @@ $contactEmail=\App\Models\SiteSetting::valueFor('customer_dashboard_contact_emai
 @if(Route::has('user.contact'))<a class="az-user-nav-link {{ request()->routeIs('user.contact')?'is-active':'' }}" href="{{ route('user.contact') }}"><span class="material-symbols-outlined">mail</span><span>Contact Azari</span></a>@endif
 <form method="POST" action="{{ route('logout') }}">@csrf<button class="az-user-nav-link" type="submit" style="width:100%;border:0;background:transparent;text-align:left"><span class="material-symbols-outlined">logout</span><span>Logout</span></button></form>
 </nav></section>
-<aside class="az-user-support-card"><strong>Need assistance?</strong><p>Open a support ticket or contact the residence team directly.</p>@if($contactEmail)<a href="mailto:{{ $contactEmail }}">{{ $contactEmail }}</a>@endif</aside>
+

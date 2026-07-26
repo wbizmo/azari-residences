@@ -274,4 +274,5 @@
             @endforelse
         </div>
     </section>
+<x-azari-pagination-stack :items="get_defined_vars()" />
 @endsection

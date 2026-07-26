@@ -16,12 +16,14 @@
     <aside class="az-user-sidebar" aria-label="Guest account navigation">
         <div class="az-user-brand-area"><a href="{{ route('user.dashboard') }}" class="brand brand-dark azari-brand azari-brand--guest-sidebar" aria-label="Azari Residences guest dashboard"><span class="brand-logo-slot azari-brand__logo-slot guest-brand-logo-slot"><img src="{{ asset('images/logo-dark.png') }}" alt="Azari Residences" class="brand-image azari-brand__image guest-brand-image" loading="eager" decoding="async"></span></a></div>
         <div class="az-user-sidebar-scroll">@include('user.partials.navigation')</div>
+        <div class="az-user-support-fixed">@include('user.partials.support-card')</div>
     </aside>
 
     <div class="az-user-mobile-backdrop" data-user-drawer-close></div>
     <aside class="az-user-mobile-drawer" aria-label="Mobile guest navigation">
         <div class="az-user-drawer-header"><div><a href="{{ route('user.dashboard') }}" class="brand brand-dark azari-brand azari-brand--guest-sidebar" aria-label="Azari Residences guest dashboard"><span class="brand-logo-slot azari-brand__logo-slot guest-brand-logo-slot"><img src="{{ asset('images/logo-dark.png') }}" alt="Azari Residences" class="brand-image azari-brand__image guest-brand-image" loading="eager" decoding="async"></span></a></div><button class="az-user-drawer-close" type="button" data-user-drawer-close aria-label="Close navigation"><span class="material-symbols-outlined">close</span></button></div>
-        @include('user.partials.navigation')
+        <div class="az-user-drawer-scroll">@include('user.partials.navigation')</div>
+        <div class="az-user-support-fixed">@include('user.partials.support-card')</div>
     </aside>
 
     <main class="az-user-main">

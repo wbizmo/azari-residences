@@ -743,3 +743,181 @@ if (document.readyState === 'loading') {
 } else {
     initialiseAzariPublicHeader();
 }
+
+// AZARI HOTFIX: icons must be visible immediately; font loading may enhance later.
+document.documentElement.classList.add('az-icons-ready');
+document.body?.classList.toggle(
+    'azari-home-page',
+    window.location.pathname === '/' || window.location.pathname === ''
+);
+
+/*
+|--------------------------------------------------------------------------
+| Azari public-header single-logo controller
+|--------------------------------------------------------------------------
+|
+| There is only one physical <img> element in the public header.
+| This script changes only its src, so the logo position and navigation
+| layout never move.
+|
+*/
+
+document.addEventListener('DOMContentLoaded', () => {
+    const logo = document.querySelector('[data-azari-public-logo]');
+
+    if (!logo) {
+        return;
+    }
+
+    const darkLogo = logo.dataset.darkLogo;
+    const lightLogo = logo.dataset.lightLogo;
+
+    const normalizedPath = window.location.pathname.replace(/\/+$/, '');
+    const isHomepage = normalizedPath === '';
+
+    const updateAzariPublicLogo = () => {
+        const hasScrolled = window.scrollY > 24;
+
+        /*
+         * Homepage:
+         *   top       -> logo-dark.png
+         *   scrolled  -> logo-light.png
+         *
+         * Other public pages:
+         *   always    -> logo-light.png
+         */
+        const requiredLogo =
+            isHomepage && !hasScrolled
+                ? darkLogo
+                : lightLogo;
+
+        if (
+            requiredLogo &&
+            logo.getAttribute('src') !== requiredLogo
+        ) {
+            logo.setAttribute('src', requiredLogo);
+        }
+
+        logo.dataset.logoVariant =
+            isHomepage && !hasScrolled
+                ? 'dark'
+                : 'light';
+    };
+
+    updateAzariPublicLogo();
+
+    window.addEventListener(
+        'scroll',
+        updateAzariPublicLogo,
+        { passive: true }
+    );
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| Azari public hamburger colour controller
+|--------------------------------------------------------------------------
+|
+| Homepage:
+| - At the top: semi-peach
+| - After scrolling: Azari green
+|
+| Other public pages:
+| - Always Azari green
+|
+| This changes only a state attribute. It does not add, hide, duplicate,
+| replace, or reposition the hamburger button.
+|
+*/
+
+document.addEventListener('DOMContentLoaded', () => {
+    const normalizedPath = window.location.pathname.replace(/\/+$/, '');
+    const isHomepage = normalizedPath === '';
+
+    const updateAzariHamburgerColour = () => {
+        const hasScrolled = window.scrollY > 24;
+
+        const variant =
+            isHomepage && !hasScrolled
+                ? 'peach'
+                : 'green';
+
+        document.documentElement.dataset.azariHamburgerVariant = variant;
+    };
+
+    updateAzariHamburgerColour();
+
+    window.addEventListener(
+        'scroll',
+        updateAzariHamburgerColour,
+        { passive: true }
+    );
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| Azari public header visual state
+|--------------------------------------------------------------------------
+|
+| One shared state controls the public logo and hamburger.
+|
+| home-top:
+|   - URL path is /
+|   - scroll position is 24px or less
+|   - hamburger is #eee5d2
+|
+| solid:
+|   - homepage has been scrolled
+|   - or the current page is not the homepage
+|   - hamburger uses its original Azari green
+|
+*/
+
+document.addEventListener('DOMContentLoaded', () => {
+    const menuToggle = document.querySelector('[data-azari-menu-toggle]');
+    const publicLogo = document.querySelector('[data-azari-public-logo]');
+
+    const normalizedPath =
+        window.location.pathname.replace(/\/+$/, '');
+
+    const isHomepage = normalizedPath === '';
+
+    const updateAzariPublicHeaderState = () => {
+        const isHomepageTop =
+            isHomepage &&
+            window.scrollY <= 24;
+
+        document.documentElement.dataset.azariPublicHeaderState =
+            isHomepageTop
+                ? 'home-top'
+                : 'solid';
+
+        /*
+         * Keep the existing single-logo implementation synchronized.
+         * This changes only the src of the one existing image node.
+         */
+        if (publicLogo) {
+            const requiredLogo =
+                isHomepageTop
+                    ? publicLogo.dataset.darkLogo
+                    : publicLogo.dataset.lightLogo;
+
+            if (
+                requiredLogo &&
+                publicLogo.getAttribute('src') !== requiredLogo
+            ) {
+                publicLogo.setAttribute('src', requiredLogo);
+            }
+        }
+    };
+
+    updateAzariPublicHeaderState();
+
+    window.addEventListener(
+        'scroll',
+        updateAzariPublicHeaderState,
+        { passive: true }
+    );
+});
