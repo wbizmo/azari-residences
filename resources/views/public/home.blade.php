@@ -1,11 +1,11 @@
 
-        
+
 <x-public-site.layout
     title="Azari Residences | Home"
     :description="$content['hero_body'] ?? 'Luxury serviced apartments by Azari Residences.'"
 >
-    
-    
+
+
     <section class="azari-home-hero" aria-labelledby="azari-home-hero-title">
         <img
             src="{{ asset('images/azari-hero.png') }}"
@@ -92,7 +92,7 @@
                     data-availability-form
                     novalidate
                 >
-                    
+
                     <div class="search-field">
                         <label for="check_in">Check in</label>
 
@@ -159,7 +159,7 @@
                             >group</span>
 
                             <span data-guest-summary>
-                                1 adult · 0 children
+                                1 adult 路 0 children
                             </span>
 
                             <span
@@ -293,7 +293,7 @@
     <section class="intro-section" id="about">
         <div class="site-container intro-grid">
             <div class="intro-heading">
-                <span class="eyebrow">Nigeria and Rwanda</span>
+                <span class="eyebrow">Across Our Locations</span>
 
                 <h2>
                     A considered collection of residences.

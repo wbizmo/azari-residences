@@ -40,7 +40,7 @@
                             <span>Azari Residences</span>
 
                             <strong>
-                                Thoughtfully managed stays in Nigeria and Rwanda.
+                                Thoughtfully managed stays across our locations.
                             </strong>
                         </figcaption>
                     </figure>

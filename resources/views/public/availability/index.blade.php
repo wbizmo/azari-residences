@@ -34,7 +34,7 @@
                             <span>Azari Residences</span>
 
                             <strong>
-                                Thoughtfully managed stays in Nigeria and Rwanda.
+                                Thoughtfully managed stays across our locations.
                             </strong>
                         </div>
                     </div>
@@ -130,7 +130,7 @@
                                     <span data-guest-summary>
                                         {{ max(1, (int) request('adults', 1)) }}
                                         {{ (int) request('adults', 1) === 1 ? 'adult' : 'adults' }}
-                                        ·
+                                        路
                                         {{ max(0, (int) request('children', 0)) }}
                                         {{ (int) request('children', 0) === 1 ? 'child' : 'children' }}
                                     </span>
