@@ -54,5 +54,258 @@
         <a class="{{ request()->routeIs('user.profile.*')?'is-active':'' }}" href="{{ route('user.profile.edit') }}"><span class="material-symbols-outlined">person</span><span>Profile</span></a>
     </nav>
 </div>
+<style>
+/* =========================================================
+   LIVE USER MOBILE DRAWER FIX
+   Uses the actual Azari Blade markup and body state.
+   ========================================================= */
+
+@media (max-width: 980px) {
+    /*
+     * Hide the permanent desktop sidebar on mobile.
+     */
+    .az-user-sidebar {
+        display: none !important;
+    }
+
+    /*
+     * Drawer is hidden off-screen by default.
+     */
+    .az-user-mobile-drawer {
+        position: fixed !important;
+        z-index: 10020 !important;
+        top: 0 !important;
+        bottom: 0 !important;
+        left: 0 !important;
+
+        display: flex !important;
+        width: min(88vw, 340px) !important;
+        max-width: 340px !important;
+        height: 100dvh !important;
+        min-height: 0 !important;
+        flex-direction: column !important;
+
+        overflow: hidden !important;
+        transform: translate3d(-105%, 0, 0) !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+
+        box-shadow: 24px 0 70px rgba(0, 0, 0, 0.34) !important;
+        transition:
+            transform 220ms ease,
+            visibility 220ms ease !important;
+    }
+
+    /*
+     * The existing JS adds az-user-drawer-open to the body.
+     */
+    body.az-user-drawer-open .az-user-mobile-drawer {
+        transform: translate3d(0, 0, 0) !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+    }
+
+    /*
+     * Actual backdrop class used in layouts/user.blade.php.
+     */
+    .az-user-mobile-backdrop {
+        position: fixed !important;
+        z-index: 10010 !important;
+        inset: 0 !important;
+
+        display: block !important;
+        border: 0 !important;
+        background: rgba(5, 20, 15, 0.68) !important;
+
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+
+        backdrop-filter: blur(3px);
+        -webkit-backdrop-filter: blur(3px);
+
+        transition:
+            opacity 220ms ease,
+            visibility 220ms ease !important;
+    }
+
+    body.az-user-drawer-open .az-user-mobile-backdrop {
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+    }
+
+    /*
+     * Keep the drawer above bottom navigation and every page element.
+     */
+    .az-user-mobile-bottom {
+        z-index: 90 !important;
+    }
+
+    /*
+     * Lock page scrolling while drawer is open.
+     */
+    body.az-user-drawer-open {
+        overflow: hidden !important;
+        touch-action: none;
+    }
+
+    /*
+     * Drawer header and close button.
+     */
+    .az-user-drawer-header {
+        position: relative;
+        z-index: 3;
+
+        display: flex !important;
+        min-height: 82px;
+        flex: 0 0 auto;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+
+        padding: 16px 18px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        background: var(--az-user-sidebar, #0b2a22);
+    }
+
+    .az-user-drawer-close {
+        display: inline-grid !important;
+        width: 42px !important;
+        height: 42px !important;
+        flex: 0 0 42px;
+        place-items: center;
+
+        padding: 0 !important;
+        border: 1px solid rgba(255, 255, 255, 0.18) !important;
+        border-radius: 10px !important;
+        background: rgba(255, 255, 255, 0.08) !important;
+        color: #ffffff !important;
+
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .az-user-drawer-close:hover,
+    .az-user-drawer-close:focus-visible {
+        border-color: rgba(255, 255, 255, 0.34) !important;
+        background: rgba(255, 255, 255, 0.16) !important;
+    }
+
+    .az-user-drawer-close .material-symbols-outlined {
+        display: inline-block !important;
+        color: #ffffff !important;
+        font-size: 25px !important;
+        line-height: 1 !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+
+    /*
+     * Only the menu area scrolls.
+     */
+    .az-user-drawer-scroll {
+        min-height: 0 !important;
+        flex: 1 1 auto !important;
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /*
+     * Assistance card stays fixed below navigation.
+     */
+    .az-user-mobile-drawer .az-user-support-fixed {
+        position: relative;
+        z-index: 3;
+        flex: 0 0 auto;
+        padding: 12px;
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+        background: var(--az-user-sidebar, #0b2a22);
+    }
+}
+
+@media (min-width: 981px) {
+    /*
+     * Desktop keeps the permanent sidebar.
+     */
+    .az-user-sidebar {
+        display: flex !important;
+    }
+
+    .az-user-mobile-drawer,
+    .az-user-mobile-backdrop {
+        display: none !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .az-user-mobile-drawer {
+        width: min(92vw, 340px) !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .az-user-mobile-drawer,
+    .az-user-mobile-backdrop {
+        transition: none !important;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const body = document.body;
+    const drawer = document.querySelector('.az-user-mobile-drawer');
+    const openButton = document.querySelector('[data-user-drawer-open]');
+    const closeButtons = document.querySelectorAll('[data-user-drawer-close]');
+
+    if (!drawer || !openButton) {
+        return;
+    }
+
+    function openUserDrawer() {
+        body.classList.add('az-user-drawer-open');
+        openButton.setAttribute('aria-expanded', 'true');
+        drawer.setAttribute('aria-hidden', 'false');
+
+        const closeButton = drawer.querySelector('.az-user-drawer-close');
+
+        window.requestAnimationFrame(function () {
+            closeButton?.focus();
+        });
+    }
+
+    function closeUserDrawer() {
+        body.classList.remove('az-user-drawer-open');
+        openButton.setAttribute('aria-expanded', 'false');
+        drawer.setAttribute('aria-hidden', 'true');
+    }
+
+    openButton.addEventListener('click', openUserDrawer);
+
+    closeButtons.forEach(function (button) {
+        button.addEventListener('click', closeUserDrawer);
+    });
+
+    document.addEventListener('keydown', function (event) {
+        if (
+            event.key === 'Escape' &&
+            body.classList.contains('az-user-drawer-open')
+        ) {
+            closeUserDrawer();
+        }
+    });
+
+    window.addEventListener('resize', function () {
+        if (window.innerWidth > 980) {
+            closeUserDrawer();
+        }
+    });
+
+    closeUserDrawer();
+});
+</script>
 </body>
 </html>
