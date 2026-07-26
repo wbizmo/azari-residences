@@ -1,58 +1,182 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
-
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+  <img src="/public/images/logo-light.png" alt="The Azari Residences" width="320">
 </p>
 
-## About Laravel
+<p align="center">
+  <strong>THE AZARI RESIDENCES</strong><br>
+  Africa's Finest Address
+</p>
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+<p align="center">
+A modern hotel and apartment booking platform built with Laravel, designed for premium hospitality businesses. The platform provides a seamless booking experience for guests while giving administrators complete control over rooms, apartments, reservations, payments, content, users, identities, services, and day-to-day operations through an intuitive management dashboard.
+</p>
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+**Features**
 
-## Learning Laravel
+- Luxury hotel and serviced apartment booking
+- Apartment and room availability management
+- Online payment processing
+- Booking verification portal
+- Guest dashboard
+- Admin dashboard
+- Identity verification (KYC)
+- Additional guest management
+- Invoice and receipt generation
+- Booking history
+- User notifications
+- Support ticket system
+- Service requests
+- Concierge management
+- Housekeeping requests
+- Airport transfer requests
+- Restaurant reservations
+- Content Management System (CMS)
+- Homepage section management
+- Navigation management
+- Review management
+- Responsive mobile experience
+- Email notifications
+- Role-based access control
+- Dynamic branding and logo management
+- SEO optimized public pages
+- Production-ready architecture
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+---
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+**Technology Stack**
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+- Laravel 13
+- PHP 8.4+
+- MySQL
+- Blade
+- Vite
+- Alpine.js
+- Tailwind CSS
+- Laravel Breeze
 
-## Agentic Development
+---
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+**Requirements**
+
+- PHP 8.4 or later
+- MySQL 8+
+- Composer
+- Node.js 20+
+- npm
+
+---
+
+**Installation**
+
+Clone the repository.
+
+Install dependencies.
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+composer install
+npm install
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Copy the environment file.
 
-## Contributing
+```bash
+cp .env.example .env
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Configure your database credentials inside `.env`.
 
-## Code of Conduct
+Generate the application key.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+php artisan key:generate
+```
 
-## Security Vulnerabilities
+Run migrations.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+php artisan migrate
+```
 
-## License
+Build the frontend assets.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+npm run build
+```
+
+Create the storage symlink.
+
+```bash
+php artisan storage:link
+```
+
+Cache the application.
+
+```bash
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+```
+
+Start the application.
+
+```bash
+php artisan serve
+```
+
+---
+
+**Shared Hosting (cPanel)**
+
+- Upload the project files.
+- Point your domain's document root to the `public` directory.
+- Configure the `.env` file.
+- Import the database.
+- Ensure the `storage` and `bootstrap/cache` directories are writable.
+- Run the production asset build before deployment.
+
+---
+
+**Demo Administrator**
+
+Email
+
+admin@azariadmin.com
+
+Password
+
+12345678
+
+---
+
+**Administrator Features**
+
+- Dashboard
+- Booking Management
+- Room Management
+- Apartment Management
+- Guest Management
+- Identity Verification
+- Payment Management
+- Invoice & Receipt Management
+- Reviews
+- Homepage CMS
+- Navigation Management
+- Content Management
+- Notifications
+- Reports
+- Website Settings
+- Branding & Logo Management
+
+---
+
+**License**
+
+This project is provided for demonstration and educational purposes unless otherwise specified by the project owner.
+
+---
+
+<p align="center">
+Built with Laravel for premium hospitality experiences.
+</p>

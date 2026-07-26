@@ -38,3 +38,6 @@ replit.nix
 .upm/
 .replit.history
 .replit.user
+.cache/
+.local/
+node_modules/

@@ -7993,3 +7993,241 @@ html[data-azari-public-header-state="solid"]
     background-color: var(--azari-green, #123f37) !important;
     border-color: var(--azari-green, #123f37) !important;
 }
+
+/* AZARI_AUTH_PASSWORD_HARD_FIX_CSS_START */
+
+/*
+ * The input and toggle share exactly the same grid cell.
+ * Toggling the input type therefore cannot alter the toggle position.
+ */
+.az-password-control {
+    position: relative;
+    display: grid;
+    width: 100%;
+    min-width: 0;
+    isolation: isolate;
+}
+
+.az-password-control__input,
+.az-password-control__toggle {
+    grid-area: 1 / 1;
+}
+
+.az-password-control__input {
+    z-index: 1;
+    width: 100%;
+    min-width: 0;
+    padding-right: 54px !important;
+}
+
+.az-password-control__toggle {
+    z-index: 2;
+    align-self: stretch;
+    justify-self: end;
+    display: grid;
+    place-items: center;
+    width: 48px;
+    min-width: 48px;
+    height: auto;
+    min-height: 0;
+    margin: 3px;
+    padding: 0;
+    appearance: none;
+    -webkit-appearance: none;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: #746d62;
+    line-height: 1;
+    cursor: pointer;
+    transform: none !important;
+    transition:
+        color 160ms ease,
+        background-color 160ms ease;
+}
+
+.az-password-control__toggle:hover {
+    color: #8a6232;
+    background: rgba(138, 98, 50, .09);
+}
+
+.az-password-control__toggle:active,
+.az-password-control__toggle:focus,
+.az-password-control__toggle:focus-visible,
+.az-password-control__toggle[aria-pressed="true"] {
+    transform: none !important;
+}
+
+.az-password-control__toggle:focus-visible {
+    outline: 2px solid #a8793c;
+    outline-offset: -4px;
+}
+
+.az-password-control__icon {
+    display: block;
+    width: 19px;
+    height: 19px;
+    pointer-events: none;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/*
+ * The hidden attribute must win over any global SVG display declaration.
+ */
+.az-password-control__icon[hidden] {
+    display: none !important;
+}
+
+/*
+ * Back-to-home control shared by all guest/user authentication pages.
+ */
+.az-auth-home-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    width: fit-content;
+    margin: 0 0 24px;
+    color: #815a2c;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 750;
+    line-height: 1.3;
+}
+
+.az-auth-home-link svg {
+    display: block;
+    width: 18px;
+    height: 18px;
+    flex: 0 0 auto;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: transform 160ms ease;
+}
+
+.az-auth-home-link:hover svg {
+    transform: translateX(-3px);
+}
+
+.az-auth-home-link:focus-visible {
+    border-radius: 5px;
+    outline: 2px solid #a8793c;
+    outline-offset: 4px;
+}
+
+/*
+ * Do not let generic auth-panel input styles treat the wrapper as an input.
+ */
+.az-auth-panel .az-password-control {
+    display: grid;
+    gap: 0;
+}
+
+.az-auth-panel .az-password-control__input {
+    width: 100%;
+}
+
+@media (max-width: 767px) {
+    .az-auth-home-link {
+        margin-bottom: 20px;
+    }
+
+    .az-password-control__toggle {
+        width: 46px;
+        min-width: 46px;
+    }
+
+    .az-password-control__input {
+        padding-right: 51px !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .az-auth-home-link svg,
+    .az-password-control__toggle {
+        transition: none;
+    }
+}
+
+/* AZARI_AUTH_PASSWORD_HARD_FIX_CSS_END */
+
+/*
+|--------------------------------------------------------------------------
+| Azari password eye state — deterministic override
+|--------------------------------------------------------------------------
+|
+| aria-pressed=false:
+|     regular eye visible
+|
+| aria-pressed=true:
+|     slashed eye visible
+|
+*/
+
+.az-password-control__toggle [data-azari-eye-open] {
+    display: block !important;
+}
+
+.az-password-control__toggle [data-azari-eye-closed] {
+    display: none !important;
+}
+
+.az-password-control__toggle[aria-pressed="true"] [data-azari-eye-open] {
+    display: none !important;
+}
+
+.az-password-control__toggle[aria-pressed="true"] [data-azari-eye-closed] {
+    display: block !important;
+}
+
+/*
+|--------------------------------------------------------------------------
+| Azari password eye state — deterministic override
+|--------------------------------------------------------------------------
+|
+| aria-pressed=false:
+|     regular eye visible
+|
+| aria-pressed=true:
+|     slashed eye visible
+|
+*/
+
+.az-password-control__toggle [data-azari-eye-open] {
+    display: block !important;
+}
+
+.az-password-control__toggle [data-azari-eye-closed] {
+    display: none !important;
+}
+
+.az-password-control__toggle[aria-pressed="true"] [data-azari-eye-open] {
+    display: none !important;
+}
+
+.az-password-control__toggle[aria-pressed="true"] [data-azari-eye-closed] {
+    display: block !important;
+}
+
+/* Password visibility icon state */
+.az-password-control__toggle [data-azari-eye-open] {
+    display: block !important;
+}
+
+.az-password-control__toggle [data-azari-eye-closed] {
+    display: none !important;
+}
+
+.az-password-control__toggle[aria-pressed="true"] [data-azari-eye-open] {
+    display: none !important;
+}
+
+.az-password-control__toggle[aria-pressed="true"] [data-azari-eye-closed] {
+    display: block !important;
+}

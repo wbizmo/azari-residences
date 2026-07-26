@@ -9,6 +9,7 @@
             @csrf
             <button type="submit">Resend verification email</button>
         </form>
+
         <form method="POST" action="{{ route('logout') }}">
             @csrf
             <button type="submit" class="secondary">Sign out</button>

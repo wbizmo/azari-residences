@@ -921,3 +921,61 @@ document.addEventListener('DOMContentLoaded', () => {
         { passive: true }
     );
 });
+
+
+
+/* AZARI_AUTH_PASSWORD_HARD_FIX_START */
+const initialiseAzariPasswordControls = () => {
+    document.querySelectorAll('[data-azari-password-control]').forEach((control) => {
+        const input = control.querySelector('input');
+        const toggle = control.querySelector('[data-azari-password-toggle]');
+        const eyeOpen = control.querySelector('[data-azari-eye-open]');
+        const eyeClosed = control.querySelector('[data-azari-eye-closed]');
+
+        if (!input || !toggle || toggle.dataset.ready === 'true') {
+            return;
+        }
+
+        toggle.dataset.ready = 'true';
+
+        /*
+         * Prevent the toggle from taking focus away from the input.
+         * There is no manual refocus, no caret restoration and no layout work.
+         */
+        toggle.addEventListener('pointerdown', (event) => {
+            event.preventDefault();
+        });
+
+        toggle.addEventListener('click', () => {
+            const willShow = input.type === 'password';
+
+            input.type = willShow ? 'text' : 'password';
+
+            toggle.setAttribute(
+                'aria-pressed',
+                willShow ? 'true' : 'false'
+            );
+
+            toggle.setAttribute(
+                'aria-label',
+                `${willShow ? 'Hide' : 'Show'} ${
+                    input.getAttribute('aria-label') ||
+                    toggle.getAttribute('aria-controls')?.includes('confirmation')
+                        ? 'password confirmation'
+                        : 'password'
+                }`
+            );
+        });
+    });
+};
+
+if (document.readyState === 'loading') {
+    document.addEventListener(
+        'DOMContentLoaded',
+        initialiseAzariPasswordControls,
+        { once: true }
+    );
+} else {
+    initialiseAzariPasswordControls();
+}
+/* AZARI_AUTH_PASSWORD_HARD_FIX_END */
