@@ -76,7 +76,7 @@ class AzariProductionSeeder extends Seeder
                     'bathrooms' => $baths,
                     'max_guests' => $guests,
                     'nightly_rate' => $rate,
-                    'currency' => 'NGN',
+                    'currency' => 'USD',
                     'short_description' => 'A fully serviced residence managed by Azari.',
                     'description' => 'A private, fully serviced residence prepared for business and leisure stays.',
                     'is_featured' => true,

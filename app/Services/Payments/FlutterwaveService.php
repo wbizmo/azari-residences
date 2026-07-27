@@ -107,7 +107,7 @@ final class FlutterwaveService implements PaymentProvider
         if (! $this->enabled()) return ['successful' => false, 'message' => 'Provider is disabled.'];
         try {
             $this->assertConfigured();
-            $response = $this->request()->get('/v3/balances/NGN');
+            $response = $this->request()->get('/v3/balances/USD');
             return ['successful' => $response->successful(), 'message' => $response->successful() ? 'Connection successful.' : 'Connection failed.'];
         } catch (\Throwable $e) {
             return ['successful' => false, 'message' => 'Connection failed.'];

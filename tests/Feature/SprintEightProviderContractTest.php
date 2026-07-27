@@ -22,7 +22,7 @@ class SprintEightProviderContractTest extends TestCase
         ]);
         Http::fake([
             'https://api.flutterwave.test/v3/payments' => Http::response(['status' => 'success', 'data' => ['link' => 'https://checkout.test']], 200),
-            'https://api.flutterwave.test/v3/transactions/44/verify' => Http::response(['status' => 'success', 'data' => ['id' => 44, 'tx_ref' => 'PAY-44', 'status' => 'successful', 'amount' => 500, 'currency' => 'NGN', 'payment_type' => 'card']], 200),
+            'https://api.flutterwave.test/v3/transactions/44/verify' => Http::response(['status' => 'success', 'data' => ['id' => 44, 'tx_ref' => 'PAY-44', 'status' => 'successful', 'amount' => 500, 'currency' => 'USD', 'payment_type' => 'card']], 200),
         ]);
         $driver = app(FlutterwaveService::class);
         $initial = $driver->initialise($this->payload('PAY-44'));
@@ -45,7 +45,7 @@ class SprintEightProviderContractTest extends TestCase
         Http::fake([
             'https://pesapal.test/api/Auth/RequestToken' => Http::response(['token' => 'token'], 200),
             'https://pesapal.test/api/Transactions/SubmitOrderRequest' => Http::response(['order_tracking_id' => 'TRACK', 'merchant_reference' => 'PAY-55', 'redirect_url' => 'https://pesapal-checkout.test'], 200),
-            'https://pesapal.test/api/Transactions/GetTransactionStatus*' => Http::response(['payment_status_description' => 'COMPLETED', 'merchant_reference' => 'PAY-55', 'amount' => 500, 'currency' => 'NGN', 'payment_method' => 'Mobile Money'], 200),
+            'https://pesapal.test/api/Transactions/GetTransactionStatus*' => Http::response(['payment_status_description' => 'COMPLETED', 'merchant_reference' => 'PAY-55', 'amount' => 500, 'currency' => 'USD', 'payment_method' => 'Mobile Money'], 200),
         ]);
         $driver = app(PesapalService::class);
         $this->assertSame('https://pesapal-checkout.test', $driver->initialise($this->payload('PAY-55'))['checkout_url']);
@@ -61,7 +61,7 @@ class SprintEightProviderContractTest extends TestCase
         ]);
         Http::fake([
             'https://intouch.test/start' => Http::response(['data' => ['transaction_id' => 'I-1', 'checkout_url' => 'https://intouch-checkout.test']], 200),
-            'https://intouch.test/status/I-1*' => Http::response(['data' => ['transaction_id' => 'I-1', 'merchant_reference' => 'PAY-66', 'status' => 'SUCCESSFUL', 'amount' => 500, 'currency' => 'NGN']], 200),
+            'https://intouch.test/status/I-1*' => Http::response(['data' => ['transaction_id' => 'I-1', 'merchant_reference' => 'PAY-66', 'status' => 'SUCCESSFUL', 'amount' => 500, 'currency' => 'USD']], 200),
         ]);
         $driver = app(InTouchService::class);
         $this->assertSame('https://intouch-checkout.test', $driver->initialise($this->payload('PAY-66'))['checkout_url']);
@@ -75,7 +75,7 @@ class SprintEightProviderContractTest extends TestCase
     {
         return [
             'reference' => $reference, 'booking_reference' => 'AZR-001', 'amount' => 500,
-            'currency' => 'NGN', 'name' => 'Guest User', 'first_name' => 'Guest', 'last_name' => 'User',
+            'currency' => 'USD', 'name' => 'Guest User', 'first_name' => 'Guest', 'last_name' => 'User',
             'email' => 'guest@example.com', 'phone' => '+2348000000000',
             'callback_url' => 'https://azari.test/callback', 'webhook_url' => 'https://azari.test/webhook',
         ];

@@ -1,5 +1,5 @@
 @extends('admin.layouts.app')
-@section('title', ->exists ? 'Edit property' : 'Add property')
+@section('title', $property->exists ? 'Edit property' : 'Add property')
 @section('content')
     <div class="admin-heading">
         <div><span>PROPERTY EDITOR</span><h1>{{ $property->exists ? $property->name : 'Add property' }}</h1><p>Every control below uses the Azari administration design system.</p></div>
@@ -45,7 +45,7 @@
 
         <div class="az-form-section-head"><span class="material-symbols-outlined">account_balance_wallet</span><div><h2>Base pricing</h2><p>Seasonal and promotional rules can be added after saving.</p></div></div>
 
-        <label class="az-field"><span>Currency</span><select name="currency"><option value="NGN" @selected(old('currency', $property->currency ?: 'NGN') === 'NGN')>NGN</option><option value="RWF" @selected(old('currency', $property->currency) === 'RWF')>RWF</option><option value="USD" @selected(old('currency', $property->currency) === 'USD')>USD</option></select></label>
+        <label class="az-field"><span>Currency</span><select name="currency"><option value="USD" selected>USD</option></select></label>
         <label class="az-field"><span>Nightly rate</span><input type="number" step="0.01" min="0" name="nightly_rate" value="{{ old('nightly_rate', $property->nightly_rate ?: 0) }}" required></label>
         <label class="az-field"><span>Weekend rate</span><input type="number" step="0.01" min="0" name="weekend_rate" value="{{ old('weekend_rate', $property->weekend_rate) }}"></label>
         <label class="az-field"><span>Cleaning fee</span><input type="number" step="0.01" min="0" name="cleaning_fee" value="{{ old('cleaning_fee', $property->cleaning_fee ?: 0) }}"></label>

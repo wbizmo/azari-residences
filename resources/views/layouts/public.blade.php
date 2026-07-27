@@ -1,13 +1,11 @@
-<x-layouts.base title="Azari Residences | Premium Serviced Apartments & Luxury Stays">
-    <header>
-        <div class="azari-container">
-            <a href="{{ url('/') }}" aria-label="{{ config('app.name') }}">
-                <span>{{ config('app.name') }}</span>
-            </a>
-        </div>
-    </header>
-
-    <main>
-        @yield('content')
-    </main>
-</x-layouts.base>
+<x-public.layout
+    :title="$title ?? trim($__env->yieldContent('title', 'Azari Residences | Premium Serviced Residences'))"
+    :description="$description ?? trim($__env->yieldContent('description')) ?: null"
+    :keywords="$keywords ?? null"
+    :canonical="$canonical ?? null"
+    :image="$image ?? null"
+    :type="$type ?? 'website'"
+    :body-class="$bodyClass ?? ''"
+>
+    @yield('content')
+</x-public.layout>

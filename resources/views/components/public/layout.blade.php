@@ -1,6 +1,10 @@
 @props([
-    'title' => 'Azari Residences',
+    'title' => 'Azari Residences | Premium Serviced Residences',
     'description' => null,
+    'keywords' => null,
+    'canonical' => null,
+    'image' => null,
+    'type' => 'website',
     'bodyClass' => '',
 ])
 
@@ -10,19 +14,17 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <link rel="icon" type="image/png" href="{{ asset('images/azari-favicon.png') }}">
 
-    
-                
-            
-            
-        <title>{{ $title ?? 'Azari Residences' }}</title>
-    
-        
-        
-            
+    @include('partials.public-seo', [
+        'seoTitle' => $title,
+        'seoDescription' => $description,
+        'seoKeywords' => $keywords,
+        'seoCanonical' => $canonical,
+        'seoImage' => $image,
+        'seoType' => $type,
+    ])
+
     @include('partials.azari-head-assets')
-    <meta name="description" content="{{ $description ?? 'Private, fully serviced residences in Lagos with direct booking and dedicated guest support.' }}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -30,39 +32,17 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('head')
-    <script>document.fonts.load('24px Material Symbols Outlined').then(()=>document.documentElement.classList.add('az-icons-ready')).catch(()=>document.documentElement.classList.add('az-icons-ready'));</script>
+    <script>document.documentElement.classList.add('az-icons-ready');</script>
 </head>
-
 <body class="public-site {{ request()->routeIs('home') ? 'home-page azari-home-page' : 'inner-page azari-inner-page azari-solid-header' }} {{ $bodyClass ?? '' }}">
-
-    <!-- AZARI_PRELOADER_START -->
-    
-<div
-        class="azari-preloader"
-        data-public-preloader
-        role="status"
-        aria-label="Loading Azari Residences"
-    >
+    <div class="azari-preloader" data-public-preloader role="status" aria-label="Loading Azari Residences">
         <span class="azari-preloader__mark" aria-hidden="true">
             <span class="azari-preloader__spinner"></span>
-            <img
-                src="{{ asset('images/azari-favicon.png') }}"
-                alt=""
-                width="42"
-                height="42"
-                loading="eager"
-                decoding="sync"
-            >
+            <img src="{{ asset('images/azari-favicon.png') }}" alt="" width="42" height="42" loading="eager" decoding="sync">
         </span>
     </div>
-    
-    <!-- AZARI_PRELOADER_END -->
-    
-    
-            
 
-            <a class="skip-link"
-         href="#main-content">Skip to main content</a>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
 
     @include('public.partials.navigation')
 
@@ -76,21 +56,12 @@
 
     @include('public.partials.footer')
 
-    <button
-        type="button"
-        class="back-to-top"
-        data-back-to-top
-        aria-label="Back to top"
-        title="Back to top"
-    >
+    <button type="button" class="back-to-top" data-back-to-top aria-label="Back to top" title="Back to top">
         <span class="material-symbols-outlined" aria-hidden="true">arrow_upward</span>
     </button>
-
-    <div class="toast-region" data-toast-region aria-live="polite" aria-atomic="true"></div>
-    @include('public.partials.drawer-root')
+@include('public.partials.drawer-root')
 
     @stack('scripts')
     <x-azari-feedback />
-    
 </body>
 </html>

@@ -74,7 +74,7 @@ return new class extends Migration
                 $table->unsignedInteger('rooms')->default(1);
                 $table->string('status')->default('pending')->index();
                 $table->string('verification_status')->default('unverified');
-                $table->char('currency', 3)->default('NGN');
+                $table->char('currency', 3)->default('USD');
                 $table->decimal('subtotal', 14, 2)->default(0);
                 $table->decimal('tax_total', 14, 2)->default(0);
                 $table->decimal('total', 14, 2)->default(0);

@@ -23,7 +23,7 @@ class SprintTwoPointFiveTest extends TestCase
             'bathrooms' => 2,
             'max_guests' => 4,
             'nightly_rate' => 300000,
-            'currency' => 'NGN',
+            'currency' => 'USD',
             'is_featured' => true,
             'is_published' => true,
         ]);
@@ -43,7 +43,7 @@ class SprintTwoPointFiveTest extends TestCase
             'bathrooms' => 2,
             'max_guests' => 4,
             'nightly_rate' => 300000,
-            'currency' => 'NGN',
+            'currency' => 'USD',
             'is_published' => false,
         ]);
 

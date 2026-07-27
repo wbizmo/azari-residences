@@ -205,7 +205,7 @@ CREATE TABLE `bookings` (
   `rooms` INT NOT NULL DEFAULT '1',
   `status` VARCHAR(255) NOT NULL DEFAULT 'pending',
   `verification_status` VARCHAR(255) NOT NULL DEFAULT 'unverified',
-  `currency` VARCHAR(255) NOT NULL DEFAULT 'NGN',
+  `currency` VARCHAR(255) NOT NULL DEFAULT 'USD',
   `subtotal` DECIMAL(15,2) NOT NULL DEFAULT '0',
   `tax_total` DECIMAL(15,2) NOT NULL DEFAULT '0',
   `total` DECIMAL(15,2) NOT NULL DEFAULT '0',
@@ -757,7 +757,7 @@ CREATE TABLE `properties` (
   `bathrooms` INT NOT NULL DEFAULT '1',
   `max_guests` INT NOT NULL DEFAULT '2',
   `nightly_rate` DECIMAL(15,2) NOT NULL DEFAULT '0',
-  `currency` VARCHAR(255) NOT NULL DEFAULT 'NGN',
+  `currency` VARCHAR(255) NOT NULL DEFAULT 'USD',
   `short_description` TEXT NULL,
   `description` TEXT NULL,
   `cover_image` TEXT NULL,
@@ -1132,6 +1132,7 @@ CREATE TABLE `users` (
   `emergency_contact_phone` VARCHAR(255) NULL,
   `email_notifications` TINYINT(1) NOT NULL DEFAULT '1',
   `sms_notifications` TINYINT(1) NOT NULL DEFAULT '0',
+  `whatsapp_notifications` TINYINT(1) NOT NULL DEFAULT '0',
   `marketing_consent` TINYINT(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `users_status_index` (`status`),
@@ -1165,7 +1166,9 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (17, '2026_07_25_130000_complete_azari_sprints_09_12', 11),
 (18, '2026_07_25_160000_complete_azari_sprints_13_16', 12),
 (19, '2026_07_25_170000_harden_azari_sprints_13_16', 13),
-(20, '2026_07_26_120000_make_external_fields_database_portable', 14);
+(20, '2026_07_26_120000_make_external_fields_database_portable', 14),
+(21,'2026_07_27_010000_make_usd_the_platform_currency',15),
+(22,'2026_07_27_020000_add_whatsapp_notification_preference',15);
 
 INSERT INTO `permissions` (`id`, `name`, `slug`, `group`, `created_at`, `updated_at`) VALUES
 (1, 'Dashboard — View', 'dashboard.view', 'Dashboard', '2026-07-25 10:09:16', '2026-07-25 10:09:16'),

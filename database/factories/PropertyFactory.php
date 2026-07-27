@@ -36,7 +36,7 @@ class PropertyFactory extends Factory
 
             'nightly_rate' => fake()->numberBetween(30000,120000),
 
-            'currency' => 'NGN',
+            'currency' => 'USD',
 
             'short_description' => fake()->sentence(),
             'description' => fake()->paragraph(),

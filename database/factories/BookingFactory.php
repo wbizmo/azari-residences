@@ -34,7 +34,7 @@ class BookingFactory extends Factory
             'status' => 'confirmed',
             'verification_status' => 'verified',
 
-            'currency' => 'NGN',
+            'currency' => 'USD',
 
             'subtotal' => 100000,
             'tax_total' => 7500,

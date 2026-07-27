@@ -35,5 +35,16 @@ return [
         ],
     ],
 
-    'twilio' => ['enabled' => env('TWILIO_ENABLED', false), 'sid' => env('TWILIO_ACCOUNT_SID'), 'token' => env('TWILIO_AUTH_TOKEN'), 'messaging_service_sid' => env('TWILIO_MESSAGING_SERVICE_SID'), 'from' => env('TWILIO_FROM_NUMBER'), 'status_callback' => env('TWILIO_STATUS_CALLBACK_URL')],
+    'twilio' => [
+        'enabled' => filter_var(env('TWILIO_ENABLED', false), FILTER_VALIDATE_BOOL),
+        'sid' => env('TWILIO_ACCOUNT_SID'),
+        'token' => env('TWILIO_AUTH_TOKEN'),
+        'messaging_service_sid' => env('TWILIO_MESSAGING_SERVICE_SID'),
+        'from' => env('TWILIO_FROM_NUMBER'),
+        'status_callback' => env('TWILIO_STATUS_CALLBACK_URL'),
+        'default_country_code' => env('TWILIO_DEFAULT_COUNTRY_CODE', '234'),
+        'whatsapp_enabled' => filter_var(env('TWILIO_WHATSAPP_ENABLED', false), FILTER_VALIDATE_BOOL),
+        'whatsapp_from' => env('TWILIO_WHATSAPP_FROM'),
+        'whatsapp_content_sids' => [],
+    ],
 ];

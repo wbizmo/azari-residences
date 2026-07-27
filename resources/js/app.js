@@ -15,35 +15,11 @@ function setBodyLock(locked) {
     body.classList.toggle('is-locked', locked);
 }
 
-function showToast(message, type = 'information') {
-    const region = document.querySelector('[data-toast-region]');
-
-    if (!region || !message) {
-        return;
+function showToast(message, type = 'info') {
+    const normalized = type === 'information' ? 'info' : type;
+    if (typeof window.AzariToast === 'function') {
+        window.AzariToast(message, normalized);
     }
-
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    toast.setAttribute('role', 'status');
-    toast.innerHTML = `
-        <span class="material-symbols-outlined" aria-hidden="true">
-            ${type === 'success' ? 'check_circle' : 'info'}
-        </span>
-        <span>${message}</span>
-        <button type="button" aria-label="Dismiss notification">
-            <span class="material-symbols-outlined" aria-hidden="true">close</span>
-        </button>
-    `;
-
-    const remove = () => toast.remove();
-    toast.querySelector('button')?.addEventListener('click', remove);
-    region.appendChild(toast);
-
-    requestAnimationFrame(() => toast.classList.add('is-visible'));
-    window.setTimeout(() => {
-        toast.classList.remove('is-visible');
-        window.setTimeout(remove, 250);
-    }, 5000);
 }
 
 document.querySelectorAll('[data-toast]').forEach((trigger) => {

@@ -24,7 +24,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at', 'phone_verified_at', 'last_login_at', 'last_active_at',
         'suspended_at', 'suspension_reason', 'emergency_contact_name',
         'emergency_contact_phone', 'email_notifications', 'sms_notifications',
-        'marketing_consent',
+        'whatsapp_notifications', 'marketing_consent',
     ];
 
     protected $hidden = ['password', 'remember_token'];
@@ -38,6 +38,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'is_active' => 'boolean',
             'email_notifications' => 'boolean',
             'sms_notifications' => 'boolean',
+            'whatsapp_notifications' => 'boolean',
             'marketing_consent' => 'boolean',
             'password' => 'hashed',
             'last_login_at' => 'datetime',

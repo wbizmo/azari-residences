@@ -37,7 +37,7 @@ class AzariSprintFiveSixDemoSeeder extends Seeder
                 'guest_email' => $customer->email, 'guest_phone' => '+2348000000000',
                 'nationality' => 'Nigerian', 'address' => 'Demo address', 'city' => 'Lagos', 'country' => 'Nigeria',
                 'check_in' => $checkIn, 'check_out' => $checkOut, 'adults' => 2, 'children' => 0, 'rooms' => 1,
-                'status' => $status, 'verification_status' => 'verified', 'currency' => $property->currency ?: 'NGN',
+                'status' => $status, 'verification_status' => 'verified', 'currency' => $property->currency ?: 'USD',
                 'nightly_rate' => $property->nightly_rate, 'nights' => $checkIn->diffInDays($checkOut),
                 'subtotal' => $property->nightly_rate * $checkIn->diffInDays($checkOut), 'fee_total' => 0,
                 'add_on_total' => 0, 'tax_rate' => 0, 'tax_total' => 0,

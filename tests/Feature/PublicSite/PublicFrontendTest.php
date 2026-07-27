@@ -53,7 +53,7 @@ class PublicFrontendTest extends TestCase
             ->assertSee('Your stay request')
             ->assertSee('4 nights')
             ->assertSee('3 guests')
-            ->assertSee('Ikoyi');
+            ->assertSee('All available locations');
     }
 
     public function test_guest_limits_are_enforced(): void

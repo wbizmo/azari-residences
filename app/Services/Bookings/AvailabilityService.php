@@ -31,6 +31,6 @@ class AvailabilityService
             ->whereDate('ends_on', '>=', $checkOut->copy()->subDay())
             ->orderByDesc('starts_on')->first();
         $rate = (float)($season->nightly_rate ?? 0);
-        return ['available'=>$this->isAvailable($propertyId,$checkIn,$checkOut),'nights'=>$nights,'nightly_rate'=>$rate,'subtotal'=>$rate*$nights,'currency'=>'NGN','minimum_stay'=>(int)($season->minimum_stay ?? 1),'maximum_stay'=>$season?->maximum_stay];
+        return ['available'=>$this->isAvailable($propertyId,$checkIn,$checkOut),'nights'=>$nights,'nightly_rate'=>$rate,'subtotal'=>$rate*$nights,'currency'=>'USD','minimum_stay'=>(int)($season->minimum_stay ?? 1),'maximum_stay'=>$season?->maximum_stay];
     }
 }

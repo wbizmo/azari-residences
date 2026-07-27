@@ -53,7 +53,7 @@
     <label>Cleaning fee<input name="cleaning_fee" type="number" min="0" step="0.01" value="{{ old('cleaning_fee', $property->cleaning_fee) }}"></label>
     <label>Service charge<input name="service_charge" type="number" min="0" step="0.01" value="{{ old('service_charge', $property->service_charge) }}"></label>
     <label>Tax rate (%)<input name="tax_rate" type="number" min="0" max="100" step="0.001" value="{{ old('tax_rate', $property->tax_rate) }}"></label>
-    <label>Currency<input name="currency" maxlength="3" value="{{ old('currency', $property->currency ?: 'NGN') }}" required></label>
+    <label>Currency<input name="currency" maxlength="3" value="USD" readonly required></label>
 
     <label class="admin-form-span-2">Short description
         <textarea name="short_description">{{ old('short_description', $property->short_description) }}</textarea>

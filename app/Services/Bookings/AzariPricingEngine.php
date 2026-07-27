@@ -27,7 +27,7 @@ class AzariPricingEngine {
         $taxRate=(float)($property->tax_rate ?? config('azari.booking.default_tax_rate',0));
         $tax=round(($subtotal+$fee+$addonTotal)*($taxRate/100),2);
         return [
-            'currency'=>$property->currency ?? 'NGN','nights'=>$nights,
+            'currency'=>$property->currency ?? 'USD','nights'=>$nights,
             'nightly_rate'=>$nights ? round($subtotal/$nights,2) : 0,'nightly_breakdown'=>$breakdown,
             'subtotal'=>$subtotal,'fee_total'=>$fee,'add_ons'=>$addons,'add_on_total'=>$addonTotal,
             'tax_rate'=>$taxRate,'tax_total'=>$tax,'total'=>round($subtotal+$fee+$addonTotal+$tax,2),

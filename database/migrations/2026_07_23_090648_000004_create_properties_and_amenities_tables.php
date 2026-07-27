@@ -19,7 +19,7 @@ return new class extends Migration
             $table->unsignedTinyInteger('bathrooms')->default(1);
             $table->unsignedTinyInteger('max_guests')->default(2);
             $table->decimal('nightly_rate', 14, 2)->default(0);
-            $table->char('currency', 3)->default('NGN');
+            $table->char('currency', 3)->default('USD');
             $table->text('short_description')->nullable();
             $table->longText('description')->nullable();
             $table->string('cover_image')->nullable();

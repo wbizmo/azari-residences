@@ -16,15 +16,15 @@ class SprintEightPaymentFinalizationTest extends TestCase
     public function test_verified_success_confirms_booking_once_and_is_idempotent(): void
     {
         $user = User::factory()->create(['account_type' => 'customer', 'is_active' => true]);
-        $booking = Booking::factory()->for($user)->create(['status' => 'pending_payment', 'currency' => 'NGN', 'total' => 107500]);
+        $booking = Booking::factory()->for($user)->create(['status' => 'pending_payment', 'currency' => 'USD', 'total' => 107500]);
         $payment = Payment::query()->create([
             'reference' => 'PAY-TEST-001', 'provider' => 'flutterwave', 'booking_id' => $booking->id,
             'user_id' => $user->id, 'guest_email' => $user->email, 'amount' => 107500,
-            'currency' => 'NGN', 'status' => 'pending', 'initiated_at' => now(),
+            'currency' => 'USD', 'status' => 'pending', 'initiated_at' => now(),
         ]);
         $verification = [
             'status' => 'successful', 'provider_status' => 'successful', 'provider_reference' => '443311',
-            'merchant_reference' => 'PAY-TEST-001', 'amount' => 107500, 'currency' => 'NGN',
+            'merchant_reference' => 'PAY-TEST-001', 'amount' => 107500, 'currency' => 'USD',
             'payment_method' => 'card', 'safe_response' => ['id' => 443311, 'status' => 'successful'],
         ];
 
@@ -40,10 +40,10 @@ class SprintEightPaymentFinalizationTest extends TestCase
 
     public function test_amount_or_currency_mismatch_is_rejected_without_confirming_booking(): void
     {
-        $booking = Booking::factory()->create(['status' => 'pending_payment', 'currency' => 'NGN', 'total' => 107500]);
+        $booking = Booking::factory()->create(['status' => 'pending_payment', 'currency' => 'USD', 'total' => 107500]);
         $payment = Payment::query()->create([
             'reference' => 'PAY-TEST-002', 'provider' => 'pesapal', 'booking_id' => $booking->id,
-            'guest_email' => $booking->guest_email, 'amount' => 107500, 'currency' => 'NGN',
+            'guest_email' => $booking->guest_email, 'amount' => 107500, 'currency' => 'USD',
             'status' => 'pending', 'initiated_at' => now(),
         ]);
 
