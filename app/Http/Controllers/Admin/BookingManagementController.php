@@ -35,9 +35,12 @@ class BookingManagementController extends Controller
 
     public function show(Booking $booking)
     {
-        $booking->load(['property', 'guests.identityDocument', 'payments']);
+        $booking->load('property');
 
-        return view('admin.bookings.show', compact('booking'));
+        $guests = $booking->guests()->with('identityDocument')->orderBy('position')->paginate(10, ['*'], 'guests_page')->withQueryString();
+        $payments = $booking->payments()->latest()->paginate(10, ['*'], 'payments_page')->withQueryString();
+
+        return view('admin.bookings.show', compact('booking', 'guests', 'payments'));
     }
 
     public function receipt(Booking $booking): Response
@@ -59,7 +62,7 @@ class BookingManagementController extends Controller
     public function calendar()
     {
         return view('admin.bookings.calendar', [
-            'bookings' => Booking::whereNot('status', 'cancelled')->orderBy('check_in')->paginate(10),
+            'bookings' => Booking::whereNot('status', 'cancelled')->orderBy('check_in')->paginate(10)->withQueryString(),
         ]);
     }
 }

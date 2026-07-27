@@ -21,10 +21,10 @@ class CmsController extends Controller
     {
         return view('admin.cms.index', [
             'settings' => SiteSetting::query()->pluck('value', 'key'),
-            'navigation' => NavigationItem::query()->orderBy('location')->orderBy('sort_order')->get(),
-            'sections' => HomepageSection::query()->orderBy('sort_order')->get(),
-            'media' => MediaAsset::query()->where('is_archived', false)->latest()->limit(30)->get(),
-            'themes' => ThemeRevision::query()->latest()->limit(20)->get(),
+            'navigation' => NavigationItem::query()->orderBy('location')->orderBy('sort_order')->paginate(10, ['*'], 'navigation_page')->withQueryString(),
+            'sections' => HomepageSection::query()->orderBy('sort_order')->paginate(10, ['*'], 'sections_page')->withQueryString(),
+            'media' => MediaAsset::query()->where('is_archived', false)->latest()->paginate(12, ['*'], 'media_page')->withQueryString(),
+            'themes' => ThemeRevision::query()->latest()->paginate(10, ['*'], 'themes_page')->withQueryString(),
         ]);
     }
 

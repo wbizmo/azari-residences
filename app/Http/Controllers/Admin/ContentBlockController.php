@@ -13,7 +13,7 @@ class ContentBlockController extends Controller
     public function index(): View
     {
         return view('admin.content.index', [
-            'blocks' => ContentBlock::query()->orderBy('page')->orderBy('sort_order')->get(),
+            'blocks' => ContentBlock::query()->orderBy('page')->orderBy('sort_order')->paginate(config('azari.pagination.per_page', 10), ['*'], 'blocks_page')->withQueryString(),
         ]);
     }
 

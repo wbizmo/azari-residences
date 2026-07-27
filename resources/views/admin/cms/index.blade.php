@@ -154,9 +154,12 @@
             @empty
                 <div class="production-empty-state">No theme revisions yet.</div>
             @endforelse
-        </div>
+    </div>
     </section>
 
+        @if($themes->hasPages())
+            <div class="az-pagination-block">{{ $themes->onEachSide(1)->links() }}</div>
+        @endif
     <section class="az-admin-panel" data-tab-panel="navigation">
         <form class="admin-form az-form-grid" method="POST" action="{{ route('azari.admin.cms.navigation.store') }}">
             @csrf
@@ -191,6 +194,9 @@
         @endforeach
     </section>
 
+        @if($navigation->hasPages())
+            <div class="az-pagination-block">{{ $navigation->onEachSide(1)->links() }}</div>
+        @endif
     <section class="az-admin-panel" data-tab-panel="homepage">
         <form class="admin-form az-form-grid" method="POST" action="{{ route('azari.admin.cms.sections.store') }}">
             @csrf
@@ -228,6 +234,9 @@
         @endforeach
     </section>
 
+        @if($sections->hasPages())
+            <div class="az-pagination-block">{{ $sections->onEachSide(1)->links() }}</div>
+        @endif
     <section class="az-admin-panel" data-tab-panel="seo">
         <form class="admin-form az-form-grid" method="POST" action="{{ route('azari.admin.cms.seo') }}">
             @csrf
@@ -273,6 +282,8 @@
                 <div class="production-empty-state">No media uploaded.</div>
             @endforelse
         </div>
+        @if($media->hasPages())
+            <div class="az-pagination-block">{{ $media->onEachSide(1)->links() }}</div>
+        @endif
     </section>
-<x-azari-pagination-stack :items="get_defined_vars()" />
 @endsection

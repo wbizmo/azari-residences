@@ -37,6 +37,7 @@ final class StaffPermissionResolver
 
         $parts = explode('.', substr($routeName, strlen('azari.admin.')));
         $segment = $parts[0] ?? '';
+        if ($segment === 'dashboard') return null;
         $module = self::MODULE_MAP[$segment] ?? null;
         if (! $module) return null;
 
