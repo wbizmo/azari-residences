@@ -955,3 +955,19 @@ if (document.readyState === 'loading') {
     initialiseAzariPasswordControls();
 }
 /* AZARI_AUTH_PASSWORD_HARD_FIX_END */
+
+/* AZARI_RESPONSIVE_TABLE_HARDENING */
+const initialiseAzariResponsiveTables = () => {
+    document.querySelectorAll('.az-admin-content table, .az-user-content table').forEach((table) => {
+        if (table.closest('.az-responsive-table-shell, .az-admin-table-wrap, .az-s78-table-wrap, .table-responsive, .overflow-x-auto')) return;
+        const shell = document.createElement('div');
+        shell.className = 'az-responsive-table-shell';
+        shell.setAttribute('role', 'region');
+        shell.setAttribute('aria-label', table.getAttribute('aria-label') || 'Scrollable data table');
+        shell.setAttribute('tabindex', '0');
+        table.parentNode.insertBefore(shell, table);
+        shell.appendChild(table);
+    });
+};
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initialiseAzariResponsiveTables, { once: true });
+else initialiseAzariResponsiveTables();

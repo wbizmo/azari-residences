@@ -10,6 +10,7 @@ Route::middleware(['azari.staff'])
     ->group(function (): void {
         Route::get('/cms', [CmsController::class, 'index'])->name('cms.index');
         Route::put('/cms/branding', [CmsController::class, 'branding'])->name('cms.branding');
+        Route::put('/cms/promotion', [CmsController::class, 'promotion'])->name('cms.promotion');
         Route::post('/cms/themes', [CmsController::class, 'theme'])->name('cms.themes.store');
         Route::post('/cms/navigation', [CmsController::class, 'navigationStore'])->name('cms.navigation.store');
         Route::delete('/cms/navigation/{navigationItem}', [CmsController::class, 'navigationDelete'])->name('cms.navigation.delete');

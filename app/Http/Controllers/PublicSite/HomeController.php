@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ContentBlock;
 use App\Models\Location;
 use App\Models\Property;
+use App\Models\Promotion;
 use App\Models\RoomType;
 use App\Models\SiteSetting;
 use Illuminate\Contracts\View\View;
@@ -15,6 +16,15 @@ class HomeController extends Controller
     public function __invoke(): View
     {
         return view('public.home', [
+            'homepagePromotion' => Promotion::query()
+                ->visible()
+                ->where('show_on_homepage', true)
+                ->where('type', 'promotion')
+                ->orderByDesc('is_featured')
+                ->orderBy('sort_order')
+                ->latest('updated_at')
+                ->first(),
+
             'settings' => SiteSetting::query()->pluck('value', 'key'),
 
             'content' => ContentBlock::query()->where('is_active', true)->pluck('value', 'key'),

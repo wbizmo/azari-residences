@@ -25,6 +25,8 @@
 
     @stack('head')
 
+    @include("partials.azari-shell-layout")
+
     <script>
         document.fonts
             .load('24px Material Symbols Outlined')

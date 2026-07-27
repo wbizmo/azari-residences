@@ -6,12 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\HomepageSection;
 use App\Models\MediaAsset;
 use App\Models\NavigationItem;
+use App\Models\Promotion;
 use App\Models\SiteSetting;
 use App\Models\ThemeRevision;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -25,6 +27,7 @@ class CmsController extends Controller
             'sections' => HomepageSection::query()->orderBy('sort_order')->paginate(10, ['*'], 'sections_page')->withQueryString(),
             'media' => MediaAsset::query()->where('is_archived', false)->latest()->paginate(12, ['*'], 'media_page')->withQueryString(),
             'themes' => ThemeRevision::query()->latest()->paginate(10, ['*'], 'themes_page')->withQueryString(),
+            'promotion' => Promotion::query()->where('type', 'promotion')->latest('updated_at')->first(),
         ]);
     }
 
@@ -263,5 +266,50 @@ class CmsController extends Controller
         $mediaAsset->update(['is_archived' => true]);
 
         return back()->with('status', 'Media archived.');
+    }
+    public function promotion(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'title' => ['required', 'string', 'max:160'],
+            'body' => ['required', 'string', 'max:10000'],
+            'cta_label' => ['nullable', 'string', 'max:80'],
+            'cta_url' => ['nullable', 'string', 'max:500'],
+            'show_on_homepage' => ['nullable', 'boolean'],
+        ]);
+
+        $promotion = DB::transaction(function () use ($request, $data): Promotion {
+            $promotion = Promotion::query()
+                ->where('type', 'promotion')
+                ->latest('updated_at')
+                ->first() ?? new Promotion();
+
+            $promotion->fill([
+                'title' => $data['title'],
+                'slug' => $promotion->slug ?: Str::slug($data['title']).'-homepage',
+                'type' => 'promotion',
+                'summary' => null,
+                'body' => $data['body'],
+                'cta_label' => filled($data['cta_label'] ?? null) ? trim($data['cta_label']) : null,
+                'cta_url' => filled($data['cta_url'] ?? null) ? trim($data['cta_url']) : null,
+                'is_active' => $request->boolean('show_on_homepage'),
+                'is_featured' => true,
+                'show_on_homepage' => $request->boolean('show_on_homepage'),
+                'starts_at' => null,
+                'ends_at' => null,
+                'sort_order' => 0,
+            ]);
+            $promotion->save();
+
+            Promotion::query()
+                ->where('type', 'promotion')
+                ->whereKeyNot($promotion->getKey())
+                ->delete();
+
+            return $promotion;
+        });
+
+        return back()
+            ->with('status', 'Homepage promotion settings saved.')
+            ->with('active_cms_tab', 'promotion');
     }
 }

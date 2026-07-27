@@ -5,6 +5,7 @@
     :description="$content['hero_body'] ?? 'Luxury serviced apartments by Azari Residences.'"
 >
 
+    @include('public.partials.promotion-popup')
 
     <section class="azari-home-hero" aria-labelledby="azari-home-hero-title">
         <img

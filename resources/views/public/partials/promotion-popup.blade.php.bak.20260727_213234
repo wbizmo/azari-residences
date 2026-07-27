@@ -1,0 +1,579 @@
+@if(isset($homepagePromotion) && $homepagePromotion)
+@php
+    /*
+     * The fingerprint changes whenever the promotion content changes.
+     * A newly edited promotion therefore bypasses the previous 24-hour dismissal.
+     */
+    $promotionFingerprint = sha1(implode('|', [
+        (string) $homepagePromotion->id,
+        (string) optional($homepagePromotion->updated_at)->timestamp,
+        (string) $homepagePromotion->title,
+        (string) $homepagePromotion->summary,
+        (string) $homepagePromotion->body,
+        (string) $homepagePromotion->cta_label,
+        (string) $homepagePromotion->cta_url,
+    ]));
+@endphp
+
+<div
+    class="az-promo-popup"
+    data-promotion-popup
+    data-promotion-id="{{ $homepagePromotion->id }}"
+    data-promotion-fingerprint="{{ $promotionFingerprint }}"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="az-promo-title"
+    aria-describedby="az-promo-description"
+    hidden
+>
+    <div class="az-promo-popup__overlay" data-promotion-close aria-hidden="true"></div>
+
+    <article
+        class="az-promo-popup__dialog"
+        tabindex="-1"
+        data-promotion-dialog
+    >
+        <div class="az-promo-popup__media">
+            <img
+                src="{{ asset('images/azari-promotions.png') }}"
+                alt=""
+                aria-hidden="true"
+                loading="eager"
+                decoding="async"
+            >
+
+            <div class="az-promo-popup__media-shade" aria-hidden="true"></div>
+
+            <span class="az-promo-popup__badge">
+                <span class="material-symbols-outlined" aria-hidden="true">redeem</span>
+                Exclusive promotion
+            </span>
+
+            <button
+                type="button"
+                class="az-promo-popup__close"
+                data-promotion-close
+                aria-label="Close promotion"
+            >
+                <span class="material-symbols-outlined" aria-hidden="true">close</span>
+            </button>
+        </div>
+
+        <div class="az-promo-popup__content-shell">
+            <div class="az-promo-popup__content" data-promotion-content>
+                <header class="az-promo-popup__heading">
+                    <p class="az-promo-popup__eyebrow">A special invitation</p>
+                    <h2 id="az-promo-title">{{ $homepagePromotion->title }}</h2>
+                </header>
+
+                @if(filled($homepagePromotion->summary))
+                    <p class="az-promo-popup__summary" id="az-promo-description">
+                        {{ $homepagePromotion->summary }}
+                    </p>
+                @elseif(filled($homepagePromotion->body))
+                    <p class="sr-only" id="az-promo-description">Promotion details</p>
+                @else
+                    <p class="sr-only" id="az-promo-description">Current homepage promotion</p>
+                @endif
+
+                @if(filled($homepagePromotion->body))
+                    <div class="az-promo-popup__copy">
+                        {!! nl2br(e($homepagePromotion->body)) !!}
+                    </div>
+                @endif
+            </div>
+
+            <footer class="az-promo-popup__footer">
+                @if(filled($homepagePromotion->cta_label) && filled($homepagePromotion->cta_url))
+                    <a
+                        class="az-promo-popup__cta"
+                        href="{{ $homepagePromotion->cta_url }}"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        <span>{{ $homepagePromotion->cta_label }}</span>
+                        <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+                    </a>
+                @endif
+
+                <button
+                    type="button"
+                    class="az-promo-popup__later"
+                    data-promotion-close
+                >
+                    Maybe later
+                </button>
+            </footer>
+        </div>
+    </article>
+</div>
+
+@push('head')
+<style>
+/*
+|--------------------------------------------------------------------------
+| World-class homepage promotion modal
+|--------------------------------------------------------------------------
+| Popup remains below every preloader.
+| The outer dialog never shows a browser scrollbar.
+| Only long textual content receives a themed nested scrollbar.
+*/
+.az-promo-popup{
+    position:fixed;
+    z-index:9000;
+    inset:0;
+    display:grid;
+    place-items:center;
+    padding:clamp(16px,3vw,34px);
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+    transition:opacity .24s ease,visibility .24s ease;
+}
+.az-promo-popup.is-visible{
+    opacity:1;
+    visibility:visible;
+    pointer-events:auto;
+}
+.az-promo-popup__overlay{
+    position:absolute;
+    inset:0;
+    background:
+        radial-gradient(circle at 50% 20%,rgba(185,149,90,.14),transparent 36rem),
+        rgba(3,13,10,.82);
+    -webkit-backdrop-filter:blur(14px) saturate(.78);
+    backdrop-filter:blur(14px) saturate(.78);
+}
+.az-promo-popup__dialog{
+    position:relative;
+    z-index:1;
+    display:grid;
+    grid-template-rows:auto minmax(0,1fr);
+    width:min(100%,760px);
+    max-height:min(90dvh,880px);
+    overflow:hidden;
+    color:#18231f;
+    background:#fffdf8;
+    border:1px solid rgba(255,255,255,.25);
+    border-radius:0;
+    outline:none;
+    box-shadow:
+        0 44px 130px rgba(0,0,0,.52),
+        0 0 0 1px rgba(185,149,90,.12);
+    transform:translateY(22px) scale(.982);
+    transition:transform .24s cubic-bezier(.2,.8,.2,1);
+}
+.az-promo-popup.is-visible .az-promo-popup__dialog{
+    transform:none;
+}
+.az-promo-popup__media{
+    position:relative;
+    aspect-ratio:16/7;
+    min-height:220px;
+    max-height:330px;
+    overflow:hidden;
+    background:#102b22;
+}
+.az-promo-popup__media img{
+    display:block;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    object-position:center;
+    transform:scale(1.002);
+}
+.az-promo-popup__media-shade{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background:
+        linear-gradient(180deg,rgba(4,18,13,.12) 0%,rgba(4,18,13,.03) 43%,rgba(4,18,13,.72) 100%),
+        linear-gradient(90deg,rgba(4,18,13,.35),transparent 55%);
+}
+.az-promo-popup__badge{
+    position:absolute;
+    z-index:3;
+    left:clamp(20px,4vw,34px);
+    bottom:20px;
+    display:inline-flex;
+    align-items:center;
+    gap:9px;
+    min-height:36px;
+    padding:8px 12px;
+    color:#102b22;
+    background:#f7e7c7;
+    border:1px solid rgba(255,255,255,.65);
+    border-radius:0;
+    box-shadow:0 10px 30px rgba(0,0,0,.18);
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    font-size:.67rem;
+    font-weight:850;
+}
+.az-promo-popup__badge .material-symbols-outlined{
+    color:#7d5a25;
+    font-size:18px;
+}
+.az-promo-popup__close{
+    position:absolute;
+    z-index:4;
+    top:16px;
+    right:16px;
+    display:grid;
+    place-items:center;
+    width:44px;
+    height:44px;
+    padding:0;
+    color:#fffdf8;
+    background:#0d2b22e8;
+    border:1px solid rgba(255,255,255,.42);
+    border-radius:0;
+    cursor:pointer;
+    -webkit-backdrop-filter:blur(10px);
+    backdrop-filter:blur(10px);
+    transition:background .16s ease,transform .16s ease,border-color .16s ease;
+}
+.az-promo-popup__close:hover{
+    background:#1d4a3c;
+    border-color:#fff;
+    transform:translateY(-1px);
+}
+.az-promo-popup__close:focus-visible,
+.az-promo-popup__cta:focus-visible,
+.az-promo-popup__later:focus-visible{
+    outline:2px solid #d8b87a;
+    outline-offset:3px;
+}
+.az-promo-popup__close .material-symbols-outlined{
+    font-size:22px;
+}
+.az-promo-popup__content-shell{
+    display:grid;
+    grid-template-rows:minmax(0,1fr) auto;
+    min-height:0;
+    overflow:hidden;
+}
+.az-promo-popup__content{
+    min-height:0;
+    overflow:hidden;
+    padding:clamp(30px,5vw,50px) clamp(26px,6vw,58px) 24px;
+}
+.az-promo-popup__content.is-scrollable{
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    scrollbar-width:thin;
+    scrollbar-color:#b9955a #eee8dd;
+    padding-right:calc(clamp(26px,6vw,58px) - 8px);
+}
+.az-promo-popup__content.is-scrollable::-webkit-scrollbar{
+    width:9px;
+}
+.az-promo-popup__content.is-scrollable::-webkit-scrollbar-track{
+    background:#eee8dd;
+}
+.az-promo-popup__content.is-scrollable::-webkit-scrollbar-thumb{
+    background:#b9955a;
+    border:2px solid #eee8dd;
+}
+.az-promo-popup__content.is-scrollable::-webkit-scrollbar-thumb:hover{
+    background:#8f6c38;
+}
+.az-promo-popup__heading{
+    max-width:650px;
+}
+.az-promo-popup__eyebrow{
+    margin:0 0 12px;
+    color:#8f6c38;
+    letter-spacing:.17em;
+    text-transform:uppercase;
+    font-size:.68rem;
+    font-weight:850;
+}
+.az-promo-popup__body h2,
+.az-promo-popup__heading h2{
+    margin:0;
+    color:#102f26;
+    font-family:var(--font-heading,Georgia,serif);
+    font-size:clamp(2.25rem,5vw,4.15rem);
+    font-weight:500;
+    line-height:.98;
+    letter-spacing:-.042em;
+    text-wrap:balance;
+}
+.az-promo-popup__summary{
+    max-width:640px;
+    margin:20px 0 0;
+    color:#354b43;
+    font-size:clamp(1rem,1.55vw,1.12rem);
+    line-height:1.72;
+}
+.az-promo-popup__copy{
+    max-width:640px;
+    margin-top:17px;
+    color:#68736e;
+    font-size:.95rem;
+    line-height:1.78;
+}
+.az-promo-popup__footer{
+    display:grid;
+    justify-items:center;
+    gap:17px;
+    padding:8px clamp(26px,6vw,58px) clamp(25px,4vw,36px);
+    background:
+        linear-gradient(180deg,rgba(255,253,248,0),#fffdf8 20%);
+}
+.az-promo-popup__cta{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:11px;
+    width:min(100%,420px);
+    min-height:54px;
+    padding:14px 24px;
+    color:#fff;
+    background:#173d33;
+    border:1px solid #173d33;
+    border-radius:0;
+    font-size:.84rem;
+    font-weight:850;
+    letter-spacing:.035em;
+    text-align:center;
+    text-decoration:none;
+    transition:background .16s ease,border-color .16s ease,transform .16s ease,box-shadow .16s ease;
+}
+.az-promo-popup__cta:hover{
+    color:#fff;
+    background:#245c4b;
+    border-color:#245c4b;
+    transform:translateY(-2px);
+    box-shadow:0 14px 30px rgba(23,61,51,.2);
+}
+.az-promo-popup__cta .material-symbols-outlined{
+    flex:none;
+    font-size:19px;
+    transition:transform .16s ease;
+}
+.az-promo-popup__cta:hover .material-symbols-outlined{
+    transform:translateX(4px);
+}
+.az-promo-popup__later{
+    display:inline;
+    width:auto;
+    margin:0;
+    padding:2px 0 4px;
+    color:#52615b;
+    background:transparent;
+    border:0;
+    border-bottom:1px solid currentColor;
+    border-radius:0;
+    font-size:.79rem;
+    font-weight:750;
+    cursor:pointer;
+    opacity:.84;
+    transition:color .16s ease,opacity .16s ease;
+}
+.az-promo-popup__later:hover{
+    color:#173d33;
+    opacity:1;
+}
+.azari-preloader,
+.public-preloader,
+[data-preloader],
+.site-preloader,
+.page-preloader{
+    z-index:99999!important;
+}
+@media(max-width:640px){
+    .az-promo-popup{
+        align-items:end;
+        padding:0;
+    }
+    .az-promo-popup__dialog{
+        width:100%;
+        max-height:94dvh;
+        border-left:0;
+        border-right:0;
+        border-bottom:0;
+    }
+    .az-promo-popup__media{
+        aspect-ratio:16/8.5;
+        min-height:190px;
+        max-height:240px;
+    }
+    .az-promo-popup__badge{
+        left:18px;
+        bottom:16px;
+    }
+    .az-promo-popup__content{
+        padding:27px 22px 20px;
+    }
+    .az-promo-popup__content.is-scrollable{
+        padding-right:16px;
+    }
+    .az-promo-popup__heading h2{
+        font-size:clamp(2.1rem,11vw,3.2rem);
+    }
+    .az-promo-popup__footer{
+        padding:8px 22px 24px;
+    }
+    .az-promo-popup__cta{
+        width:100%;
+    }
+}
+@media(max-height:720px) and (min-width:641px){
+    .az-promo-popup__media{
+        min-height:180px;
+        max-height:235px;
+    }
+    .az-promo-popup__content{
+        padding-top:26px;
+    }
+}
+@media(prefers-reduced-motion:reduce){
+    .az-promo-popup,
+    .az-promo-popup__dialog,
+    .az-promo-popup__close,
+    .az-promo-popup__cta,
+    .az-promo-popup__cta .material-symbols-outlined{
+        transition:none;
+    }
+}
+</style>
+@endpush
+
+@push('scripts')
+<script>
+(() => {
+    const popup = document.querySelector('[data-promotion-popup]');
+    if (!popup) return;
+
+    const dialog = popup.querySelector('[data-promotion-dialog]');
+    const content = popup.querySelector('[data-promotion-content]');
+    const fingerprint = popup.dataset.promotionFingerprint || popup.dataset.promotionId || 'default';
+    const storageKey = 'azari-homepage-promotion-dismissal';
+    const dismissalLifetime = 24 * 60 * 60 * 1000;
+    let lastFocused = null;
+    let closeTimer = null;
+
+    const updateScrollableState = () => {
+        if (!content) return;
+
+        content.classList.remove('is-scrollable');
+
+        requestAnimationFrame(() => {
+            const needsScroll = content.scrollHeight > content.clientHeight + 2;
+            content.classList.toggle('is-scrollable', needsScroll);
+        });
+    };
+
+    const readDismissal = () => {
+        try {
+            const value = JSON.parse(localStorage.getItem(storageKey) || 'null');
+
+            if (!value || typeof value !== 'object') return null;
+            if (value.fingerprint !== fingerprint) return null;
+            if (!Number.isFinite(Number(value.dismissedAt))) return null;
+
+            return value;
+        } catch (_) {
+            return null;
+        }
+    };
+
+    const isDismissed = () => {
+        const dismissal = readDismissal();
+        if (!dismissal) return false;
+
+        return Date.now() - Number(dismissal.dismissedAt) < dismissalLifetime;
+    };
+
+    const rememberDismissal = () => {
+        try {
+            localStorage.setItem(storageKey, JSON.stringify({
+                fingerprint,
+                dismissedAt: Date.now(),
+            }));
+        } catch (_) {
+            /* Storage may be disabled; the popup can safely reappear next load. */
+        }
+    };
+
+    const getFocusableElements = () => {
+        if (!dialog) return [];
+
+        return [...dialog.querySelectorAll(
+            'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])'
+        )].filter((element) => !element.hidden && element.offsetParent !== null);
+    };
+
+    const close = ({ remember = true } = {}) => {
+        if (!popup.classList.contains('is-visible')) return;
+
+        if (remember) rememberDismissal();
+
+        popup.classList.remove('is-visible');
+        document.body.classList.remove('is-locked');
+
+        window.clearTimeout(closeTimer);
+        closeTimer = window.setTimeout(() => {
+            popup.hidden = true;
+            lastFocused?.focus?.();
+        }, 250);
+    };
+
+    const open = () => {
+        lastFocused = document.activeElement;
+        popup.hidden = false;
+
+        requestAnimationFrame(() => {
+            updateScrollableState();
+            popup.classList.add('is-visible');
+            document.body.classList.add('is-locked');
+            dialog?.focus({ preventScroll:true });
+        });
+    };
+
+    popup.querySelectorAll('[data-promotion-close]').forEach((element) => {
+        element.addEventListener('click', () => close());
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (!popup.classList.contains('is-visible')) return;
+
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            close();
+            return;
+        }
+
+        if (event.key !== 'Tab') return;
+
+        const focusable = getFocusableElements();
+        if (!focusable.length) {
+            event.preventDefault();
+            dialog?.focus();
+            return;
+        }
+
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+
+        if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+        }
+    });
+
+    window.addEventListener('resize', updateScrollableState, { passive:true });
+
+    window.addEventListener('load', () => {
+        if (isDismissed()) return;
+        window.setTimeout(open, 700);
+    }, { once:true });
+})();
+</script>
+@endpush
+@endif
