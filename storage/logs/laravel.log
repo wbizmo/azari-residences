@@ -151,3 +151,11 @@
 #72 /home/runner/workspace/vendor/phpunit/phpunit/phpunit(104): PHPUnit\\TextUI\\Application->run(Array)
 #73 {main}
 "} 
+[2026-07-27 15:39:08] local.WARNING: Azari local QR generation failed. {"booking_reference":"AZR-DEMO-001","document_type":"invoice","exception":"Error","message":"Call to undefined method Endroid\\QrCode\\Builder\\Builder::create()"} 
+[2026-07-27 15:39:12] local.WARNING: Azari local QR generation failed. {"booking_reference":"AZR-DEMO-002","document_type":"invoice","exception":"Error","message":"Call to undefined method Endroid\\QrCode\\Builder\\Builder::create()"} 
+[2026-07-27 15:39:14] local.WARNING: Azari local QR generation failed. {"booking_reference":"AZR-DEMO-003","document_type":"invoice","exception":"Error","message":"Call to undefined method Endroid\\QrCode\\Builder\\Builder::create()"} 
+[2026-07-27 15:39:19] local.WARNING: Azari local QR generation failed. {"booking_reference":"AZR-DEMO-004","document_type":"invoice","exception":"Error","message":"Call to undefined method Endroid\\QrCode\\Builder\\Builder::create()"} 
+[2026-07-27 16:18:31] local.WARNING: Azari local QR generation failed. {"booking_reference":"AZR-DEMO-001","document_type":"invoice","exception":"Error","message":"Call to undefined method Endroid\\QrCode\\Builder\\Builder::create()"} 
+[2026-07-27 16:18:35] local.WARNING: Azari local QR generation failed. {"booking_reference":"AZR-DEMO-002","document_type":"invoice","exception":"Error","message":"Call to undefined method Endroid\\QrCode\\Builder\\Builder::create()"} 
+[2026-07-27 16:18:38] local.WARNING: Azari local QR generation failed. {"booking_reference":"AZR-DEMO-003","document_type":"invoice","exception":"Error","message":"Call to undefined method Endroid\\QrCode\\Builder\\Builder::create()"} 
+[2026-07-27 16:18:40] local.WARNING: Azari local QR generation failed. {"booking_reference":"AZR-DEMO-004","document_type":"invoice","exception":"Error","message":"Call to undefined method Endroid\\QrCode\\Builder\\Builder::create()"} 
