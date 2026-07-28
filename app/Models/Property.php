@@ -16,6 +16,10 @@ class Property extends Model
     protected $perPage = 10;
 
     protected $fillable = [
+        'owner_id',
+        'owner_listing_id',
+        'owner_share_percentage',
+        'managed_for_owner',
         'location_id',
         'building_id',
         'room_type_id',
@@ -72,7 +76,19 @@ class Property extends Model
             'service_charge' => 'decimal:2',
             'tax_rate' => 'decimal:3',
             'same_day_booking' => 'boolean',
+            'managed_for_owner' => 'boolean',
+            'owner_share_percentage' => 'decimal:2',
         ];
+    }
+
+    public function owner(): BelongsTo
+    {
+        return ->belongsTo(User::class, 'owner_id');
+    }
+
+    public function ownerListing(): BelongsTo
+    {
+        return ->belongsTo(PropertyListing::class, 'owner_listing_id');
     }
 
     public function locationRecord(): BelongsTo

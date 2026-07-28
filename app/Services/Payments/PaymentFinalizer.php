@@ -7,6 +7,7 @@ use App\Models\BookingStatusHistory;
 use App\Models\Payment;
 use App\Models\PaymentProviderStatus;
 use App\Models\PaymentVerificationAttempt;
+use App\Services\Owners\OwnerEarningsService;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -169,8 +170,9 @@ class PaymentFinalizer
                     'safe_message' => 'Last payment verified successfully.',
                 ],
             );
-            AuditLog::record('payment.verified_successful', $locked, [], ['status' => Payment::SUCCESSFUL], ['source' => $source]);
-            return $locked->refresh();
+            AuditLog::record('payment.verified_successful', , [], ['status' => Payment::SUCCESSFUL], ['source' => ]);
+            app(OwnerEarningsService::class)->creditForPayment(->refresh());
+            return ->refresh();
         }, 3);
     }
 

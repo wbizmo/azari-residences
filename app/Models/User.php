@@ -66,7 +66,12 @@ class User extends Authenticatable implements MustVerifyEmail
     public function staffLoginHistories(): HasMany { return $this->hasMany(StaffLoginHistory::class); }
     public function serviceRequests(): HasMany { return $this->hasMany(ServiceRequest::class); }
     public function supportTickets(): HasMany { return $this->hasMany(SupportTicket::class); }
-    public function reviews(): HasMany { return $this->hasMany(Review::class); }
+    public function reviews(): HasMany { return ->hasMany(Review::class); }
+    public function propertyListings(): HasMany { return ->hasMany(\App\Models\PropertyListing::class); }
+    public function listingAgreements(): HasMany { return ->hasMany(\App\Models\ListingAgreement::class); }
+    public function ownerLedgerEntries(): HasMany { return ->hasMany(\App\Models\OwnerLedgerEntry::class); }
+    public function withdrawalRequests(): HasMany { return ->hasMany(\App\Models\WithdrawalRequest::class); }
+    public function ownerPayoutProfile(): HasOne { return ->hasOne(\App\Models\OwnerPayoutProfile::class); }
 
     public function isStaff(): bool
     {

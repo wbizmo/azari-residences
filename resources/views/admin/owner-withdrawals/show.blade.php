@@ -1,0 +1,10 @@
+@extends('admin.layouts.app')
+@section('content')
+<div class="az-premium-page-head"><div><span class="az-premium-kicker">{{ $withdrawal->reference }}</span><h1>{{ $withdrawal->currency }} {{ number_format($withdrawal->amount,2) }}</h1><p>{{ $withdrawal->user->name }} · {{ ucfirst($withdrawal->gateway) }} · {{ ucfirst($withdrawal->status) }}</p></div></div>
+<div class="az-s78-grid">
+<section class="az-premium-card"><div class="az-premium-card-head"><div><h2>Request details</h2></div></div><dl class="az-s78-detail"><div><dt>Owner</dt><dd>{{ $withdrawal->user->name }}</dd></div><div><dt>Email</dt><dd>{{ $withdrawal->user->email }}</dd></div><div><dt>Gateway</dt><dd>{{ ucfirst($withdrawal->gateway) }}</dd></div><div><dt>Destination</dt><dd>{{ $withdrawal->gateway==='paypal'?data_get($withdrawal->destination_snapshot,'paypal_recipient'):data_get($withdrawal->destination_snapshot,'stripe_connected_account_id') }}</dd></div><div><dt>Provider reference</dt><dd>{{ $withdrawal->provider_reference ?: 'Not processed' }}</dd></div></dl></section>
+@if(in_array($withdrawal->status,['pending','failed']))
+<section class="az-premium-card"><form class="az-s78-form" method="POST" action="{{ route('azari.admin.owner-withdrawals.process',$withdrawal) }}">@csrf<div class="az-premium-card-head"><div><h2>Process payout</h2><p>This sends a real provider request when live credentials are configured.</p></div></div><label class="az-s78-field"><span>Admin note</span><textarea name="admin_note"></textarea></label><button class="az-premium-button">Process {{ ucfirst($withdrawal->gateway) }} payout</button></form><hr style="margin:24px 0"><form class="az-s78-form" method="POST" action="{{ route('azari.admin.owner-withdrawals.reject',$withdrawal) }}">@csrf<label class="az-s78-field"><span>Rejection reason</span><textarea name="rejection_reason" required minlength="10"></textarea></label><button class="az-premium-button" style="background:#8b3036">Reject withdrawal</button></form></section>
+@endif
+</div>
+@endsection
