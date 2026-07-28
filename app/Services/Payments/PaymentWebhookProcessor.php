@@ -22,7 +22,11 @@ class PaymentWebhookProcessor
         $provider = $this->manager->driver($providerName);
         $raw = $request->getContent();
         $payload = $request->all();
-        if ($payload === [] && $raw !== '') $payload = json_decode($raw, true) ?: [];
+
+        if ($payload === [] && $raw !== '') {
+            $payload = json_decode($raw, true) ?: [];
+        }
+
         $references = $provider->webhookReferences($payload);
         $signatureValid = $provider->webhookSignatureIsValid($raw, $request->headers->all());
         $eventId = (string) ($references['event_id'] ?? hash('sha256', $raw));
@@ -36,59 +40,140 @@ class PaymentWebhookProcessor
                 'processed' => false,
                 'received_at' => now(),
                 'safe_payload' => $this->safePayload($payload),
+                'attempt_count' => 0,
             ],
         );
 
         PaymentProviderStatus::query()->updateOrCreate(
             ['provider' => $providerName],
-            ['enabled' => $provider->enabled(), 'mode' => $provider->mode(), 'last_webhook_at' => now()],
+            [
+                'enabled' => $provider->enabled(),
+                'mode' => $provider->mode(),
+                'last_webhook_at' => now(),
+            ],
         );
 
         if (! $signatureValid) {
             if ($event->wasRecentlyCreated) {
-                $event->update(['processed' => true, 'processed_at' => now(), 'safe_error' => 'Invalid webhook signature.']);
-                AuditLog::record('payment.webhook_rejected', $event, [], [], ['provider' => $providerName]);
+                $event->update([
+                    'processed' => true,
+                    'processed_at' => now(),
+                    'safe_error' => 'Invalid webhook signature or provider authentication.',
+                ]);
+                AuditLog::record('payment.webhook_rejected', $event, [], [], [
+                    'provider' => $providerName,
+                ]);
             }
-            return ['duplicate' => ! $event->wasRecentlyCreated, 'processed' => false, 'invalid_signature' => true];
+
+            return [
+                'duplicate' => ! $event->wasRecentlyCreated,
+                'processed' => false,
+                'invalid_signature' => true,
+            ];
         }
 
-        if (blank($references['merchant_reference'] ?? null) && blank($references['provider_reference'] ?? null)) {
-            $event->update(['processed' => true, 'processed_at' => now(), 'safe_error' => 'Payment references are missing.']);
-            return ['duplicate' => ! $event->wasRecentlyCreated, 'processed' => false, 'malformed' => true];
+        if (blank($references['merchant_reference'] ?? null)
+            && blank($references['provider_reference'] ?? null)
+        ) {
+            $event->update([
+                'processed' => true,
+                'processed_at' => now(),
+                'safe_error' => 'Payment references are missing.',
+            ]);
+
+            return [
+                'duplicate' => ! $event->wasRecentlyCreated,
+                'processed' => false,
+                'malformed' => true,
+            ];
         }
 
         $payment = Payment::query()
-            ->when(filled($references['merchant_reference'] ?? null), fn ($q) => $q->where('reference', $references['merchant_reference']))
-            ->when(blank($references['merchant_reference'] ?? null) && filled($references['provider_reference'] ?? null), fn ($q) => $q->where('provider_reference', $references['provider_reference']))
+            ->when(
+                filled($references['merchant_reference'] ?? null),
+                fn ($query) => $query->where('reference', $references['merchant_reference'])
+            )
+            ->when(
+                blank($references['merchant_reference'] ?? null)
+                    && filled($references['provider_reference'] ?? null),
+                fn ($query) => $query->where('provider_reference', $references['provider_reference'])
+            )
             ->first();
 
         if (! $payment) {
-            $event->update(['processed' => true, 'processed_at' => now(), 'safe_error' => 'Payment record not found.']);
-            return ['duplicate' => ! $event->wasRecentlyCreated, 'processed' => false, 'missing_payment' => true];
+            $event->update([
+                'processed' => true,
+                'processed_at' => now(),
+                'safe_error' => 'Payment record not found.',
+            ]);
+
+            return [
+                'duplicate' => ! $event->wasRecentlyCreated,
+                'processed' => false,
+                'missing_payment' => true,
+            ];
         }
 
-        $event->update(['payment_id' => $payment->id]);
+        $event->update([
+            'payment_id' => $payment->id,
+            'attempt_count' => ((int) $event->attempt_count) + 1,
+        ]);
+
         try {
-            // Duplicate delivery is acknowledged but safely re-queried while the payment
-            // remains unresolved. The unique event row prevents duplicate history records.
-            if (! $event->wasRecentlyCreated && in_array($payment->status, [Payment::SUCCESSFUL, 'successful_excess'], true)) {
+            if (! $event->wasRecentlyCreated
+                && in_array($payment->status, [Payment::SUCCESSFUL, 'successful_excess'], true)
+            ) {
                 return ['duplicate' => true, 'processed' => true];
             }
 
-            $providerReference = (string) ($references['provider_reference'] ?? $payment->provider_reference ?? '');
+            $providerReference = (string) (
+                $references['provider_reference']
+                ?? $payment->provider_reference
+                ?? ''
+            );
+
             $verification = $provider->verify($providerReference);
             $this->finalizer->apply($payment, $verification, 'webhook');
-            $event->update(['processed' => true, 'processed_at' => now(), 'safe_error' => null]);
-            return ['duplicate' => ! $event->wasRecentlyCreated, 'processed' => true];
-        } catch (\Throwable $e) {
+
+            $event->update([
+                'processed' => true,
+                'processed_at' => now(),
+                'next_attempt_at' => null,
+                'safe_error' => null,
+            ]);
+
+            return [
+                'duplicate' => ! $event->wasRecentlyCreated,
+                'processed' => true,
+                'merchant_reference' => $references['merchant_reference'] ?? '',
+                'provider_reference' => $providerReference,
+                'event_type' => $references['event_type'] ?? null,
+            ];
+        } catch (\Throwable $exception) {
             Log::error('Payment webhook processing failed.', [
                 'provider' => $providerName,
                 'payment_reference' => $payment->reference,
                 'event_id' => $eventId,
-                'exception' => $e,
+                'exception' => $exception,
             ]);
-            $event->update(['processed' => true, 'processed_at' => now(), 'safe_error' => 'Webhook verification failed.']);
-            return ['duplicate' => ! $event->wasRecentlyCreated, 'processed' => false, 'error' => true];
+
+            // Do not mark a transient verification failure as permanently
+            // processed. Scheduled reconciliation remains the fallback.
+            $event->update([
+                'processed' => false,
+                'processed_at' => null,
+                'next_attempt_at' => now()->addMinutes(5),
+                'safe_error' => 'Webhook verification failed; scheduled reconciliation will retry.',
+            ]);
+
+            return [
+                'duplicate' => ! $event->wasRecentlyCreated,
+                'processed' => false,
+                'error' => true,
+                'merchant_reference' => $references['merchant_reference'] ?? '',
+                'provider_reference' => $references['provider_reference'] ?? '',
+                'event_type' => $references['event_type'] ?? null,
+            ];
         }
     }
 

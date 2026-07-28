@@ -29,6 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'payments/*/webhook',
             'payments/*/callback/*',
+            'webhooks/twilio/message-status',
         ]);
         $middleware->trustProxies(at: '*');
     })

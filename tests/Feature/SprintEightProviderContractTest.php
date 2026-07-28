@@ -19,6 +19,7 @@ class SprintEightProviderContractTest extends TestCase
         config()->set('azari.payments.flutterwave', [
             'enabled' => true, 'mode' => 'test', 'base_url' => 'https://api.flutterwave.test',
             'secret_key' => 'secret', 'webhook_secret' => 'hook-secret',
+            'initialise_path' => '/v3/payments', 'verify_path' => '/v3/transactions/{id}/verify',
         ]);
         Http::fake([
             'https://api.flutterwave.test/v3/payments' => Http::response(['status' => 'success', 'data' => ['link' => 'https://checkout.test']], 200),
@@ -41,6 +42,10 @@ class SprintEightProviderContractTest extends TestCase
         config()->set('azari.payments.pesapal', [
             'enabled' => true, 'mode' => 'sandbox', 'base_url' => 'https://pesapal.test',
             'consumer_key' => 'key', 'consumer_secret' => 'secret', 'notification_id' => 'notification',
+            'callback_url' => 'https://azari.test/payments/pesapal/callback',
+            'auth_path' => '/api/Auth/RequestToken',
+            'submit_order_path' => '/api/Transactions/SubmitOrderRequest',
+            'status_path' => '/api/Transactions/GetTransactionStatus',
         ]);
         Http::fake([
             'https://pesapal.test/api/Auth/RequestToken' => Http::response(['token' => 'token'], 200),
@@ -55,9 +60,17 @@ class SprintEightProviderContractTest extends TestCase
     public function test_intouch_adapter_is_environment_configurable_and_verifies_hmac(): void
     {
         config()->set('azari.payments.intouch', [
-            'enabled' => true, 'mode' => 'test', 'base_url' => 'https://intouch.test',
+            'enabled' => true, 'mode' => 'test', 'profile' => 'custom_v1', 'base_url' => 'https://intouch.test',
             'merchant_id' => 'merchant', 'username' => 'user', 'password' => 'pass', 'secret' => 'api-secret',
-            'webhook_secret' => 'webhook-secret', 'initialise_path' => '/start', 'verify_path' => '/status/{reference}', 'health_path' => '',
+            'webhook_secret' => 'webhook-secret', 'callback_url' => 'https://azari.test/payments/intouch/callback',
+            'auth_mode' => 'basic_and_headers', 'merchant_header' => 'X-Merchant-ID', 'secret_header' => 'X-API-Secret',
+            'webhook_signature_header' => 'x-intouch-signature',
+            'initialise_path' => '/start', 'verify_path' => '/status/{reference}', 'health_path' => '',
+            'checkout_url_field' => 'checkout_url', 'provider_reference_field' => 'transaction_id',
+            'merchant_reference_field' => 'merchant_reference', 'status_field' => 'status',
+            'amount_field' => 'amount', 'currency_field' => 'currency',
+            'successful_statuses' => ['SUCCESS', 'SUCCESSFUL', 'COMPLETED', 'PAID'],
+            'failed_statuses' => ['FAILED', 'DECLINED', 'CANCELLED', 'INVALID'],
         ]);
         Http::fake([
             'https://intouch.test/start' => Http::response(['data' => ['transaction_id' => 'I-1', 'checkout_url' => 'https://intouch-checkout.test']], 200),

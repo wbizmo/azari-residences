@@ -16,6 +16,7 @@ use App\Http\Controllers\UserArea\UserNotificationController;
 use App\Http\Controllers\UserArea\UserPaymentController;
 use App\Http\Controllers\UserArea\UserProfileController;
 use App\Http\Controllers\UserArea\UserSecurityController;
+use App\Http\Controllers\Webhooks\TwilioMessageStatusController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'verified', 'azari.customer'])->prefix('account')->name('user.')->group(function (): void {
@@ -47,6 +48,8 @@ Route::middleware(['auth', 'verified', 'azari.customer'])->prefix('account')->na
     Route::get('/service-requests', fn (UserContactController $controller) => $controller('service-requests'))->name('service-requests');
     Route::get('/support-tickets', fn (UserContactController $controller) => $controller('support-tickets'))->name('support-tickets');
 });
+
+Route::post('/webhooks/twilio/message-status', TwilioMessageStatusController::class)->middleware('throttle:600,1')->name('webhooks.twilio.message-status');
 
 Route::get('/booking/{reference}/payment', [PaymentCheckoutController::class, 'select'])->name('public.payment.select');
 Route::post('/booking/{reference}/payment', [PaymentCheckoutController::class, 'initialise'])->middleware('throttle:20,1')->name('public.payment.initialise');

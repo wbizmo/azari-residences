@@ -23,7 +23,15 @@ final class TwilioSmsChannel
         ]);
         try {
             $result = $this->provider->send($notifiable->phone, $message);
-            $log->update(['status' => 'sent', 'sent_at' => now(), 'provider_reference' => $result['sid'] ?? null]);
+            $providerStatus = strtolower((string) ($result['status'] ?? 'queued'));
+            $log->update([
+                'status' => in_array($providerStatus, ['sent', 'delivered', 'read'], true) ? 'sent' : 'queued',
+                'provider_reference' => $result['sid'] ?? null,
+                'provider_status' => $providerStatus,
+                'status_updated_at' => now(),
+                'sent_at' => in_array($providerStatus, ['sent', 'delivered', 'read'], true) ? now() : null,
+                'delivered_at' => in_array($providerStatus, ['delivered', 'read'], true) ? now() : null,
+            ]);
         } catch (\Throwable $e) {
             Log::error('Azari SMS delivery failed', ['log_id' => $log->id, 'exception' => $e]);
             $log->update(['status' => 'failed', 'failed_at' => now(), 'safe_error' => 'The text message could not be delivered.', 'retry_count' => $log->retry_count + 1]);

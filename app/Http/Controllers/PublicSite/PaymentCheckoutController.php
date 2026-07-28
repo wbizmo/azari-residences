@@ -98,8 +98,32 @@ class PaymentCheckoutController extends Controller
     public function webhook(Request $request, string $provider, PaymentWebhookProcessor $processor): JsonResponse
     {
         abort_unless(in_array($provider, ['flutterwave', 'pesapal', 'intouch'], true), 404);
+
+        if ($provider !== 'pesapal' && ! $request->isMethod('POST')) {
+            abort(405);
+        }
+
         $result = $processor->process($provider, $request);
-        $status = ($result['invalid_signature'] ?? false) ? 401 : (($result['malformed'] ?? false) ? 400 : 200);
+
+        if ($provider === 'pesapal') {
+            return response()->json([
+                'orderNotificationType' => $result['event_type'] ?? 'IPNCHANGE',
+                'orderTrackingId' => $result['provider_reference'] ?? (string) (
+                    $request->input('OrderTrackingId')
+                    ?: $request->input('orderTrackingId')
+                ),
+                'orderMerchantReference' => $result['merchant_reference'] ?? (string) (
+                    $request->input('OrderMerchantReference')
+                    ?: $request->input('orderMerchantReference')
+                ),
+                'status' => ($result['processed'] ?? false) ? 200 : 500,
+            ], 200);
+        }
+
+        $status = ($result['invalid_signature'] ?? false)
+            ? 401
+            : (($result['malformed'] ?? false) ? 400 : 200);
+
         return response()->json(['received' => true, ...$result], $status);
     }
 

@@ -15,7 +15,11 @@ final class TwilioSmsService implements SmsProvider
     {
         return (bool) config('services.twilio.enabled')
             && filled(config('services.twilio.sid'))
-            && filled(config('services.twilio.token'));
+            && filled(config('services.twilio.token'))
+            && (
+                filled(config('services.twilio.messaging_service_sid'))
+                || filled(config('services.twilio.from'))
+            );
     }
 
     public function whatsappEnabled(): bool
@@ -28,7 +32,7 @@ final class TwilioSmsService implements SmsProvider
     public function send(string $recipient, string $message, array $options = []): array
     {
         if (! $this->enabled()) {
-            throw new RuntimeException('Twilio SMS is not configured.');
+            throw new RuntimeException('Twilio SMS is not completely configured.');
         }
 
         $payload = [
@@ -37,6 +41,7 @@ final class TwilioSmsService implements SmsProvider
         ];
 
         $messagingService = config('services.twilio.messaging_service_sid');
+
         if (filled($messagingService)) {
             $payload['MessagingServiceSid'] = $messagingService;
         } else {
@@ -49,7 +54,7 @@ final class TwilioSmsService implements SmsProvider
     public function sendWhatsApp(string $recipient, string $message, array $options = []): array
     {
         if (! $this->whatsappEnabled()) {
-            throw new RuntimeException('Twilio WhatsApp is not configured.');
+            throw new RuntimeException('Twilio WhatsApp is not completely configured.');
         }
 
         $payload = [
@@ -59,8 +64,12 @@ final class TwilioSmsService implements SmsProvider
 
         if (filled($options['content_sid'] ?? null)) {
             $payload['ContentSid'] = $options['content_sid'];
+
             if (! empty($options['content_variables'])) {
-                $payload['ContentVariables'] = json_encode($options['content_variables'], JSON_THROW_ON_ERROR);
+                $payload['ContentVariables'] = json_encode(
+                    $options['content_variables'],
+                    JSON_THROW_ON_ERROR
+                );
             }
         } else {
             $payload['Body'] = mb_substr(trim($message), 0, 1500);
@@ -73,20 +82,33 @@ final class TwilioSmsService implements SmsProvider
     {
         $sid = (string) config('services.twilio.sid');
         $callback = $options['status_callback'] ?? config('services.twilio.status_callback');
+
         if (filled($callback)) {
+            if (! filter_var($callback, FILTER_VALIDATE_URL)) {
+                throw new RuntimeException('Twilio StatusCallback must be a fully qualified URL.');
+            }
+
             $payload['StatusCallback'] = $callback;
         }
 
-        $response = $this->client()->asForm()->post(
-            "https://api.twilio.com/2010-04-01/Accounts/{$sid}/Messages.json",
-            $payload,
-        );
+        // Message creation is intentionally not retried automatically. A
+        // timeout may occur after Twilio accepted the message, and retrying
+        // could send the customer a duplicate notification.
+        $response = $this->client()->asForm()->post($this->messagesEndpoint($sid), $payload);
 
         if (! $response->successful()) {
-            throw new RuntimeException('Twilio rejected the message: '.($response->json('message') ?: 'delivery failed'));
+            throw new RuntimeException(
+                'Twilio rejected the message: '.($response->json('message') ?: 'delivery failed')
+            );
         }
 
-        return (array) $response->json();
+        $result = (array) $response->json();
+
+        if (blank($result['sid'] ?? null)) {
+            throw new RuntimeException('Twilio accepted the request without returning a Message SID.');
+        }
+
+        return $result;
     }
 
     private function client(): PendingRequest
@@ -94,11 +116,31 @@ final class TwilioSmsService implements SmsProvider
         return Http::withBasicAuth(
             (string) config('services.twilio.sid'),
             (string) config('services.twilio.token'),
-        )->acceptJson()->timeout(20)->retry(2, 250, throw: false);
+        )
+            ->acceptJson()
+            ->timeout((int) config('azari.integrations.http_timeout', 20))
+            ->connectTimeout((int) config('azari.integrations.connect_timeout', 8));
+    }
+
+    private function messagesEndpoint(string $sid): string
+    {
+        $base = rtrim((string) config('services.twilio.api_base_url'), '/');
+        $version = trim((string) config('services.twilio.api_version'), '/');
+
+        if (app()->environment('production')
+            && config('azari.integrations.require_https_in_production')
+            && ! str_starts_with(strtolower($base), 'https://')
+        ) {
+            throw new RuntimeException('Twilio must use HTTPS in production.');
+        }
+
+        return "{$base}/{$version}/Accounts/{$sid}/Messages.json";
     }
 
     private function whatsappAddress(string $value): string
     {
-        return str_starts_with($value, 'whatsapp:') ? $value : 'whatsapp:'.$this->numbers->normalize($value);
+        return str_starts_with($value, 'whatsapp:')
+            ? $value
+            : 'whatsapp:'.$this->numbers->normalize($value);
     }
 }
