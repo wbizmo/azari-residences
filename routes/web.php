@@ -18,15 +18,17 @@ Route::get('/residences/{property}', [PropertyController::class, 'show'])->name(
 Route::get('/favicon.svg', fn () => redirect('/images/azari-favicon.png'))->name('public.favicon');
 
 Route::prefix('azaridevadmin')->group(function (): void {
-    Route::get('/login', [AzariAdminLoginController::class, 'create'])->name('azari.admin.login');
+    Route::get('/login', [AzariAdminLoginController::class, 'create'])
+        ->middleware('throttle:30,1')
+        ->name('azari.admin.login');
     Route::post('/login', [AzariAdminLoginController::class, 'store'])
         ->middleware('throttle:5,1')
         ->name('azari.admin.login.store');
 });
 
-Route::get('/azaridevadmin', DashboardController::class)->middleware('azari.staff')->name('azari.admin.dashboard');
+Route::get('/azaridevadmin', DashboardController::class)->middleware(['auth.session', 'azari.staff'])->name('azari.admin.dashboard');
 
-Route::prefix('azaridevadmin')->middleware(['azari.staff'])->group(function (): void {
+Route::prefix('azaridevadmin')->middleware(['auth.session', 'azari.staff'])->group(function (): void {
     Route::post('/logout', [AzariAdminLoginController::class, 'destroy'])->name('azari.admin.logout');
 
     Route::get('/branding', [SiteSettingController::class, 'edit'])->name('azari.admin.settings.edit');
@@ -52,10 +54,10 @@ Route::prefix('azaridevadmin')->middleware(['azari.staff'])->group(function (): 
 });
 
 Route::get('/dashboard', fn () => redirect()->route('user.dashboard'))
-    ->middleware(['auth', 'verified', 'azari.customer'])
+    ->middleware(['auth', 'auth.session', 'verified', 'azari.customer'])
     ->name('dashboard');
 
-Route::middleware(['auth', 'azari.customer'])->group(function (): void {
+Route::middleware(['auth', 'auth.session', 'azari.customer'])->group(function (): void {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

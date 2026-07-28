@@ -12,7 +12,7 @@ Route::get('/list-your-property', function () {
 
 Route::prefix('user/property-centre')
     ->name('user.owner.')
-    ->middleware(['auth', 'verified', 'azari.customer'])
+    ->middleware(['auth', 'auth.session', 'verified', 'azari.customer'])
     ->group(function (): void {
         Route::get('/', [PropertyOwnerController::class, 'dashboard'])->name('dashboard');
         Route::get('/agreement', [PropertyOwnerController::class, 'agreement'])->name('agreement');
@@ -34,7 +34,7 @@ Route::prefix('user/property-centre')
 
 Route::prefix('azaridevadmin/property-owners')
     ->name('azari.admin.')
-    ->middleware(['azari.staff'])
+    ->middleware(['auth.session', 'azari.staff'])
     ->group(function (): void {
         Route::get('/listings', [OwnerMarketplaceController::class, 'listings'])
             ->middleware('azari.staff:property-owners.view')->name('owner-listings.index');

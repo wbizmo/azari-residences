@@ -14,7 +14,7 @@ Route::middleware('web')->group(function () {
     Route::post('/booking/{reference}/confirm', [AzariBookingFlowController::class, 'confirm'])->name('azari.booking.confirm');
     Route::get('/booking/{reference}/summary', [AzariBookingFlowController::class, 'summary'])->name('azari.booking.summary');
 
-    Route::prefix('azari-admin')->name('azari.admin.s56.')->middleware(['auth', 'azari.staff'])->group(function () {
+    Route::prefix('azari-admin')->name('azari.admin.s56.')->middleware(['auth', 'auth.session', 'azari.staff'])->group(function () {
         Route::get('/availability-calendar', [AzariBookingOperationsController::class, 'calendar'])->name('calendar');
         Route::post('/maintenance-periods', [AzariBookingOperationsController::class, 'storeMaintenance'])->name('maintenance.store');
         Route::delete('/maintenance-periods/{maintenancePeriod}', [AzariBookingOperationsController::class, 'destroyMaintenance'])->name('maintenance.destroy');

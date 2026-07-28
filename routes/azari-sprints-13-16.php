@@ -9,7 +9,7 @@ use App\Http\Controllers\UserArea\ReviewController;
 use App\Http\Controllers\UserArea\SupportTicketController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth','verified','azari.customer'])->prefix('account')->name('user.')->group(function (): void {
+Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer'])->prefix('account')->name('user.')->group(function (): void {
     Route::get('/support',[SupportTicketController::class,'index'])->name('support.index');
     Route::post('/support',[SupportTicketController::class,'store'])->middleware('throttle:10,1')->name('support.store');
     Route::get('/support/{ticket}',[SupportTicketController::class,'show'])->name('support.show');
@@ -19,7 +19,7 @@ Route::middleware(['auth','verified','azari.customer'])->prefix('account')->name
     Route::patch('/support/{ticket}/reopen',[SupportTicketController::class,'reopen'])->name('support.reopen');
     Route::post('/bookings/{booking}/review',[ReviewController::class,'store'])->middleware('throttle:5,1')->name('reviews.store');
 });
-Route::prefix('azari-admin')->name('azari.admin.')->middleware(['azari.staff'])->group(function (): void {
+Route::prefix('azari-admin')->name('azari.admin.')->middleware(['auth.session', 'azari.staff'])->group(function (): void {
     Route::middleware('azari.permission:support-tickets.view')->group(function (): void {
         Route::get('/support',[AdminSupportTicketController::class,'index'])->name('support.index');
         Route::get('/support/{ticket}',[AdminSupportTicketController::class,'show'])->name('support.show');

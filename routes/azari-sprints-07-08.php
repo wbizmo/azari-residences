@@ -19,7 +19,7 @@ use App\Http\Controllers\UserArea\UserSecurityController;
 use App\Http\Controllers\Webhooks\TwilioMessageStatusController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'verified', 'azari.customer'])->prefix('account')->name('user.')->group(function (): void {
+Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer'])->prefix('account')->name('user.')->group(function (): void {
     Route::get('/', UserDashboardController::class)->name('dashboard');
     Route::get('/bookings', [UserBookingController::class, 'index'])->name('bookings.index');
     Route::get('/bookings/{reference}', [UserBookingController::class, 'show'])->name('bookings.show');
