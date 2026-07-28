@@ -4,6 +4,7 @@ use App\Http\Middleware\EnsureAdmin;
 use App\Http\Middleware\EnsureAzariCustomer;
 use App\Http\Middleware\EnsureAzariStaff;
 use App\Http\Middleware\EnsureStaffPermission;
+use App\Http\Middleware\EnsureRouteModelOwnership;
 use App\Http\Middleware\CorrelationId;
 use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
@@ -25,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'azari.customer' => EnsureAzariCustomer::class,
             'azari.admin' => EnsureAdmin::class,
             'azari.permission' => EnsureStaffPermission::class,
+            'azari.owns-route' => EnsureRouteModelOwnership::class,
         ]);
         $middleware->validateCsrfTokens(except: [
             'payments/*/webhook',

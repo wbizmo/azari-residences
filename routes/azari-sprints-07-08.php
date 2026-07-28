@@ -19,7 +19,7 @@ use App\Http\Controllers\UserArea\UserSecurityController;
 use App\Http\Controllers\Webhooks\TwilioMessageStatusController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer'])->prefix('account')->name('user.')->group(function (): void {
+Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer', 'azari.owns-route'])->prefix('account')->name('user.')->group(function (): void {
     Route::get('/', UserDashboardController::class)->name('dashboard');
     Route::get('/bookings', [UserBookingController::class, 'index'])->name('bookings.index');
     Route::get('/bookings/{reference}', [UserBookingController::class, 'show'])->name('bookings.show');
@@ -57,27 +57,43 @@ Route::get('/booking/{reference}/payment-receipt/{payment}', [PaymentCheckoutCon
 Route::match(['GET', 'POST'], '/payments/{provider}/callback/{payment}', [PaymentCheckoutController::class, 'callback'])->middleware('throttle:120,1')->name('payments.callback');
 Route::match(['GET', 'POST'], '/payments/{provider}/webhook', [PaymentCheckoutController::class, 'webhook'])->middleware('throttle:240,1')->name('payments.webhook');
 
-Route::prefix('azari-admin')->name('azari.admin.')->middleware('azari.staff')->group(function (): void {
+Route::prefix('azari-admin')->name('azari.admin.')->middleware(['auth.session', 'azari.staff'])->group(function (): void {
     Route::get('/settings/integrations', [SystemSettingsController::class, 'edit'])->name('settings.integrations');
-    Route::put('/settings/integrations', [SystemSettingsController::class, 'update'])->name('settings.integrations.update');
+    Route::put('/settings/integrations', [SystemSettingsController::class, 'update'])
+        ->middleware('azari.admin')
+        ->name('settings.integrations.update');
 
     Route::get('/payments/providers', [AdminPaymentController::class, 'providers'])->name('payments.providers');
-    Route::post('/payments/providers/{provider}/test', [AdminPaymentController::class, 'testProvider'])->name('payments.providers.test');
+    Route::post('/payments/providers/{provider}/test', [AdminPaymentController::class, 'testProvider'])
+        ->middleware('azari.admin')
+        ->name('payments.providers.test');
     Route::get('/payments/create', [AdminPaymentController::class, 'create'])->name('payments.create');
-    Route::post('/payments', [AdminPaymentController::class, 'store'])->name('payments.store');
+    Route::post('/payments', [AdminPaymentController::class, 'store'])
+        ->middleware('azari.permission:payments.manage')
+        ->name('payments.store');
     Route::get('/payments', [AdminPaymentController::class, 'index'])->name('payments.index');
     Route::get('/payments/{payment}', [AdminPaymentController::class, 'show'])->name('payments.show');
-    Route::post('/payments/{payment}/reconcile', [AdminPaymentController::class, 'reconcile'])->name('payments.reconcile');
+    Route::post('/payments/{payment}/reconcile', [AdminPaymentController::class, 'reconcile'])
+        ->middleware('azari.permission:payments.manage')
+        ->name('payments.reconcile');
     Route::get('/payments/{payment}/proof', [AdminPaymentController::class, 'proof'])->name('payments.proof');
 
     Route::get('/identities', [IdentityManagementController::class, 'index'])->name('identities.index');
     Route::get('/identities/types', [IdentityManagementController::class, 'types'])->name('identities.types');
-    Route::post('/identities/types', [IdentityManagementController::class, 'storeType'])->name('identities.types.store');
-    Route::put('/identities/types/{identityType}', [IdentityManagementController::class, 'updateType'])->name('identities.types.update');
+    Route::post('/identities/types', [IdentityManagementController::class, 'storeType'])
+        ->middleware('azari.admin')
+        ->name('identities.types.store');
+    Route::put('/identities/types/{identityType}', [IdentityManagementController::class, 'updateType'])
+        ->middleware('azari.admin')
+        ->name('identities.types.update');
     Route::get('/identities/missing', [IdentityManagementController::class, 'missing'])->name('identities.missing');
     Route::get('/identities/audit', [IdentityManagementController::class, 'audit'])->name('identities.audit');
-    Route::patch('/identities/users/{document}/review', [IdentityManagementController::class, 'reviewUser'])->name('identities.users.review');
-    Route::patch('/identities/guests/{document}/review', [IdentityManagementController::class, 'reviewGuest'])->name('identities.guests.review');
+    Route::patch('/identities/users/{document}/review', [IdentityManagementController::class, 'reviewUser'])
+        ->middleware('azari.permission:identities.manage')
+        ->name('identities.users.review');
+    Route::patch('/identities/guests/{document}/review', [IdentityManagementController::class, 'reviewGuest'])
+        ->middleware('azari.permission:identities.manage')
+        ->name('identities.guests.review');
     Route::get('/identities/users/{document}/download', [IdentityManagementController::class, 'downloadUser'])->name('identities.users.download');
     Route::get('/identities/guests/{document}/download', [IdentityManagementController::class, 'downloadGuest'])->name('identities.guests.download');
 });
