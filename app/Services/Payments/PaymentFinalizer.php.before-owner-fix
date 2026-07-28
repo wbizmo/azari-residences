@@ -170,20 +170,9 @@ class PaymentFinalizer
                     'safe_message' => 'Last payment verified successfully.',
                 ],
             );
-            AuditLog::record(
-                'payment.verified_successful',
-                $locked,
-                [],
-                ['status' => Payment::SUCCESSFUL],
-                ['source' => $source]
-            );
-
-            $finalizedPayment = $locked->refresh();
-
-            app(OwnerEarningsService::class)
-                ->creditForPayment($finalizedPayment);
-
-            return $finalizedPayment;
+            AuditLog::record('payment.verified_successful', , [], ['status' => Payment::SUCCESSFUL], ['source' => ]);
+            app(OwnerEarningsService::class)->creditForPayment(->refresh());
+            return ->refresh();
         }, 3);
     }
 
