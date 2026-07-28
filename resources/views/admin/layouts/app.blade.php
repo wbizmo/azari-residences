@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-admin-theme="light">
 <head>
+    @include('partials.material-symbols-preload')
     @include('partials.azari-head-assets')
 
     <meta charset="utf-8">

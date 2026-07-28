@@ -4,8 +4,14 @@
 @import './azari-user-area.css';
 @import './azari-sprints-07-08-admin.css';
 
-@import 'material-symbols/outlined.css';
 
+@font-face {
+    font-family: 'Material Symbols Outlined';
+    font-style: normal;
+    font-weight: 100 700;
+    font-display: block;
+    src: url('/fonts/material-symbols-outlined.woff2') format('woff2');
+}
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -119,14 +125,33 @@ svg {
 }
 
 .material-symbols-outlined {
+    display: inline-block;
+    width: 1em;
+    min-width: 1em;
+    height: 1em;
+    overflow: hidden;
+    font-family: 'Material Symbols Outlined';
+    font-size: 1em;
+    font-style: normal;
+    font-weight: normal;
+    font-feature-settings: 'liga';
     font-variation-settings:
         'FILL' 0,
         'wght' 300,
         'GRAD' 0,
         'opsz' 24;
     line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    vertical-align: middle;
+    -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    contain: inline-size layout paint;
 }
-
 .site-container {
     width: min(calc(100% - 40px), var(--container));
     margin-inline: auto;
