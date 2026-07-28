@@ -1,14 +1,15 @@
-@extends('admin.layouts.app')
+@extends('layouts.admin')
+@section('title','Property owner settings')
 @section('content')
-<div class="az-premium-page-head"><div><span class="az-premium-kicker">Property owners</span><h1>Marketplace settings</h1><p>Configure default splits, withdrawal windows and enabled payout gateways.</p></div></div>
-<form class="az-premium-card az-s78-form" method="POST" action="{{ route('azari.admin.owner-settings.update') }}">@csrf @method('PUT')
-<div class="az-s78-form-grid">
-<label class="az-s78-field"><span>Default owner share (%)</span><input type="number" step=".01" min="0" max="100" name="owner_default_share_percentage" value="{{ $settings['owner_default_share_percentage'] }}" required></label>
-<label class="az-s78-field"><span>Withdrawal days (ISO 1-7)</span><input name="owner_withdrawal_days" value="{{ $settings['owner_withdrawal_days'] }}" required><small>Example: 1,2,3,4,5 for Monday-Friday.</small></label>
-<label class="az-s78-field"><span>Minimum withdrawal</span><input type="number" step=".01" min="0" name="owner_withdrawal_minimum" value="{{ $settings['owner_withdrawal_minimum'] }}" required></label>
-<label class="az-s78-field"><span>Withdrawal currency</span><input maxlength="3" name="owner_withdrawal_currency" value="{{ $settings['owner_withdrawal_currency'] }}" required></label>
-<label class="az-s78-field"><span>Agreement version</span><input name="owner_listing_agreement_version" value="{{ $settings['owner_listing_agreement_version'] }}" required></label>
-<label class="az-s78-check"><input type="checkbox" name="owner_paypal_enabled" value="1" @checked(filter_var($settings['owner_paypal_enabled'],FILTER_VALIDATE_BOOL))><span>Enable PayPal withdrawals</span></label>
-<label class="az-s78-check"><input type="checkbox" name="owner_stripe_enabled" value="1" @checked(filter_var($settings['owner_stripe_enabled'],FILTER_VALIDATE_BOOL))><span>Enable Stripe Connect withdrawals</span></label>
-</div><button class="az-premium-button">Save marketplace settings</button></form>
+<div class="admin-page-header"><div><h1>Property owner marketplace</h1><p>Control agreements, earnings share, withdrawal days and payout gateways.</p></div></div>
+<form method="post" action="{{ route('azari.admin.owner-settings.update') }}" class="admin-card">@csrf @method('PUT')
+<label>Default owner share (%)<input type="number" name="owner_default_share_percentage" min="0" max="100" step="0.01" value="{{ old('owner_default_share_percentage',$settings['owner_default_share_percentage']) }}" required></label>
+<label>Withdrawal weekdays (ISO 1–7, comma-separated)<input name="owner_withdrawal_days" value="{{ old('owner_withdrawal_days',$settings['owner_withdrawal_days']) }}" required></label>
+<label>Minimum withdrawal<input type="number" name="owner_withdrawal_minimum" min="0" step="0.01" value="{{ old('owner_withdrawal_minimum',$settings['owner_withdrawal_minimum']) }}" required></label>
+<label>Withdrawal currency<input name="owner_withdrawal_currency" maxlength="3" value="{{ old('owner_withdrawal_currency',$settings['owner_withdrawal_currency']) }}" required></label>
+<label>Agreement version<input name="owner_listing_agreement_version" value="{{ old('owner_listing_agreement_version',$settings['owner_listing_agreement_version']) }}" required></label>
+<label><input type="checkbox" name="owner_paypal_enabled" value="1" @checked(filter_var($settings['owner_paypal_enabled'],FILTER_VALIDATE_BOOL))> Enable PayPal payouts</label>
+<label><input type="checkbox" name="owner_stripe_enabled" value="1" @checked(filter_var($settings['owner_stripe_enabled'],FILTER_VALIDATE_BOOL))> Enable Stripe Connect payouts</label>
+<button>Save owner marketplace settings</button>
+</form>
 @endsection

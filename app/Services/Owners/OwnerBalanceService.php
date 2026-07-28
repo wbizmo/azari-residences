@@ -10,13 +10,19 @@ class OwnerBalanceService
 {
     public function balance(User $user, string $currency): float
     {
+        $currency = strtoupper($currency);
+
         $credits = (float) OwnerLedgerEntry::query()
-            ->where('user_id', $user->id)->where('currency', strtoupper($currency))
-            ->where('direction', 'credit')->sum('amount');
+            ->where('user_id', $user->id)
+            ->where('currency', $currency)
+            ->where('direction', 'credit')
+            ->sum('amount');
 
         $debits = (float) OwnerLedgerEntry::query()
-            ->where('user_id', $user->id)->where('currency', strtoupper($currency))
-            ->where('direction', 'debit')->sum('amount');
+            ->where('user_id', $user->id)
+            ->where('currency', $currency)
+            ->where('direction', 'debit')
+            ->sum('amount');
 
         return round($credits - $debits, 2);
     }
@@ -26,7 +32,12 @@ class OwnerBalanceService
         return round((float) WithdrawalRequest::query()
             ->where('user_id', $user->id)
             ->where('currency', strtoupper($currency))
-            ->whereIn('status', ['pending', 'processing'])
+            ->whereIn('status', [
+                'pending',
+                'processing',
+                'provider_sent',
+                'reconciliation_required',
+            ])
             ->sum('amount'), 2);
     }
 

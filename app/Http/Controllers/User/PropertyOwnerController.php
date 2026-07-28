@@ -6,13 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Amenity;
 use App\Models\ListingAgreement;
 use App\Models\Location;
-use App\Models\OwnerLedgerEntry;
 use App\Models\OwnerPayoutProfile;
 use App\Models\PropertyListing;
 use App\Models\RoomType;
 use App\Models\SiteSetting;
-use App\Models\WithdrawalRequest;
 use App\Services\Owners\OwnerBalanceService;
+use App\Services\Owners\OwnerWithdrawalService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -219,8 +218,10 @@ class PropertyOwnerController extends Controller
         return back()->with('status', 'Withdrawal destination saved.');
     }
 
-    public function requestWithdrawal(Request $request, OwnerBalanceService $balances): RedirectResponse
-    {
+    public function requestWithdrawal(
+        Request $request,
+        OwnerWithdrawalService $withdrawals
+    ): RedirectResponse {
         abort_unless($this->withdrawalOpen(), 422, 'Withdrawals are not available today.');
 
         $currency = strtoupper((string) SiteSetting::valueFor('owner_withdrawal_currency', 'USD'));
@@ -229,32 +230,30 @@ class PropertyOwnerController extends Controller
 
         abort_unless($profile, 422, 'Configure your payout destination first.');
 
+        $gatewayEnabled = $profile->preferred_gateway === 'paypal'
+            ? filter_var(SiteSetting::valueFor('owner_paypal_enabled', '0'), FILTER_VALIDATE_BOOL)
+            : filter_var(SiteSetting::valueFor('owner_stripe_enabled', '0'), FILTER_VALIDATE_BOOL);
+
+        abort_unless($gatewayEnabled, 422, 'The selected payout gateway is currently unavailable.');
+
         $data = $request->validate([
             'amount' => ['required', 'numeric', 'min:'.$minimum],
             'owner_note' => ['nullable', 'string', 'max:1000'],
         ]);
 
-        $available = $balances->available($request->user(), $currency);
-        if ((float) $data['amount'] > $available + 0.001) {
-            return back()->withErrors(['amount' => 'The requested amount exceeds your available balance.']);
+        try {
+            $withdrawals->request(
+                $request->user(),
+                $profile,
+                $currency,
+                (float) $data['amount'],
+                $data['owner_note'] ?? null,
+            );
+        } catch (\RuntimeException $exception) {
+            return back()->withErrors(['amount' => $exception->getMessage()])->withInput();
         }
 
-        WithdrawalRequest::query()->create([
-            'user_id' => $request->user()->id,
-            'gateway' => $profile->preferred_gateway,
-            'currency' => $currency,
-            'amount' => round((float) $data['amount'], 2),
-            'status' => 'pending',
-            'destination_snapshot' => [
-                'paypal_recipient' => $profile->paypal_recipient,
-                'paypal_recipient_type' => $profile->paypal_recipient_type,
-                'stripe_connected_account_id' => $profile->stripe_connected_account_id,
-            ],
-            'owner_note' => $data['owner_note'] ?? null,
-            'requested_at' => now(),
-        ]);
-
-        return back()->with('status', 'Withdrawal request submitted for processing.');
+        return back()->with('status', 'Withdrawal request submitted and the amount has been reserved.');
     }
 
     private function currentAgreement(Request $request): ?ListingAgreement
@@ -306,7 +305,7 @@ class PropertyOwnerController extends Controller
         $roomType = RoomType::query()->findOrFail($data['room_type_id']);
 
         $propertyData = collect($data)->except([
-            'cover_image', 'gallery', 'amenities', 'proposed_owner_share_percentage', 'owner_notes'
+            'cover_image', 'gallery', 'amenities', 'proposed_owner_share_percentage', 'owner_notes',
         ])->all();
 
         $propertyData['location'] = $location->name;
@@ -320,7 +319,9 @@ class PropertyOwnerController extends Controller
 
         $cover = $listing?->cover_image;
         if ($request->hasFile('cover_image')) {
-            if ($cover) Storage::disk('public')->delete($cover);
+            if ($cover) {
+                Storage::disk('public')->delete($cover);
+            }
             $cover = $request->file('cover_image')->store('owner-listings/covers', 'public');
         }
 

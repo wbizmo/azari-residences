@@ -4,21 +4,19 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Amenity;
-use App\Models\ListingAgreement;
-use App\Models\OwnerLedgerEntry;
 use App\Models\Property;
 use App\Models\PropertyListing;
 use App\Models\SiteSetting;
 use App\Models\WithdrawalRequest;
-use App\Services\Withdrawals\WithdrawalGatewayManager;
+use App\Services\Owners\OwnerWithdrawalService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use Throwable;
 
 class OwnerMarketplaceController extends Controller
 {
@@ -116,7 +114,7 @@ class OwnerMarketplaceController extends Controller
         $path = storage_path('app/private/agreements/'.$agreement->id.'.pdf');
 
         if (! is_file($path)) {
-            \Illuminate\Support\Facades\Storage::disk('local')->makeDirectory('private/agreements');
+            Storage::disk('local')->makeDirectory('private/agreements');
             Pdf::loadView('user.owner.agreement-pdf', compact('agreement'))->setPaper('a4')->save($path);
         }
 
@@ -146,54 +144,27 @@ class OwnerMarketplaceController extends Controller
     public function processWithdrawal(
         Request $request,
         WithdrawalRequest $withdrawal,
-        WithdrawalGatewayManager $gateways
+        OwnerWithdrawalService $withdrawals
     ): RedirectResponse {
-        abort_unless($withdrawal->status === 'pending', 422);
-
-        $withdrawal->update([
-            'status' => 'processing',
-            'processing_started_at' => now(),
-            'processed_by' => $request->user()->id,
+        $data = $request->validate([
+            'admin_note' => ['nullable', 'string', 'max:3000'],
         ]);
 
         try {
-            $result = $gateways->send($withdrawal);
+            $processed = $withdrawals->process(
+                $withdrawal,
+                $request->user(),
+                $data['admin_note'] ?? null,
+            );
 
-            DB::transaction(function () use ($withdrawal, $result, $request): void {
-                $withdrawal->refresh()->update([
-                    'status' => 'processed',
-                    'provider_reference' => $result['reference'],
-                    'provider_response' => $result['safe_response'] ?? null,
-                    'admin_note' => $request->input('admin_note'),
-                    'processed_by' => $request->user()->id,
-                    'processed_at' => now(),
-                    'failed_at' => null,
-                ]);
-
-                OwnerLedgerEntry::query()->create([
-                    'user_id' => $withdrawal->user_id,
-                    'withdrawal_request_id' => $withdrawal->id,
-                    'type' => 'withdrawal',
-                    'direction' => 'debit',
-                    'amount' => $withdrawal->amount,
-                    'currency' => $withdrawal->currency,
-                    'reference' => 'DEBIT-'.Str::upper(Str::random(14)),
-                    'description' => 'Withdrawal '.$withdrawal->reference.' processed through '.ucfirst($withdrawal->gateway).'.',
-                    'metadata' => ['provider_reference' => $result['reference']],
-                ]);
-            }, 3);
-
-            return back()->with('status', 'Withdrawal processed successfully.');
-        } catch (Throwable $exception) {
-            report($exception);
-
-            $withdrawal->update([
-                'status' => 'failed',
-                'failed_at' => now(),
-                'admin_note' => trim(($request->input('admin_note') ? $request->input('admin_note')."\n" : '').$exception->getMessage()),
-            ]);
-
-            return back()->withErrors(['withdrawal' => 'Payout failed safely: '.$exception->getMessage()]);
+            return back()->with(
+                'status',
+                $processed->status === 'processed'
+                    ? 'Withdrawal processed exactly once and recorded successfully.'
+                    : 'Withdrawal processing status updated.'
+            );
+        } catch (\RuntimeException $exception) {
+            return back()->withErrors(['withdrawal' => $exception->getMessage()]);
         }
     }
 

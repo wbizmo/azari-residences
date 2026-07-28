@@ -1,6 +1,10 @@
-@extends('admin.layouts.app')
+@extends('layouts.admin')
+@section('title','Property owner listings')
 @section('content')
-<div class="az-premium-page-head"><div><span class="az-premium-kicker">Property owners</span><h1>Listing submissions</h1><p>Review owner data, property details and agreements before publishing.</p></div></div>
-<form class="az-s78-toolbar" method="GET"><label class="az-field">Status<select name="status"><option value="">All</option>@foreach(['submitted','under_review','approved','declined'] as $status)<option value="{{ $status }}" @selected(request('status')===$status)>{{ ucfirst(str_replace('_',' ',$status)) }}</option>@endforeach</select></label><button class="az-premium-button">Filter</button></form>
-<section class="az-premium-card"><div class="az-responsive-table-shell"><table class="az-s78-table"><thead><tr><th>Owner</th><th>Property</th><th>Reference</th><th>Status</th><th>Submitted</th><th></th></tr></thead><tbody>@forelse($listings as $listing)<tr><td><strong>{{ $listing->user->name }}</strong><small>{{ $listing->user->email }} · {{ $listing->user->phone }}</small></td><td>{{ data_get($listing->property_data,'name') }}</td><td>{{ $listing->reference }}</td><td><span class="az-s78-badge {{ $listing->status==='declined'?'is-danger':($listing->status==='approved'?'':'is-warning') }}">{{ ucfirst($listing->status) }}</span></td><td>{{ optional($listing->submitted_at)->format('d M Y H:i') }}</td><td><a class="az-premium-link" href="{{ route('azari.admin.owner-listings.show',$listing) }}">Review</a></td></tr>@empty<tr><td colspan="6"><div class="az-s78-empty">No submissions found.</div></td></tr>@endforelse</tbody></table></div>{{ $listings->links('vendor.pagination.azari') }}</section>
+<div class="admin-page-header"><div><h1>Property owner listings</h1><p>Review externally submitted properties before they enter inventory.</p></div></div>
+<div class="admin-card"><form method="get"><label>Status<select name="status" onchange="this.form.submit()"><option value="">All</option>@foreach(['submitted','under_review','approved','declined'] as $status)<option value="{{ $status }}" @selected(request('status')===$status)>{{ ucfirst(str_replace('_',' ',$status)) }}</option>@endforeach</select></label></form></div>
+<div class="admin-card"><div class="table-responsive"><table><thead><tr><th>Reference</th><th>Owner</th><th>Property</th><th>Status</th><th>Submitted</th><th></th></tr></thead><tbody>
+@forelse($listings as $listing)<tr><td>{{ $listing->reference }}</td><td>{{ $listing->user?->name }}</td><td>{{ data_get($listing->property_data,'name') }}</td><td>{{ str_replace('_',' ',$listing->status) }}</td><td>{{ optional($listing->submitted_at)->format('j M Y') }}</td><td><a href="{{ route('azari.admin.owner-listings.show',$listing) }}">Review</a></td></tr>
+@empty<tr><td colspan="6">No matching owner listings.</td></tr>@endforelse
+</tbody></table></div>{{ $listings->links() }}</div>
 @endsection
