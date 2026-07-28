@@ -5835,7 +5835,7 @@ html[data-admin-theme="dark"] .az-metric-card__icon {
 .az-modal[hidden]{display:none}.az-modal{position:fixed;z-index:12000;inset:0;display:grid;place-items:center;padding:20px}.az-modal__backdrop{position:absolute;inset:0;background:rgba(8,27,22,.72);backdrop-filter:blur(8px)}.az-modal__dialog{position:relative;z-index:1;width:min(560px,100%);max-height:min(760px,calc(100vh - 40px));overflow:auto;border:1px solid rgba(185,149,90,.34);border-radius:22px;background:#fffdf8;color:#18231f;box-shadow:0 34px 100px rgba(0,0,0,.34);outline:none}.az-modal__header{display:grid;grid-template-columns:auto 1fr auto;align-items:start;gap:14px;padding:22px 22px 16px;border-bottom:1px solid #e2ddd2}.az-modal__icon{display:grid;width:42px;height:42px;place-items:center;border-radius:50%;background:rgba(163,58,53,.12);color:#a33a35}.az-modal__eyebrow{display:block;margin-bottom:4px;color:#8f6c38;font-size:.68rem;font-weight:900;letter-spacing:.15em;text-transform:uppercase}.az-modal__header h2{margin:0;font:1.55rem/1.15 Georgia,serif}.az-modal__close,.az-toast button{display:grid;place-items:center;border:0;background:transparent;color:inherit;cursor:pointer}.az-modal__body{padding:22px;color:#68736e}.az-modal__body p{margin:0;line-height:1.65}.az-modal__footer{position:sticky;bottom:0;display:flex;justify-content:flex-end;gap:10px;padding:16px 22px;border-top:1px solid #e2ddd2;background:#fffdf8}.az-modal-open{overflow:hidden}.az-button--danger{border-color:#a33a35;background:#a33a35;color:#fff}.az-button--secondary{background:#fffdf8;color:#18231f}.az-button--light{border-color:rgba(255,255,255,.4);background:rgba(255,255,255,.12);color:#fff}.az-toast-region{position:fixed;z-index:13000;top:22px;right:22px;display:grid;width:min(420px,calc(100vw - 32px));gap:12px}.az-toast{display:grid;grid-template-columns:auto 1fr auto;align-items:start;gap:12px;padding:16px;border:1px solid #e2ddd2;border-radius:16px;background:#fffdf8;color:#18231f;box-shadow:0 20px 60px rgba(8,27,22,.2)}.az-toast strong,.az-toast p{display:block;margin:0}.az-toast p{margin-top:4px;color:#68736e;font-size:.86rem;line-height:1.45}.az-toast--success>.material-symbols-outlined{color:#287552}.az-toast--error>.material-symbols-outlined{color:#a33a35}@media(max-width:640px){.az-modal{align-items:end;padding:0}.az-modal__dialog{width:100%;max-height:88vh;border-radius:22px 22px 0 0}.az-modal__footer{display:grid;grid-template-columns:1fr}.az-toast-region{top:12px;right:12px;left:12px;width:auto}}
 
 
-/* ========================================================================== 
+/* ==========================================================================
    AZARI ROUTE, MODAL AND CUSTOM FORM CONTROL HOTFIX
    ========================================================================== */
 :where(input, textarea, select, button) {
@@ -6345,7 +6345,7 @@ html,body,button,input,select,textarea{font-weight:400}h1,h2,h3,h4,h5,h6,label,t
     [data-booking-search-form]
 ) {
     display: grid !important;
-    
+
     grid-template-columns:
         minmax(9rem, .95fr)
         minmax(9rem, .95fr)

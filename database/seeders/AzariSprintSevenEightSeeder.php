@@ -30,7 +30,12 @@ class AzariSprintSevenEightSeeder extends Seeder
             'support-tickets' => 'Support tickets', 'documents' => 'Documents',
             'communications' => 'Communications', 'cms' => 'CMS', 'reports' => 'Reports',
             'staff' => 'Staff', 'settings' => 'Settings', 'audit-logs' => 'Audit logs',
+
             'system-health' => 'System health',
+            'property-owners' => 'Property owners',
+            'owner-withdrawals' => 'Owner withdrawals',
+            'owner-settings' => 'Owner marketplace settings',
+
         ];
         foreach ($modules as $module => $label) {
             foreach (['view', 'create', 'edit', 'delete', 'export', 'manage'] as $action) {

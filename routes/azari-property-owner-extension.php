@@ -34,43 +34,43 @@ Route::prefix('user/property-centre')
 
 Route::prefix('azaridevadmin/property-owners')
     ->name('azari.admin.')
-    ->middleware(['auth.session', 'azari.staff'])
+    ->middleware(['auth', 'auth.session', 'verified', 'azari.staff'])
     ->group(function (): void {
         Route::get('/listings', [OwnerMarketplaceController::class, 'listings'])
-            ->middleware('azari.staff:property-owners.view')->name('owner-listings.index');
+            ->middleware('azari.permission:property-owners.view')->name('owner-listings.index');
         Route::get('/listings/{listing}', [OwnerMarketplaceController::class, 'showListing'])
-            ->middleware('azari.staff:property-owners.view')->name('owner-listings.show');
+            ->middleware('azari.permission:property-owners.view')->name('owner-listings.show');
         Route::post('/listings/{listing}/review', [OwnerMarketplaceController::class, 'markUnderReview'])
-            ->middleware('azari.staff:property-owners.review')->name('owner-listings.review');
+            ->middleware('azari.permission:property-owners.review')->name('owner-listings.review');
         Route::post('/listings/{listing}/approve', [OwnerMarketplaceController::class, 'approveListing'])
-            ->middleware('azari.staff:property-owners.review')->name('owner-listings.approve');
+            ->middleware('azari.permission:property-owners.review')->name('owner-listings.approve');
         Route::post('/listings/{listing}/decline', [OwnerMarketplaceController::class, 'declineListing'])
-            ->middleware('azari.staff:property-owners.review')->name('owner-listings.decline');
+            ->middleware('azari.permission:property-owners.review')->name('owner-listings.decline');
         Route::get('/listings/{listing}/agreement', [OwnerMarketplaceController::class, 'agreementDownload'])
-            ->middleware('azari.staff:property-owners.view')->name('owner-listings.agreement');
+            ->middleware('azari.permission:property-owners.view')->name('owner-listings.agreement');
 
         Route::get('/withdrawals', [OwnerMarketplaceController::class, 'withdrawals'])
-            ->middleware('azari.staff:owner-withdrawals.view')->name('owner-withdrawals.index');
+            ->middleware('azari.permission:owner-withdrawals.view')->name('owner-withdrawals.index');
         Route::get('/withdrawals/{withdrawal}', [OwnerMarketplaceController::class, 'showWithdrawal'])
-            ->middleware('azari.staff:owner-withdrawals.view')->name('owner-withdrawals.show');
+            ->middleware('azari.permission:owner-withdrawals.view')->name('owner-withdrawals.show');
         Route::post('/withdrawals/{withdrawal}/process', [OwnerMarketplaceController::class, 'processWithdrawal'])
-            ->middleware('azari.staff:owner-withdrawals.process')->name('owner-withdrawals.process');
+            ->middleware('azari.permission:owner-withdrawals.process')->name('owner-withdrawals.process');
         Route::post('/withdrawals/{withdrawal}/retry', [OwnerMarketplaceController::class, 'retryWithdrawal'])
-            ->middleware('azari.staff:owner-withdrawals.process')->name('owner-withdrawals.retry');
+            ->middleware('azari.permission:owner-withdrawals.process')->name('owner-withdrawals.retry');
         Route::post('/withdrawals/{withdrawal}/reconcile-paid', [OwnerMarketplaceController::class, 'reconcileWithdrawalPaid'])
-            ->middleware('azari.staff:owner-withdrawals.process')->name('owner-withdrawals.reconcile-paid');
+            ->middleware('azari.permission:owner-withdrawals.process')->name('owner-withdrawals.reconcile-paid');
         Route::post('/withdrawals/{withdrawal}/reconcile-not-paid', [OwnerMarketplaceController::class, 'reconcileWithdrawalNotPaid'])
-            ->middleware('azari.staff:owner-withdrawals.process')->name('owner-withdrawals.reconcile-not-paid');
+            ->middleware('azari.permission:owner-withdrawals.process')->name('owner-withdrawals.reconcile-not-paid');
         Route::post('/withdrawals/{withdrawal}/reject', [OwnerMarketplaceController::class, 'rejectWithdrawal'])
-            ->middleware('azari.staff:owner-withdrawals.process')->name('owner-withdrawals.reject');
+            ->middleware('azari.permission:owner-withdrawals.process')->name('owner-withdrawals.reject');
 
         Route::post('/payout-profiles/{profile}/verify', [OwnerMarketplaceController::class, 'verifyPayoutProfile'])
-            ->middleware('azari.staff:owner-withdrawals.process')->name('owner-payout-profiles.verify');
+            ->middleware('azari.permission:owner-withdrawals.process')->name('owner-payout-profiles.verify');
         Route::post('/payout-profiles/{profile}/unverify', [OwnerMarketplaceController::class, 'unverifyPayoutProfile'])
-            ->middleware('azari.staff:owner-withdrawals.process')->name('owner-payout-profiles.unverify');
+            ->middleware('azari.permission:owner-withdrawals.process')->name('owner-payout-profiles.unverify');
 
         Route::get('/settings', [OwnerMarketplaceController::class, 'settings'])
-            ->middleware('azari.staff:owner-settings.manage')->name('owner-settings.edit');
+            ->middleware('azari.permission:owner-settings.manage')->name('owner-settings.edit');
         Route::put('/settings', [OwnerMarketplaceController::class, 'updateSettings'])
-            ->middleware('azari.staff:owner-settings.manage')->name('owner-settings.update');
+            ->middleware('azari.permission:owner-settings.manage')->name('owner-settings.update');
     });

@@ -330,3 +330,37 @@ body.az-user-body {
     }
 }
 /* AZARI_USER_RESPONSIVE_V3_END */
+
+
+/* Property Owner integration: fixed customer topbar parity with admin shell. */
+.az-user-main {
+    padding-top: var(--az-user-topbar);
+}
+
+.az-user-topbar {
+    position: fixed;
+    top: 0;
+    right: 34px;
+    left: calc(var(--az-user-sidebar) + 34px);
+    z-index: 70;
+    min-height: var(--az-user-topbar);
+}
+
+@media (max-width: 1024px) {
+    .az-user-main {
+        margin-left: 0;
+        padding-top: var(--az-user-topbar);
+    }
+
+    .az-user-topbar {
+        right: 20px;
+        left: 20px;
+    }
+}
+
+@media (max-width: 640px) {
+    .az-user-topbar {
+        right: 14px;
+        left: 14px;
+    }
+}

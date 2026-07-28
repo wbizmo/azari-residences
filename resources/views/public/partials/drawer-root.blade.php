@@ -234,8 +234,13 @@
                 <a href="{{ route('public.airport-transfers') }}">Airport transfers</a>
                 <a href="{{ route('public.local-guide') }}">Local guide</a>
                 <a href="{{ route('public.about') }}">About Azari</a>
+
                 <a href="{{ route('public.contact') }}">Contact</a>
+                (Route::has('public.list-property'))
+                    <a href="{{ route('public.list-property') }}">List your property</a>
+
                 <a href="{{ route('bookings.verify') }}">Verify booking</a>
+
                 <a href="{{ route('public.book-now') }}">Book now</a>
             </nav>
         </div>

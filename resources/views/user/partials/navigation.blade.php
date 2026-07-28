@@ -31,10 +31,60 @@ $contactEmail=\App\Models\SiteSetting::valueFor('customer_dashboard_contact_emai
 
         @endforeach
     </nav>
+
 </section>
+
+(Route::has('user.owner.dashboard'))
+<section class="az-user-nav-group">
+    <p class="az-user-nav-label">Property Owner</p>
+    <nav class="az-user-nav-list">
+        <a class="az-user-nav-link {{ request()->routeIs('user.owner.dashboard') ? 'is-active' : '' }}"
+           href="{{ route('user.owner.dashboard') }}">
+            <span class="material-symbols-outlined" aria-hidden="true">domain</span>
+            <span>Property centre</span>
+        </a>
+        (Route::has('user.owner.listings.index'))
+            <a class="az-user-nav-link {{ request()->routeIs('user.owner.listings.*') ? 'is-active' : '' }}"
+               href="{{ route('user.owner.listings.index') }}">
+                <span class="material-symbols-outlined" aria-hidden="true">real_estate_agent</span>
+                <span>My properties</span>
+            </a>
+
+        (Route::has('user.owner.listings.create'))
+            <a class="az-user-nav-link {{ request()->routeIs('user.owner.listings.create') ? 'is-active' : '' }}"
+               href="{{ route('user.owner.listings.create') }}">
+                <span class="material-symbols-outlined" aria-hidden="true">add_home_work</span>
+                <span>List a property</span>
+            </a>
+
+        (Route::has('user.owner.earnings'))
+            <a class="az-user-nav-link {{ request()->routeIs('user.owner.earnings') ? 'is-active' : '' }}"
+               href="{{ route('user.owner.earnings') }}">
+                <span class="material-symbols-outlined" aria-hidden="true">payments</span>
+                <span>Owner earnings</span>
+            </a>
+
+        (Route::has('user.owner.withdrawals'))
+            <a class="az-user-nav-link {{ request()->routeIs('user.owner.withdrawals') ? 'is-active' : '' }}"
+               href="{{ route('user.owner.withdrawals') }}">
+                <span class="material-symbols-outlined" aria-hidden="true">account_balance</span>
+                <span>Withdrawals</span>
+            </a>
+
+        (Route::has('user.owner.agreement'))
+            <a class="az-user-nav-link {{ request()->routeIs('user.owner.agreement') ? 'is-active' : '' }}"
+               href="{{ route('user.owner.agreement') }}">
+                <span class="material-symbols-outlined" aria-hidden="true">contract</span>
+                <span>Listing agreement</span>
+            </a>
+
+    </nav>
+</section>
+
 
 <section class="az-user-nav-group">
     <p class="az-user-nav-label">Services</p>
+
 
     <nav class="az-user-nav-list">
 

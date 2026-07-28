@@ -27,7 +27,13 @@ final class StaffPermissionResolver
         'settings' => 'settings',
         'reports' => 'reports',
         'audit-logs' => 'audit-logs',
+
         'system' => 'system-health',
+        'owner-listings' => 'property-owners',
+        'owner-withdrawals' => 'owner-withdrawals',
+        'owner-payout-profiles' => 'owner-withdrawals',
+        'owner-settings' => 'owner-settings',
+
     ];
 
     public static function permissionFor(Request $request): ?string

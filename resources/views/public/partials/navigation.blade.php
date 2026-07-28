@@ -1,7 +1,7 @@
 <header class="site-header" data-site-header>
     <div class="site-container nav-shell">
         <a href="{{ url('/') }}" class="brand azari-brand azari-brand--header azari-header-logo" aria-label="{{ config('app.name', 'The Azari Residences') }} home">
-            
+
         <span class="brand-logo-slot azari-brand__logo-slot azari-header-logo__slot">
                 <img
                     src="{{ asset('images/logo-dark.png') }}"
@@ -14,7 +14,7 @@
                     decoding="async"
                 >
             </span>
-    
+
         </a>
 
         <nav class="desktop-navigation" aria-label="Primary navigation">
@@ -47,8 +47,13 @@
 
             <a href="{{ route('public.local-guide') }}">Local guide</a>
             <a href="{{ route('public.about') }}">About</a>
+
             <a href="{{ route('public.contact') }}">Contact</a>
+            (Route::has('public.list-property'))
+                <a href="{{ route('public.list-property') }}" class="{{ request()->routeIs('public.list-property') ? 'is-active' : '' }}">List your property</a>
+
         </nav>
+
 
         <div class="nav-actions">
             <a href="{{ route('bookings.verify') }}" class="nav-text-action">Verify booking</a>

@@ -28,12 +28,12 @@
 
     @include("partials.azari-shell-layout")
 
+
     <script>
-        document.fonts
-            .load('24px Material Symbols Outlined')
-            .then(() => document.documentElement.classList.add('az-icons-ready'))
-            .catch(() => document.documentElement.classList.add('az-icons-ready'));
+        document.documentElement.classList.add('az-icons-local');
+        document.fonts.ready.finally(() => document.documentElement.classList.add('az-icons-ready'));
     </script>
+
 </head>
 
 <body class="az-user-body">

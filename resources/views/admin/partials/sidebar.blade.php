@@ -7,7 +7,12 @@
     $items = [
         ['azari.admin.bookings.index','calendar_month','Bookings','bookings.view'],
         ['azari.admin.s56.calendar','event_available','Availability','availability.view'],
+
         ['azari.admin.properties.index','apartment','Properties','properties.view'],
+        ['azari.admin.owner-listings.index','real_estate_agent','Owner listings','property-owners.view'],
+        ['azari.admin.owner-withdrawals.index','payments','Owner withdrawals','owner-withdrawals.view'],
+        ['azari.admin.owner-settings.edit','tune','Owner marketplace','owner-settings.manage'],
+
         ['azari.admin.users.index','group','Users','guests.view'],
         ['azari.admin.identities.index','id_card','Guest identities','guest-identities.view'],
         ['azari.admin.payments.index','account_balance_wallet','Payments','payments.view'],
