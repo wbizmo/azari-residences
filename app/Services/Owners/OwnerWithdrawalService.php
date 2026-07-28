@@ -93,11 +93,16 @@ class OwnerWithdrawalService
         } catch (Throwable $exception) {
             report($exception);
 
-            $claimed->update([
-                'status' => 'failed',
-                'failed_at' => now(),
-                'last_error' => Str::limit($exception->getMessage(), 4000),
-            ]);
+            DB::transaction(function () use ($claimed, $exception): void {
+                $locked = $this->lock($claimed);
+                if ($locked->status === 'processing') {
+                    $locked->update([
+                        'status' => 'failed',
+                        'failed_at' => now(),
+                        'last_error' => Str::limit($exception->getMessage(), 4000),
+                    ]);
+                }
+            }, 5);
 
             throw new RuntimeException('Payout failed safely before confirmation: '.$exception->getMessage(), 0, $exception);
         }
@@ -138,13 +143,18 @@ class OwnerWithdrawalService
         } catch (Throwable $exception) {
             report($exception);
 
-            $claimed->refresh()->update([
-                'status' => 'reconciliation_required',
-                'reconciliation_required_at' => now(),
-                'last_error' => Str::limit($exception->getMessage(), 4000),
-                'provider_reference' => $result['reference'] ?? $claimed->provider_reference,
-                'provider_response' => $result['safe_response'] ?? $claimed->provider_response,
-            ]);
+            DB::transaction(function () use ($claimed, $result, $exception): void {
+                $locked = $this->lock($claimed);
+                if ($locked->status !== 'processed') {
+                    $locked->update([
+                        'status' => 'reconciliation_required',
+                        'reconciliation_required_at' => now(),
+                        'last_error' => Str::limit($exception->getMessage(), 4000),
+                        'provider_reference' => $result['reference'] ?? $locked->provider_reference,
+                        'provider_response' => $result['safe_response'] ?? $locked->provider_response,
+                    ]);
+                }
+            }, 5);
 
             throw new RuntimeException(
                 'The provider may have sent this payout, but Azari could not finish recording it. Manual reconciliation is required; do not retry automatically.',

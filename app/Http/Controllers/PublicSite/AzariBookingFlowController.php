@@ -4,15 +4,11 @@ namespace App\Http\Controllers\PublicSite;
 
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
-use App\Models\BookingGuest;
 use App\Models\BookingHold;
-use App\Models\BookingStatusHistory;
 use App\Services\Bookings\AzariAvailabilityEngine;
 use App\Services\Bookings\AzariPricingEngine;
-use App\Services\Identity\IdentityDocumentService;
+use App\Services\Bookings\BookingCreationService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -28,73 +24,9 @@ class AzariBookingFlowController extends Controller
         ]);
     }
 
-    public function store(Request $request, AzariAvailabilityEngine $availability, AzariPricingEngine $pricing, IdentityDocumentService $identityService)
+    public function store(Request $request, BookingCreationService $bookings)
     {
-        $hold = BookingHold::query()->with('property')->active()->where('token', $request->input('hold_token'))->first();
-        if (! $hold) throw ValidationException::withMessages(['hold_token' => 'Your reservation hold expired. Please search again.']);
-
-        $hasAccountIdentity = (bool) $request->user()?->currentIdentity()->exists();
-        $rules = [
-            'hold_token' => ['required', 'uuid'], 'first_name' => ['required', 'string', 'max:80'], 'last_name' => ['required', 'string', 'max:80'],
-            'guest_email' => ['required', 'email:rfc', 'max:190'], 'guest_phone' => ['required', 'string', 'max:40'],
-            'nationality' => ['required', 'string', 'max:100'], 'address' => ['required', 'string', 'max:255'], 'city' => ['required', 'string', 'max:120'],
-            'country' => ['required', 'string', 'max:120'], 'arrival_time' => ['nullable', 'date_format:H:i'], 'guest_notes' => ['nullable', 'string', 'max:3000'],
-            'adults' => ['required', 'array', 'size:'.$hold->adults], 'children' => ['nullable', 'array', 'size:'.$hold->children], 'terms' => ['accepted'],
-        ];
-        for ($i = 0; $i < $hold->adults; $i++) {
-            $rules["adults.$i.first_name"] = ['required', 'string', 'max:80'];
-            $rules["adults.$i.last_name"] = ['required', 'string', 'max:80'];
-            $rules["adults.$i.document_type"] = [$i === 0 && $hasAccountIdentity ? 'nullable' : 'required', Rule::in(['passport', 'national_id', 'drivers_licence', 'other_government_id'])];
-            $rules["adults.$i.document"] = [$i === 0 && $hasAccountIdentity ? 'nullable' : 'required', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'mimetypes:image/jpeg,image/png,image/webp,application/pdf', 'max:10240'];
-        }
-        for ($i = 0; $i < $hold->children; $i++) {
-            $rules["children.$i.first_name"] = ['required', 'string', 'max:80'];
-            $rules["children.$i.last_name"] = ['required', 'string', 'max:80'];
-        }
-        $data = $request->validate($rules);
-
-        if (! $availability->available($hold->property_id, $hold->check_in, $hold->check_out, null, $hold->token)) {
-            throw ValidationException::withMessages(['hold_token' => 'This residence is no longer available.']);
-        }
-        $quote = $pricing->quote($hold->property, $hold->check_in, $hold->check_out);
-
-        $booking = DB::transaction(function () use ($request, $data, $hold, $quote, $identityService, $hasAccountIdentity): Booking {
-            do { $reference = 'AZR-'.now()->format('ymd').'-'.Str::upper(Str::random(7)); }
-            while (Booking::query()->where('reference', $reference)->exists());
-
-            $booking = Booking::query()->create([
-                'reference' => $reference, 'user_id' => $request->user()?->id, 'property_id' => $hold->property_id, 'hold_token' => $hold->token,
-                'guest_name' => $data['first_name'].' '.$data['last_name'], 'guest_first_name' => $data['first_name'], 'guest_last_name' => $data['last_name'],
-                'guest_email' => $data['guest_email'], 'guest_phone' => $data['guest_phone'], 'nationality' => $data['nationality'], 'address' => $data['address'],
-                'city' => $data['city'], 'country' => $data['country'], 'arrival_time' => $data['arrival_time'] ?? null, 'guest_notes' => $data['guest_notes'] ?? null,
-                'check_in' => $hold->check_in, 'check_out' => $hold->check_out, 'adults' => $hold->adults, 'children' => $hold->children, 'rooms' => $hold->rooms,
-                'status' => 'pending_payment', 'verification_status' => 'unverified', 'currency' => $quote['currency'], 'nightly_rate' => $quote['nightly_rate'], 'nights' => $quote['nights'],
-                'subtotal' => $quote['subtotal'], 'fee_total' => $quote['fee_total'], 'add_on_total' => 0, 'tax_rate' => $quote['tax_rate'], 'tax_total' => $quote['tax_total'],
-                'total' => $quote['total'], 'pricing_snapshot' => $quote, 'expires_at' => now()->addHours(24),
-            ]);
-
-            foreach ($data['adults'] as $index => $adult) {
-                $guest = BookingGuest::query()->create([
-                    'booking_id' => $booking->id, 'type' => 'adult', 'position' => $index + 1,
-                    'first_name' => $adult['first_name'], 'last_name' => $adult['last_name'], 'is_lead' => $index === 0,
-                ]);
-                if ($index === 0 && $hasAccountIdentity && $request->user()) {
-                    $identityService->attachOwnerIdentity($booking, $request->user(), $guest);
-                } else {
-                    $identityService->storeGuestIdentity($booking, $guest, $adult['document_type'], $request->file("adults.$index.document"), $request->user()?->id);
-                }
-            }
-            foreach (($data['children'] ?? []) as $index => $child) {
-                BookingGuest::query()->create(['booking_id' => $booking->id, 'type' => 'child', 'position' => $index + 1, 'first_name' => $child['first_name'], 'last_name' => $child['last_name'], 'is_lead' => false]);
-            }
-            BookingStatusHistory::query()->create([
-                'booking_id' => $booking->id, 'changed_by' => $request->user()?->id,
-                'from_status' => null, 'to_status' => 'pending_payment', 'note' => 'Booking created and awaiting payment.',
-                'metadata' => ['channel' => $request->user() ? 'registered' : 'guest'],
-            ]);
-            $hold->delete();
-            return $booking;
-        }, 3);
+        $booking = $bookings->create($request);
 
         $request->session()->put('azari_guest_bookings.'.$booking->reference, true);
         return redirect()->route('azari.booking.review', $booking->reference)->with('success', 'Guest details saved. Review the booking before payment.');

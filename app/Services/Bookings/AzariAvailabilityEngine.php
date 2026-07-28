@@ -42,6 +42,7 @@ class AzariAvailabilityEngine {
     public function hold(Property $property, CarbonInterface $in, CarbonInterface $out, int $adults, int $children, int $rooms, ?int $userId): BookingHold {
         $this->assertRules($property,$in,$out,$adults,$children,$rooms);
         return DB::transaction(function() use($property,$in,$out,$adults,$children,$rooms,$userId) {
+            Property::query()->whereKey($property->getKey())->when(DB::connection()->getDriverName() !== 'sqlite', fn (Builder $query) => $query->lockForUpdate())->firstOrFail();
             BookingHold::query()->where('expires_at','<=',now())->delete();
             if (!$this->available($property->getKey(),$in,$out)) throw ValidationException::withMessages(['property_id'=>'Residence is no longer available.']);
             return BookingHold::query()->create([
