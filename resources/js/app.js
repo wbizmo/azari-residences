@@ -1,4 +1,5 @@
 import './azari-user-area.js';
+import './azari-frontend-ux.js';
 // import './bootstrap';
 
 const body = document.body;

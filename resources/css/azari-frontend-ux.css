@@ -1,0 +1,196 @@
+[aria-busy="true"] {
+    cursor: progress;
+}
+
+form.is-submitting {
+    position: relative;
+}
+
+form.is-submitting::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    border-radius: inherit;
+    background: rgba(243, 236, 221, 0.44);
+    cursor: progress;
+}
+
+form.is-submitting button[type='submit'],
+form.is-submitting input[type='submit'] {
+    cursor: progress;
+    opacity: 0.72;
+}
+
+[data-validation-error][hidden],
+[aria-hidden='true'][data-ux-panel] {
+    display: none !important;
+}
+
+[data-validation-error] {
+    display: block;
+    margin-top: 0.4rem;
+    color: var(--azari-error, #b42318);
+    font-size: 0.82rem;
+    line-height: 1.45;
+}
+
+[aria-invalid='true'] {
+    border-color: var(--azari-error, #b42318) !important;
+    box-shadow: 0 0 0 3px rgba(180, 35, 24, 0.12);
+}
+
+.azari-empty-state,
+[data-empty-state] {
+    display: grid;
+    justify-items: center;
+    gap: 0.75rem;
+    padding: clamp(1.5rem, 4vw, 3rem);
+    border: 1px dashed var(--azari-border, rgba(18, 33, 27, 0.16));
+    border-radius: 1rem;
+    text-align: center;
+}
+
+.azari-loading-state,
+[data-loading-state] {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+}
+
+.azari-loading-state::before,
+[data-loading-state]::before {
+    width: 1rem;
+    height: 1rem;
+    content: '';
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 999px;
+    animation: azari-ux-spin 0.7s linear infinite;
+}
+
+@keyframes azari-ux-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .azari-loading-state::before,
+    [data-loading-state]::before {
+        animation-duration: 1.5s;
+    }
+}
+
+.azari-confirmation-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+}
+
+.azari-confirmation-layer[hidden] {
+    display: none !important;
+}
+
+.azari-confirmation-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(8, 25, 21, 0.72);
+    backdrop-filter: blur(8px);
+}
+
+.azari-confirmation-card {
+    position: relative;
+    z-index: 1;
+    width: min(100%, 31rem);
+    max-height: min(90dvh, 42rem);
+    overflow-y: auto;
+    padding: clamp(1.5rem, 4vw, 2.25rem);
+    background: var(--azari-ivory, #f3ecdd);
+    border: 1px solid var(--azari-border, rgba(18, 33, 27, 0.16));
+    border-radius: 1.25rem;
+    box-shadow: 0 2rem 5rem rgba(0, 0, 0, 0.35);
+    text-align: center;
+    outline: none;
+}
+
+.azari-confirmation-close {
+    position: absolute;
+    top: 0.85rem;
+    right: 0.85rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: grid;
+    place-items: center;
+    color: var(--azari-ink, #12211b);
+    background: transparent;
+    border: 1px solid var(--azari-border, rgba(18, 33, 27, 0.16));
+    border-radius: 999px;
+}
+
+.azari-confirmation-icon {
+    width: 3.5rem;
+    height: 3.5rem;
+    margin: 0 auto 1rem;
+    display: grid;
+    place-items: center;
+    color: var(--azari-ink, #12211b);
+    background: var(--azari-ivory-deep, #e8dec6);
+    border-radius: 1rem;
+}
+
+.azari-confirmation-card h2 {
+    margin: 0;
+    color: var(--azari-ink, #12211b);
+    font-family: var(--font-display, Georgia, serif);
+    font-size: clamp(1.5rem, 4vw, 2rem);
+}
+
+.azari-confirmation-card p {
+    margin: 0.8rem auto 0;
+    max-width: 34rem;
+    color: var(--azari-muted, #6e7268);
+    line-height: 1.65;
+}
+
+.azari-confirmation-actions {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.azari-confirmation-primary,
+.azari-confirmation-secondary {
+    min-height: 2.9rem;
+    padding: 0 1.1rem;
+    border-radius: 0.75rem;
+    font-weight: 700;
+}
+
+.azari-confirmation-primary {
+    color: #fff;
+    background: var(--azari-ink, #12211b);
+    border: 1px solid var(--azari-ink, #12211b);
+}
+
+.azari-confirmation-primary.is-destructive {
+    background: var(--azari-error, #b42318);
+    border-color: var(--azari-error, #b42318);
+}
+
+.azari-confirmation-secondary {
+    color: var(--azari-ink, #12211b);
+    background: transparent;
+    border: 1px solid var(--azari-border, rgba(18, 33, 27, 0.16));
+}
+
+@media (max-width: 520px) {
+    .azari-confirmation-actions > button {
+        width: 100%;
+    }
+}
