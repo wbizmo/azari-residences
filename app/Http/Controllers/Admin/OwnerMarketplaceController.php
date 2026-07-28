@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Amenity;
 use App\Models\Property;
 use App\Models\PropertyListing;
+use App\Models\OwnerPayoutProfile;
 use App\Models\SiteSetting;
 use App\Models\WithdrawalRequest;
 use App\Services\Owners\OwnerWithdrawalService;
@@ -41,6 +42,19 @@ class OwnerMarketplaceController extends Controller
             'listing' => $listing,
             'amenities' => Amenity::query()->whereIn('id', $listing->amenity_ids ?? [])->pluck('name'),
         ]);
+    }
+
+    public function markUnderReview(Request $request, PropertyListing $listing): RedirectResponse
+    {
+        abort_unless($listing->status === 'submitted', 422);
+
+        $listing->update([
+            'status' => 'under_review',
+            'reviewed_by' => $request->user()->id,
+            'reviewed_at' => now(),
+        ]);
+
+        return back()->with('status', 'Listing marked as under review.');
     }
 
     public function approveListing(Request $request, PropertyListing $listing): RedirectResponse
@@ -186,6 +200,101 @@ class OwnerMarketplaceController extends Controller
         return back()->with('status', 'Withdrawal rejected. The reserved amount is available to the owner again.');
     }
 
+    public function verifyPayoutProfile(Request $request, OwnerPayoutProfile $profile): RedirectResponse
+    {
+        $data = $request->validate([
+            'verification_note' => ['required', 'string', 'min:10', 'max:3000'],
+        ]);
+
+        $profile->update([
+            'is_verified' => true,
+            'verified_by' => $request->user()->id,
+            'verified_at' => now(),
+            'verification_note' => $data['verification_note'],
+        ]);
+
+        return back()->with('status', 'Payout destination verified. The owner can now request withdrawals.');
+    }
+
+    public function unverifyPayoutProfile(Request $request, OwnerPayoutProfile $profile): RedirectResponse
+    {
+        $data = $request->validate([
+            'verification_note' => ['required', 'string', 'min:10', 'max:3000'],
+        ]);
+
+        $profile->update([
+            'is_verified' => false,
+            'verified_by' => $request->user()->id,
+            'verified_at' => null,
+            'verification_note' => $data['verification_note'],
+        ]);
+
+        return back()->with('status', 'Payout destination verification revoked.');
+    }
+
+    public function retryWithdrawal(
+        Request $request,
+        WithdrawalRequest $withdrawal,
+        OwnerWithdrawalService $withdrawals
+    ): RedirectResponse {
+        $data = $request->validate([
+            'admin_note' => ['nullable', 'string', 'max:3000'],
+        ]);
+
+        try {
+            $withdrawals->retryFailed($withdrawal, $request->user(), $data['admin_note'] ?? null);
+        } catch (\RuntimeException $exception) {
+            return back()->withErrors(['withdrawal' => $exception->getMessage()]);
+        }
+
+        return back()->with('status', 'Withdrawal returned to the pending queue for one safe retry.');
+    }
+
+    public function reconcileWithdrawalPaid(
+        Request $request,
+        WithdrawalRequest $withdrawal,
+        OwnerWithdrawalService $withdrawals
+    ): RedirectResponse {
+        $data = $request->validate([
+            'provider_reference' => ['required', 'string', 'max:255'],
+            'reconciliation_note' => ['required', 'string', 'min:10', 'max:3000'],
+        ]);
+
+        try {
+            $withdrawals->reconcileAsPaid(
+                $withdrawal,
+                $request->user(),
+                $data['provider_reference'],
+                $data['reconciliation_note'],
+            );
+        } catch (\RuntimeException $exception) {
+            return back()->withErrors(['withdrawal' => $exception->getMessage()]);
+        }
+
+        return back()->with('status', 'Withdrawal reconciled as paid and the debit was recorded exactly once.');
+    }
+
+    public function reconcileWithdrawalNotPaid(
+        Request $request,
+        WithdrawalRequest $withdrawal,
+        OwnerWithdrawalService $withdrawals
+    ): RedirectResponse {
+        $data = $request->validate([
+            'reconciliation_note' => ['required', 'string', 'min:10', 'max:3000'],
+        ]);
+
+        try {
+            $withdrawals->reconcileAsNotPaid(
+                $withdrawal,
+                $request->user(),
+                $data['reconciliation_note'],
+            );
+        } catch (\RuntimeException $exception) {
+            return back()->withErrors(['withdrawal' => $exception->getMessage()]);
+        }
+
+        return back()->with('status', 'Withdrawal reconciled as not paid. Reserved funds are available again.');
+    }
     public function settings(): View
     {
         return view('admin.owner-settings.edit', [

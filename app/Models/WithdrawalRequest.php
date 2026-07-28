@@ -19,9 +19,13 @@ class WithdrawalRequest extends Model
             'provider_response' => 'array',
             'requested_at' => 'datetime',
             'processing_started_at' => 'datetime',
+            'provider_sent_at' => 'datetime',
             'processed_at' => 'datetime',
             'failed_at' => 'datetime',
             'rejected_at' => 'datetime',
+            'reconciliation_required_at' => 'datetime',
+            'reconciled_at' => 'datetime',
+            'retry_count' => 'integer',
         ];
     }
 
@@ -33,6 +37,26 @@ class WithdrawalRequest extends Model
         });
     }
 
-    public function user(): BelongsTo { return $this->belongsTo(User::class); }
-    public function processedBy(): BelongsTo { return $this->belongsTo(User::class, 'processed_by'); }
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function processedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'processed_by');
+    }
+
+    public function reconciledBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'reconciled_by');
+    }
+
+    public function isSafelyRetryable(): bool
+    {
+        return $this->status === 'failed'
+            && blank($this->provider_reference)
+            && blank($this->provider_sent_at)
+            && blank($this->reconciliation_required_at);
+    }
 }

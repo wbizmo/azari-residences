@@ -25,6 +25,8 @@ class OwnerWithdrawalReservationTest extends TestCase
             'preferred_gateway' => 'paypal',
             'paypal_recipient' => 'owner@example.com',
             'paypal_recipient_type' => 'EMAIL',
+            'is_verified' => true,
+            'verified_at' => now(),
         ]);
 
         OwnerLedgerEntry::query()->create([

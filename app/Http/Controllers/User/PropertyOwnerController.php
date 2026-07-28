@@ -229,6 +229,7 @@ class PropertyOwnerController extends Controller
         $profile = $request->user()->ownerPayoutProfile;
 
         abort_unless($profile, 422, 'Configure your payout destination first.');
+        abort_unless($profile->is_verified, 422, 'Your payout destination is awaiting Azari verification.');
 
         $gatewayEnabled = $profile->preferred_gateway === 'paypal'
             ? filter_var(SiteSetting::valueFor('owner_paypal_enabled', '0'), FILTER_VALIDATE_BOOL)
@@ -295,6 +296,8 @@ class PropertyOwnerController extends Controller
             'description' => ['required', 'string', 'max:20000'],
             'cover_image' => [$listing?->cover_image ? 'nullable' : 'required', 'image', 'max:8192'],
             'gallery.*' => ['nullable', 'image', 'max:8192'],
+            'remove_gallery' => ['nullable', 'array'],
+            'remove_gallery.*' => ['string', 'max:1000'],
             'amenities' => ['nullable', 'array'],
             'amenities.*' => ['integer', 'exists:amenities,id'],
             'proposed_owner_share_percentage' => ['nullable', 'numeric', 'min:0', 'max:100'],
@@ -305,7 +308,7 @@ class PropertyOwnerController extends Controller
         $roomType = RoomType::query()->findOrFail($data['room_type_id']);
 
         $propertyData = collect($data)->except([
-            'cover_image', 'gallery', 'amenities', 'proposed_owner_share_percentage', 'owner_notes',
+            'cover_image', 'gallery', 'remove_gallery', 'amenities', 'proposed_owner_share_percentage', 'owner_notes',
         ])->all();
 
         $propertyData['location'] = $location->name;
@@ -326,6 +329,12 @@ class PropertyOwnerController extends Controller
         }
 
         $gallery = $listing?->gallery ?? [];
+        $removeGallery = array_values(array_intersect($gallery, $data['remove_gallery'] ?? []));
+        if ($removeGallery !== []) {
+            Storage::disk('public')->delete($removeGallery);
+            $gallery = array_values(array_diff($gallery, $removeGallery));
+        }
+
         if ($request->hasFile('gallery')) {
             $gallery = array_values([...$gallery, ...collect($request->file('gallery'))
                 ->map(fn ($image) => $image->store('owner-listings/gallery', 'public'))->all()]);

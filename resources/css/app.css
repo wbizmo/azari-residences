@@ -8512,3 +8512,46 @@ body.az-admin-body {
     }
 }
 /* AZARI_ALL_SHELLS_RESPONSIVE_V3_END */
+
+/* Property owner marketplace production-readiness additions */
+.az-s78-field--error input,
+.az-s78-field--error select,
+.az-s78-field--error textarea {
+    border-color: #a93737;
+    box-shadow: 0 0 0 3px rgba(169, 55, 55, .08);
+}
+.az-s78-field small,
+.az-user-alert--danger {
+    color: #8d2929;
+}
+.az-user-alert {
+    margin-bottom: 1rem;
+    padding: 1rem 1.1rem;
+    border: 1px solid currentColor;
+    border-radius: 14px;
+    background: rgba(255,255,255,.92);
+}
+.az-owner-media-preview {
+    display: block;
+    width: 100%;
+    border-radius: 16px;
+    object-fit: cover;
+}
+.az-owner-media-preview--cover {
+    max-height: 360px;
+}
+.az-owner-gallery-manager {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(150px,1fr));
+    gap: .9rem;
+}
+.az-owner-gallery-item {
+    display: grid;
+    gap: .45rem;
+}
+.az-owner-gallery-item img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: 12px;
+}
