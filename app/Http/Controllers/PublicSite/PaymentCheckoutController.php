@@ -14,7 +14,6 @@ use App\Services\Payments\PaymentWebhookProcessor;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
@@ -66,7 +65,7 @@ class PaymentCheckoutController extends Controller
         $eventId = hash('sha256', implode('|', [$provider, $record->reference, $providerReference, json_encode($request->query())]));
         $event = PaymentEvent::query()->firstOrCreate(
             ['provider' => $provider, 'event_id' => $eventId],
-            ['payment_id' => $record->id, 'event_type' => 'payment.callback', 'source' => 'callback', 'signature_valid' => null, 'processed' => false, 'received_at' => now(), 'safe_payload' => Arr::only($request->all(), ['status', 'tx_ref', 'transaction_id', 'OrderTrackingId', 'orderTrackingId', 'OrderMerchantReference', 'orderMerchantReference', 'reference'])]
+            ['payment_id' => $record->id, 'event_type' => 'payment.callback', 'source' => 'callback', 'signature_valid' => null, 'processed' => false, 'received_at' => now(), 'safe_payload' => $request->only(['status', 'tx_ref', 'transaction_id', 'OrderTrackingId', 'orderTrackingId', 'OrderMerchantReference', 'orderMerchantReference', 'reference'])]
         );
 
         try {

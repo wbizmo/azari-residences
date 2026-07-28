@@ -2,10 +2,10 @@
 
 namespace App\Http\Requests\PublicSite;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\AzariFormRequest;
 use Illuminate\Validation\Rule;
 
-class AvailabilitySearchRequest extends FormRequest
+class AvailabilitySearchRequest extends AzariFormRequest
 {
     public function authorize(): bool
     {

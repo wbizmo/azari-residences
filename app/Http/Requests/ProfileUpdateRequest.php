@@ -2,12 +2,12 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Requests\AzariFormRequest;
 use App\Models\User;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class ProfileUpdateRequest extends FormRequest
+class ProfileUpdateRequest extends AzariFormRequest
 {
     /**
      * Get the validation rules that apply to the request.
