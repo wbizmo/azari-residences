@@ -236,8 +236,9 @@
                 <a href="{{ route('public.about') }}">About Azari</a>
 
                 <a href="{{ route('public.contact') }}">Contact</a>
-                (Route::has('public.list-property'))
+                @if(Route::has('public.list-property'))
                     <a href="{{ route('public.list-property') }}">List your property</a>
+                @endif
 
                 <a href="{{ route('bookings.verify') }}">Verify booking</a>
 

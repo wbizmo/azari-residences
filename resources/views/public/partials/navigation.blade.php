@@ -49,8 +49,9 @@
             <a href="{{ route('public.about') }}">About</a>
 
             <a href="{{ route('public.contact') }}">Contact</a>
-            (Route::has('public.list-property'))
+            @if(Route::has('public.list-property'))
                 <a href="{{ route('public.list-property') }}" class="{{ request()->routeIs('public.list-property') ? 'is-active' : '' }}">List your property</a>
+            @endif
 
         </nav>
 

@@ -364,3 +364,164 @@ body.az-user-body {
         left: 14px;
     }
 }
+
+
+/* AZARI_OWNER_BLADE_THEME_V7_START */
+.az-owner-cover {
+    display: block;
+    width: 100%;
+    max-height: 440px;
+    margin-bottom: 22px;
+    border-radius: 20px;
+    object-fit: cover;
+    background: var(--az-user-green-100);
+}
+.az-owner-agreement-copy {
+    margin-bottom: 24px;
+    padding: clamp(18px, 3vw, 30px);
+    border: 1px solid var(--az-user-line);
+    border-radius: 20px;
+    background: #fcfaf5;
+    color: var(--az-user-ink);
+    font-size: 14px;
+    line-height: 1.85;
+    white-space: pre-line;
+}
+.az-user-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+.az-user-stat {
+    min-width: 0;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border: 1px solid var(--az-user-line);
+    border-radius: 20px;
+    background: var(--az-user-paper);
+    box-shadow: var(--az-user-shadow-sm);
+}
+.az-user-stat > .material-symbols-outlined {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    flex: 0 0 44px;
+    place-items: center;
+    border-radius: 14px;
+    background: var(--az-user-green-100);
+    color: var(--az-user-green-800);
+    font-size: 23px;
+}
+.az-user-stat small,
+.az-user-stat strong {
+    display: block;
+}
+.az-user-stat small {
+    margin-bottom: 4px;
+    color: var(--az-user-muted);
+    font-size: 11px;
+}
+.az-user-stat strong {
+    color: var(--az-user-green-950);
+    font-size: clamp(16px, 2vw, 21px);
+    overflow-wrap: anywhere;
+}
+.az-user-panel + .az-user-panel {
+    margin-top: 22px;
+}
+.az-user-list-item {
+    min-width: 0;
+}
+.az-user-list-item > div {
+    min-width: 0;
+}
+.az-user-list-item h3,
+.az-user-list-item p {
+    overflow-wrap: anywhere;
+}
+.az-user-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
+    gap: 12px;
+    margin: 0 0 22px;
+}
+.az-user-detail-grid > div {
+    padding: 16px;
+    border: 1px solid var(--az-user-line);
+    border-radius: 16px;
+    background: var(--az-user-ivory);
+}
+.az-user-detail-grid small,
+.az-user-detail-grid strong {
+    display: block;
+}
+.az-user-detail-grid small {
+    margin-bottom: 5px;
+    color: var(--az-user-muted);
+    font-size: 10px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+.az-user-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+.az-user-form > label {
+    min-width: 0;
+    display: grid;
+    gap: 7px;
+    color: var(--az-user-green-950);
+    font-size: 12px;
+    font-weight: 700;
+}
+.az-user-form > label:has(textarea),
+.az-user-form > label:has(input[type="checkbox"]),
+.az-user-form > .az-user-button {
+    grid-column: 1 / -1;
+}
+.az-user-form input:not([type="checkbox"]),
+.az-user-form select,
+.az-user-form textarea {
+    width: 100%;
+    min-width: 0;
+    border: 1px solid var(--az-user-line);
+    border-radius: 13px;
+    background: #fff;
+    color: var(--az-user-ink);
+    padding: 12px 13px;
+}
+.az-user-form input:not([type="checkbox"]),
+.az-user-form select {
+    min-height: 46px;
+}
+.az-user-form textarea {
+    resize: vertical;
+}
+.az-user-form input:focus,
+.az-user-form select:focus,
+.az-user-form textarea:focus {
+    border-color: var(--az-user-brass);
+    outline: 3px solid rgba(181, 138, 74, .15);
+}
+.az-user-content nav[role="navigation"] {
+    max-width: 100%;
+    margin-top: 20px;
+    overflow-x: auto;
+}
+@media (max-width: 720px) {
+    .az-user-panel-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+    .az-user-panel-header > .az-user-button {
+        width: 100%;
+    }
+    .az-user-form {
+        grid-template-columns: 1fr;
+    }
+}
+/* AZARI_OWNER_BLADE_THEME_V7_END */

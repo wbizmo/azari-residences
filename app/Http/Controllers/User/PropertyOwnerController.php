@@ -102,7 +102,9 @@ class PropertyOwnerController extends Controller
     public function index(Request $request): View
     {
         return view('user.owner.listings-index', [
-            'listings' => $request->user()->propertyListings()->latest()->paginate(10),
+
+'listings' => $request->user()->propertyListings()->latest()->paginate(10)->withQueryString()
+,
         ]);
     }
 
@@ -176,7 +178,9 @@ class PropertyOwnerController extends Controller
     public function earnings(Request $request): View
     {
         return view('user.owner.earnings', [
-            'entries' => $request->user()->ownerLedgerEntries()->latest()->paginate(10),
+
+'entries' => $request->user()->ownerLedgerEntries()->latest()->paginate(10)->withQueryString()
+,
         ]);
     }
 
@@ -185,7 +189,9 @@ class PropertyOwnerController extends Controller
         $currency = strtoupper((string) SiteSetting::valueFor('owner_withdrawal_currency', 'USD'));
 
         return view('user.owner.withdrawals', [
-            'withdrawals' => $request->user()->withdrawalRequests()->latest()->paginate(10),
+
+'withdrawals' => $request->user()->withdrawalRequests()->latest()->paginate(10)->withQueryString()
+,
             'profile' => $request->user()->ownerPayoutProfile ?: new OwnerPayoutProfile,
             'currency' => $currency,
             'available' => $balances->available($request->user(), $currency),
