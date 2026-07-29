@@ -7,6 +7,8 @@ use App\Mail\ContactEnquiry;
 use App\Models\Location;
 use App\Models\Property;
 use App\Models\RoomType;
+use App\Services\Bookings\AzariAvailabilityEngine;
+use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -29,6 +31,22 @@ class PublicPageController extends Controller
                     ->where('is_published', true)
                     ->where('status', '!=', 'inactive'))
                 ->orderBy('sort_order')->orderBy('name')->get(),
+        ]);
+    }
+
+    public function propertyAvailability(
+        Property $property,
+        AzariAvailabilityEngine $availability
+    ): View {
+        abort_unless($property->is_published && $property->status !== 'inactive', 404);
+
+        $property->load(['locationRecord', 'roomType', 'amenities']);
+        $start = CarbonImmutable::today(config('azari.timezone', 'Africa/Lagos'));
+
+        return view('public.bookings.property-availability', [
+            'property' => $property,
+            'calendar' => $availability->calendar($property->getKey(), $start, 90),
+            'start' => $start,
         ]);
     }
 

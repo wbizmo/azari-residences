@@ -1,15 +1,16 @@
 <?php
 
-use App\Http\Controllers\PublicSite\AvailabilitySearchController;
-
 use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Admin\RoomTypeController;
+use App\Http\Controllers\PublicSite\AvailabilitySearchController;
 use App\Http\Controllers\PublicSite\AzariAvailabilityController;
 use App\Http\Controllers\PublicSite\PublicPageController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/availability', [PublicPageController::class, 'availability'])
     ->name('availability.index');
+Route::get('/residences/{property}/availability', [PublicPageController::class, 'propertyAvailability'])
+    ->name('availability.property');
 
 Route::get('/availability/results', [AzariAvailabilityController::class, 'index'])
     ->name('availability.results');

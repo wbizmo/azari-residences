@@ -37,7 +37,7 @@
                     <span>From</span>
                     <strong>{{ $property->currency }} {{ number_format($property->nightly_rate) }}</strong>
                     <small>per night</small>
-                    <a href="{{ route('home') }}#availability" class="button button-primary button-block">Check availability</a>
+                    <a href="{{ route('availability.property', $property) }}" class="button button-primary button-block">Check availability</a>
                 </aside>
             </div>
         </div>

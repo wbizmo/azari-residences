@@ -26,6 +26,7 @@ class AvailabilitySearchController extends Controller
             'room_type_id' => ['nullable', 'integer', 'exists:room_types,id'],
             'property_type' => ['nullable', 'string', 'max:80'],
             'location' => ['nullable', 'string', 'max:120'],
+            'property_id' => ['nullable', 'integer', 'exists:properties,id'],
         ]);
 
         if (empty($validated['location_id']) && ! empty($validated['location'])) {

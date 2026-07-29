@@ -1,6 +1,6 @@
 <header class="site-header" data-site-header>
     <div class="site-container nav-shell">
-        <a href="{{ route('user.owner.listings.create') }}" class="brand azari-brand azari-brand--header azari-header-logo" aria-label="{{ config('app.name', 'The Azari Residences') }} home">
+        <a href="{{ route('home') }}" class="brand azari-brand azari-brand--header azari-header-logo" aria-label="{{ config('app.name', 'The Azari Residences') }} home">
 
         <span class="brand-logo-slot azari-brand__logo-slot azari-header-logo__slot">
                 <img
@@ -18,8 +18,8 @@
         </a>
 
         <nav class="desktop-navigation" aria-label="Primary navigation">
-            <a href="{{ route('apartments.index') }}">Apartments</a>
-            <a href="{{ route('rooms.index') }}">Rooms</a>
+            <a href="{{ route('public.apartments') }}">Apartments</a>
+            <a href="{{ route('public.rooms') }}">Rooms</a>
             <a href="{{ route('availability.index') }}">Availability</a>
 
             <div class="nav-popover" data-popover>
@@ -31,7 +31,7 @@
 
                 <div class="nav-popover-panel" id="services-popover" data-popover-panel hidden>
                     @if(Route::has('public.list-property'))
-                        <a href="{{ route('user.owner.listings.create') }}"
+                        <a href="{{ route('public.list-property') }}"
                            class="{{ request()->routeIs('public.list-property') ? 'is-active' : '' }}">
                             <span class="material-symbols-outlined" aria-hidden="true">add_home_work</span>
                             <span>List my property</span>

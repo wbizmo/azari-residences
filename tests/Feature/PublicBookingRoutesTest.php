@@ -2,10 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Models\Booking;
 use App\Models\Location;
 use App\Models\Property;
 use App\Models\RoomType;
+use App\Services\Bookings\AzariAvailabilityEngine;
+use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
 class PublicBookingRoutesTest extends TestCase
@@ -61,5 +65,64 @@ class PublicBookingRoutesTest extends TestCase
         ]));
 
         $response->assertSuccessful()->assertSee($property->name);
+    }
+
+    public function test_property_page_opens_property_specific_inventory(): void
+    {
+        $property = Property::factory()->create(['is_published' => true, 'status' => 'available']);
+
+        $this->get(route('properties.show', $property))
+            ->assertSuccessful()
+            ->assertSee(route('availability.property', $property), false);
+
+        $this->get(route('availability.property', $property))
+            ->assertSuccessful()
+            ->assertSee('name="property_id"', false)
+            ->assertSee('value="'.$property->id.'"', false)
+            ->assertSee('90-day availability calendar');
+    }
+
+    public function test_property_filter_is_preserved_and_isolates_results(): void
+    {
+        $wanted = Property::factory()->create(['is_published' => true, 'status' => 'available', 'max_guests' => 4]);
+        $other = Property::factory()->create(['is_published' => true, 'status' => 'available', 'max_guests' => 4]);
+
+        $this->get(route('availability.results', [
+            'property_id' => $wanted->id,
+            'check_in' => now()->addDays(5)->toDateString(),
+            'check_out' => now()->addDays(7)->toDateString(),
+            'adults' => 2,
+            'children' => 0,
+            'rooms' => 1,
+        ]))->assertSuccessful()->assertSee($wanted->name)->assertDontSee($other->name);
+    }
+
+    public function test_expired_pending_payment_does_not_block_inventory(): void
+    {
+        $property = Property::factory()->create(['is_published' => true, 'status' => 'available']);
+        $in = CarbonImmutable::today()->addDays(5);
+        $out = $in->addDays(2);
+        Booking::factory()->for($property)->create([
+            'status' => 'pending_payment',
+            'check_in' => $in,
+            'check_out' => $out,
+            'expires_at' => now()->subMinute(),
+        ]);
+
+        $this->assertTrue(app(AzariAvailabilityEngine::class)->available($property->id, $in, $out));
+    }
+
+    public function test_active_hold_prevents_a_second_hold(): void
+    {
+        $property = Property::factory()->create([
+            'is_published' => true, 'status' => 'available', 'same_day_booking' => true,
+        ]);
+        $in = CarbonImmutable::today()->addDays(5);
+        $out = $in->addDays(2);
+        $engine = app(AzariAvailabilityEngine::class);
+        $engine->hold($property, $in, $out, 1, 0, 1, null);
+
+        $this->expectException(ValidationException::class);
+        $engine->hold($property, $in, $out, 1, 0, 1, null);
     }
 }

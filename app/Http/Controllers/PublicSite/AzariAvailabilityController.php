@@ -31,6 +31,7 @@ class AzariAvailabilityController extends Controller
             'location' => ['nullable', 'string', 'max:120'],
             'room_type_id' => ['nullable', 'integer', 'exists:room_types,id'],
             'property_type' => ['nullable', 'string', 'max:80'],
+            'property_id' => ['nullable', 'integer', 'exists:properties,id'],
         ]);
 
         $checkIn = CarbonImmutable::parse($filters['check_in'])->startOfDay();
@@ -43,12 +44,10 @@ class AzariAvailabilityController extends Controller
             ->with(['locationRecord', 'roomType', 'amenities'])
             ->where('is_published', true)
             ->where('status', '!=', 'inactive')
-            ->when($filters['location_id'] ?? null, fn ($query, $locationId) =>
-                $query->where('location_id', $locationId))
-            ->when($filters['room_type_id'] ?? null, fn ($query, $roomTypeId) =>
-                $query->where('room_type_id', $roomTypeId))
-            ->when($filters['property_type'] ?? null, fn ($query, $type) =>
-                $query->whereRaw('LOWER(property_type) = ?', [mb_strtolower($type)]))
+            ->when($filters['property_id'] ?? null, fn ($query, $propertyId) => $query->whereKey($propertyId))
+            ->when($filters['location_id'] ?? null, fn ($query, $locationId) => $query->where('location_id', $locationId))
+            ->when($filters['room_type_id'] ?? null, fn ($query, $roomTypeId) => $query->where('room_type_id', $roomTypeId))
+            ->when($filters['property_type'] ?? null, fn ($query, $type) => $query->whereRaw('LOWER(property_type) = ?', [mb_strtolower($type)]))
             ->orderBy('sort_order')
             ->orderBy('name')
             ->get();
