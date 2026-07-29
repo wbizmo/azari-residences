@@ -31,7 +31,7 @@
 
                 <div class="nav-popover-panel" id="services-popover" data-popover-panel hidden>
                     @if(Route::has('public.list-property'))
-                        <a href="{{ route('public.list-property') }}"
+                        <a href="{{ route('user.owner.listings.create') }}"
                            class="{{ request()->routeIs('public.list-property') ? 'is-active' : '' }}">
                             <span class="material-symbols-outlined" aria-hidden="true">add_home_work</span>
                             <span>List my property</span>

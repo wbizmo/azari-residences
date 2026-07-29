@@ -8,7 +8,7 @@
 
             <div class="footer-column">
                 <h2>Explore</h2>
-                <a href="{{ route('public.list-property') }}">Apartments</a>
+                <a href="{{ route('user.owner.listings.create') }}">Apartments</a>
                 <a href="{{ route('public.rooms') }}">Rooms</a>
                 <a href="{{ route('availability.index') }}">Availability</a>
                 <a href="{{ route('public.services') }}">Services</a>
