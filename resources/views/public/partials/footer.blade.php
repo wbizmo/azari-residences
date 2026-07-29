@@ -8,7 +8,7 @@
 
             <div class="footer-column">
                 <h2>Explore</h2>
-                <a href="{{ route('public.apartments') }}">Apartments</a>
+                <a href="{{ route('public.list-property') }}">Apartments</a>
                 <a href="{{ route('public.rooms') }}">Rooms</a>
                 <a href="{{ route('availability.index') }}">Availability</a>
                 <a href="{{ route('public.services') }}">Services</a>
@@ -20,7 +20,7 @@
                 <a href="{{ route('bookings.verify') }}">Verify booking</a>
                 <a href="{{ route('login') }}">Guest login</a>
                 <a href="{{ route('register') }}">Create account</a>
-                <a href="{{ route('public.support') }}">Contact support</a>
+                <a href="{{ route('public.support') }}">List my property</a>
                 <a href="{{ route('public.contact') }}">Contact Azari</a>
             </div>
 

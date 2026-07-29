@@ -30,6 +30,13 @@
                 </button>
 
                 <div class="nav-popover-panel" id="services-popover" data-popover-panel hidden>
+                    @if(Route::has('public.list-property'))
+                        <a href="{{ route('public.list-property') }}"
+                           class="{{ request()->routeIs('public.list-property') ? 'is-active' : '' }}">
+                            <span class="material-symbols-outlined" aria-hidden="true">add_home_work</span>
+                            <span>List my property</span>
+                        </a>
+                    @endif
                     <a href="{{ route('public.concierge') }}">
                         <span class="material-symbols-outlined">concierge</span>Concierge
                     </a>
@@ -49,9 +56,6 @@
             <a href="{{ route('public.about') }}">About</a>
 
             <a href="{{ route('public.contact') }}">Contact</a>
-            @if(Route::has('public.list-property'))
-                <a href="{{ route('public.list-property') }}" class="{{ request()->routeIs('public.list-property') ? 'is-active' : '' }}">List your property</a>
-            @endif
 
         </nav>
 
