@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('admin.layouts.app')
 @section('title','Owner withdrawals')
 @section('content')
 <div class="az-admin-page-header"><div><h1>Owner withdrawals</h1><p>Process each payout exactly once and reconcile ambiguous provider outcomes.</p></div></div>

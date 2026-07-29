@@ -18,9 +18,9 @@
         </a>
 
         <nav class="desktop-navigation" aria-label="Primary navigation">
-            <a href="{{ route('user.owner.listings.create') }}">Apartments</a>
-            <a href="{{ route('user.owner.listings.create') }}">Rooms</a>
-            <a href="{{ route('user.owner.listings.create') }}">Availability</a>
+            <a href="{{ route('apartments.index') }}">Apartments</a>
+            <a href="{{ route('rooms.index') }}">Rooms</a>
+            <a href="{{ route('availability.index') }}">Availability</a>
 
             <div class="nav-popover" data-popover>
                 <button type="button" class="nav-popover-trigger" data-popover-trigger

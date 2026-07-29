@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('admin.layouts.app')
 @section('title','Property owner listings')
 @section('content')
 <div class="az-admin-page-header"><div><h1>Property owner listings</h1><p>Review externally submitted properties before they enter inventory.</p></div></div>

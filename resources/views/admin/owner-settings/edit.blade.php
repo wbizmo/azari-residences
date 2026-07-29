@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('admin.layouts.app')
 @section('title','Property owner settings')
 @section('content')
 <div class="az-admin-page-header"><div><h1>Property owner marketplace</h1><p>Control agreements, earnings share, withdrawal days and payout gateways.</p></div></div>

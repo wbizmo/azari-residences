@@ -232,6 +232,7 @@
                 <a href="{{ route('public.housekeeping') }}">Housekeeping</a>
                 <a href="{{ route('public.restaurant') }}">Restaurant</a>
                 <a href="{{ route('public.airport-transfers') }}">Airport transfers</a>
+                <a href="{{ route('user.owner.listings.create') }}">List my property</a>
                 <a href="{{ route('public.local-guide') }}">Local guide</a>
                 <a href="{{ route('public.about') }}">About Azari</a>
 

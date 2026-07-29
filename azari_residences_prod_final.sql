@@ -305,12 +305,15 @@ CREATE TABLE `communication_logs` (
   `masked_recipient` VARCHAR(512) NULL,
   `provider` VARCHAR(255) NULL,
   `provider_reference` VARCHAR(512) NULL,
+  `provider_status` VARCHAR(64) NULL,
+  `status_updated_at` DATETIME NULL,
   `status` VARCHAR(255) NOT NULL DEFAULT 'queued',
   `queued_at` DATETIME NULL,
   `sent_at` DATETIME NULL,
   `delivered_at` DATETIME NULL,
   `failed_at` DATETIME NULL,
   `safe_error` TEXT NULL,
+  `provider_error_code` VARCHAR(64) NULL,
   `retry_count` INT NOT NULL DEFAULT '0',
   `meta` LONGTEXT NULL,
   `created_at` DATETIME NULL,
@@ -563,6 +566,8 @@ CREATE TABLE `payment_events` (
   `processed_at` DATETIME NULL,
   `safe_payload` TEXT NULL,
   `safe_error` TEXT NULL,
+  `attempt_count` INT UNSIGNED NOT NULL DEFAULT '0',
+  `next_attempt_at` DATETIME NULL,
   `created_at` DATETIME NULL,
   `updated_at` DATETIME NULL,
   PRIMARY KEY (`id`),
@@ -736,6 +741,7 @@ CREATE TABLE `promotions` (
   `image_path` TEXT NULL,
   `is_active` TINYINT(1) NOT NULL DEFAULT '0',
   `is_featured` TINYINT(1) NOT NULL DEFAULT '0',
+  `show_on_homepage` TINYINT(1) NOT NULL DEFAULT '0',
   `starts_at` DATETIME NULL,
   `ends_at` DATETIME NULL,
   `sort_order` INT NOT NULL DEFAULT '0',
@@ -743,11 +749,17 @@ CREATE TABLE `promotions` (
   `updated_at` DATETIME NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `promotions_slug_unique` (`slug`),
+  KEY `promotions_show_on_homepage_index` (`show_on_homepage`),
   KEY `promotions_is_active_type_index` (`is_active`, `type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 DROP TABLE IF EXISTS `properties`;
 CREATE TABLE `properties` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `owner_id` BIGINT UNSIGNED NULL,
+  `ownership_type` VARCHAR(32) NOT NULL DEFAULT 'azari',
+  `owner_listing_id` BIGINT UNSIGNED NULL,
+  `owner_share_percentage` DECIMAL(5,2) NOT NULL DEFAULT '0',
+  `managed_for_owner` TINYINT(1) NOT NULL DEFAULT '0',
   `name` VARCHAR(255) NOT NULL,
   `slug` VARCHAR(255) NOT NULL,
   `location` VARCHAR(255) NOT NULL,
@@ -793,11 +805,16 @@ CREATE TABLE `properties` (
   `same_day_booking` TINYINT(1) NOT NULL DEFAULT '0',
   `service_fee` DECIMAL(15,2) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
+  KEY `properties_owner_id_index` (`owner_id`),
+  KEY `properties_ownership_type_index` (`ownership_type`),
+  KEY `properties_owner_listing_id_index` (`owner_listing_id`),
   KEY `properties_status_index` (`status`),
   UNIQUE KEY `properties_code_unique` (`code`),
   UNIQUE KEY `properties_slug_unique` (`slug`),
   KEY `properties_is_published_index` (`is_published`),
   KEY `properties_is_featured_index` (`is_featured`),
+  CONSTRAINT `fk_properties_owner_id_users` FOREIGN KEY (`owner_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT,
+  CONSTRAINT `fk_properties_owner_listing_id_property_listings` FOREIGN KEY (`owner_listing_id`) REFERENCES `property_listings` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT,
   CONSTRAINT `fk_properties_room_type_id_room_types` FOREIGN KEY (`room_type_id`) REFERENCES `room_types` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT,
   CONSTRAINT `fk_properties_building_id_buildings` FOREIGN KEY (`building_id`) REFERENCES `buildings` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT,
   CONSTRAINT `fk_properties_location_id_locations` FOREIGN KEY (`location_id`) REFERENCES `locations` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT
@@ -1144,6 +1161,155 @@ CREATE TABLE `users` (
   UNIQUE KEY `users_email_unique` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+DROP TABLE IF EXISTS `listing_agreements`;
+CREATE TABLE `listing_agreements` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` BIGINT UNSIGNED NOT NULL,
+  `version` VARCHAR(40) NOT NULL,
+  `legal_name` VARCHAR(255) NOT NULL,
+  `agreement_text` LONGTEXT NOT NULL,
+  `signature_hash` VARCHAR(64) NOT NULL,
+  `signed_ip` VARCHAR(45) NULL,
+  `signed_user_agent` TEXT NULL,
+  `signed_at` DATETIME NOT NULL,
+  `created_at` DATETIME NULL,
+  `updated_at` DATETIME NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `listing_agreements_user_id_version_unique` (`user_id`, `version`),
+  CONSTRAINT `fk_listing_agreements_user_id_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+DROP TABLE IF EXISTS `property_listings`;
+CREATE TABLE `property_listings` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `reference` VARCHAR(32) NOT NULL,
+  `user_id` BIGINT UNSIGNED NOT NULL,
+  `listing_agreement_id` BIGINT UNSIGNED NOT NULL,
+  `approved_property_id` BIGINT UNSIGNED NULL,
+  `status` VARCHAR(24) NOT NULL DEFAULT 'draft',
+  `property_data` JSON NOT NULL,
+  `amenity_ids` JSON NULL,
+  `cover_image` VARCHAR(255) NULL,
+  `gallery` JSON NULL,
+  `proposed_owner_share_percentage` DECIMAL(5,2) NULL,
+  `approved_owner_share_percentage` DECIMAL(5,2) NULL,
+  `owner_notes` TEXT NULL,
+  `admin_notes` TEXT NULL,
+  `decline_reason` TEXT NULL,
+  `reviewed_by` BIGINT UNSIGNED NULL,
+  `submitted_at` DATETIME NULL,
+  `reviewed_at` DATETIME NULL,
+  `approved_at` DATETIME NULL,
+  `declined_at` DATETIME NULL,
+  `created_at` DATETIME NULL,
+  `updated_at` DATETIME NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `property_listings_reference_unique` (`reference`),
+  KEY `property_listings_status_index` (`status`),
+  KEY `property_listings_user_id_status_index` (`user_id`, `status`),
+  KEY `property_listings_listing_agreement_id_index` (`listing_agreement_id`),
+  KEY `property_listings_approved_property_id_index` (`approved_property_id`),
+  KEY `property_listings_reviewed_by_index` (`reviewed_by`),
+  CONSTRAINT `fk_property_listings_user_id_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
+  CONSTRAINT `fk_property_listings_listing_agreement_id_listing_agreements` FOREIGN KEY (`listing_agreement_id`) REFERENCES `listing_agreements` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `fk_property_listings_approved_property_id_properties` FOREIGN KEY (`approved_property_id`) REFERENCES `properties` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT,
+  CONSTRAINT `fk_property_listings_reviewed_by_users` FOREIGN KEY (`reviewed_by`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+DROP TABLE IF EXISTS `owner_payout_profiles`;
+CREATE TABLE `owner_payout_profiles` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` BIGINT UNSIGNED NOT NULL,
+  `preferred_gateway` VARCHAR(20) NOT NULL DEFAULT 'paypal',
+  `paypal_recipient` VARCHAR(255) NULL,
+  `paypal_recipient_type` VARCHAR(20) NOT NULL DEFAULT 'EMAIL',
+  `stripe_connected_account_id` VARCHAR(255) NULL,
+  `is_verified` TINYINT(1) NOT NULL DEFAULT '0',
+  `verified_by` BIGINT UNSIGNED NULL,
+  `verified_at` DATETIME NULL,
+  `verification_note` TEXT NULL,
+  `created_at` DATETIME NULL,
+  `updated_at` DATETIME NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `owner_payout_profiles_user_id_unique` (`user_id`),
+  KEY `owner_payout_profiles_verified_by_index` (`verified_by`),
+  CONSTRAINT `fk_owner_payout_profiles_user_id_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
+  CONSTRAINT `fk_owner_payout_profiles_verified_by_users` FOREIGN KEY (`verified_by`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+DROP TABLE IF EXISTS `withdrawal_requests`;
+CREATE TABLE `withdrawal_requests` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `reference` VARCHAR(32) NOT NULL,
+  `idempotency_key` VARCHAR(80) NULL,
+  `user_id` BIGINT UNSIGNED NOT NULL,
+  `gateway` VARCHAR(20) NOT NULL,
+  `currency` VARCHAR(3) NOT NULL,
+  `amount` DECIMAL(14,2) NOT NULL,
+  `status` VARCHAR(24) NOT NULL DEFAULT 'pending',
+  `destination_snapshot` JSON NOT NULL,
+  `provider_reference` VARCHAR(255) NULL,
+  `provider_response` JSON NULL,
+  `last_error` TEXT NULL,
+  `owner_note` TEXT NULL,
+  `admin_note` TEXT NULL,
+  `rejection_reason` TEXT NULL,
+  `processed_by` BIGINT UNSIGNED NULL,
+  `requested_at` DATETIME NOT NULL,
+  `processing_started_at` DATETIME NULL,
+  `provider_sent_at` DATETIME NULL,
+  `reconciliation_required_at` DATETIME NULL,
+  `processed_at` DATETIME NULL,
+  `failed_at` DATETIME NULL,
+  `rejected_at` DATETIME NULL,
+  `reconciled_by` BIGINT UNSIGNED NULL,
+  `reconciled_at` DATETIME NULL,
+  `reconciliation_note` TEXT NULL,
+  `retry_count` INT UNSIGNED NOT NULL DEFAULT '0',
+  `created_at` DATETIME NULL,
+  `updated_at` DATETIME NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `withdrawal_requests_reference_unique` (`reference`),
+  UNIQUE KEY `withdrawal_requests_idempotency_key_unique` (`idempotency_key`),
+  KEY `withdrawal_requests_status_index` (`status`),
+  KEY `withdrawal_requests_provider_reference_index` (`provider_reference`),
+  KEY `withdrawal_requests_user_id_status_index` (`user_id`, `status`),
+  KEY `owner_withdrawals_status_requested_idx` (`status`, `requested_at`),
+  KEY `withdrawal_requests_processed_by_index` (`processed_by`),
+  KEY `withdrawal_requests_reconciled_by_index` (`reconciled_by`),
+  CONSTRAINT `fk_withdrawal_requests_user_id_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
+  CONSTRAINT `fk_withdrawal_requests_processed_by_users` FOREIGN KEY (`processed_by`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT,
+  CONSTRAINT `fk_withdrawal_requests_reconciled_by_users` FOREIGN KEY (`reconciled_by`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+DROP TABLE IF EXISTS `owner_ledger_entries`;
+CREATE TABLE `owner_ledger_entries` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` BIGINT UNSIGNED NOT NULL,
+  `property_id` BIGINT UNSIGNED NULL,
+  `booking_id` BIGINT UNSIGNED NULL,
+  `payment_id` BIGINT UNSIGNED NULL,
+  `withdrawal_request_id` BIGINT UNSIGNED NULL,
+  `type` VARCHAR(32) NOT NULL,
+  `direction` VARCHAR(8) NOT NULL,
+  `amount` DECIMAL(14,2) NOT NULL,
+  `currency` VARCHAR(3) NOT NULL,
+  `gross_amount` DECIMAL(14,2) NULL,
+  `owner_share_percentage` DECIMAL(5,2) NULL,
+  `reference` VARCHAR(60) NOT NULL,
+  `description` TEXT NOT NULL,
+  `metadata` JSON NULL,
+  `created_at` DATETIME NULL,
+  `updated_at` DATETIME NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `owner_ledger_entries_reference_unique` (`reference`),
+  UNIQUE KEY `owner_ledger_entries_payment_id_unique` (`payment_id`),
+  KEY `owner_ledger_entries_withdrawal_request_id_index` (`withdrawal_request_id`),
+  KEY `owner_ledger_entries_user_id_currency_created_at_index` (`user_id`, `currency`, `created_at`),
+  KEY `owner_ledger_entries_property_id_index` (`property_id`),
+  KEY `owner_ledger_entries_booking_id_index` (`booking_id`),
+  CONSTRAINT `fk_owner_ledger_entries_user_id_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
+  CONSTRAINT `fk_owner_ledger_entries_property_id_properties` FOREIGN KEY (`property_id`) REFERENCES `properties` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT,
+  CONSTRAINT `fk_owner_ledger_entries_booking_id_bookings` FOREIGN KEY (`booking_id`) REFERENCES `bookings` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT,
+  CONSTRAINT `fk_owner_ledger_entries_payment_id_payments` FOREIGN KEY (`payment_id`) REFERENCES `payments` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- Required baseline records
 
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
@@ -1168,7 +1334,13 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (19, '2026_07_25_170000_harden_azari_sprints_13_16', 13),
 (20, '2026_07_26_120000_make_external_fields_database_portable', 14),
 (21,'2026_07_27_010000_make_usd_the_platform_currency',15),
-(22,'2026_07_27_020000_add_whatsapp_notification_preference',15);
+(22,'2026_07_27_020000_add_whatsapp_notification_preference',15),
+(23,'2026_07_27_180000_add_homepage_popup_to_promotions',16),
+(24,'2026_07_27_210000_add_homepage_visibility_to_promotions',17),
+(25,'2026_07_27_220000_add_property_owner_marketplace',18),
+(26,'2026_07_28_200000_harden_property_owner_marketplace',19),
+(27,'2026_07_28_235900_harden_owner_marketplace_production_readiness',20),
+(28,'2026_07_28_235950_harden_external_integrations',21);
 
 INSERT INTO `permissions` (`id`, `name`, `slug`, `group`, `created_at`, `updated_at`) VALUES
 (1, 'Dashboard — View', 'dashboard.view', 'Dashboard', '2026-07-25 10:09:16', '2026-07-25 10:09:16'),
@@ -1466,5 +1638,60 @@ INSERT INTO `permission_user` (`permission_id`, `user_id`, `granted_by`, `create
 (104, 1, NULL, '2026-07-25 13:16:13', '2026-07-25 13:16:13'),
 (105, 1, NULL, '2026-07-25 13:16:13', '2026-07-25 13:16:13'),
 (106, 1, NULL, '2026-07-25 13:16:13', '2026-07-25 13:16:13');
+
+INSERT INTO `permissions` (`name`, `slug`, `group`, `created_at`, `updated_at`) VALUES
+('Property owners — View', 'property-owners.view', 'Property owners', NOW(), NOW()),
+('Property owners — Create', 'property-owners.create', 'Property owners', NOW(), NOW()),
+('Property owners — Edit', 'property-owners.edit', 'Property owners', NOW(), NOW()),
+('Property owners — Delete', 'property-owners.delete', 'Property owners', NOW(), NOW()),
+('Property owners — Export', 'property-owners.export', 'Property owners', NOW(), NOW()),
+('Property owners — Manage', 'property-owners.manage', 'Property owners', NOW(), NOW()),
+('Approve or decline property listings', 'property-owners.review', 'Property owners', NOW(), NOW()),
+('Owner withdrawals — View', 'owner-withdrawals.view', 'Owner withdrawals', NOW(), NOW()),
+('Owner withdrawals — Create', 'owner-withdrawals.create', 'Owner withdrawals', NOW(), NOW()),
+('Owner withdrawals — Edit', 'owner-withdrawals.edit', 'Owner withdrawals', NOW(), NOW()),
+('Owner withdrawals — Delete', 'owner-withdrawals.delete', 'Owner withdrawals', NOW(), NOW()),
+('Owner withdrawals — Export', 'owner-withdrawals.export', 'Owner withdrawals', NOW(), NOW()),
+('Owner withdrawals — Manage', 'owner-withdrawals.manage', 'Owner withdrawals', NOW(), NOW()),
+('Process owner withdrawals', 'owner-withdrawals.process', 'Owner withdrawals', NOW(), NOW()),
+('Owner marketplace settings — View', 'owner-settings.view', 'Owner marketplace settings', NOW(), NOW()),
+('Owner marketplace settings — Create', 'owner-settings.create', 'Owner marketplace settings', NOW(), NOW()),
+('Owner marketplace settings — Edit', 'owner-settings.edit', 'Owner marketplace settings', NOW(), NOW()),
+('Owner marketplace settings — Delete', 'owner-settings.delete', 'Owner marketplace settings', NOW(), NOW()),
+('Owner marketplace settings — Export', 'owner-settings.export', 'Owner marketplace settings', NOW(), NOW()),
+('Owner marketplace settings — Manage', 'owner-settings.manage', 'Owner marketplace settings', NOW(), NOW())
+ON DUPLICATE KEY UPDATE
+  `name` = VALUES(`name`),
+  `group` = VALUES(`group`),
+  `updated_at` = VALUES(`updated_at`);
+
+INSERT INTO `permission_user` (`permission_id`, `user_id`, `granted_by`, `created_at`, `updated_at`)
+SELECT `permissions`.`id`, `users`.`id`, NULL, NOW(), NOW()
+FROM `permissions`
+INNER JOIN `users`
+  ON LOWER(`users`.`email`) = 'admin@azariadmin.com'
+LEFT JOIN `permission_user`
+  ON `permission_user`.`permission_id` = `permissions`.`id`
+ AND `permission_user`.`user_id` = `users`.`id`
+WHERE (
+    `permissions`.`slug` LIKE 'property-owners.%'
+ OR `permissions`.`slug` LIKE 'owner-withdrawals.%'
+ OR `permissions`.`slug` LIKE 'owner-settings.%'
+)
+AND `permission_user`.`permission_id` IS NULL;
+
+INSERT INTO `site_settings` (`key`, `value`, `type`, `group`, `created_at`, `updated_at`) VALUES
+('owner_listing_agreement_version', '1.0', 'text', 'property_owners', NOW(), NOW()),
+('owner_default_share_percentage', '70', 'number', 'property_owners', NOW(), NOW()),
+('owner_withdrawal_days', '1,2,3,4,5', 'text', 'property_owners', NOW(), NOW()),
+('owner_withdrawal_minimum', '50', 'number', 'property_owners', NOW(), NOW()),
+('owner_withdrawal_currency', 'USD', 'text', 'property_owners', NOW(), NOW()),
+('owner_paypal_enabled', '0', 'boolean', 'property_owners', NOW(), NOW()),
+('owner_stripe_enabled', '0', 'boolean', 'property_owners', NOW(), NOW())
+ON DUPLICATE KEY UPDATE
+  `value` = VALUES(`value`),
+  `type` = VALUES(`type`),
+  `group` = VALUES(`group`),
+  `updated_at` = VALUES(`updated_at`);
 
 SET FOREIGN_KEY_CHECKS = 1;
