@@ -320,4 +320,11 @@ body.az-user-body *::after {
         display: none;
     }
 }
+/* AZARI_USER_TOPBAR_WIDTH_FIX_V1 */
+.az-user-topbar {
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0 !important;
+}
+/* AZARI_USER_TOPBAR_WIDTH_FIX_V1_END */
 </style>

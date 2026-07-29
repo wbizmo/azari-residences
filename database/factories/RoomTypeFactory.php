@@ -22,7 +22,7 @@ class RoomTypeFactory extends Factory
 
         return [
             'name' => $name,
-            'slug' => Str::slug($name),
+            'slug' => Str::slug($name).'-'.fake()->unique()->numberBetween(1000, 9999),
             'description' => fake()->sentence(),
             'icon' => 'apartment',
             'is_active' => true,

@@ -525,3 +525,173 @@ body.az-user-body {
     }
 }
 /* AZARI_OWNER_BLADE_THEME_V7_END */
+
+/* AZARI_GLOBAL_RESPONSIVE_TOPBAR_CARDS_V1_START */
+/*
+ * Final customer-shell authority:
+ * - prevents calculated widths plus padding from exceeding the viewport
+ * - keeps the fixed topbar aligned with the content column
+ * - preserves the full desktop profile chip
+ * - forces mobile cards/forms to stack instead of squeezing
+ */
+.az-user-body,
+.az-user-shell,
+.az-user-main,
+.az-user-topbar,
+.az-user-content,
+.az-user-content *,
+.az-user-mobile-bottom {
+    box-sizing: border-box;
+}
+
+.az-user-shell {
+    width: 100%;
+    max-width: 100%;
+}
+
+.az-user-main {
+    width: auto;
+    max-width: none;
+    margin-left: var(--az-user-sidebar);
+    padding-right: 34px;
+    padding-left: 34px;
+}
+
+.az-user-topbar {
+    right: 34px;
+    left: calc(var(--az-user-sidebar) + 34px);
+    width: auto;
+    max-width: none;
+    padding: 0;
+    overflow: visible;
+}
+
+.az-user-topbar-left {
+    flex: 1 1 auto;
+    overflow: hidden;
+}
+
+.az-user-topbar-left > div {
+    min-width: 0;
+}
+
+.az-user-page-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.az-user-profile-chip {
+    display: flex;
+    flex: 0 0 auto;
+    max-width: min(320px, 42vw);
+    overflow: hidden;
+}
+
+.az-user-profile-meta {
+    display: block;
+    min-width: 0;
+}
+
+.az-user-profile-meta strong,
+.az-user-profile-meta span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.az-user-content,
+.az-user-content > *,
+.az-user-detail-grid,
+.az-user-detail-grid > *,
+.az-user-form,
+.az-user-form > *,
+.az-user-form-grid,
+.az-user-form-grid > *,
+.az-user-dashboard-grid,
+.az-user-dashboard-grid > *,
+.az-user-summary-grid,
+.az-user-summary-grid > *,
+.az-user-hero-grid,
+.az-user-hero-grid > *,
+.az-user-list,
+.az-user-list > *,
+.az-user-panel,
+.az-user-panel-body {
+    min-width: 0;
+    max-width: 100%;
+}
+
+@media (max-width: 980px) {
+    .az-user-main {
+        width: auto;
+        max-width: 100%;
+        margin-left: 0;
+        padding-right: 22px;
+        padding-left: 22px;
+    }
+
+    .az-user-topbar {
+        right: 22px;
+        left: 22px;
+        width: auto;
+        max-width: none;
+    }
+}
+
+@media (max-width: 720px) {
+    .az-user-main {
+        padding-right: 14px;
+        padding-left: 14px;
+    }
+
+    .az-user-topbar {
+        right: 14px;
+        left: 14px;
+        gap: 10px;
+    }
+
+    .az-user-profile-chip {
+        max-width: 52px;
+        padding: 5px;
+    }
+
+    .az-user-profile-meta {
+        display: none;
+    }
+
+    .az-user-detail-grid,
+    .az-user-form,
+    .az-user-form-grid,
+    .az-user-dashboard-grid,
+    .az-user-summary-grid,
+    .az-user-hero-grid {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    .az-user-detail-grid > *,
+    .az-user-form > *,
+    .az-user-form-grid > *,
+    .az-user-field--full {
+        grid-column: 1 / -1 !important;
+        width: 100%;
+    }
+
+    .az-user-panel-header,
+    .az-user-detail-row,
+    .az-user-list-item {
+        min-width: 0;
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 420px) {
+    .az-user-page-title {
+        font-size: 20px;
+    }
+
+    .az-user-menu-button {
+        flex: 0 0 42px;
+    }
+}
+/* AZARI_GLOBAL_RESPONSIVE_TOPBAR_CARDS_V1_END */

@@ -8749,3 +8749,92 @@ body.az-admin-body {
     }
 }
 /* AZARI_ADMIN_OWNER_THEME_V7_END */
+
+/* AZARI_GLOBAL_RESPONSIVE_TOPBAR_CARDS_V1_START */
+/*
+ * Final administrator/staff containment authority. The administrator and staff
+ * areas share this shell, so both receive the same viewport and card safeguards.
+ */
+.az-admin-body,
+.az-admin-app,
+.az-admin-main,
+.az-admin-topbar,
+.az-admin-content,
+.az-admin-content * {
+    box-sizing: border-box;
+}
+
+.az-admin-app {
+    width: 100%;
+    max-width: 100%;
+}
+
+.az-admin-main {
+    width: auto;
+    max-width: none;
+    margin-left: var(--az-admin-sidebar-width);
+}
+
+.az-admin-topbar {
+    right: 0;
+    left: var(--az-admin-sidebar-width);
+    width: auto;
+    max-width: none;
+}
+
+.az-admin-content,
+.az-admin-content > *,
+.az-admin-content :where(
+    .az-admin-card,
+    .az-panel,
+    .az-card,
+    .az-s78-card,
+    .az-admin-grid,
+    .az-form-grid,
+    .az-detail-grid,
+    form
+) {
+    min-width: 0;
+    max-width: 100%;
+}
+
+@media (max-width: 980px) {
+    .az-admin-main {
+        width: auto;
+        max-width: 100%;
+        margin-left: 0;
+    }
+
+    .az-admin-topbar {
+        right: 0;
+        left: 0;
+        width: auto;
+        max-width: none;
+    }
+}
+
+@media (max-width: 720px) {
+    .az-admin-content :where(
+        .az-admin-grid,
+        .az-form-grid,
+        .az-detail-grid,
+        .az-s78-grid,
+        .az-admin-form-grid
+    ) {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    .az-admin-content :where(
+        .az-admin-grid,
+        .az-form-grid,
+        .az-detail-grid,
+        .az-s78-grid,
+        .az-admin-form-grid
+    ) > * {
+        grid-column: 1 / -1 !important;
+        min-width: 0;
+        width: 100%;
+        max-width: 100%;
+    }
+}
+/* AZARI_GLOBAL_RESPONSIVE_TOPBAR_CARDS_V1_END */
