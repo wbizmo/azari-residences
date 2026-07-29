@@ -1,6 +1,6 @@
 <header class="site-header" data-site-header>
     <div class="site-container nav-shell">
-        <a href="{{ url('/') }}" class="brand azari-brand azari-brand--header azari-header-logo" aria-label="{{ config('app.name', 'The Azari Residences') }} home">
+        <a href="{{ route('user.owner.listings.create') }}" class="brand azari-brand azari-brand--header azari-header-logo" aria-label="{{ config('app.name', 'The Azari Residences') }} home">
 
         <span class="brand-logo-slot azari-brand__logo-slot azari-header-logo__slot">
                 <img
@@ -18,9 +18,9 @@
         </a>
 
         <nav class="desktop-navigation" aria-label="Primary navigation">
-            <a href="{{ route('public.apartments') }}">Apartments</a>
-            <a href="{{ route('public.rooms') }}">Rooms</a>
-            <a href="{{ route('availability.index') }}">Availability</a>
+            <a href="{{ route('user.owner.listings.create') }}">Apartments</a>
+            <a href="{{ route('user.owner.listings.create') }}">Rooms</a>
+            <a href="{{ route('user.owner.listings.create') }}">Availability</a>
 
             <div class="nav-popover" data-popover>
                 <button type="button" class="nav-popover-trigger" data-popover-trigger
