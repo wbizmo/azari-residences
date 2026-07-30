@@ -3,8 +3,17 @@
 namespace App\Providers;
 
 use App\Contracts\Communication\SmsProvider;
-use App\Models\SiteSetting;
+use App\Models\{Booking, GuestIdentityDocument, OwnerLedgerEntry, OwnerPayoutProfile, Payment, PropertyListing, ServiceRequest, SiteSetting, UserIdentityDocument, WithdrawalRequest};
 use App\Services\Communication\TwilioSmsService;
+use App\Observers\BookingObserver;
+use App\Observers\GuestIdentityDocumentObserver;
+use App\Observers\OwnerLedgerEntryObserver;
+use App\Observers\OwnerPayoutProfileObserver;
+use App\Observers\PaymentObserver;
+use App\Observers\PropertyListingObserver;
+use App\Observers\ServiceRequestObserver;
+use App\Observers\UserIdentityDocumentObserver;
+use App\Observers\WithdrawalRequestObserver;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -23,6 +32,17 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // AZARI_TRANSACTIONAL_EMAIL_V102
+        Booking::observe(BookingObserver::class);
+        Payment::observe(PaymentObserver::class);
+        ServiceRequest::observe(ServiceRequestObserver::class);
+        PropertyListing::observe(PropertyListingObserver::class);
+        OwnerPayoutProfile::observe(OwnerPayoutProfileObserver::class);
+        WithdrawalRequest::observe(WithdrawalRequestObserver::class);
+        OwnerLedgerEntry::observe(OwnerLedgerEntryObserver::class);
+        UserIdentityDocument::observe(UserIdentityDocumentObserver::class);
+        GuestIdentityDocument::observe(GuestIdentityDocumentObserver::class);
+
         VerifyEmail::toMailUsing(function (object $notifiable, string $url): MailMessage {
             return (new MailMessage)->subject('Verify your Azari email address')->view('emails.premium', [
                 'title' => 'Verify your email address',

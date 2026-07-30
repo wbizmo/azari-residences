@@ -12,17 +12,19 @@ class RoomTypeFactory extends Factory
 
     public function definition(): array
     {
-        $name = fake()->randomElement([
+        $descriptor = fake()->randomElement([
             'Studio',
             'Deluxe',
             'Executive',
             'Suite',
-            'Penthouse'
+            'Penthouse',
         ]);
+
+        $name = $descriptor.' '.fake()->unique()->numberBetween(100000, 999999);
 
         return [
             'name' => $name,
-            'slug' => Str::slug($name).'-'.fake()->unique()->numberBetween(1000, 9999),
+            'slug' => Str::slug($name),
             'description' => fake()->sentence(),
             'icon' => 'apartment',
             'is_active' => true,
