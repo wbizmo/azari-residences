@@ -11,6 +11,7 @@ use App\Models\Payment;
 use App\Models\PropertyListing;
 use App\Models\ServiceRequest;
 use App\Models\SiteSetting;
+use App\Models\SupportTicket;
 use App\Models\User;
 use App\Models\UserIdentityDocument;
 use App\Models\WithdrawalRequest;
@@ -446,6 +447,168 @@ class AzariTransactionalMailService
             'Guest service update',
             ['booking_id' => $booking?->id, 'service_request_id' => $request->id, 'user_id' => $user?->id],
             'service-request-updated:'.$request->id.':'.optional($request->updated_at)->format('Uu')
+        );
+    }
+
+    public function passwordChanged(User $user): void
+    {
+        if (! $user->email) {
+            return;
+        }
+
+        $this->send(
+            $user->email,
+            $user,
+            'account-password-changed',
+            'Your Azari account password was changed',
+            [
+                'The password for your Azari account was changed successfully.',
+                'If you did not make this change, reset your password immediately and contact Azari support.',
+            ],
+            'Review account security',
+            $this->route('profile.edit'),
+            [
+                'Account' => $this->maskEmail((string) $user->email),
+                'Changed' => $this->dateTime(now()),
+            ],
+            'Azari will never ask you to send your password by email.',
+            'warning',
+            null,
+            null,
+            true,
+            true,
+            'Account security',
+            ['user_id' => $user->id],
+            'account-password-changed:'.$user->id.':'.optional($user->updated_at)->format('Uu')
+        );
+    }
+
+    public function emailAddressChanged(User $user, string $previousEmail): void
+    {
+        $previousEmail = trim(strtolower($previousEmail));
+        $newEmail = trim(strtolower((string) $user->email));
+
+        if (
+            ! filter_var($previousEmail, FILTER_VALIDATE_EMAIL)
+            || $previousEmail === $newEmail
+        ) {
+            return;
+        }
+
+        $this->send(
+            $previousEmail,
+            $user,
+            'account-email-changed',
+            'Your Azari account email address was changed',
+            [
+                'The email address connected to your Azari account was changed.',
+                'If you did not make this change, secure the account immediately.',
+            ],
+            'Reset your password',
+            $this->route('password.request'),
+            [
+                'Previous email' => $this->maskEmail($previousEmail),
+                'New email' => $this->maskEmail($newEmail),
+                'Changed' => $this->dateTime(now()),
+            ],
+            'The new address must be verified before protected account features are available.',
+            'warning',
+            null,
+            null,
+            true,
+            true,
+            'Account security',
+            ['user_id' => $user->id],
+            'account-email-changed:'.$user->id.':'.sha1($previousEmail.'|'.$newEmail).':'.optional($user->updated_at)->format('Uu')
+        );
+    }
+
+    public function supportTicketCompleted(SupportTicket $ticket): void
+    {
+        $ticket->loadMissing('user');
+
+        $user = $ticket->user;
+        $status = (string) $ticket->status;
+
+        if (! $user?->email || ! in_array($status, ['resolved', 'closed'], true)) {
+            return;
+        }
+
+        $resolved = $status === 'resolved';
+
+        $this->send(
+            $user->email,
+            $user,
+            $resolved ? 'support-ticket-resolved' : 'support-ticket-closed',
+            'Support ticket '.$ticket->reference.' has been '.($resolved ? 'resolved' : 'closed'),
+            [
+                $resolved
+                    ? 'The Azari team has marked your support request as resolved.'
+                    : 'Your Azari support request has been closed.',
+                'Open the ticket to review the conversation and recorded outcome.',
+            ],
+            'View support ticket',
+            $this->route('user.support.show', [$ticket->id]),
+            [
+                'Ticket reference' => $ticket->reference,
+                'Subject' => $ticket->subject,
+                'Status' => $this->label($status),
+            ],
+            $resolved
+                ? 'You can reopen the ticket from your account if the issue still requires attention.'
+                : null,
+            $resolved ? 'success' : 'default',
+            null,
+            null,
+            false,
+            true,
+            'Support update',
+            ['user_id' => $user->id, 'support_ticket_id' => $ticket->id],
+            'support-ticket-terminal:'.$ticket->id.':'.$status.':'.optional($ticket->updated_at)->format('Uu')
+        );
+    }
+
+    public function payoutDestinationChanged(OwnerPayoutProfile $profile): void
+    {
+        $profile->loadMissing('user');
+
+        if (! $profile->user?->email || blank($profile->preferred_gateway)) {
+            return;
+        }
+
+        $this->send(
+            $profile->user->email,
+            $profile->user,
+            'owner-payout-destination-changed',
+            'Your payout destination was changed',
+            [
+                'The payout destination saved for your Azari property-owner account was changed.',
+                'For security, only a masked destination is shown in this email.',
+            ],
+            'Review withdrawal settings',
+            $this->route('user.owner.withdrawals'),
+            [
+                'Gateway' => ucfirst((string) $profile->preferred_gateway),
+                'Destination' => $this->maskPayoutDestination($profile),
+                'Verification' => $profile->is_verified ? 'Verified' : 'Verification required',
+            ],
+            $profile->is_verified
+                ? 'Contact Azari immediately if you did not make this change.'
+                : 'Withdrawals remain unavailable until Azari verifies the updated destination.',
+            'warning',
+            null,
+            null,
+            true,
+            true,
+            'Payout security',
+            ['user_id' => $profile->user_id, 'owner_payout_profile_id' => $profile->id],
+            'owner-payout-destination-changed:'.$profile->id.':'.hash('sha256', implode('|', [
+                (string) $profile->preferred_gateway,
+                (string) $profile->paypal_recipient,
+                (string) $profile->paypal_recipient_type,
+                (string) $profile->stripe_connected_account_id,
+                optional($profile->updated_at)->format('Uu'),
+            ]))
         );
     }
 
@@ -1222,9 +1385,30 @@ class AzariTransactionalMailService
         return $value === null ? null : ucfirst(str_replace('_', ' ', $value));
     }
 
+    private function maskPayoutDestination(OwnerPayoutProfile $profile): string
+    {
+        $destination = trim((string) $profile->destinationLabel());
+
+        if ($destination === '') {
+            return 'Not provided';
+        }
+
+        if (filter_var($destination, FILTER_VALIDATE_EMAIL)) {
+            return $this->maskEmail(strtolower($destination));
+        }
+
+        $length = mb_strlen($destination);
+        if ($length <= 4) {
+            return str_repeat('*', $length);
+        }
+
+        return str_repeat('*', max(4, $length - 4)).mb_substr($destination, -4);
+    }
+
     private function maskEmail(string $email): string
     {
         [$local, $domain] = array_pad(explode('@', $email, 2), 2, '');
+
         return mb_substr($local, 0, 2).'***@'.$domain;
     }
 }

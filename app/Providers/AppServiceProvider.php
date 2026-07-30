@@ -3,8 +3,17 @@
 namespace App\Providers;
 
 use App\Contracts\Communication\SmsProvider;
-use App\Models\{Booking, GuestIdentityDocument, OwnerLedgerEntry, OwnerPayoutProfile, Payment, PropertyListing, ServiceRequest, SiteSetting, UserIdentityDocument, WithdrawalRequest};
-use App\Services\Communication\TwilioSmsService;
+use App\Models\Booking;
+use App\Models\GuestIdentityDocument;
+use App\Models\OwnerLedgerEntry;
+use App\Models\OwnerPayoutProfile;
+use App\Models\Payment;
+use App\Models\PropertyListing;
+use App\Models\ServiceRequest;
+use App\Models\SiteSetting;
+use App\Models\SupportTicket;
+use App\Models\UserIdentityDocument;
+use App\Models\WithdrawalRequest;
 use App\Observers\BookingObserver;
 use App\Observers\GuestIdentityDocumentObserver;
 use App\Observers\OwnerLedgerEntryObserver;
@@ -12,8 +21,10 @@ use App\Observers\OwnerPayoutProfileObserver;
 use App\Observers\PaymentObserver;
 use App\Observers\PropertyListingObserver;
 use App\Observers\ServiceRequestObserver;
+use App\Observers\SupportTicketObserver;
 use App\Observers\UserIdentityDocumentObserver;
 use App\Observers\WithdrawalRequestObserver;
+use App\Services\Communication\TwilioSmsService;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -36,6 +47,7 @@ class AppServiceProvider extends ServiceProvider
         Booking::observe(BookingObserver::class);
         Payment::observe(PaymentObserver::class);
         ServiceRequest::observe(ServiceRequestObserver::class);
+        SupportTicket::observe(SupportTicketObserver::class);
         PropertyListing::observe(PropertyListingObserver::class);
         OwnerPayoutProfile::observe(OwnerPayoutProfileObserver::class);
         WithdrawalRequest::observe(WithdrawalRequestObserver::class);
@@ -55,6 +67,7 @@ class AppServiceProvider extends ServiceProvider
 
         ResetPassword::toMailUsing(function (object $notifiable, string $token): MailMessage {
             $url = url(route('password.reset', ['token' => $token, 'email' => $notifiable->getEmailForPasswordReset()], false));
+
             return (new MailMessage)->subject('Reset your Azari password')->view('emails.premium', [
                 'title' => 'Reset your password',
                 'preheader' => 'A password reset was requested for your Azari account.',
@@ -88,7 +101,9 @@ class AppServiceProvider extends ServiceProvider
         $applicationUrl = rtrim((string) config('app.url'), '/');
         if ($applicationUrl !== '') {
             URL::forceRootUrl($applicationUrl);
-            if (str_starts_with($applicationUrl, 'https://')) URL::forceScheme('https');
+            if (str_starts_with($applicationUrl, 'https://')) {
+                URL::forceScheme('https');
+            }
         }
     }
 }
