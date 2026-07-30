@@ -26,6 +26,14 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 
+# Shell scripts
+*.sh
+*.bash
+*.zsh
+*.ksh
+*.fish
+*.command
+
 # Azari project-specific
 .agents/
 .config/
