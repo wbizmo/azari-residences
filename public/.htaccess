@@ -14,24 +14,56 @@
 </IfModule>
 
 <IfModule mod_mime.c>
+    AddType image/avif .avif
     AddType image/webp .webp
+    AddType font/woff2 .woff2
+</IfModule>
+
+# AZARI_AGGRESSIVE_STATIC_CACHE_V1
+# Fingerprinted Vite assets and the local icon font are immutable for one year.
+# Stable public image URLs remain cached for three days so replacements become
+# visible after the agreed cache window without an application cache purge.
+<IfModule mod_setenvif.c>
+    SetEnvIf Request_URI "^/build/assets/" AZARI_IMMUTABLE_ASSET=1
+    SetEnvIf Request_URI "^/fonts/" AZARI_IMMUTABLE_ASSET=1
 </IfModule>
 
 <IfModule mod_headers.c>
     <FilesMatch "\.(png|jpe?g)$">
-        Header append Vary Accept
+        Header merge Vary "Accept"
     </FilesMatch>
 
-    <FilesMatch "\.(png|jpe?g|webp)$">
-        Header set Cache-Control "public, max-age=3600, stale-while-revalidate=86400"
+    <FilesMatch "\.(avif|gif|ico|jpe?g|png|svg|webp)$">
+        Header set Cache-Control "public, max-age=259200, stale-while-revalidate=604800, stale-if-error=2592000"
+    </FilesMatch>
+
+    <FilesMatch "\.(eot|otf|ttf|woff2?)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+
+    Header set Cache-Control "public, max-age=31536000, immutable" env=AZARI_IMMUTABLE_ASSET
+
+    <FilesMatch "\.(html?|php)$">
+        Header set Cache-Control "no-cache, private, must-revalidate"
     </FilesMatch>
 </IfModule>
 
 <IfModule mod_expires.c>
     ExpiresActive On
-    ExpiresByType image/png "access plus 1 hour"
-    ExpiresByType image/jpeg "access plus 1 hour"
-    ExpiresByType image/webp "access plus 1 hour"
+
+    ExpiresByType font/eot "access plus 1 year"
+    ExpiresByType font/otf "access plus 1 year"
+    ExpiresByType font/ttf "access plus 1 year"
+    ExpiresByType font/woff "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
+
+    ExpiresByType image/avif "access plus 3 days"
+    ExpiresByType image/gif "access plus 3 days"
+    ExpiresByType image/jpeg "access plus 3 days"
+    ExpiresByType image/png "access plus 3 days"
+    ExpiresByType image/svg+xml "access plus 3 days"
+    ExpiresByType image/webp "access plus 3 days"
+    ExpiresByType image/x-icon "access plus 3 days"
 </IfModule>
 # AZARI AUTOMATIC WEBP END
 

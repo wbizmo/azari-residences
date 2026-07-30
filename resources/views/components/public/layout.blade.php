@@ -33,7 +33,6 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('head')
-    <script>document.documentElement.classList.add('az-icons-ready');</script>
 </head>
 <body class="public-site {{ request()->routeIs('home') ? 'home-page azari-home-page' : 'inner-page azari-inner-page azari-solid-header' }} {{ $bodyClass ?? '' }}">
     <div class="azari-preloader" data-public-preloader role="status" aria-label="Loading Azari Residences">
