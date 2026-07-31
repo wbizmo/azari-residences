@@ -16,8 +16,12 @@ class PaymentInitiator
         private readonly PaymentEligibilityService $eligibility,
     ) {}
 
-    public function create(Booking $booking, string $provider, ?int $actorId = null): Payment
-    {
+    public function create(
+        Booking $booking,
+        string $provider,
+        ?int $actorId = null,
+        array $providerOptions = []
+    ): Payment {
         $driver = $this->manager->driver($provider);
         if (! $driver->enabled()) {
             throw ValidationException::withMessages(['provider' => ucfirst($provider).' is not currently available.']);
@@ -25,15 +29,13 @@ class PaymentInitiator
         $this->eligibility->assertCanInitiate($booking);
 
         [$payment, $new] = DB::transaction(function () use ($booking, $provider, $actorId): array {
-            $lockedBooking = 
-        Booking::query()
-            ->whereKey($booking->id)
-            ->when(
-                DB::connection()->getDriverName() !== 'sqlite',
-                fn ($query) => $query->lockForUpdate()
-            )
-            ->firstOrFail()
-    ;
+            $lockedBooking = Booking::query()
+                ->whereKey($booking->id)
+                ->when(
+                    DB::connection()->getDriverName() !== 'sqlite',
+                    fn ($query) => $query->lockForUpdate()
+                )
+                ->firstOrFail();
             $this->eligibility->assertCanInitiate($lockedBooking);
             $balance = $lockedBooking->balanceDue();
             if ($balance <= 0) {
@@ -56,6 +58,7 @@ class PaymentInitiator
                 if (blank($active->checkout_url)) {
                     throw ValidationException::withMessages(['provider' => 'Payment initialization is already in progress. Please retry shortly.']);
                 }
+
                 return [$active, false];
             }
 
@@ -103,15 +106,40 @@ class PaymentInitiator
                 'phone' => $booking->guest_phone,
                 'callback_url' => route('payments.callback', ['provider' => $provider, 'payment' => $payment->reference]),
                 'webhook_url' => route('payments.webhook', ['provider' => $provider]),
+                'instructions_url' => route('public.payment.flutterwave.instructions', [
+                    'reference' => $booking->reference,
+                    'payment' => $payment->reference,
+                ]),
+                'provider_options' => $providerOptions,
             ]);
+
+            $checkoutUrl = trim((string) ($result['checkout_url'] ?? ''));
+            if ($checkoutUrl === '' || ! filter_var($checkoutUrl, FILTER_VALIDATE_URL)) {
+                throw new PaymentProviderException(
+                    'The payment provider did not return a usable continuation URL.',
+                    $provider
+                );
+            }
 
             $payment->update([
                 'status' => 'pending',
-                'checkout_url' => $result['checkout_url'] ?? null,
-                'provider_reference' => filled($result['provider_reference'] ?? null) ? $result['provider_reference'] : null,
+                'checkout_url' => $checkoutUrl,
+                'provider_reference' => filled($result['provider_reference'] ?? null)
+                    ? $result['provider_reference']
+                    : null,
                 'provider_response_summary' => $result['safe_response'] ?? null,
             ]);
-            AuditLog::record('payment.initialised', $payment, [], ['provider' => $provider, 'booking_reference' => $booking->reference], actorId: $actorId);
+            AuditLog::record(
+                'payment.initialised',
+                $payment,
+                [],
+                [
+                    'provider' => $provider,
+                    'booking_reference' => $booking->reference,
+                    'payment_method' => $result['safe_response']['payment_method'] ?? null,
+                ],
+                actorId: $actorId
+            );
 
             return $payment->refresh();
         } catch (\Throwable $e) {
@@ -120,7 +148,14 @@ class PaymentInitiator
                 'failed_at' => now(),
                 'provider_response_summary' => ['error' => 'Provider initialization failed.'],
             ]);
-            AuditLog::record('payment.initialisation_failed', $payment, [], [], ['provider' => $provider, 'error_class' => $e::class], $actorId);
+            AuditLog::record(
+                'payment.initialisation_failed',
+                $payment,
+                [],
+                [],
+                ['provider' => $provider, 'error_class' => $e::class],
+                $actorId
+            );
             throw $e;
         }
     }

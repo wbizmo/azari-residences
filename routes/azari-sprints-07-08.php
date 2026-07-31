@@ -53,6 +53,7 @@ Route::post('/webhooks/twilio/message-status', TwilioMessageStatusController::cl
 
 Route::get('/booking/{reference}/payment', [PaymentCheckoutController::class, 'select'])->name('public.payment.select');
 Route::post('/booking/{reference}/payment', [PaymentCheckoutController::class, 'initialise'])->middleware('throttle:20,1')->name('public.payment.initialise');
+Route::get('/booking/{reference}/payment/flutterwave/{payment}/instructions', [PaymentCheckoutController::class, 'flutterwaveInstructions'])->name('public.payment.flutterwave.instructions');
 Route::get('/booking/{reference}/payment-receipt/{payment}', [PaymentCheckoutController::class, 'receipt'])->name('public.payment.receipt');
 Route::match(['GET', 'POST'], '/payments/{provider}/callback/{payment}', [PaymentCheckoutController::class, 'callback'])->middleware('throttle:120,1')->name('payments.callback');
 Route::match(['GET', 'POST'], '/payments/{provider}/webhook', [PaymentCheckoutController::class, 'webhook'])->middleware('throttle:240,1')->name('payments.webhook');

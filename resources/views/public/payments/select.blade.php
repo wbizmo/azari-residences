@@ -13,6 +13,11 @@
 
             @if(session('error'))<div class="az-alert az-alert--danger">{{ session('error') }}</div>@endif
             @if(session('warning'))<div class="az-alert">{{ session('warning') }}</div>@endif
+            @if($errors->any())
+                <div class="az-alert az-alert--danger">
+                    {{ $errors->first() }}
+                </div>
+            @endif
 
             <section class="az-checkout-panel">
                 <div class="az-checkout-panel-head">
@@ -26,13 +31,50 @@
                     <div class="az-checkout-provider-list">
                         @foreach($providers as $key => $provider)
                             @php($label = $key === 'intouch' ? 'InTouch' : ucfirst($key))
-                            <form method="POST" action="{{ route('public.payment.initialise', $booking->reference) }}" class="az-checkout-provider">
-                                @csrf
-                                <input type="hidden" name="provider" value="{{ $key }}">
-                                <div class="az-provider-mark"><span class="material-symbols-outlined">payments</span></div>
-                                <div class="az-provider-copy"><h3>{{ $label }}</h3><p>Secure {{ strtolower($provider->mode()) }} checkout</p></div>
-                                <button class="az-checkout-provider-button" type="submit">Pay now <span class="material-symbols-outlined">arrow_forward</span></button>
-                            </form>
+
+                            @if($key === 'flutterwave')
+                                <form method="POST" action="{{ route('public.payment.initialise', $booking->reference) }}" class="az-checkout-provider az-flw-v4-provider" id="flutterwaveV4Form">
+                                    @csrf
+                                    <input type="hidden" name="provider" value="flutterwave">
+                                    <div class="az-provider-mark"><span class="material-symbols-outlined">payments</span></div>
+                                    <div class="az-provider-copy">
+                                        <h3>Flutterwave</h3>
+                                        <p>Secure {{ strtolower($provider->mode()) }} API v4 payment</p>
+
+                                        <div class="az-flw-v4-fields">
+                                            <label for="flutterwavePaymentMethod">Payment option</label>
+                                            <select id="flutterwavePaymentMethod" name="flutterwave_payment_method" required>
+                                                @foreach($flutterwaveMethods as $method)
+                                                    <option value="{{ $method }}" @selected(old('flutterwave_payment_method', $flutterwaveMethods[0] ?? 'opay') === $method)>
+                                                        {{ $method === 'opay' ? 'OPay' : 'USSD' }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+
+                                            <div id="flutterwaveBankField" hidden>
+                                                <label for="flutterwaveUssdBank">Bank</label>
+                                                <select id="flutterwaveUssdBank" name="flutterwave_ussd_bank">
+                                                    <option value="">Select bank</option>
+                                                    @foreach($flutterwaveBanks as $bank)
+                                                        <option value="{{ $bank['code'] }}" @selected(old('flutterwave_ussd_bank') === $bank['code'])>
+                                                            {{ $bank['name'] }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button class="az-checkout-provider-button" type="submit">Continue <span class="material-symbols-outlined">arrow_forward</span></button>
+                                </form>
+                            @else
+                                <form method="POST" action="{{ route('public.payment.initialise', $booking->reference) }}" class="az-checkout-provider">
+                                    @csrf
+                                    <input type="hidden" name="provider" value="{{ $key }}">
+                                    <div class="az-provider-mark"><span class="material-symbols-outlined">payments</span></div>
+                                    <div class="az-provider-copy"><h3>{{ $label }}</h3><p>Secure {{ strtolower($provider->mode()) }} checkout</p></div>
+                                    <button class="az-checkout-provider-button" type="submit">Pay now <span class="material-symbols-outlined">arrow_forward</span></button>
+                                </form>
+                            @endif
                         @endforeach
                     </div>
                 @endif
@@ -72,4 +114,69 @@
         </aside>
     </section>
 </main>
+
+<style>
+    .az-flw-v4-provider {
+        align-items: flex-start;
+    }
+
+    .az-flw-v4-fields {
+        display: grid;
+        gap: .55rem;
+        margin-top: .85rem;
+        max-width: 24rem;
+    }
+
+    .az-flw-v4-fields label {
+        color: var(--muted, #6e7a75);
+        font-size: .72rem;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+    }
+
+    .az-flw-v4-fields select {
+        min-height: 2.85rem;
+        width: 100%;
+        padding: 0 .9rem;
+        color: var(--ink, #18231f);
+        background: var(--paper, #fffdf9);
+        border: 1px solid var(--line, #e7e1d7);
+        border-radius: .8rem;
+        outline: 0;
+    }
+
+    .az-flw-v4-fields select:focus-visible {
+        border-color: var(--brass, #b58a4a);
+        box-shadow: 0 0 0 3px rgba(181, 138, 74, .18);
+    }
+
+    #flutterwaveBankField {
+        display: grid;
+        gap: .55rem;
+    }
+
+    #flutterwaveBankField[hidden] {
+        display: none;
+    }
+</style>
+
+@if(array_key_exists('flutterwave', $providers))
+<script>
+    (() => {
+        const method = document.getElementById('flutterwavePaymentMethod');
+        const bankField = document.getElementById('flutterwaveBankField');
+        const bank = document.getElementById('flutterwaveUssdBank');
+
+        function syncFlutterwaveMethod() {
+            const needsBank = method?.value === 'ussd';
+            if (bankField) bankField.hidden = !needsBank;
+            if (bank) bank.required = needsBank;
+        }
+
+        method?.addEventListener('change', syncFlutterwaveMethod);
+        syncFlutterwaveMethod();
+    })();
+</script>
+@endif
 </x-public-site.layout>

@@ -2,13 +2,12 @@
 
 namespace Tests\Feature\Integrations;
 
-use App\Models\CommunicationLog;
 use App\Services\Communication\TwilioSmsService;
 use App\Services\Payments\FlutterwaveService;
 use App\Services\Payments\InTouchService;
 use App\Services\Payments\PaymentProviderException;
-use App\Services\Payments\PesapalService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
@@ -19,7 +18,7 @@ class ExternalIntegrationHardeningTest extends TestCase
     public function test_flutterwave_current_hmac_signature_is_verified(): void
     {
         config()->set('azari.payments.flutterwave.webhook_secret', 'secret');
-        $raw = '{"id":"wbk_1","type":"charge.completed","data":{"id":"chg_1"}}';
+        $raw = '{"webhook_id":"wbk_1","type":"charge.completed","data":{"id":"chg_1"}}';
         $signature = base64_encode(hash_hmac('sha256', $raw, 'secret', true));
 
         $this->assertTrue(app(FlutterwaveService::class)->webhookSignatureIsValid(
@@ -28,32 +27,62 @@ class ExternalIntegrationHardeningTest extends TestCase
         ));
     }
 
-    public function test_flutterwave_initialisation_is_not_retried_automatically(): void
+    public function test_flutterwave_v4_initialisation_is_not_retried_automatically(): void
     {
-        config()->set('azari.payments.flutterwave.enabled', true);
-        config()->set('azari.payments.flutterwave.secret_key', 'secret');
-        config()->set('azari.payments.flutterwave.webhook_secret', 'webhook');
-        config()->set('azari.payments.flutterwave.base_url', 'https://api.flutterwave.test');
+        Cache::clear();
+        config()->set('azari.payments.flutterwave', [
+            'enabled' => true,
+            'mode' => 'test',
+            'api_version' => 'v4',
+            'client_id' => 'client-id',
+            'client_secret' => 'client-secret',
+            'webhook_secret' => 'webhook',
+            'token_url' => 'https://idp.flutterwave.test/token',
+            'sandbox_base_url' => 'https://api.flutterwave.test',
+            'live_base_url' => 'https://live.flutterwave.test',
+            'orchestrator_path' => '/orchestration/direct-charges',
+            'charge_path' => '/charges/{id}',
+            'banks_path' => '/banks',
+            'allowed_payment_methods' => ['opay'],
+            'default_payment_method' => 'opay',
+            'token_cache_seconds' => 540,
+        ]);
 
         Http::fake([
-            'api.flutterwave.test/*' => Http::response([
+            'https://idp.flutterwave.test/token' => Http::response([
+                'access_token' => 'token',
+                'expires_in' => 600,
+            ], 200),
+            'https://api.flutterwave.test/orchestration/direct-charges' => Http::response([
                 'status' => 'success',
-                'data' => ['link' => 'https://checkout.flutterwave.test/pay'],
-            ]),
+                'data' => [
+                    'id' => 'chg_1',
+                    'status' => 'pending',
+                    'next_action' => [
+                        'type' => 'redirect_url',
+                        'redirect_url' => ['url' => 'https://checkout.flutterwave.test/pay'],
+                    ],
+                ],
+            ], 201),
         ]);
 
         app(FlutterwaveService::class)->initialise([
             'reference' => 'PAY-1',
             'booking_reference' => 'AZR-1',
             'amount' => 100,
-            'currency' => 'USD',
+            'currency' => 'NGN',
             'callback_url' => 'https://azari.test/callback',
+            'instructions_url' => 'https://azari.test/instructions',
             'email' => 'guest@example.com',
-            'name' => 'Guest',
+            'first_name' => 'Guest',
+            'last_name' => 'User',
             'phone' => '+2348000000000',
+            'provider_options' => ['flutterwave_payment_method' => 'opay'],
         ]);
 
-        Http::assertSentCount(1);
+        // One OAuth request and one charge request. The charge POST itself is
+        // not retried for ambiguous connection failures.
+        Http::assertSentCount(2);
     }
 
     public function test_pesapal_ipn_endpoint_returns_api_three_acknowledgement_shape(): void

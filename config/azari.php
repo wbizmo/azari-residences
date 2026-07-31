@@ -34,15 +34,34 @@ return [
         'flutterwave' => [
             'enabled' => filter_var(env('FLUTTERWAVE_ENABLED', false), FILTER_VALIDATE_BOOL),
             'mode' => env('FLUTTERWAVE_MODE', 'test'),
-            'api_version' => env('FLUTTERWAVE_API_VERSION', 'v3'),
-            'base_url' => env('FLUTTERWAVE_BASE_URL', 'https://api.flutterwave.com'),
-            'initialise_path' => env('FLUTTERWAVE_INITIALISE_PATH', '/v3/payments'),
-            'verify_path' => env('FLUTTERWAVE_VERIFY_PATH', '/v3/transactions/{id}/verify'),
-            'public_key' => env('FLUTTERWAVE_PUBLIC_KEY'),
-            'secret_key' => env('FLUTTERWAVE_SECRET_KEY'),
-            'encryption_key' => env('FLUTTERWAVE_ENCRYPTION_KEY'),
+            'api_version' => env('FLUTTERWAVE_API_VERSION', 'v4'),
+            'client_id' => env('FLUTTERWAVE_CLIENT_ID'),
+            'client_secret' => env('FLUTTERWAVE_CLIENT_SECRET'),
             'webhook_secret' => env('FLUTTERWAVE_WEBHOOK_SECRET'),
-            'payload_hash_enabled' => filter_var(env('FLUTTERWAVE_PAYLOAD_HASH_ENABLED', false), FILTER_VALIDATE_BOOL),
+            'token_url' => env(
+                'FLUTTERWAVE_TOKEN_URL',
+                'https://idp.flutterwave.com/realms/flutterwave/protocol/openid-connect/token'
+            ),
+            'sandbox_base_url' => env(
+                'FLUTTERWAVE_SANDBOX_BASE_URL',
+                'https://developersandbox-api.flutterwave.com'
+            ),
+            'live_base_url' => env(
+                'FLUTTERWAVE_LIVE_BASE_URL',
+                'https://f4bexperience.flutterwave.com'
+            ),
+            'orchestrator_path' => env(
+                'FLUTTERWAVE_ORCHESTRATOR_PATH',
+                '/orchestration/direct-charges'
+            ),
+            'charge_path' => env('FLUTTERWAVE_CHARGE_PATH', '/charges/{id}'),
+            'banks_path' => env('FLUTTERWAVE_BANKS_PATH', '/banks'),
+            'allowed_payment_methods' => array_values(array_filter(array_map(
+                static fn (string $method): string => strtolower(trim($method)),
+                explode(',', (string) env('FLUTTERWAVE_ALLOWED_PAYMENT_METHODS', 'opay,ussd'))
+            ))),
+            'default_payment_method' => strtolower((string) env('FLUTTERWAVE_DEFAULT_PAYMENT_METHOD', 'opay')),
+            'token_cache_seconds' => max(60, min(540, (int) env('FLUTTERWAVE_TOKEN_CACHE_SECONDS', 540))),
         ],
 
         'pesapal' => [

@@ -7,6 +7,7 @@ use Illuminate\Console\Command;
 class AuditAzariIntegrations extends Command
 {
     protected $signature = 'azari:integrations-audit {--strict : Fail when enabled integrations are incomplete}';
+
     protected $description = 'Audit Azari payment, messaging, webhook and production environment configuration.';
 
     public function handle(): int
@@ -31,11 +32,13 @@ class AuditAzariIntegrations extends Command
 
         if ($issues === []) {
             $this->info('Azari integration configuration audit passed.');
+
             return self::SUCCESS;
         }
 
         if (! $this->option('strict')) {
             $this->warn('Audit found blocking issues, but --strict was not supplied.');
+
             return self::SUCCESS;
         }
 
@@ -46,6 +49,7 @@ class AuditAzariIntegrations extends Command
     {
         if (! app()->environment('production')) {
             $warnings[] = 'APP_ENV is not production; live integration safety checks are advisory.';
+
             return;
         }
 
@@ -64,16 +68,32 @@ class AuditAzariIntegrations extends Command
 
     private function checkFlutterwave(array &$issues, array &$warnings): void
     {
-        if (! config('azari.payments.flutterwave.enabled')) return;
+        if (! config('azari.payments.flutterwave.enabled')) {
+            return;
+        }
+
+        if (config('azari.payments.flutterwave.api_version') !== 'v4') {
+            $issues[] = 'FLUTTERWAVE_API_VERSION must be v4.';
+        }
 
         foreach ([
-            'secret_key' => 'FLUTTERWAVE_SECRET_KEY',
+            'client_id' => 'FLUTTERWAVE_CLIENT_ID',
+            'client_secret' => 'FLUTTERWAVE_CLIENT_SECRET',
             'webhook_secret' => 'FLUTTERWAVE_WEBHOOK_SECRET',
-            'base_url' => 'FLUTTERWAVE_BASE_URL',
+            'token_url' => 'FLUTTERWAVE_TOKEN_URL',
+            'sandbox_base_url' => 'FLUTTERWAVE_SANDBOX_BASE_URL',
+            'live_base_url' => 'FLUTTERWAVE_LIVE_BASE_URL',
+            'orchestrator_path' => 'FLUTTERWAVE_ORCHESTRATOR_PATH',
+            'charge_path' => 'FLUTTERWAVE_CHARGE_PATH',
         ] as $key => $env) {
             if (blank(config("azari.payments.flutterwave.{$key}"))) {
                 $issues[] = "{$env} is required while Flutterwave is enabled.";
             }
+        }
+
+        $methods = (array) config('azari.payments.flutterwave.allowed_payment_methods', []);
+        if ($methods === [] || array_diff($methods, ['opay', 'ussd']) !== []) {
+            $issues[] = 'FLUTTERWAVE_ALLOWED_PAYMENT_METHODS must contain only the implemented v4 methods: opay and/or ussd.';
         }
 
         if (app()->environment('production')
@@ -82,12 +102,15 @@ class AuditAzariIntegrations extends Command
             $issues[] = 'FLUTTERWAVE_MODE must be live in production when enabled.';
         }
 
-        $warnings[] = 'Confirm the Flutterwave dashboard webhook URL and secret hash match this deployment.';
+        $warnings[] = 'Confirm the Flutterwave v4 dashboard webhook URL and HMAC secret match this deployment.';
+        $warnings[] = 'Flutterwave card collection remains intentionally disabled until an approved encrypted or SDK-based flow receives PCI review.';
     }
 
     private function checkPesapal(array &$issues, array &$warnings): void
     {
-        if (! config('azari.payments.pesapal.enabled')) return;
+        if (! config('azari.payments.pesapal.enabled')) {
+            return;
+        }
 
         foreach ([
             'consumer_key' => 'PESAPAL_CONSUMER_KEY',
@@ -111,7 +134,9 @@ class AuditAzariIntegrations extends Command
 
     private function checkInTouch(array &$issues, array &$warnings): void
     {
-        if (! config('azari.payments.intouch.enabled')) return;
+        if (! config('azari.payments.intouch.enabled')) {
+            return;
+        }
 
         if (config('azari.payments.intouch.profile') !== 'custom_v1') {
             $issues[] = 'INTOUCH_API_PROFILE must be custom_v1 after confirming the merchant API contract.';
@@ -133,7 +158,9 @@ class AuditAzariIntegrations extends Command
 
     private function checkTwilio(array &$issues, array &$warnings): void
     {
-        if (! config('services.twilio.enabled')) return;
+        if (! config('services.twilio.enabled')) {
+            return;
+        }
 
         foreach ([
             'sid' => 'TWILIO_ACCOUNT_SID',
