@@ -1,5 +1,7 @@
 <?php
 
+$azariContactDomain = parse_url((string) env('APP_URL', 'https://theazariresidence.com'), PHP_URL_HOST) ?: 'theazariresidence.com';
+
 return [
 
     /*
@@ -111,7 +113,7 @@ return [
     */
 
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS', 'hello@example.com'),
+        'address' => env('MAIL_FROM_ADDRESS', 'hello@'.$azariContactDomain),
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
     ],
 

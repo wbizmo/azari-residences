@@ -126,16 +126,24 @@ class StaffController extends Controller
 
     private function syncPermissions(User $staff, array $slugs, int $grantedBy): void
     {
-        if ($staff->isAdministrator()) {
-            $ids = Permission::query()->pluck('id');
-            $sync = $ids->mapWithKeys(fn ($id) => [$id => ['granted_by' => $grantedBy]])->all();
-            $staff->directPermissions()->sync($sync);
-            return;
-        }
-        $ids = Permission::query()->whereIn('slug', $slugs)->pluck('id');
-        $sync = $ids->mapWithKeys(fn ($id) => [$id => ['granted_by' => $grantedBy]])->all();
+        $grantedBy = User::query()->whereKey($grantedBy)->exists() ? $grantedBy : null;
+        $ids = $staff->isAdministrator()
+            ? Permission::query()->pluck('id')
+            : Permission::query()->whereIn('slug', $slugs)->pluck('id');
         $before = $staff->directPermissions()->pluck('slug')->all();
+        $sync = $ids->mapWithKeys(fn ($id) => [$id => ['granted_by' => $grantedBy]])->all();
+
         $staff->directPermissions()->sync($sync);
-        AuditLog::record('staff.permissions_changed', $staff, ['permissions' => $before], ['permissions' => array_values($slugs)], actorId: $grantedBy);
+
+        if (! $staff->isAdministrator()) {
+            AuditLog::record(
+                'staff.permissions_changed',
+                $staff,
+                ['permissions' => $before],
+                ['permissions' => array_values($slugs)],
+                actorId: $grantedBy,
+            );
+        }
     }
+
 }

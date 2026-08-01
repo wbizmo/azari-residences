@@ -4,6 +4,7 @@
         : 'Azari Residences';
     $adminActor = auth()->user();
     $can = fn (string $permission): bool => (bool) ($adminActor?->isAdministrator() || $adminActor?->hasPermission($permission));
+
     $items = [
         ['azari.admin.bookings.index','calendar_month','Bookings','bookings.view'],
         ['azari.admin.s56.calendar','event_available','Availability','availability.view'],
@@ -22,8 +23,11 @@
         ['azari.admin.cms.index','edit_note','CMS','cms.view'],
         ['azari.admin.reports.index','monitoring','Reports','reports.view'],
         ['azari.admin.audit-logs.index','history','Audit logs','audit-logs.view'],
+        ['azari.admin.promotions.index','campaign','Promotions','promotions.view'],
+        ['azari.admin.vouchers.index','sell','Vouchers','vouchers.view'],
         ['azari.admin.system-health.index','health_metrics','System health','system-health.view'],
     ];
+
 @endphp
 <aside class="az-admin-sidebar" id="az-admin-sidebar" data-admin-sidebar aria-label="Administration navigation">
     <div class="az-sidebar-brand"><a href="{{ route('azari.admin.dashboard') }}" class="az-sidebar-brand__link" aria-label="{{ $siteName }} dashboard"><img src="{{ asset('images/logo-dark.png') }}" alt="{{ $siteName }}" class="az-sidebar-brand__logo" loading="eager" decoding="async"></a><button type="button" class="az-icon-button az-sidebar-close" data-sidebar-close aria-label="Close navigation"><span class="material-symbols-outlined" aria-hidden="true">close</span></button></div>

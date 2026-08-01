@@ -2,6 +2,7 @@
 use App\Http\Controllers\Admin\CustomerContentController;
 use App\Http\Controllers\Admin\OperationsController;
 use App\Http\Controllers\Admin\PromotionController;
+use App\Http\Controllers\Admin\VoucherController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
 use App\Http\Controllers\Admin\SupportTicketController as AdminSupportTicketController;
@@ -34,6 +35,9 @@ Route::prefix('azari-admin')->name('azari.admin.')->middleware(['auth.session', 
     Route::get('/promotions',[PromotionController::class,'index'])->middleware('azari.permission:promotions.view')->name('promotions.index');
     Route::post('/promotions',[PromotionController::class,'store'])->middleware('azari.permission:promotions.create')->name('promotions.store');
     Route::put('/promotions/{promotion}',[PromotionController::class,'update'])->middleware('azari.permission:promotions.edit')->name('promotions.update');
+    Route::get('/vouchers',[VoucherController::class,'index'])->middleware('azari.permission:vouchers.view')->name('vouchers.index');
+    Route::post('/vouchers',[VoucherController::class,'store'])->middleware('azari.permission:vouchers.create')->name('vouchers.store');
+    Route::put('/vouchers/{voucher}',[VoucherController::class,'update'])->middleware('azari.permission:vouchers.edit')->name('vouchers.update');
     Route::get('/reports',[ReportController::class,'index'])->middleware('azari.permission:reports.view')->name('reports.index');
     Route::get('/reports/export/{format}',[ReportController::class,'export'])->middleware('azari.permission:reports.export')->name('reports.export');
     Route::get('/reports/print',[ReportController::class,'print'])->middleware('azari.permission:reports.view')->name('reports.print');

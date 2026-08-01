@@ -16,7 +16,7 @@ class Booking extends Model
     protected $perPage = 10;
 
     protected $fillable = [
-        'reference', 'user_id', 'property_id', 'hold_token', 'guest_name',
+        'reference', 'user_id', 'property_id', 'voucher_id', 'voucher_code', 'discount_total', 'voucher_snapshot', 'hold_token', 'guest_name',
         'guest_first_name', 'guest_last_name', 'guest_email', 'guest_phone',
         'arrival_time', 'country', 'city', 'address', 'nationality', 'check_in',
         'check_out', 'adults', 'children', 'rooms', 'status', 'verification_status',
@@ -37,7 +37,7 @@ class Booking extends Model
             'checked_in_at' => 'datetime', 'checked_out_at' => 'datetime', 'no_show_at' => 'datetime', 'check_in_reversed_at' => 'datetime', 'completed_at' => 'datetime',
             'room_assignment_locked_at' => 'datetime', 'payment_transfer_locked_at' => 'datetime',
             'modified_at' => 'datetime', 'expires_at' => 'datetime',
-            'pricing_snapshot' => 'array', 'nightly_rate' => 'decimal:2',
+            'pricing_snapshot' => 'array', 'voucher_snapshot' => 'array', 'discount_total' => 'decimal:2', 'nightly_rate' => 'decimal:2',
             'subtotal' => 'decimal:2', 'fee_total' => 'decimal:2',
             'add_on_total' => 'decimal:2', 'tax_rate' => 'decimal:4',
             'tax_total' => 'decimal:2', 'total' => 'decimal:2',
@@ -45,6 +45,7 @@ class Booking extends Model
     }
 
     public function property(): BelongsTo { return $this->belongsTo(Property::class); }
+    public function voucher(): BelongsTo { return $this->belongsTo(Voucher::class); }
     public function user(): BelongsTo { return $this->belongsTo(User::class); }
     public function cancelledBy(): BelongsTo { return $this->belongsTo(User::class, 'cancelled_by'); }
     public function guests(): HasMany { return $this->hasMany(BookingGuest::class)->orderBy('type')->orderBy('position'); }

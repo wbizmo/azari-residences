@@ -78,8 +78,8 @@ class PublicPageController extends Controller
     public function page(string $key): View
     {
         $pages = [
-            'services' => ['Services', 'Thoughtful support for every stage of your stay.', 'azari-service.png'],
-            'concierge' => ['Concierge', 'Personal assistance, considered recommendations and dependable arrangements.', 'azari-service.png'],
+            'services' => ['Services', 'Thoughtful support for every stage of your stay.', 'azari-concierge.png'],
+            'concierge' => ['Concierge', 'Personal assistance, considered recommendations and dependable arrangements.', 'azari-concierge.png'],
             'housekeeping' => ['Housekeeping', 'Professional care that keeps every residence calm, fresh and ready.', 'azari-housekeeping.png'],
             'restaurant' => ['Restaurant & dining', 'Curated dining support, local recommendations and memorable table experiences.', 'azari-food.png'],
             'airport-transfers' => ['Airport transfers', 'Reliable pickup and drop-off coordination from arrival to residence.', 'azari-airport.png'],

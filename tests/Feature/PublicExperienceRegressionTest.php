@@ -23,7 +23,7 @@ class PublicExperienceRegressionTest extends TestCase
         $this->get(route('public.about'))->assertOk()->assertSee('team-azari.png');
         $this->get(route('public.contact'))->assertOk()->assertSee('contact-azari.png');
         $this->get(route('public.local-guide'))->assertOk()->assertSee('local-guides-azari.png');
-        $this->get(route('public.concierge'))->assertOk()->assertSee('azari-service.png');
+        $this->get(route('public.concierge'))->assertOk()->assertSee('azari-concierge.png');
         $this->get(route('public.housekeeping'))->assertOk()->assertSee('azari-housekeeping.png');
         $this->get(route('public.restaurant'))->assertOk()->assertSee('azari-food.png');
         $this->get(route('public.airport-transfers'))->assertOk()->assertSee('azari-airport.png');
