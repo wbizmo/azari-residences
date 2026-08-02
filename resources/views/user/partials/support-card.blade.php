@@ -1,8 +1,5 @@
 @php
-    $contactEmail = \App\Models\SiteSetting::valueFor(
-        'customer_dashboard_contact_email',
-        \App\Models\SiteSetting::valueFor('public_contact_email', config('mail.from.address'))
-    );
+    $contactEmail = 'hello@' . preg_replace('/^www\./i', '', request()->getHost());
 @endphp
 <aside class="az-user-support-card">
     <strong>Need assistance?</strong>

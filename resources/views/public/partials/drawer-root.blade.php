@@ -1,11 +1,5 @@
 @php
-    $contactEmail = \App\Models\SiteSetting::valueFor(
-        'customer_dashboard_contact_email',
-        \App\Models\SiteSetting::valueFor(
-            'public_contact_email',
-            config('mail.from.address')
-        )
-    );
+    $contactEmail = 'hello@' . preg_replace('/^www\./i', '', request()->getHost());
 @endphp
 
 <style>
@@ -232,7 +226,7 @@
                 <a href="{{ route('public.housekeeping') }}">Housekeeping</a>
                 <a href="{{ route('public.restaurant') }}">Restaurant</a>
                 <a href="{{ route('public.airport-transfers') }}">Airport transfers</a>
-                <a href="{{ route('user.owner.listings.create') }}">List my property</a>
+                <!-- <a href="{{ route('user.owner.listings.create') }}">List my property</a> -->
                 <a href="{{ route('public.local-guide') }}">Local guide</a>
                 <a href="{{ route('public.about') }}">About Azari</a>
 
