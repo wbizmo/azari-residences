@@ -9,3 +9,17 @@ Schedule::command('model:prune')->daily();
 Schedule::command('azari:expire-unpaid-bookings')->hourly()->name('expire-unpaid-bookings')->withoutOverlapping();
 
 require __DIR__.'/azari-final-schedule.php';
+
+/*
+|--------------------------------------------------------------------------
+| AZARI_PUBLIC_STATUS_SCHEDULE_V1
+|--------------------------------------------------------------------------
+|
+| The production server already invokes Laravel's scheduler every minute.
+| Generate one sanitized public snapshot every five minutes.
+|
+*/
+
+\Illuminate\Support\Facades\Schedule::command(
+    'azari:status-snapshot'
+)->everyFiveMinutes();
