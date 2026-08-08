@@ -4,7 +4,7 @@
     @include('partials.material-symbols-preload')
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Create guest account | Azari Residences</title>
+    <title>Create guest account | Azari Hotels & Residences</title>
     @vite(['resources/css/app.css','resources/js/app.js'])
 </head>
 
@@ -13,7 +13,7 @@
     <section class="az-auth-visual">
         <img
             src="{{ asset('images/azari-auth-lounge.png') }}"
-            alt="Elegant private lounge at Azari Residences"
+            alt="Elegant private lounge at Azari Hotels & Residences"
         >
         <div>
             <h1>Your stays, preferences and reservations in one refined space.</h1>

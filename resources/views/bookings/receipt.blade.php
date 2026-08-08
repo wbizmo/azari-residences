@@ -12,7 +12,7 @@
 <div class="toolbar"><button type="button" onclick="window.print()">Print or save as PDF</button></div>
 <main class="invoice">
     <header class="head">
-        <div><div class="kicker">Azari Residences</div><div class="brand">Booking invoice</div><span class="status">{{ ucwords(str_replace('_', ' ', $booking->status)) }}</span></div>
+        <div><div class="kicker">Azari Hotels & Residences</div><div class="brand">Booking invoice</div><span class="status">{{ ucwords(str_replace('_', ' ', $booking->status)) }}</span></div>
         <div class="meta"><strong>{{ $booking->reference }}</strong><br><span>{{ $booking->created_at?->format('d M Y, H:i') }}</span></div>
     </header>
 

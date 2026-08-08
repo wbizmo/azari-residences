@@ -1,6 +1,6 @@
 @extends('components.public.layout')
 
-@section('title', $title.' | Azari Residences')
+@section('title', $title.' | Azari Hotels & Residences')
 
 @section('content')
 <main class="az-editorial-page az-collection-page">
@@ -24,8 +24,8 @@
     <section class="az-collection-section" id="collection">
         <div class="site-container">
             <header class="az-section-heading az-section-heading--split">
-                <div><span class="eyebrow">Available residences</span><h2>Designed around the way you stay.</h2></div>
-                <p>Explore available Azari residences.</p>
+                <div><span class="eyebrow">Available hotels & residences</span><h2>Designed around the way you stay.</h2></div>
+                <p>Explore available Azari hotels & residences.</p>
             </header>
 
             <div class="az-luxury-property-grid">
@@ -52,7 +52,7 @@
                     </article>
                 @empty
                     <div class="az-visual-empty-state">
-                        <div><h2>No residences available</h2><p>Check availability for other dates or contact the Azari team.</p><a class="button button-primary" href="{{ route('availability.index') }}">Search availability</a></div>
+                        <div><h2>No hotels & residences available</h2><p>Check availability for other dates or contact the Azari team.</p><a class="button button-primary" href="{{ route('availability.index') }}">Search availability</a></div>
                     </div>
                 @endforelse
             </div>

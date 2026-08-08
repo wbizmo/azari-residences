@@ -39,19 +39,4 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
-        $exceptions->render(function (\Throwable $e, Request $request) {
-            if (config('app.debug') || $e instanceof HttpExceptionInterface) {
-                return null;
-            }
-            report($e);
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'message' => 'The request could not be completed.',
-                    'request_id' => $request->attributes->get('request_id'),
-                ], 500);
-            }
-            return response()->view('errors.500', [
-                'requestId' => $request->attributes->get('request_id'),
-            ], 500);
-        });
     })->create();

@@ -1,5 +1,5 @@
 <x-public-site.layout
-    title="Book your stay | Azari Residences"
+    title="Book your stay | Azari Hotels & Residences"
     description="Search live availability and book directly with Azari Residences."
 >
     <main class="az-book-page">
@@ -37,7 +37,7 @@
                         ></span>
 
                         <figcaption class="az-book-media__copy">
-                            <span>Azari Residences</span>
+                            <span>Azari Hotels & Residences</span>
 
                             <strong>
                                 Thoughtfully managed stays across our locations.
@@ -58,7 +58,7 @@
 
                             <p>
                                 Enter your stay details to view matching
-                                residences and current direct-booking rates.
+                                hotels & residences and current direct-booking rates.
                             </p>
                         </header>
 
@@ -254,7 +254,7 @@
 
                             <p>
                                 Live inventory, direct rates and secure booking
-                                through Azari Residences.
+                                through Azari Hotels & Residences.
                             </p>
                         </footer>
                     </section>

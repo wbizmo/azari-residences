@@ -21,9 +21,15 @@ return [
 
         'public' => [
             'driver' => 'local',
+
+            // Store uploads directly in the real public directory.
             'root' => public_path('storage'),
-            'url' => env('APP_URL').'/storage',
+
+            // Keep generated links as /storage/... without exposing /public.
+            'url' => rtrim((string) env('APP_URL', ''), '/').'/storage',
+
             'visibility' => 'public',
+            'directory_visibility' => 'public',
             'throw' => false,
             'report' => false,
         ],
@@ -36,13 +42,15 @@ return [
             'bucket' => env('AWS_BUCKET'),
             'url' => env('AWS_URL'),
             'endpoint' => env('AWS_ENDPOINT'),
-            'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
+            'use_path_style_endpoint' => env(
+                'AWS_USE_PATH_STYLE_ENDPOINT',
+                false
+            ),
             'throw' => false,
             'report' => false,
         ],
     ],
 
-    'links' => [
-        public_path('storage') => storage_path('app/public'),
-    ],
+    // No symlink is required because files are written directly there.
+    'links' => [],
 ];

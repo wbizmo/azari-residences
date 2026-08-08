@@ -3,7 +3,7 @@
         <div class="footer-primary">
             <div class="footer-brand">
                 <x-brand-logo variant="footer" />
-                <p>Private, fully serviced residences managed with dedicated support from booking through checkout.</p>
+                <p>Private, fully serviced hotels & residences managed with dedicated support from booking through checkout.</p>
             </div>
 
             <div class="footer-column">
@@ -21,7 +21,16 @@
                 <a href="{{ route('user.owner.listings.create') }}">Guest login</a>
                 <a href="{{ route('user.owner.listings.create') }}">Create account</a>
                 <a href="{{ route('user.owner.listings.create') }}">List my property</a>
-                <a href="{{ route('public.contact') }}">Contact Azari</a>
+
+            <!-- AZARI PWA FOOTER LINK START -->
+            <a
+                href="/login"
+                data-azari-pwa-install
+                aria-label="Download the Azari App"
+            >Download the Azari App</a>
+            <!-- AZARI PWA FOOTER LINK END -->
+
+            <a href="{{ route('public.contact') }}">Contact Azari</a>
             </div>
 
             <div class="footer-column">
@@ -34,7 +43,7 @@
         </div>
 
         <div class="footer-legal">
-            <span>&copy; {{ now()->year }} Azari Residences.</span>
+            <span>&copy; {{ now()->year }} Azari Hotels & Residences.</span>
             <span>Azari Luxury Properties LTD.</span>
             <a href="{{ route('home') }}">Back home</a>
         </div>

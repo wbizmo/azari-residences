@@ -1,13 +1,13 @@
 @extends('components.public.layout')
 
-@section('title', $title.' | Azari Residences')
+@section('title', $title.' | Azari Hotels & Residences')
 
 @section('content')
 <main class="az-editorial-page az-standard-page az-standard-page--{{ $key }}">
     <section class="az-editorial-hero">
         <div class="site-container az-editorial-hero__grid">
             <div class="az-editorial-hero__copy">
-                <span class="eyebrow">Azari Residences</span>
+                <span class="eyebrow">Azari Hotels & Residences</span>
                 <h1>{{ $title }}</h1>
                 <p>{{ $intro }}</p>
 
@@ -18,12 +18,12 @@
                 @elseif($key === 'local-guide')
                     <a class="button button-primary" href="#guide">Explore the guide</a>
                 @elseif($key === 'about')
-                    <a class="button button-primary" href="{{ route('public.apartments') }}">Explore residences</a>
+                    <a class="button button-primary" href="{{ route('public.apartments') }}">Explore hotels & residences</a>
                 @endif
             </div>
 
             <figure class="az-editorial-hero__media">
-                <img src="{{ asset('images/'.$image) }}" alt="{{ $title }} at Azari Residences">
+                <img src="{{ asset('images/'.$image) }}" alt="{{ $title }} at Azari Hotels & Residences">
             </figure>
         </div>
     </section>
@@ -37,7 +37,7 @@
                 </div>
 
                 <div>
-                    <p>Azari Residences brings together carefully selected homes, consistent preparation and responsive guest support. Our focus is not simply where guests sleep, but how confidently they can arrive, settle in and move through every day of their stay.</p>
+                    <p>Azari Hotels & Residences brings together carefully selected homes, consistent preparation and responsive guest support. Our focus is not simply where guests sleep, but how confidently they can arrive, settle in and move through every day of their stay.</p>
                     <p>From business travel and relocation to longer visits and private city breaks, each residence is managed around comfort, discretion and thoughtful service.</p>
                 </div>
             </div>
@@ -238,7 +238,7 @@
                     <span class="eyebrow">Guest information</span>
                     <h2>{{ $title }}</h2>
                     <p>{{ $intro }}</p>
-                    <p>For assistance, contact the Azari Residences guest-support team through an official channel.</p>
+                    <p>For assistance, contact the Azari Hotels & Residences guest-support team through an official channel.</p>
                 </div>
             </div>
         </section>

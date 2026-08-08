@@ -1,4 +1,4 @@
-<x-public-site.layout title="Complete Flutterwave payment | Azari Residences">
+<x-public-site.layout title="Complete Flutterwave payment | Azari Hotels & Residences">
 <main class="site-container az-checkout-page">
     <section class="az-checkout-shell">
         <div class="az-checkout-main">
