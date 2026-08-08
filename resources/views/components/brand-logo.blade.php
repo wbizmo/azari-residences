@@ -5,7 +5,7 @@
 
 @php
     $settings = isset($siteSettings) && is_array($siteSettings) ? $siteSettings : [];
-    $siteName = trim((string) ($settings['site_name'] ?? 'Azari Residences'));
+    $siteName = trim((string) ($settings['site_name'] ?? 'Azari Hotels & Residences'));
     $isFooter = $variant === 'footer';
     $isGuestSidebar = in_array($variant, ['guest-sidebar', 'guest-drawer'], true);
     $logoUrl = trim((string) (
@@ -50,7 +50,7 @@
         @unless ($isGuestSidebar)
             <span class="brand-copy azari-brand__copy">
                 <strong>Azari</strong>
-                <small>Residences</small>
+                <small>Hotels & Residences</small>
             </span>
         @endunless
     @endif

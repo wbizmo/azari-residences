@@ -1,5 +1,5 @@
 @props([
-    'title' => 'Azari Residences | Premium Serviced Residences',
+    'title' => 'Azari Hotels & Residences | Premium Serviced Hotels & Residences',
     'description' => null,
     'keywords' => null,
     'canonical' => null,
@@ -33,9 +33,16 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('head')
+
+        <!-- AZARI PWA HEAD START -->
+        <link rel="manifest" href="/manifest.webmanifest">
+        <meta name="theme-color" content="#0c2b24">
+        <link rel="apple-touch-icon" href="/public/images/azari-favicon.png">
+        <!-- AZARI PWA HEAD END -->
+
 </head>
 <body class="public-site {{ request()->routeIs('home') ? 'home-page azari-home-page' : 'inner-page azari-inner-page azari-solid-header' }} {{ $bodyClass ?? '' }}">
-    <div class="azari-preloader" data-public-preloader role="status" aria-label="Loading Azari Residences">
+    <div class="azari-preloader" data-public-preloader role="status" aria-label="Loading Azari Hotels & Residences">
         <span class="azari-preloader__mark" aria-hidden="true">
             <span class="azari-preloader__spinner"></span>
             <img src="{{ asset('images/azari-favicon.png') }}" alt="" width="42" height="42" loading="eager" decoding="sync">
@@ -63,5 +70,10 @@
 
     @stack('scripts')
     <x-azari-feedback />
+
+    <!-- AZARI PWA RUNTIME START -->
+    <script src="/pwa-install.js" defer></script>
+    <!-- AZARI PWA RUNTIME END -->
+
 </body>
 </html>

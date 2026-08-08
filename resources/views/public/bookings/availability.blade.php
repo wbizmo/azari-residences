@@ -1,5 +1,5 @@
 <x-public-site.layout
-    title="Available residences | Azari Residences"
+    title="Available hotels & residences | Azari Hotels & Residences"
     description="Review live Azari inventory and refine your stay request."
 >
     @php
@@ -15,7 +15,7 @@
                 <span class="sr-only">Your stay request</span>
                 <div>
                     <span class="eyebrow">Live inventory</span>
-                    <h1>Available residences</h1>
+                    <h1>Available hotels & residences</h1>
                     <p>
                         {{ $checkIn->format('j M Y') }} to {{ $checkOut->format('j M Y') }}
                         <span aria-hidden="true">·</span>
@@ -104,7 +104,7 @@
                 </p>
             @endif
 
-            <section class="az-results-grid" aria-label="Available residences">
+            <section class="az-results-grid" aria-label="Available hotels & residences">
                 @forelse($results as $result)
                     @php($property = $result['property'])
                     @php($quote = $result['quote'])

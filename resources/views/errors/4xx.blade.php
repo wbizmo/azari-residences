@@ -6,4 +6,4 @@
 @section('message')
     The requested page or action is unavailable, invalid, expired, or restricted.
 @endsection
-@section('support', 'Return to the previous page and try again. Contact Azari Residences support if the issue continues.')
+@section('support', 'Return to the previous page and try again. Contact Azari Hotels & Residences support if the issue continues.')

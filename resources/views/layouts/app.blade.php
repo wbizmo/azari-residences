@@ -5,8 +5,8 @@
         @include('partials.azari-head-assets')
 
         @php
-            $seoTitle = 'Azari Residences | Luxury Residences, Apartments, Rooms and Hospitality';
-            $seoDescription = 'Discover Azari Residences, a premium hospitality and accommodation platform owned by Azari Luxury Properties Ltd. Explore residences, apartments, rooms, concierge services, dining, housekeeping, airport transfers and secure online booking.';
+            $seoTitle = 'Azari Hotels & Residences | Luxury Hotels & Residences, Apartments, Rooms and Hospitality';
+            $seoDescription = 'Discover Azari Hotels & Residences, a premium hospitality and accommodation platform owned by Azari Luxury Properties Ltd. Explore hotels & residences, apartments, rooms, concierge services, dining, housekeeping, airport transfers and secure online booking.';
             $seoUrl = url()->current();
             $seoImage = asset('images/azari-favicon.png');
 
@@ -23,19 +23,19 @@
     DESCRIPTION;
 
             $nameKeywords = [
-                'Azari', 'Azari Residences', 'The Azari', 'The Azari Residences',
-                'Azari Residence', 'Azari Luxury Residences', 'Azari Luxury Properties',
+                'Azari', 'Azari Hotels & Residences', 'The Azari', 'The Azari Hotels & Residences',
+                'Azari Residence', 'Azari Luxury Hotels & Residences', 'Azari Luxury Properties',
                 'Azari Luxury Properties Ltd', 'Azari Luxury Properties Limited',
                 'Azari Group', 'The Azari Group', 'Azari Holdings', 'Azari Holdings Ltd',
                 'Azari Holdings Limited', 'Azari Hospitality', 'Azari Hospitality Group',
                 'Azari Hospitality Services', 'Azari Accommodation', 'Azari Apartments',
                 'Azari Rooms', 'Azari Properties', 'Azari Property', 'Azari Property Booking',
-                'Azari Residence Booking', 'Azari Residences Booking', 'Azari Hotel',
+                'Azari Residence Booking', 'Azari Hotels & Residences Booking', 'Azari Hotel',
                 'Azari Hotels', 'Azari Guest House', 'Azari Guest Accommodation',
                 'Azari Serviced Apartments', 'Azari Short Stay', 'Azari Extended Stay',
-                'Azari Holiday Residences', 'Azari Vacation Residences',
-                'Azari Premium Residences', 'Azari Private Residences',
-                'Azari Executive Residences', 'Azari Corporate Accommodation',
+                'Azari Holiday Hotels & Residences', 'Azari Vacation Hotels & Residences',
+                'Azari Premium Hotels & Residences', 'Azari Private Hotels & Residences',
+                'Azari Executive Hotels & Residences', 'Azari Corporate Accommodation',
                 'Azari Family Accommodation', 'Azari Luxury Accommodation',
                 'Azari Property Management', 'Azari Residence Management',
                 'Azari Resort Management', 'Azari Guest Services', 'Azari Concierge',
@@ -43,17 +43,17 @@
                 'Azari Restaurant', 'Azari Local Guide', 'Azari Booking Platform',
                 'Azari Reservation Platform', 'Azari Online Booking',
                 'Azari Secure Booking', 'Azari Availability', 'Azari Property Owners',
-                'Azari Property Listings', 'Azari Guest Portal', 'Azari Residences Website',
+                'Azari Property Listings', 'Azari Guest Portal', 'Azari Hotels & Residences Website',
                 'Azari Luxury Properties Website',
             ];
 
             $searchKeywords = [
-                'Azari website', 'Azari Residences website', 'Azari booking',
-                'Azari Residences booking', 'book Azari Residences',
-                'how to book Azari Residences', 'where is Azari Residences',
-                'what is Azari Residences', 'who owns Azari Residences',
-                'Azari Residences availability', 'check Azari availability',
-                'check Azari Residences availability', 'Azari available rooms',
+                'Azari website', 'Azari Hotels & Residences website', 'Azari booking',
+                'Azari Hotels & Residences booking', 'book Azari Hotels & Residences',
+                'how to book Azari Hotels & Residences', 'where is Azari Hotels & Residences',
+                'what is Azari Hotels & Residences', 'who owns Azari Hotels & Residences',
+                'Azari Hotels & Residences availability', 'check Azari availability',
+                'check Azari Hotels & Residences availability', 'Azari available rooms',
                 'Azari available apartments', 'Azari room booking',
                 'Azari apartment booking', 'Azari residence prices',
                 'Azari accommodation prices', 'Azari booking confirmation',
@@ -62,7 +62,7 @@
                 'Azari property owner registration', 'list property with Azari',
                 'Azari concierge booking', 'Azari airport pickup',
                 'Azari housekeeping request', 'Azari contact information',
-                'contact Azari Residences','Azari','Azari luxury','Azari group',
+                'contact Azari Hotels & Residences','Azari','Azari luxury','Azari group',
             ];
 
             $generalKeywords = [
@@ -127,10 +127,10 @@
                     [
                         '@type' => ['WebSite', 'LodgingBusiness'],
                         '@id' => url('/').'#azari-residences',
-                        'name' => 'Azari Residences',
+                        'name' => 'Azari Hotels & Residences',
                         'alternateName' => [
-                            'The Azari Residences',
-                            'Azari Luxury Residences',
+                            'The Azari Hotels & Residences',
+                            'Azari Luxury Hotels & Residences',
                         ],
                         'url' => url('/'),
                         'description' => $seoLongDescription,

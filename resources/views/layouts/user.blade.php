@@ -16,7 +16,7 @@
 
     <title>
         @yield('title', 'Guest area') |
-        {{ $siteSettings['site_name'] ?? 'Azari Residences' }}
+        {{ $siteSettings['site_name'] ?? 'Azari Hotels & Residences' }}
     </title>
 
     @vite([
@@ -44,12 +44,12 @@
             <a
                 href="{{ route('user.dashboard') }}"
                 class="brand brand-dark azari-brand azari-brand--guest-sidebar"
-                aria-label="Azari Residences guest dashboard"
+                aria-label="Azari Hotels & Residences guest dashboard"
             >
                 <span class="brand-logo-slot azari-brand__logo-slot guest-brand-logo-slot">
                     <img
                         src="{{ asset('images/logo-dark.png') }}"
-                        alt="Azari Residences"
+                        alt="Azari Hotels & Residences"
                         class="brand-image azari-brand__image guest-brand-image"
                         loading="eager"
                         decoding="async"
@@ -121,12 +121,12 @@
                 <a
                     href="{{ route('user.dashboard') }}"
                     class="brand brand-dark azari-brand azari-brand--guest-sidebar"
-                    aria-label="Azari Residences guest dashboard"
+                    aria-label="Azari Hotels & Residences guest dashboard"
                 >
                     <span class="brand-logo-slot azari-brand__logo-slot guest-brand-logo-slot">
                         <img
                             src="{{ asset('images/logo-dark.png') }}"
-                            alt="Azari Residences"
+                            alt="Azari Hotels & Residences"
                             class="brand-image azari-brand__image guest-brand-image"
                             loading="eager"
                             decoding="async"

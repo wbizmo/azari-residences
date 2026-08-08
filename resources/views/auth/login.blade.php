@@ -4,7 +4,7 @@
     @include('partials.material-symbols-preload')
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Sign in | Azari Residences</title>
+    <title>Sign in | Azari Hotels & Residences</title>
     @vite(['resources/css/app.css','resources/js/app.js'])
 
     <style>
@@ -36,13 +36,20 @@
         @media(max-width:767px){.auth{display:block}.visual{display:none}.panel{min-height:100dvh;padding:25px 21px}h1{font-size:44px}}
         @media(max-height:700px) and (min-width:768px){.panel{padding-block:20px}.sub{margin-bottom:18px}.field{margin-bottom:12px}.field input{height:45px}.submit{height:47px}}
     </style>
+
+        <!-- AZARI PWA HEAD START -->
+        <link rel="manifest" href="/manifest.webmanifest">
+        <meta name="theme-color" content="#0c2b24">
+        <link rel="apple-touch-icon" href="/public/images/azari-favicon.png">
+        <!-- AZARI PWA HEAD END -->
+
 </head>
 
 <body>
 <main class="auth">
     <section class="visual">
         <img src="{{ asset('images/azari-guest-auth-suite.png') }}" alt="Luxury Azari suite">
-        <a class="brand" href="{{ url('/') }}">Azari Residences</a>
+        <a class="brand" href="{{ url('/') }}">Azari Hotels & Residences</a>
     </section>
 
     <section class="panel">
@@ -112,5 +119,10 @@
         </div>
     </section>
 </main>
+
+    <!-- AZARI PWA RUNTIME START -->
+    <script src="/pwa-install.js" defer></script>
+    <!-- AZARI PWA RUNTIME END -->
+
 </body>
 </html>
