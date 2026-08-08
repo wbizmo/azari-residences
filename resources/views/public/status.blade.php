@@ -12,7 +12,7 @@
 
     <link
         rel="icon"
-        href="/public/public/public/images/azari-favicon.png"
+        href="/public/images/azari-favicon.png"
     >
 
     <style>
@@ -617,6 +617,20 @@
         }
 
     </style>
+
+    <!-- AZARI_STATUS_STICKY_TOPBAR_V112 -->
+    <style>
+        .topbar {
+            position: sticky !important;
+            top: 0 !important;
+            z-index: 1000 !important;
+            background: rgba(245, 244, 239, .94) !important;
+            border-bottom: 1px solid rgba(222, 223, 217, .82);
+            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(16px);
+        }
+    </style>
+
 </head>
 
 <body>
@@ -642,7 +656,7 @@
     <div class="wrap topbar-inner">
         <a class="brand" href="/">
             <img
-                src="/public/public/public/images/azari-favicon.png"
+                src="/public/images/azari-favicon.png"
                 alt=""
                 aria-hidden="true"
             >
