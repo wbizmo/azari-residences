@@ -1,0 +1,24 @@
+{
+  "resources/css/app.css": {
+    "file": "assets/app-CaYKhuwg.css",
+    "name": "app",
+    "names": [
+      "app.css"
+    ],
+    "src": "resources/css/app.css",
+    "isEntry": true,
+    "assets": [
+      "assets/azari-hero-CgVtCu5_.png"
+    ]
+  },
+  "resources/images/azari-hero.png": {
+    "file": "assets/azari-hero-CgVtCu5_.png",
+    "src": "resources/images/azari-hero.png"
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-D_LY2CHb.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true
+  }
+}
