@@ -72,8 +72,7 @@
     <x-azari-feedback />
 
     <!-- AZARI PWA RUNTIME START -->
-    <script src="/pwa-install.js" defer></script>
+    <script src="{{ asset('pwa-install.js') }}?v=20260810-8" defer></script>
     <!-- AZARI PWA RUNTIME END -->
-
 </body>
 </html>

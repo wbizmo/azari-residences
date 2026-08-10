@@ -60,19 +60,6 @@
                 </div>
             </div>
         </div>
-
-        <a
-            href="{{ route('availability.index') }}"
-            class="azari-home-hero__scroll"
-            aria-label="Scroll to availability search"
-        >
-            <span>Discover</span>
-
-            <span
-                class="material-symbols-outlined"
-                aria-hidden="true"
-            >south</span>
-        </a>
     </section>
 
     <section class="availability-section" id="availability">
