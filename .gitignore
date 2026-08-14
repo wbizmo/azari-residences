@@ -39,7 +39,6 @@ Thumbs.db
 .config/
 .replit
 replit.nix
-*.sh
 .env
 .replit.nix
 .agent/
