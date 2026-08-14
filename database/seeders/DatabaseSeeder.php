@@ -8,7 +8,9 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        $seeders = [
+                $this->call(AzariCanonicalAdminSeeder::class);
+
+$seeders = [
             AzariProductionSeeder::class,
             AzariSprintThreeFourSeeder::class,
             AzariSprintFiveSixDemoSeeder::class,

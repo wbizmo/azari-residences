@@ -10,10 +10,23 @@ class Sprint6BTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_guest_and_customer_receive_404_for_admin_surfaces(): void
+    public function test_guest_is_redirected_to_admin_login_and_customer_receives_404_for_admin_surfaces(): void
     {
-        $this->get('/azari-admin/bookings')->assertNotFound();
-        $this->actingAs(User::factory()->create(['is_admin' => false, 'is_active' => true]))->get('/azari-admin/bookings')->assertNotFound();
+        $this->get('/azaridevadmin')
+            ->assertRedirect(route('azari.admin.login'));
+
+        $customer = User::factory()->create([
+            'account_type' => 'customer',
+            'is_admin' => false,
+            'staff_role' => null,
+            'is_active' => true,
+            'status' => 'active',
+            'suspended_at' => null,
+        ]);
+
+        $this->actingAs($customer)
+            ->get('/azaridevadmin')
+            ->assertNotFound();
     }
 
     public function test_authorised_admin_can_open_paginated_booking_list(): void

@@ -12,7 +12,14 @@ class EnsureAzariStaff
     public function handle(Request $request, Closure $next, ...$roles): Response
     {
         $user = $request->user();
-        abort_unless($user && $user->isStaff() && ! $user->isSuspended(), 404);
+
+        if (! $user) {
+            return $request->expectsJson()
+                ? response()->json(['message' => 'Unauthenticated.'], 401)
+                : redirect()->guest(route('azari.admin.login'));
+        }
+
+        abort_unless($user->isStaff() && ! $user->isSuspended(), 404);
 
         if ($roles !== []) {
             $effective = $user->isAdministrator() ? 'administrator' : (string) $user->staff_role;
