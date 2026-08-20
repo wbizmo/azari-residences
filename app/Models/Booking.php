@@ -26,7 +26,7 @@ class Booking extends Model
         'cancelled_at', 'cancellation_reason', 'cancellation_internal_note',
         'cancellation_payment_note', 'external_refund_reference', 'cancelled_by',
         'checked_in_at', 'checked_out_at', 'no_show_at', 'check_in_reversed_at', 'completed_at', 'room_assignment_locked_at',
-        'payment_transfer_locked_at', 'modified_at', 'expires_at',
+        'payment_transfer_locked_at', 'modified_at', 'expires_at', 'payment_reminder_sent_at',
     ];
 
     protected function casts(): array
@@ -36,7 +36,7 @@ class Booking extends Model
             'paid_at' => 'datetime', 'cancelled_at' => 'datetime',
             'checked_in_at' => 'datetime', 'checked_out_at' => 'datetime', 'no_show_at' => 'datetime', 'check_in_reversed_at' => 'datetime', 'completed_at' => 'datetime',
             'room_assignment_locked_at' => 'datetime', 'payment_transfer_locked_at' => 'datetime',
-            'modified_at' => 'datetime', 'expires_at' => 'datetime',
+            'modified_at' => 'datetime', 'expires_at' => 'datetime', 'payment_reminder_sent_at' => 'datetime',
             'pricing_snapshot' => 'array', 'voucher_snapshot' => 'array', 'discount_total' => 'decimal:2', 'nightly_rate' => 'decimal:2',
             'subtotal' => 'decimal:2', 'fee_total' => 'decimal:2',
             'add_on_total' => 'decimal:2', 'tax_rate' => 'decimal:4',

@@ -37,7 +37,7 @@ class BookingController extends Controller
         $quote = $service->quote((int) $data['property_id'], Carbon::parse($data['check_in']), Carbon::parse($data['check_out']));
         abort_unless($quote['available'], 422, 'Selected dates are unavailable.');
 
-        $booking = Booking::create([...$data, 'user_id' => auth()->id(), 'reference' => 'AZR-'.Str::upper(Str::random(10)), 'status' => 'pending', 'verification_status' => 'unverified', 'currency' => $quote['currency'], 'subtotal' => $quote['subtotal'], 'tax_total' => 0, 'total' => $quote['subtotal'], 'expires_at' => now()->addMinutes((int) config('azari.booking.hold_minutes', 15))]);
+        $booking = Booking::create([...$data, 'user_id' => auth()->id(), 'reference' => 'AZR-'.Str::upper(Str::random(10)), 'status' => 'pending', 'verification_status' => 'unverified', 'currency' => $quote['currency'], 'subtotal' => $quote['subtotal'], 'tax_total' => 0, 'total' => $quote['subtotal'], 'expires_at' => now()->addMinutes((int) config('azari.booking.unpaid_booking_minutes', 60))]);
         $request->session()->put('azari_guest_bookings.'.$booking->reference, true);
 
         return redirect()->route('bookings.show', $booking->reference);

@@ -114,7 +114,7 @@ class BookingCreationService
                 'tax_total' => $quote['tax_total'],
                 'total' => $quote['total'],
                 'pricing_snapshot' => $quote,
-                'expires_at' => now()->addMinutes((int) config('azari.booking.hold_minutes', 15)),
+                'expires_at' => now()->addMinutes((int) config('azari.booking.unpaid_booking_minutes', 60)),
             ]);
 
             foreach ($data['adults'] as $index => $adult) {

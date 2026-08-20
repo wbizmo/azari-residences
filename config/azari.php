@@ -6,6 +6,8 @@ return [
 
     'booking' => [
         'hold_minutes' => (int) env('AZARI_BOOKING_HOLD_MINUTES', 15),
+        'unpaid_booking_minutes' => max(1, (int) env('AZARI_UNPAID_BOOKING_MINUTES', 60)),
+        'payment_reminder_minutes' => max(1, (int) env('AZARI_PAYMENT_REMINDER_MINUTES', 30)),
         'default_tax_rate' => (float) env('AZARI_DEFAULT_TAX_RATE', 0),
         'default_service_fee' => (float) env('AZARI_DEFAULT_SERVICE_FEE', 0),
         'same_day_booking' => filter_var(env('AZARI_ALLOW_SAME_DAY_BOOKING', false), FILTER_VALIDATE_BOOL),

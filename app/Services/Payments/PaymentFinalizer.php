@@ -148,6 +148,38 @@ class PaymentFinalizer
                     'expires_at' => null,
                     'payment_transfer_locked_at' => now(),
                 ]);
+                /*
+                 * AZARI_SUCCESSFUL_BOOKING_ACCOUNT_V1
+                 *
+                 * Full provider-verified payment owns the customer-account
+                 * provisioning boundary. Pending or merely initiated payment
+                 * must never create a customer account.
+                 */
+                $account = app(
+                    \App\Services\Bookings\SuccessfulBookingAccountService::class
+                )->provision(
+                    $booking->refresh()
+                );
+
+                if ($account['created']) {
+                    $activationUser = $account['user'];
+                    $activationBooking = $account['booking'];
+
+                    DB::afterCommit(
+                        function () use (
+                            $activationUser,
+                            $activationBooking
+                        ): void {
+                            app(
+                                \App\Services\Bookings\SuccessfulBookingAccountService::class
+                            )->sendActivation(
+                                $activationUser,
+                                $activationBooking
+                            );
+                        }
+                    );
+                }
+
                 if ($from !== 'confirmed') {
                     BookingStatusHistory::query()->create([
                         'booking_id' => $booking->id,

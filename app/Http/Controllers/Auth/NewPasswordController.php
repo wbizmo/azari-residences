@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -43,12 +44,25 @@ class NewPasswordController extends Controller
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function (User $user) use ($request) {
+                $wasUnverified =
+                    $user->email_verified_at === null;
+
                 $user->forceFill([
                     'password' => Hash::make($request->password),
                     'remember_token' => Str::random(60),
+                    'email_verified_at' =>
+                        $user->email_verified_at ?: now(),
                 ])->save();
 
-                event(new PasswordReset($user));
+                if ($wasUnverified) {
+                    event(
+                        new Verified($user)
+                    );
+                }
+
+                event(
+                    new PasswordReset($user)
+                );
             }
         );
 
