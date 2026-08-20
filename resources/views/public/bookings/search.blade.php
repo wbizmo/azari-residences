@@ -84,7 +84,7 @@
                                             name="check_in"
                                             type="date"
                                             min="{{ now()->toDateString() }}"
-                                            value="{{ request('check_in') }}"
+                                            value="{{ request('check_in', session('azari_stay_search.check_in')) }}"
                                             required
                                         >
                                     </div>
@@ -109,7 +109,7 @@
                                             name="check_out"
                                             type="date"
                                             min="{{ now()->addDay()->toDateString() }}"
-                                            value="{{ request('check_out') }}"
+                                            value="{{ request('check_out', session('azari_stay_search.check_out')) }}"
                                             required
                                         >
                                     </div>
@@ -136,7 +136,7 @@
                                         type="number"
                                         min="1"
                                         max="40"
-                                        value="{{ max(1, (int) request('adults', 1)) }}"
+                                        value="{{ max(1, (int) request('adults', session('azari_stay_search.adults', 1))) }}"
                                         required
                                     >
                                 </div>
@@ -157,7 +157,7 @@
                                         type="number"
                                         min="0"
                                         max="40"
-                                        value="{{ max(0, (int) request('children', 0)) }}"
+                                        value="{{ max(0, (int) request('children', session('azari_stay_search.children', 0))) }}"
                                     >
                                 </div>
                             </div>
@@ -183,7 +183,7 @@
                                             <option
                                                 value="{{ $location->id }}"
                                                 @selected(
-                                                    (string) request('location_id') ===
+                                                    (string) request('location_id', session('azari_stay_search.location_id')) ===
                                                     (string) $location->id
                                                 )
                                             >
@@ -216,7 +216,7 @@
                                             <option
                                                 value="{{ $roomType->id }}"
                                                 @selected(
-                                                    (string) request('room_type_id') ===
+                                                    (string) request('room_type_id', session('azari_stay_search.room_type_id')) ===
                                                     (string) $roomType->id
                                                 )
                                             >
@@ -230,7 +230,7 @@
                             <input
                                 type="hidden"
                                 name="rooms"
-                                value="{{ max(1, (int) request('rooms', 1)) }}"
+                                value="{{ max(1, (int) request('rooms', session('azari_stay_search.rooms', 1))) }}"
                             >
 
                             <button

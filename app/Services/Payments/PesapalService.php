@@ -29,7 +29,7 @@ final class PesapalService implements PaymentProvider
                 'currency' => strtoupper($payload['currency']),
                 'amount' => round((float) $payload['amount'], 2),
                 'description' => 'Azari booking '.$payload['booking_reference'],
-                'callback_url' => config('azari.payments.pesapal.callback_url') ?: $payload['callback_url'],
+                'callback_url' => $payload['callback_url'] ?: config('azari.payments.pesapal.callback_url'),
                 'notification_id' => config('azari.payments.pesapal.notification_id'),
                 'billing_address' => [
                     'email_address' => $payload['email'],
@@ -222,11 +222,18 @@ final class PesapalService implements PaymentProvider
             || (is_array($error) && array_filter($error) !== [])
             || (is_string($error) && $error !== '')
         ) {
+            $providerMessage = is_array($error)
+                ? (string) ($error['message'] ?? $error['code'] ?? '')
+                : (is_string($error) ? $error : '');
+
             throw new PaymentProviderException(
-                $message,
+                $providerMessage !== '' ? $message.' Pesapal: '.$providerMessage : $message,
                 $this->name(),
                 $response->status(),
-                ['error' => $error]
+                [
+                    'error' => $error,
+                    'message' => $response->json('message'),
+                ]
             );
         }
     }

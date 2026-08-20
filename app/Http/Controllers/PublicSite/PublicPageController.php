@@ -35,19 +35,85 @@ class PublicPageController extends Controller
     }
 
     public function propertyAvailability(
+        Request $request,
         Property $property,
         AzariAvailabilityEngine $availability
     ): View {
-        abort_unless($property->is_published && $property->status !== 'inactive', 404);
+        abort_unless(
+            $property->is_published
+            && ! in_array(
+                $property->status,
+                [
+                    'inactive',
+                    'unavailable',
+                    'maintenance',
+                    'archived',
+                ],
+                true
+            ),
+            404
+        );
 
-        $property->load(['locationRecord', 'roomType', 'amenities']);
-        $start = CarbonImmutable::today(config('azari.timezone', 'Africa/Lagos'));
-
-        return view('public.bookings.property-availability', [
-            'property' => $property,
-            'calendar' => $availability->calendar($property->getKey(), $start, 90),
-            'start' => $start,
+        $property->load([
+            'locationRecord',
+            'roomType',
+            'amenities',
         ]);
+
+        $timezone = config(
+            'azari.timezone',
+            'Africa/Lagos'
+        );
+
+        $today = CarbonImmutable::today(
+            $timezone
+        );
+
+        $remembered =
+            $request->query('check_in')
+            ?: $request->session()->get(
+                'azari_stay_search.check_in'
+            );
+
+        $start = $today;
+
+        if (
+            is_string($remembered)
+            && preg_match(
+                '/^\d{4}-\d{2}-\d{2}$/',
+                $remembered
+            )
+        ) {
+            $requestedMonth =
+                CarbonImmutable::parse(
+                    $remembered,
+                    $timezone
+                )->startOfMonth();
+
+            if (
+                $requestedMonth
+                    ->greaterThan($today)
+            ) {
+                $start =
+                    $requestedMonth;
+            }
+        }
+
+        return view(
+            'public.bookings.property-availability',
+            [
+                'property' =>
+                    $property,
+                'calendar' =>
+                    $availability->calendar(
+                        $property->getKey(),
+                        $start,
+                        90
+                    ),
+                'start' =>
+                    $start,
+            ]
+        );
     }
 
     public function apartments(): View

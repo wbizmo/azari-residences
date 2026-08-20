@@ -37,7 +37,16 @@
                     <span>From</span>
                     <strong>{{ $property->currency }} {{ number_format($property->nightly_rate) }}</strong>
                     <small>per night</small>
-                    <a href="{{ route('availability.property', $property) }}" class="button button-primary button-block">Check availability</a>
+                    <a href="{{ route(
+                        'availability.property',
+                        array_merge(
+                            ['property' => $property],
+                            array_filter(
+                                (array) session('azari_stay_search', []),
+                                fn ($value) => $value !== null && $value !== ''
+                            )
+                        )
+                    ) }}" class="button button-primary button-block">Check availability</a>
                 </aside>
             </div>
         </div>

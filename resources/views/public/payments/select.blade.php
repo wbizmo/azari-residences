@@ -102,7 +102,13 @@
                         <div><dt>Check-in</dt><dd>{{ $booking->check_in?->format('d M Y') }}</dd></div>
                         <div><dt>Check-out</dt><dd>{{ $booking->check_out?->format('d M Y') }}</dd></div>
                         <div><dt>Guests</dt><dd>{{ $booking->adults }} adult{{ $booking->adults == 1 ? '' : 's' }}@if($booking->children), {{ $booking->children }} child{{ $booking->children == 1 ? '' : 'ren' }}@endif</dd></div>
-                        ((float)$booking->discount_total > 0)<div><dt>Voucher {{ $booking->voucher_code }}</dt><dd>-{{ $booking->currency }} {{ number_format((float)$booking->discount_total, 2) }}</dd></div>((float)$booking->discount_total > 0)<div><dt>Voucher {{ $booking->voucher_code }}</dt><dd>-{{ $booking->currency }} {{ number_format((float)$booking->discount_total, 2) }}</dd></div>((float)$booking->discount_total > 0)<div><dt>Voucher {{ $booking->voucher_code }}</dt><dd>-{{ $booking->currency }} {{ number_format((float)$booking->discount_total, 2) }}</dd></div>((float)$booking->discount_total > 0)<div><dt>Voucher {{ $booking->voucher_code }}</dt><dd>-{{ $booking->currency }} {{ number_format((float)$booking->discount_total, 2) }}</dd></div>((float)$booking->discount_total > 0)<div><dt>Voucher {{ $booking->voucher_code }}</dt><dd>-{{ $booking->currency }} {{ number_format((float)$booking->discount_total, 2) }}</dd></div>((float)$booking->discount_total > 0)<div><dt>Voucher {{ $booking->voucher_code }}</dt><dd>-{{ $booking->currency }} {{ number_format((float)$booking->discount_total, 2) }}</dd></div>((float)$booking->discount_total > 0)<div><dt>Voucher {{ $booking->voucher_code }}</dt><dd>-{{ $booking->currency }} {{ number_format((float)$booking->discount_total, 2) }}</dd></div>((float)$booking->discount_total > 0)<div><dt>Voucher {{ $booking->voucher_code }}</dt><dd>-{{ $booking->currency }} {{ number_format((float)$booking->discount_total, 2) }}</dd></div><div><dt>Booking total</dt><dd>{{ $booking->currency }} {{ number_format((float) $booking->total, 2) }}</dd></div>
+                        @if((float) $booking->discount_total > 0)
+                            <div>
+                                <dt>Voucher{{ $booking->voucher_code ? ' '.$booking->voucher_code : '' }}</dt>
+                                <dd>-{{ $booking->currency }} {{ number_format((float) $booking->discount_total, 2) }}</dd>
+                            </div>
+                        @endif
+                        <div><dt>Booking total</dt><dd>{{ $booking->currency }} {{ number_format((float) $booking->total, 2) }}</dd></div>
                         <div><dt>Paid</dt><dd>{{ $booking->currency }} {{ number_format($booking->successfulPaymentsTotal(), 2) }}</dd></div>
                     @endif
                 </dl>

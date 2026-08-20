@@ -95,6 +95,7 @@
                                 name="check_in"
                                 type="date"
                                 min="{{ now()->toDateString() }}"
+                                value="{{ session('azari_stay_search.check_in') }}"
                                 required
                             >
                         </div>
@@ -119,6 +120,7 @@
                                 name="check_out"
                                 type="date"
                                 min="{{ now()->addDay()->toDateString() }}"
+                                value="{{ session('azari_stay_search.check_out') }}"
                                 required
                             >
                         </div>
@@ -214,14 +216,14 @@
                         <input
                             type="hidden"
                             name="adults"
-                            value="1"
+                            value="{{ max(1, (int) session('azari_stay_search.adults', 1)) }}"
                             data-guest-input="adults"
                         >
 
                         <input
                             type="hidden"
                             name="children"
-                            value="0"
+                            value="{{ max(0, (int) session('azari_stay_search.children', 0)) }}"
                             data-guest-input="children"
                         >
                     </div>
