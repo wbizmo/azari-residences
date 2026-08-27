@@ -18,7 +18,7 @@ class DojahService
 
     public function widgetConfigured(): bool
     {
-        return $this->enabled() && filled(config('azari.identity.dojah.widget_id'));
+        return $this->enabled() && $this->widgetId() !== '';
     }
 
     public function verificationForUser(User $user): IdentityVerification
@@ -34,7 +34,7 @@ class DojahService
             ],
             [
                 'reference' => (string) Str::uuid(),
-                'widget_id' => config('azari.identity.dojah.widget_id'),
+                'widget_id' => $this->widgetId() ?: null,
             ]
         );
     }
@@ -52,7 +52,7 @@ class DojahService
             ],
             [
                 'reference' => (string) Str::uuid(),
-                'widget_id' => config('azari.identity.dojah.widget_id'),
+                'widget_id' => $this->widgetId() ?: null,
             ]
         );
     }
@@ -85,7 +85,7 @@ class DojahService
 
     public function widgetPayload(IdentityVerification $verification, array $userData = []): array
     {
-        $widgetId = (string) config('azari.identity.dojah.widget_id');
+        $widgetId = $this->widgetId();
         $widgetType = (string) config('azari.identity.dojah.widget_type', 'custom');
 
         $query = http_build_query([
@@ -98,7 +98,7 @@ class DojahService
             'widget_id' => $widgetId,
             'type' => $widgetType,
             'reference_id' => $verification->reference,
-            'launch_url' => 'https://identity.dojah.io/?'.$query,
+            'launch_url' => $widgetId !== '' ? 'https://identity.dojah.io/?'.$query : null,
         ];
     }
 
@@ -316,6 +316,21 @@ class DojahService
         }
 
         return in_array(strtolower(trim((string) $value)), ['true', '1', 'passed', 'pass', 'verified', 'approved', 'successful', 'success', 'completed'], true);
+    }
+
+    private function widgetId(): string
+    {
+        $widgetId = trim((string) config('azari.identity.dojah.widget_id'));
+        $tokenId = trim((string) config('azari.identity.dojah.token_id'));
+
+        // Older configuration temporarily fell back to DOJAH_TOKEN_ID. An API
+        // token ID is not an EasyOnboard Widget ID, so never launch the hosted
+        // verification flow unless a distinct DOJAH_WIDGET_ID is configured.
+        if ($widgetId === '' || ($tokenId !== '' && hash_equals($tokenId, $widgetId))) {
+            return '';
+        }
+
+        return $widgetId;
     }
 
     private function stringValue(mixed $value): ?string
