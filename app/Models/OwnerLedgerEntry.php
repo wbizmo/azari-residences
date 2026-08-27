@@ -15,6 +15,8 @@ class OwnerLedgerEntry extends Model
             'amount' => 'decimal:2',
             'gross_amount' => 'decimal:2',
             'owner_share_percentage' => 'decimal:2',
+            'azari_share_percentage' => 'decimal:2',
+            'azari_share_amount' => 'decimal:2',
             'metadata' => 'array',
         ];
     }

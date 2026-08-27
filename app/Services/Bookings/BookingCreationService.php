@@ -6,6 +6,7 @@ use App\Models\Booking;
 use App\Models\BookingGuest;
 use App\Models\BookingHold;
 use App\Models\BookingStatusHistory;
+use App\Models\IdentityVerification;
 use App\Services\Identity\IdentityDocumentService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -56,7 +57,7 @@ class BookingCreationService
                 ]);
             }
 
-            $lockedHold->property()
+            $property = $lockedHold->property()
                 ->when(
                     DB::connection()->getDriverName() !== 'sqlite',
                     fn (Builder $query) => $query->lockForUpdate()
@@ -76,7 +77,7 @@ class BookingCreationService
             }
 
             $quote = $this->pricing->quote(
-                $lockedHold->property,
+                $property,
                 $lockedHold->check_in,
                 $lockedHold->check_out
             );
@@ -104,7 +105,7 @@ class BookingCreationService
                 'rooms' => $lockedHold->rooms,
                 'status' => 'pending_payment',
                 'verification_status' => 'unverified',
-                'currency' => $quote['currency'],
+                'currency' => (string) config('azari.currency', 'USD'),
                 'nightly_rate' => $quote['nightly_rate'],
                 'nights' => $quote['nights'],
                 'subtotal' => $quote['subtotal'],
@@ -113,7 +114,12 @@ class BookingCreationService
                 'tax_rate' => $quote['tax_rate'],
                 'tax_total' => $quote['tax_total'],
                 'total' => $quote['total'],
-                'pricing_snapshot' => $quote,
+                'pricing_snapshot' => array_merge($quote, ['currency' => (string) config('azari.currency', 'USD')]),
+                'property_name_snapshot' => $property->name,
+                'property_formatted_address' => $property->formatted_address ?: $property->location,
+                'property_google_place_id' => $property->google_place_id,
+                'property_latitude' => $property->latitude,
+                'property_longitude' => $property->longitude,
                 'expires_at' => now()->addMinutes((int) config('azari.booking.unpaid_booking_minutes', 60)),
             ]);
 
@@ -137,6 +143,32 @@ class BookingCreationService
                         $request->file("adults.$index.document"),
                         $request->user()?->id
                     );
+                }
+
+                if ($index === 0 && $request->user() && (bool) config('azari.identity.dojah.enabled', false)) {
+                    $verifiedUserIdentity = IdentityVerification::query()
+                        ->where('provider', IdentityVerification::PROVIDER_DOJAH)
+                        ->where('user_id', $request->user()->id)
+                        ->whereNull('booking_guest_id')
+                        ->where('status', IdentityVerification::STATUS_VERIFIED)
+                        ->latest('id')
+                        ->first();
+
+                    if ($verifiedUserIdentity) {
+                        IdentityVerification::query()->create([
+                            'user_id' => $request->user()->id,
+                            'booking_guest_id' => $guest->id,
+                            'provider' => IdentityVerification::PROVIDER_DOJAH,
+                            'reference' => (string) Str::uuid(),
+                            'widget_id' => $verifiedUserIdentity->widget_id,
+                            'status' => IdentityVerification::STATUS_VERIFIED,
+                            'provider_status' => $verifiedUserIdentity->provider_status,
+                            'verification_type' => $verifiedUserIdentity->verification_type,
+                            'verification_mode' => $verifiedUserIdentity->verification_mode,
+                            'verified_at' => $verifiedUserIdentity->verified_at ?: now(),
+                            'metadata' => ['source_user_verification_id' => $verifiedUserIdentity->id],
+                        ]);
+                    }
                 }
             }
 

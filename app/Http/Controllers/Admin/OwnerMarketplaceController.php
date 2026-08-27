@@ -4,9 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Amenity;
+use App\Models\IdentityVerification;
+use App\Models\OwnerPayoutProfile;
 use App\Models\Property;
 use App\Models\PropertyListing;
-use App\Models\OwnerPayoutProfile;
 use App\Models\SiteSetting;
 use App\Models\WithdrawalRequest;
 use App\Services\Owners\OwnerWithdrawalService;
@@ -41,6 +42,7 @@ class OwnerMarketplaceController extends Controller
         return view('admin.owner-listings.show', [
             'listing' => $listing,
             'amenities' => Amenity::query()->whereIn('id', $listing->amenity_ids ?? [])->pluck('name'),
+            'dojahVerified' => $listing->user_id ? IdentityVerification::userIsVerified($listing->user_id) : false,
         ]);
     }
 
@@ -61,6 +63,14 @@ class OwnerMarketplaceController extends Controller
     {
         abort_unless(in_array($listing->status, ['submitted', 'under_review'], true), 422);
 
+        if ((bool) config('azari.identity.dojah.enabled', false)) {
+            abort_unless(
+                $listing->user_id && IdentityVerification::userIsVerified($listing->user_id),
+                422,
+                'The property owner must complete Dojah identity verification before this listing can be approved.'
+            );
+        }
+
         $data = $request->validate([
             'approved_owner_share_percentage' => ['required', 'numeric', 'min:0', 'max:100'],
             'admin_notes' => ['nullable', 'string', 'max:3000'],
@@ -77,6 +87,7 @@ class OwnerMarketplaceController extends Controller
             $payload['owner_listing_id'] = $listing->id;
             $payload['owner_share_percentage'] = round((float) $data['approved_owner_share_percentage'], 2);
             $payload['managed_for_owner'] = true;
+            $payload['currency'] = (string) config('azari.currency', 'USD');
             $payload['is_published'] = $request->boolean('publish_now');
             $payload['is_featured'] = $request->boolean('feature_now');
             $payload['status'] = $request->boolean('publish_now') ? 'available' : 'draft';
@@ -151,32 +162,26 @@ class OwnerMarketplaceController extends Controller
     public function showWithdrawal(WithdrawalRequest $withdrawal): View
     {
         $withdrawal->load(['user.ownerPayoutProfile', 'processedBy']);
-
         return view('admin.owner-withdrawals.show', compact('withdrawal'));
     }
 
-    public function processWithdrawal(
-        Request $request,
-        WithdrawalRequest $withdrawal,
-        OwnerWithdrawalService $withdrawals
-    ): RedirectResponse {
-        $data = $request->validate([
-            'admin_note' => ['nullable', 'string', 'max:3000'],
-        ]);
+    public function processWithdrawal(Request $request, WithdrawalRequest $withdrawal, OwnerWithdrawalService $withdrawals): RedirectResponse
+    {
+        if ((bool) config('azari.identity.dojah.enabled', false)) {
+            abort_unless(
+                $withdrawal->user_id && IdentityVerification::userIsVerified($withdrawal->user_id),
+                422,
+                'The owner must have a verified Dojah identity before this withdrawal can be processed.'
+            );
+        }
+
+        $data = $request->validate(['admin_note' => ['nullable', 'string', 'max:3000']]);
 
         try {
-            $processed = $withdrawals->process(
-                $withdrawal,
-                $request->user(),
-                $data['admin_note'] ?? null,
-            );
-
-            return back()->with(
-                'status',
-                $processed->status === 'processed'
-                    ? 'Withdrawal processed exactly once and recorded successfully.'
-                    : 'Withdrawal processing status updated.'
-            );
+            $processed = $withdrawals->process($withdrawal, $request->user(), $data['admin_note'] ?? null);
+            return back()->with('status', $processed->status === 'processed'
+                ? 'Withdrawal processed exactly once and recorded successfully.'
+                : 'Withdrawal processing status updated.');
         } catch (\RuntimeException $exception) {
             return back()->withErrors(['withdrawal' => $exception->getMessage()]);
         }
@@ -185,116 +190,76 @@ class OwnerMarketplaceController extends Controller
     public function rejectWithdrawal(Request $request, WithdrawalRequest $withdrawal): RedirectResponse
     {
         abort_unless(in_array($withdrawal->status, ['pending', 'failed'], true), 422);
-
-        $data = $request->validate([
-            'rejection_reason' => ['required', 'string', 'min:10', 'max:3000'],
-        ]);
-
+        $data = $request->validate(['rejection_reason' => ['required', 'string', 'min:10', 'max:3000']]);
         $withdrawal->update([
             'status' => 'rejected',
             'rejection_reason' => $data['rejection_reason'],
             'processed_by' => $request->user()->id,
             'rejected_at' => now(),
         ]);
-
         return back()->with('status', 'Withdrawal rejected. The reserved amount is available to the owner again.');
     }
 
     public function verifyPayoutProfile(Request $request, OwnerPayoutProfile $profile): RedirectResponse
     {
-        $data = $request->validate([
-            'verification_note' => ['required', 'string', 'min:10', 'max:3000'],
-        ]);
-
+        $data = $request->validate(['verification_note' => ['required', 'string', 'min:10', 'max:3000']]);
         $profile->update([
             'is_verified' => true,
             'verified_by' => $request->user()->id,
             'verified_at' => now(),
             'verification_note' => $data['verification_note'],
         ]);
-
         return back()->with('status', 'Payout destination verified. The owner can now request withdrawals.');
     }
 
     public function unverifyPayoutProfile(Request $request, OwnerPayoutProfile $profile): RedirectResponse
     {
-        $data = $request->validate([
-            'verification_note' => ['required', 'string', 'min:10', 'max:3000'],
-        ]);
-
+        $data = $request->validate(['verification_note' => ['required', 'string', 'min:10', 'max:3000']]);
         $profile->update([
             'is_verified' => false,
             'verified_by' => $request->user()->id,
             'verified_at' => null,
             'verification_note' => $data['verification_note'],
         ]);
-
         return back()->with('status', 'Payout destination verification revoked.');
     }
 
-    public function retryWithdrawal(
-        Request $request,
-        WithdrawalRequest $withdrawal,
-        OwnerWithdrawalService $withdrawals
-    ): RedirectResponse {
-        $data = $request->validate([
-            'admin_note' => ['nullable', 'string', 'max:3000'],
-        ]);
-
+    public function retryWithdrawal(Request $request, WithdrawalRequest $withdrawal, OwnerWithdrawalService $withdrawals): RedirectResponse
+    {
+        $data = $request->validate(['admin_note' => ['nullable', 'string', 'max:3000']]);
         try {
             $withdrawals->retryFailed($withdrawal, $request->user(), $data['admin_note'] ?? null);
         } catch (\RuntimeException $exception) {
             return back()->withErrors(['withdrawal' => $exception->getMessage()]);
         }
-
         return back()->with('status', 'Withdrawal returned to the pending queue for one safe retry.');
     }
 
-    public function reconcileWithdrawalPaid(
-        Request $request,
-        WithdrawalRequest $withdrawal,
-        OwnerWithdrawalService $withdrawals
-    ): RedirectResponse {
+    public function reconcileWithdrawalPaid(Request $request, WithdrawalRequest $withdrawal, OwnerWithdrawalService $withdrawals): RedirectResponse
+    {
         $data = $request->validate([
             'provider_reference' => ['required', 'string', 'max:255'],
             'reconciliation_note' => ['required', 'string', 'min:10', 'max:3000'],
         ]);
-
         try {
-            $withdrawals->reconcileAsPaid(
-                $withdrawal,
-                $request->user(),
-                $data['provider_reference'],
-                $data['reconciliation_note'],
-            );
+            $withdrawals->reconcileAsPaid($withdrawal, $request->user(), $data['provider_reference'], $data['reconciliation_note']);
         } catch (\RuntimeException $exception) {
             return back()->withErrors(['withdrawal' => $exception->getMessage()]);
         }
-
         return back()->with('status', 'Withdrawal reconciled as paid and the debit was recorded exactly once.');
     }
 
-    public function reconcileWithdrawalNotPaid(
-        Request $request,
-        WithdrawalRequest $withdrawal,
-        OwnerWithdrawalService $withdrawals
-    ): RedirectResponse {
-        $data = $request->validate([
-            'reconciliation_note' => ['required', 'string', 'min:10', 'max:3000'],
-        ]);
-
+    public function reconcileWithdrawalNotPaid(Request $request, WithdrawalRequest $withdrawal, OwnerWithdrawalService $withdrawals): RedirectResponse
+    {
+        $data = $request->validate(['reconciliation_note' => ['required', 'string', 'min:10', 'max:3000']]);
         try {
-            $withdrawals->reconcileAsNotPaid(
-                $withdrawal,
-                $request->user(),
-                $data['reconciliation_note'],
-            );
+            $withdrawals->reconcileAsNotPaid($withdrawal, $request->user(), $data['reconciliation_note']);
         } catch (\RuntimeException $exception) {
             return back()->withErrors(['withdrawal' => $exception->getMessage()]);
         }
-
         return back()->with('status', 'Withdrawal reconciled as not paid. Reserved funds are available again.');
     }
+
     public function settings(): View
     {
         return view('admin.owner-settings.edit', [
@@ -302,11 +267,11 @@ class OwnerMarketplaceController extends Controller
                 'owner_default_share_percentage',
                 'owner_withdrawal_days',
                 'owner_withdrawal_minimum',
-                'owner_withdrawal_currency',
                 'owner_paypal_enabled',
                 'owner_stripe_enabled',
                 'owner_listing_agreement_version',
             ])->mapWithKeys(fn ($key) => [$key => SiteSetting::valueFor($key)])->all(),
+            'currency' => (string) config('azari.currency', 'USD'),
         ]);
     }
 
@@ -316,13 +281,12 @@ class OwnerMarketplaceController extends Controller
             'owner_default_share_percentage' => ['required', 'numeric', 'min:0', 'max:100'],
             'owner_withdrawal_days' => ['required', 'string', 'regex:/^[1-7](,[1-7])*$/'],
             'owner_withdrawal_minimum' => ['required', 'numeric', 'min:0'],
-            'owner_withdrawal_currency' => ['required', 'string', 'size:3'],
             'owner_listing_agreement_version' => ['required', 'string', 'max:40'],
         ]);
 
         $data['owner_paypal_enabled'] = $request->boolean('owner_paypal_enabled') ? '1' : '0';
         $data['owner_stripe_enabled'] = $request->boolean('owner_stripe_enabled') ? '1' : '0';
-        $data['owner_withdrawal_currency'] = strtoupper($data['owner_withdrawal_currency']);
+        $data['owner_withdrawal_currency'] = (string) config('azari.currency', 'USD');
 
         foreach ($data as $key => $value) {
             SiteSetting::put($key, $value, is_bool($value) ? 'boolean' : 'text', 'property_owners');

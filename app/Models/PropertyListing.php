@@ -30,6 +30,7 @@ class PropertyListing extends Model
     {
         static::creating(function (self $listing): void {
             $listing->reference ??= 'LST-'.now()->format('ymd').'-'.Str::upper(Str::random(8));
+            $listing->proposed_owner_share_percentage ??= (float) config('azari.owners.default_owner_share_percentage', 88);
         });
     }
 

@@ -75,11 +75,24 @@ class PropertyController extends Controller
 
     private function validatedPayload(Request $request, ?Property $property = null): array
     {
+        $mapsRequired = (bool) config('azari.maps.enabled', false)
+            && config('azari.maps.provider', 'google') === 'google';
+
         $data = $request->validate([
             'name' => ['required', 'string', 'max:180'],
             'slug' => ['nullable', 'string', 'max:190'],
             'location_id' => ['required', 'integer', 'exists:locations,id'],
             'room_type_id' => ['required', 'integer', 'exists:room_types,id'],
+            'formatted_address' => ['required', 'string', 'max:1000'],
+            'address_line_1' => ['nullable', 'string', 'max:255'],
+            'address_line_2' => ['nullable', 'string', 'max:255'],
+            'address_city' => ['nullable', 'string', 'max:120'],
+            'address_region' => ['nullable', 'string', 'max:120'],
+            'address_postal_code' => ['nullable', 'string', 'max:40'],
+            'address_country_code' => ['nullable', 'string', 'size:2'],
+            'google_place_id' => [$mapsRequired ? 'required' : 'nullable', 'string', 'max:255'],
+            'latitude' => [$mapsRequired ? 'required' : 'nullable', 'numeric', 'between:-90,90'],
+            'longitude' => [$mapsRequired ? 'required' : 'nullable', 'numeric', 'between:-180,180'],
             'bedrooms' => ['required', 'integer', 'min:0', 'max:30'],
             'bathrooms' => ['required', 'integer', 'min:1', 'max:30'],
             'max_guests' => ['required', 'integer', 'min:1', 'max:100'],
@@ -90,7 +103,6 @@ class PropertyController extends Controller
             'cleaning_fee' => ['nullable', 'numeric', 'min:0'],
             'service_charge' => ['nullable', 'numeric', 'min:0'],
             'tax_rate' => ['nullable', 'numeric', 'min:0', 'max:100'],
-            'currency' => ['required', 'string', 'size:3'],
             'short_description' => ['nullable', 'string', 'max:500'],
             'description' => ['nullable', 'string', 'max:20000'],
             'cover_image' => ['nullable', 'image', 'max:8192'],
@@ -105,11 +117,14 @@ class PropertyController extends Controller
 
         $data['location'] = $location->name;
         $data['country'] = $location->country;
+        $data['address_country_code'] = filled($data['address_country_code'] ?? null)
+            ? strtoupper($data['address_country_code'])
+            : null;
         $data['property_type'] = Str::lower($roomType->slug ?: $roomType->name);
         $data['slug'] = filled($data['slug'] ?? null)
             ? Str::slug($data['slug'])
             : Str::slug($data['name']).'-'.Str::lower(Str::random(5));
-        $data['currency'] = strtoupper($data['currency']);
+        $data['currency'] = (string) config('azari.currency', 'USD');
         $data['is_featured'] = $request->boolean('is_featured');
         $data['is_published'] = $request->boolean('is_published');
         $data['same_day_booking'] = $request->boolean('same_day_booking');

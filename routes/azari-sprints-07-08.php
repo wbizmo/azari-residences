@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\SystemSettingsController;
 use App\Http\Controllers\PublicSite\PaymentCheckoutController;
 use App\Http\Controllers\UserArea\AdditionalGuestController;
+use App\Http\Controllers\UserArea\DojahVerificationController;
 use App\Http\Controllers\UserArea\PhoneVerificationController;
 use App\Http\Controllers\UserArea\UserBookingController;
 use App\Http\Controllers\UserArea\UserContactController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\UserArea\UserNotificationController;
 use App\Http\Controllers\UserArea\UserPaymentController;
 use App\Http\Controllers\UserArea\UserProfileController;
 use App\Http\Controllers\UserArea\UserSecurityController;
+use App\Http\Controllers\Webhooks\DojahWebhookController;
 use App\Http\Controllers\Webhooks\TwilioMessageStatusController;
 use Illuminate\Support\Facades\Route;
 
@@ -30,9 +32,11 @@ Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer', 'azari.
     Route::get('/documents', [UserDocumentController::class, 'index'])->name('documents.index');
     Route::get('/identity', [UserIdentityController::class, 'index'])->name('identity.index');
     Route::post('/identity', [UserIdentityController::class, 'store'])->name('identity.store');
+    Route::get('/identity/dojah', [DojahVerificationController::class, 'user'])->name('identity.dojah');
     Route::get('/identity/{document}/download', [UserIdentityController::class, 'download'])->name('identity.download');
     Route::get('/additional-guests', [AdditionalGuestController::class, 'index'])->name('guests.index');
     Route::post('/bookings/{reference}/guests/{guest}/identity', [AdditionalGuestController::class, 'store'])->name('guests.identity.store');
+    Route::get('/bookings/{reference}/guests/{guest}/identity/dojah', [DojahVerificationController::class, 'guest'])->name('guests.identity.dojah');
     Route::get('/bookings/{reference}/guests/{guest}/identity/{document}/download', [AdditionalGuestController::class, 'download'])->name('guests.identity.download');
     Route::get('/notifications', [UserNotificationController::class, 'index'])->name('notifications.index');
     Route::patch('/notifications/{notification}/read', [UserNotificationController::class, 'read'])->name('notifications.read');
@@ -49,6 +53,7 @@ Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer', 'azari.
     Route::get('/support-tickets', fn (UserContactController $controller) => $controller('support-tickets'))->name('support-tickets');
 });
 
+Route::post('/webhooks/dojah/kyc', DojahWebhookController::class)->middleware('throttle:240,1')->name('webhooks.dojah.kyc');
 Route::post('/webhooks/twilio/message-status', TwilioMessageStatusController::class)->middleware('throttle:600,1')->name('webhooks.twilio.message-status');
 
 Route::get('/booking/{reference}/payment', [PaymentCheckoutController::class, 'select'])->name('public.payment.select');

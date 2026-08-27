@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\UserArea;
 
 use App\Http\Controllers\Controller;
-use App\Models\Booking;
 use App\Models\BookingGuest;
 use App\Models\GuestIdentityDocument;
 use App\Models\IdentityAuditHistory;
@@ -19,9 +18,14 @@ class AdditionalGuestController extends Controller
 {
     public function index(Request $request): View
     {
-        $guests = BookingGuest::query()->with(['booking.property', 'identityDocument', 'identityLink.userIdentityDocument'])
+        $guests = BookingGuest::query()
+            ->with(['booking.property', 'identityDocument', 'identityLink.userIdentityDocument', 'latestIdentityVerification'])
             ->whereHas('booking', fn ($q) => $q->where('user_id', $request->user()->id))
-            ->where('type', 'adult')->where('is_lead', false)->latest()->paginate(10);
+            ->where('type', 'adult')
+            ->where('is_lead', false)
+            ->latest()
+            ->paginate(10);
+
         return view('user.guests.index', compact('guests'));
     }
 
@@ -36,6 +40,7 @@ class AdditionalGuestController extends Controller
         $service->storeGuestIdentity($booking, $guest, $data['document_type'], $request->file('document'), $request->user()->id);
         return back()->with('success', 'Additional guest identity updated securely.');
     }
+
     public function download(Request $request, string $reference, BookingGuest $guest, GuestIdentityDocument $document): StreamedResponse
     {
         $booking = $request->user()->bookings()->where('reference', $reference)->firstOrFail();
@@ -50,5 +55,4 @@ class AdditionalGuestController extends Controller
         ]);
         return Storage::disk($document->disk)->download($document->path, $document->original_name, ['Cache-Control' => 'no-store, private']);
     }
-
 }

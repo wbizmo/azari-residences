@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\IdentityAuditHistory;
 use App\Models\IdentityType;
 use App\Models\UserIdentityDocument;
+use App\Services\Identity\DojahService;
 use App\Services\Identity\IdentityDocumentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,12 +17,14 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class UserIdentityController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request, DojahService $dojah): View
     {
         return view('user.identity.index', [
             'currentIdentity' => $request->user()->currentIdentity()->with('identityType')->first(),
             'history' => $request->user()->identityDocuments()->with('identityType')->latest()->paginate(10),
             'identityTypes' => IdentityType::query()->where('is_active', true)->orderBy('sort_order')->get(),
+            'dojahEnabled' => $dojah->enabled(),
+            'dojahVerification' => $dojah->latestForUser($request->user()),
         ]);
     }
 

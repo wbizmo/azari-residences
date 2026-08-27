@@ -3,6 +3,12 @@
 return [
     'timezone' => env('AZARI_TIMEZONE', env('APP_TIMEZONE', 'Africa/Lagos')),
     'pagination' => ['per_page' => 10],
+    'currency' => 'USD',
+
+    'owners' => [
+        'default_azari_share_percentage' => 12.00,
+        'default_owner_share_percentage' => 88.00,
+    ],
 
     'booking' => [
         'hold_minutes' => (int) env('AZARI_BOOKING_HOLD_MINUTES', 15),
@@ -18,6 +24,32 @@ return [
     'identity' => [
         'max_kilobytes' => (int) env('AZARI_IDENTITY_MAX_KB', 10240),
         'allowed_extensions' => ['jpg', 'jpeg', 'png', 'webp', 'pdf'],
+        'dojah' => [
+            'enabled' => filter_var(env('DOJAH_ENABLED', false), FILTER_VALIDATE_BOOL),
+            'environment' => env('DOJAH_ENV', 'live'),
+            'base_url' => rtrim((string) env('DOJAH_BASE_URL', 'https://api.dojah.io'), '/'),
+            'app_id' => env('DOJAH_APP_ID'),
+            'secret_key' => env('DOJAH_SECRET_KEY'),
+            'public_key' => env('DOJAH_PUBLIC_KEY'),
+            // Current EasyOnboard flows use a widget ID. DOJAH_TOKEN_ID remains
+            // supported as a fallback for deployments that already store the published flow ID there.
+            'widget_id' => env('DOJAH_WIDGET_ID', env('DOJAH_TOKEN_ID')),
+            'widget_type' => env('DOJAH_WIDGET_TYPE', 'custom'),
+            'token_name' => env('DOJAH_TOKEN_NAME'),
+            'token_id' => env('DOJAH_TOKEN_ID'),
+            'webhook_signature_header' => env('DOJAH_WEBHOOK_SIGNATURE_HEADER', 'x-dojah-signature'),
+            'webhook_signature_v2_header' => env('DOJAH_WEBHOOK_SIGNATURE_V2_HEADER', 'x-dojah-signature-v2'),
+            'required_steps' => array_values(array_filter(array_map(
+                static fn (string $step): string => strtolower(trim($step)),
+                explode(',', (string) env('DOJAH_REQUIRED_STEPS', ''))
+            ))),
+        ],
+    ],
+
+    'maps' => [
+        'enabled' => filter_var(env('MAPS_ENABLED', false), FILTER_VALIDATE_BOOL),
+        'provider' => strtolower((string) env('MAPS_PROVIDER', 'google')),
+        'api_key' => env('MAPS_API_KEY'),
     ],
 
     'phone_verification' => [
@@ -40,22 +72,10 @@ return [
             'client_id' => env('FLUTTERWAVE_CLIENT_ID'),
             'client_secret' => env('FLUTTERWAVE_CLIENT_SECRET'),
             'webhook_secret' => env('FLUTTERWAVE_WEBHOOK_SECRET'),
-            'token_url' => env(
-                'FLUTTERWAVE_TOKEN_URL',
-                'https://idp.flutterwave.com/realms/flutterwave/protocol/openid-connect/token'
-            ),
-            'sandbox_base_url' => env(
-                'FLUTTERWAVE_SANDBOX_BASE_URL',
-                'https://developersandbox-api.flutterwave.com'
-            ),
-            'live_base_url' => env(
-                'FLUTTERWAVE_LIVE_BASE_URL',
-                'https://f4bexperience.flutterwave.com'
-            ),
-            'orchestrator_path' => env(
-                'FLUTTERWAVE_ORCHESTRATOR_PATH',
-                '/orchestration/direct-charges'
-            ),
+            'token_url' => env('FLUTTERWAVE_TOKEN_URL', 'https://idp.flutterwave.com/realms/flutterwave/protocol/openid-connect/token'),
+            'sandbox_base_url' => env('FLUTTERWAVE_SANDBOX_BASE_URL', 'https://developersandbox-api.flutterwave.com'),
+            'live_base_url' => env('FLUTTERWAVE_LIVE_BASE_URL', 'https://f4bexperience.flutterwave.com'),
+            'orchestrator_path' => env('FLUTTERWAVE_ORCHESTRATOR_PATH', '/orchestration/direct-charges'),
             'charge_path' => env('FLUTTERWAVE_CHARGE_PATH', '/charges/{id}'),
             'banks_path' => env('FLUTTERWAVE_BANKS_PATH', '/banks'),
             'allowed_payment_methods' => array_values(array_filter(array_map(
@@ -69,12 +89,7 @@ return [
         'pesapal' => [
             'enabled' => filter_var(env('PESAPAL_ENABLED', false), FILTER_VALIDATE_BOOL),
             'mode' => env('PESAPAL_MODE', 'sandbox'),
-            'base_url' => env(
-                'PESAPAL_BASE_URL',
-                env('PESAPAL_MODE', 'sandbox') === 'live'
-                    ? 'https://pay.pesapal.com/v3'
-                    : 'https://cybqa.pesapal.com/pesapalv3'
-            ),
+            'base_url' => env('PESAPAL_BASE_URL', env('PESAPAL_MODE', 'sandbox') === 'live' ? 'https://pay.pesapal.com/v3' : 'https://cybqa.pesapal.com/pesapalv3'),
             'auth_path' => env('PESAPAL_AUTH_PATH', '/api/Auth/RequestToken'),
             'submit_order_path' => env('PESAPAL_SUBMIT_ORDER_PATH', '/api/Transactions/SubmitOrderRequest'),
             'status_path' => env('PESAPAL_STATUS_PATH', '/api/Transactions/GetTransactionStatus'),

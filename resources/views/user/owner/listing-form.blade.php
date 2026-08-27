@@ -7,7 +7,7 @@
     <div>
         <span class="az-premium-kicker">Owner marketplace</span>
         <h1>{{ $listing->exists?'Correct and resubmit':'List your property' }}</h1>
-        <p>This form mirrors Azari inventory fields so an approved listing can become bookable without duplicate data entry.</p>
+        <p>Provide the exact property details and Google location. Approved listings can become bookable without duplicate data entry.</p>
     </div>
 </div>
 
@@ -31,17 +31,24 @@
         <label class="az-s78-field{{ $field('name') }}"><span>Property name</span><input name="name" value="{{ old('name',data_get($data,'name')) }}" required>@error('name')<small>{{ $message }}</small>@enderror</label>
         <label class="az-s78-field{{ $field('location_id') }}"><span>Location</span><select name="location_id" required><option value="">Select location</option>@foreach($locations as $location)<option value="{{ $location->id }}" @selected((string)old('location_id',data_get($data,'location_id'))===(string)$location->id)>{{ $location->name }} · {{ $location->city }}, {{ $location->country }}</option>@endforeach</select>@error('location_id')<small>{{ $message }}</small>@enderror</label>
         <label class="az-s78-field{{ $field('room_type_id') }}"><span>Residence category</span><select name="room_type_id" required><option value="">Select category</option>@foreach($roomTypes as $type)<option value="{{ $type->id }}" @selected((string)old('room_type_id',data_get($data,'room_type_id'))===(string)$type->id)>{{ $type->name }}</option>@endforeach</select>@error('room_type_id')<small>{{ $message }}</small>@enderror</label>
+
+        <x-property-address-fields :source="$data" wrapper-class="is-full" label-class="az-s78-field is-full" />
+        @error('formatted_address')<small class="az-s78-field is-full">{{ $message }}</small>@enderror
+        @error('google_place_id')<small class="az-s78-field is-full">Select the property from Google address suggestions.</small>@enderror
+
         <label class="az-s78-field{{ $field('bedrooms') }}"><span>Bedrooms</span><input type="number" name="bedrooms" min="0" value="{{ old('bedrooms',data_get($data,'bedrooms',1)) }}" required>@error('bedrooms')<small>{{ $message }}</small>@enderror</label>
         <label class="az-s78-field{{ $field('bathrooms') }}"><span>Bathrooms</span><input type="number" name="bathrooms" min="1" value="{{ old('bathrooms',data_get($data,'bathrooms',1)) }}" required>@error('bathrooms')<small>{{ $message }}</small>@enderror</label>
         <label class="az-s78-field{{ $field('max_guests') }}"><span>Maximum guests</span><input type="number" name="max_guests" min="1" value="{{ old('max_guests',data_get($data,'max_guests',2)) }}" required>@error('max_guests')<small>{{ $message }}</small>@enderror</label>
         <label class="az-s78-field{{ $field('minimum_stay') }}"><span>Minimum stay</span><input type="number" name="minimum_stay" min="1" value="{{ old('minimum_stay',data_get($data,'minimum_stay',1)) }}">@error('minimum_stay')<small>{{ $message }}</small>@enderror</label>
         <label class="az-s78-field{{ $field('maximum_stay') }}"><span>Maximum stay</span><input type="number" name="maximum_stay" min="1" value="{{ old('maximum_stay',data_get($data,'maximum_stay')) }}">@error('maximum_stay')<small>{{ $message }}</small>@enderror</label>
-        <label class="az-s78-field{{ $field('nightly_rate') }}"><span>Nightly rate</span><input type="number" step=".01" min="0" name="nightly_rate" value="{{ old('nightly_rate',data_get($data,'nightly_rate')) }}" required>@error('nightly_rate')<small>{{ $message }}</small>@enderror</label>
-        <label class="az-s78-field{{ $field('weekend_rate') }}"><span>Weekend rate</span><input type="number" step=".01" min="0" name="weekend_rate" value="{{ old('weekend_rate',data_get($data,'weekend_rate')) }}">@error('weekend_rate')<small>{{ $message }}</small>@enderror</label>
-        <label class="az-s78-field{{ $field('cleaning_fee') }}"><span>Cleaning fee</span><input type="number" step=".01" min="0" name="cleaning_fee" value="{{ old('cleaning_fee',data_get($data,'cleaning_fee')) }}">@error('cleaning_fee')<small>{{ $message }}</small>@enderror</label>
-        <label class="az-s78-field{{ $field('service_charge') }}"><span>Service charge</span><input type="number" step=".01" min="0" name="service_charge" value="{{ old('service_charge',data_get($data,'service_charge')) }}">@error('service_charge')<small>{{ $message }}</small>@enderror</label>
+        <label class="az-s78-field{{ $field('nightly_rate') }}"><span>Nightly rate (USD)</span><input type="number" step=".01" min="0" name="nightly_rate" value="{{ old('nightly_rate',data_get($data,'nightly_rate')) }}" required>@error('nightly_rate')<small>{{ $message }}</small>@enderror</label>
+        <label class="az-s78-field{{ $field('weekend_rate') }}"><span>Weekend rate (USD)</span><input type="number" step=".01" min="0" name="weekend_rate" value="{{ old('weekend_rate',data_get($data,'weekend_rate')) }}">@error('weekend_rate')<small>{{ $message }}</small>@enderror</label>
+        <label class="az-s78-field{{ $field('cleaning_fee') }}"><span>Cleaning fee (USD)</span><input type="number" step=".01" min="0" name="cleaning_fee" value="{{ old('cleaning_fee',data_get($data,'cleaning_fee')) }}">@error('cleaning_fee')<small>{{ $message }}</small>@enderror</label>
+        <label class="az-s78-field{{ $field('service_charge') }}"><span>Service charge (USD)</span><input type="number" step=".01" min="0" name="service_charge" value="{{ old('service_charge',data_get($data,'service_charge')) }}">@error('service_charge')<small>{{ $message }}</small>@enderror</label>
         <label class="az-s78-field{{ $field('tax_rate') }}"><span>Tax rate (%)</span><input type="number" step=".001" min="0" max="100" name="tax_rate" value="{{ old('tax_rate',data_get($data,'tax_rate')) }}">@error('tax_rate')<small>{{ $message }}</small>@enderror</label>
-        <label class="az-s78-field{{ $field('currency') }}"><span>Currency</span><input name="currency" maxlength="3" value="{{ old('currency',data_get($data,'currency','USD')) }}" required>@error('currency')<small>{{ $message }}</small>@enderror</label>
+        <label class="az-s78-field"><span>Currency</span><input value="{{ $currency }}" readonly disabled><small>Azari property pricing is locked to USD.</small></label>
+        <label class="az-s78-field"><span>Revenue share</span><input value="Owner {{ number_format($defaultOwnerShare,2) }}% · Azari {{ number_format($defaultAzariShare,2) }}%" readonly disabled><small>Azari's default share is 12%. Any negotiated change is approved by Azari during listing review.</small></label>
+
         <label class="az-s78-field is-full{{ $field('short_description') }}"><span>Short description</span><textarea name="short_description" required>{{ old('short_description',data_get($data,'short_description')) }}</textarea>@error('short_description')<small>{{ $message }}</small>@enderror</label>
         <label class="az-s78-field is-full{{ $field('description') }}"><span>Full description</span><textarea name="description" required>{{ old('description',data_get($data,'description')) }}</textarea>@error('description')<small>{{ $message }}</small>@enderror</label>
 
@@ -72,7 +79,6 @@
         </div>
         <label class="az-s78-field is-full"><span>Add gallery images</span><input type="file" name="gallery[]" accept="image/*" multiple>@error('gallery.*')<small>{{ $message }}</small>@enderror</label>
 
-        <label class="az-s78-field{{ $field('proposed_owner_share_percentage') }}"><span>Proposed owner share (%)</span><input type="number" step=".01" min="0" max="100" name="proposed_owner_share_percentage" value="{{ old('proposed_owner_share_percentage',$listing->proposed_owner_share_percentage) }}">@error('proposed_owner_share_percentage')<small>{{ $message }}</small>@enderror</label>
         <label class="az-s78-field is-full{{ $field('owner_notes') }}"><span>Notes for Azari review</span><textarea name="owner_notes">{{ old('owner_notes',$listing->owner_notes) }}</textarea>@error('owner_notes')<small>{{ $message }}</small>@enderror</label>
     </div>
 

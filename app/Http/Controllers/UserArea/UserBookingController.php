@@ -31,7 +31,14 @@ class UserBookingController extends Controller
     public function show(Request $request, string $reference): View
     {
         $booking = $request->user()->bookings()
-            ->with(['property', 'guests.identityDocument', 'guests.identityLink.userIdentityDocument.identityType', 'identityLinks', 'payments'])
+            ->with([
+                'property',
+                'guests.identityDocument',
+                'guests.identityLink.userIdentityDocument.identityType',
+                'guests.latestIdentityVerification',
+                'identityLinks',
+                'payments',
+            ])
             ->withCount('payments')
             ->where('reference', $reference)
             ->first();

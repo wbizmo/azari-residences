@@ -31,6 +31,16 @@ class Property extends Model
         'floor',
         'location',
         'country',
+        'formatted_address',
+        'address_line_1',
+        'address_line_2',
+        'address_city',
+        'address_region',
+        'address_postal_code',
+        'address_country_code',
+        'google_place_id',
+        'latitude',
+        'longitude',
         'property_type',
         'bedrooms',
         'bathrooms',
@@ -80,6 +90,8 @@ class Property extends Model
             'managed_for_owner' => 'boolean',
             'ownership_type' => 'string',
             'owner_share_percentage' => 'decimal:2',
+            'latitude' => 'decimal:7',
+            'longitude' => 'decimal:7',
         ];
     }
 
@@ -133,6 +145,11 @@ class Property extends Model
         static::creating(function (self $property): void {
             $property->ownership_type = $property->owner_id ? 'third_party' : ($property->ownership_type ?: 'azari');
             $property->managed_for_owner = $property->ownership_type === 'third_party';
+            $property->currency = (string) config('azari.currency', 'USD');
+
+            if ($property->ownership_type === 'third_party' && blank($property->owner_share_percentage)) {
+                $property->owner_share_percentage = (float) config('azari.owners.default_owner_share_percentage', 88);
+            }
 
             $property->slug = $property->slug
                 ?: Str::slug($property->name).'-'.Str::lower(Str::random(5));
@@ -142,6 +159,8 @@ class Property extends Model
         });
 
         static::saving(function (self $property): void {
+            $property->currency = (string) config('azari.currency', 'USD');
+
             if ($property->isDirty('owner_id') && ! $property->isDirty('ownership_type')) {
                 $property->ownership_type = $property->owner_id ? 'third_party' : 'azari';
             }
@@ -150,10 +169,11 @@ class Property extends Model
                 $property->owner_id = null;
                 $property->owner_listing_id = null;
                 $property->managed_for_owner = false;
-                // Existing schema requires a non-null percentage. Azari retains 100% of Azari-owned inventory.
                 $property->owner_share_percentage = 100;
             } else {
                 $property->managed_for_owner = true;
+                $property->owner_share_percentage = $property->owner_share_percentage
+                    ?: (float) config('azari.owners.default_owner_share_percentage', 88);
             }
         });
     }

@@ -9,6 +9,10 @@
 <article class="az-user-stat"><span class="material-symbols-outlined">event_available</span><div><small>Requests today</small><strong>{{ $withdrawalOpen?'Open':'Closed' }}</strong></div></article>
 </section>
 
+@if((bool) config('azari.identity.dojah.enabled', false) && !$dojahVerified)
+<div class="az-user-alert az-user-alert--danger" style="margin-top:18px"><strong>Dojah verification required for withdrawals.</strong><p>Complete identity verification before requesting owner funds.</p><a href="{{ route('user.identity.dojah') }}">Verify with Dojah</a></div>
+@endif
+
 <section class="az-user-panel"><header class="az-user-panel-header"><div><h2 class="az-user-panel-title">Payout destination</h2><p class="az-user-panel-subtitle">Changes require verification before production payout.</p></div></header><div class="az-user-panel-body">
 <form method="post" action="{{ route('user.owner.payout-profile.update') }}" class="az-user-form">@csrf @method('PUT')
 <label>Gateway<select name="preferred_gateway"><option value="paypal" @selected(old('preferred_gateway',$profile->preferred_gateway)==='paypal') @disabled(!$paypalEnabled)>PayPal</option><option value="stripe" @selected(old('preferred_gateway',$profile->preferred_gateway)==='stripe') @disabled(!$stripeEnabled)>Stripe Connect</option></select></label>
@@ -18,11 +22,11 @@
 <button class="az-user-button az-user-button--dark">Save payout destination</button>
 </form></div></section>
 
-<section class="az-user-panel"><header class="az-user-panel-header"><div><h2 class="az-user-panel-title">Request withdrawal</h2><p class="az-user-panel-subtitle">Submitted funds are reserved immediately to prevent duplicate withdrawals.</p></div></header><div class="az-user-panel-body">
+<section class="az-user-panel"><header class="az-user-panel-header"><div><h2 class="az-user-panel-title">Request withdrawal</h2><p class="az-user-panel-subtitle">Submitted funds are reserved immediately to prevent duplicate withdrawals. Owner payouts are locked to USD.</p></div></header><div class="az-user-panel-body">
 <form method="post" action="{{ route('user.owner.withdrawals.store') }}" class="az-user-form">@csrf
 <label>Amount ({{ $currency }})<input type="number" name="amount" min="{{ $minimum }}" max="{{ $available }}" step="0.01" required></label>
 <label>Note<textarea name="owner_note" rows="3"></textarea></label>
-<button class="az-user-button az-user-button--dark" @disabled(!$withdrawalOpen || $available<$minimum)>Submit withdrawal</button>
+<button class="az-user-button az-user-button--dark" @disabled(!$withdrawalOpen || $available<$minimum || ((bool) config('azari.identity.dojah.enabled', false) && !$dojahVerified))>Submit withdrawal</button>
 </form></div></section>
 
 <section class="az-user-panel"><header class="az-user-panel-header"><div><h2 class="az-user-panel-title">Withdrawal history</h2><p class="az-user-panel-subtitle">Reconciliation-required items must not be resubmitted.</p></div></header><div class="az-user-panel-body">

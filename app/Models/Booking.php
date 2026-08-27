@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\Schema;
 
 class Booking extends Model
 {
@@ -22,6 +23,8 @@ class Booking extends Model
         'check_out', 'adults', 'children', 'rooms', 'status', 'verification_status',
         'currency', 'nightly_rate', 'nights', 'subtotal', 'fee_total',
         'add_on_total', 'tax_rate', 'tax_total', 'total', 'pricing_snapshot',
+        'property_name_snapshot', 'property_formatted_address', 'property_google_place_id',
+        'property_latitude', 'property_longitude',
         'guest_notes', 'admin_notes', 'paid_at', 'receipt_number', 'payment_reference',
         'cancelled_at', 'cancellation_reason', 'cancellation_internal_note',
         'cancellation_payment_note', 'external_refund_reference', 'cancelled_by',
@@ -41,6 +44,7 @@ class Booking extends Model
             'subtotal' => 'decimal:2', 'fee_total' => 'decimal:2',
             'add_on_total' => 'decimal:2', 'tax_rate' => 'decimal:4',
             'tax_total' => 'decimal:2', 'total' => 'decimal:2',
+            'property_latitude' => 'decimal:7', 'property_longitude' => 'decimal:7',
         ];
     }
 
@@ -70,29 +74,29 @@ class Booking extends Model
 
     public function successfulPayment(): ?Payment
     {
-        if ($this->relationLoaded("payments")) {
+        if ($this->relationLoaded('payments')) {
             return $this->payments
-                ->where("status", Payment::SUCCESSFUL)
+                ->where('status', Payment::SUCCESSFUL)
                 ->sortByDesc(fn (Payment $payment) => $payment->paid_at ?: $payment->created_at)
                 ->first();
         }
 
         return $this->payments()
-            ->where("status", Payment::SUCCESSFUL)
-            ->orderByDesc("paid_at")
-            ->orderByDesc("created_at")
+            ->where('status', Payment::SUCCESSFUL)
+            ->orderByDesc('paid_at')
+            ->orderByDesc('created_at')
             ->first();
     }
 
     public function isCancelled(): bool
     {
-        return $this->status === "cancelled" || $this->cancelled_at !== null;
+        return $this->status === 'cancelled' || $this->cancelled_at !== null;
     }
 
     public function hasLegacyPaidRecord(): bool
     {
         return ! $this->isCancelled()
-            && in_array($this->status, ["paid", "confirmed", "check_in", "checked_in", "checked_out", "completed"], true)
+            && in_array($this->status, ['paid', 'confirmed', 'check_in', 'checked_in', 'checked_out', 'completed'], true)
             && $this->paid_at !== null
             && (filled($this->payment_reference) || filled($this->receipt_number));
     }
@@ -100,8 +104,8 @@ class Booking extends Model
     public function isPaid(): bool
     {
         $successfulTotal = (float) $this->payments()
-            ->where("status", Payment::SUCCESSFUL)
-            ->sum("amount");
+            ->where('status', Payment::SUCCESSFUL)
+            ->sum('amount');
 
         return ! $this->isCancelled()
             && ($successfulTotal + 0.009 >= (float) $this->total || $this->hasLegacyPaidRecord());
@@ -120,8 +124,8 @@ class Booking extends Model
     public function successfulPaymentsTotal(): float
     {
         $total = (float) $this->payments()
-            ->where("status", Payment::SUCCESSFUL)
-            ->sum("amount");
+            ->where('status', Payment::SUCCESSFUL)
+            ->sum('amount');
 
         return $total <= 0 && $this->hasLegacyPaidRecord()
             ? (float) $this->total
@@ -139,22 +143,78 @@ class Booking extends Model
         }
 
         return new Payment([
-            "reference" => $this->payment_reference ?: "LEGACY-".$this->reference,
-            "provider_reference" => $this->payment_reference,
-            "provider" => "manual",
-            "payment_method" => "Recorded payment",
-            "amount" => (float) $this->total,
-            "currency" => $this->currency,
-            "status" => Payment::SUCCESSFUL,
-            "receipt_number" => $this->receipt_number,
-            "paid_at" => $this->paid_at,
-            "verified_at" => $this->paid_at,
+            'reference' => $this->payment_reference ?: 'LEGACY-'.$this->reference,
+            'provider_reference' => $this->payment_reference,
+            'provider' => 'manual',
+            'payment_method' => 'Recorded payment',
+            'amount' => (float) $this->total,
+            'currency' => $this->currency,
+            'status' => Payment::SUCCESSFUL,
+            'receipt_number' => $this->receipt_number,
+            'paid_at' => $this->paid_at,
+            'verified_at' => $this->paid_at,
         ]);
     }
 
     public function isCheckInEligible(): bool
     {
-        return in_array($this->status, ['confirmed','paid'], true) && $this->balanceDue() <= 0 && ! $this->cancelled_at && ! $this->checked_in_at && now(config('azari.timezone','Africa/Lagos'))->toDateString() === optional($this->check_in)->toDateString() && ! $this->guests()->where('type','adult')->whereDoesntHave('identityDocument')->whereDoesntHave('identityLink')->exists();
+        $baseEligible = in_array($this->status, ['confirmed', 'paid'], true)
+            && $this->balanceDue() <= 0
+            && ! $this->cancelled_at
+            && ! $this->checked_in_at
+            && now(config('azari.timezone', 'Africa/Lagos'))->toDateString() === optional($this->check_in)->toDateString();
+
+        if (! $baseEligible) {
+            return false;
+        }
+
+        if ((bool) config('azari.identity.dojah.enabled', false) && Schema::hasTable('identity_verifications')) {
+            $adultIds = $this->guests()->where('type', 'adult')->pluck('id');
+            if ($adultIds->isEmpty()) {
+                return false;
+            }
+
+            $verifiedAdults = IdentityVerification::query()
+                ->where('provider', IdentityVerification::PROVIDER_DOJAH)
+                ->where('status', IdentityVerification::STATUS_VERIFIED)
+                ->whereIn('booking_guest_id', $adultIds)
+                ->distinct('booking_guest_id')
+                ->count('booking_guest_id');
+
+            return $verifiedAdults === $adultIds->count();
+        }
+
+        return ! $this->guests()
+            ->where('type', 'adult')
+            ->whereDoesntHave('identityDocument')
+            ->whereDoesntHave('identityLink')
+            ->exists();
+    }
+
+    public function directionsUrl(): ?string
+    {
+        $destination = null;
+
+        if ($this->property_latitude !== null && $this->property_longitude !== null) {
+            $destination = $this->property_latitude.','.$this->property_longitude;
+        } elseif (filled($this->property_formatted_address)) {
+            $destination = $this->property_formatted_address;
+        }
+
+        if (! $destination) {
+            return null;
+        }
+
+        $query = [
+            'api' => 1,
+            'destination' => $destination,
+        ];
+
+        if (filled($this->property_google_place_id)) {
+            $query['destination_place_id'] = $this->property_google_place_id;
+        }
+
+        return 'https://www.google.com/maps/dir/?'.http_build_query($query, '', '&', PHP_QUERY_RFC3986);
     }
 
     public function balanceDue(): float
@@ -165,5 +225,4 @@ class Booking extends Model
 
         return max(0, round((float) $this->total - $this->successfulPaymentsTotal(), 2));
     }
-
 }
