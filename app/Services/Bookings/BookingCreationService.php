@@ -7,12 +7,10 @@ use App\Models\BookingGuest;
 use App\Models\BookingHold;
 use App\Models\BookingStatusHistory;
 use App\Models\IdentityVerification;
-use App\Services\Identity\IdentityDocumentService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class BookingCreationService
@@ -20,11 +18,18 @@ class BookingCreationService
     public function __construct(
         private readonly AzariAvailabilityEngine $availability,
         private readonly AzariPricingEngine $pricing,
-        private readonly IdentityDocumentService $identityService,
     ) {}
 
     public function create(Request $request): Booking
     {
+        $user = $request->user();
+
+        if (! $user || ! IdentityVerification::userIsVerified((int) $user->id)) {
+            throw ValidationException::withMessages([
+                'identity' => 'Complete Dojah identity verification before creating a booking.',
+            ]);
+        }
+
         $hold = BookingHold::query()
             ->with('property')
             ->active()
@@ -37,10 +42,9 @@ class BookingCreationService
             ]);
         }
 
-        $hasAccountIdentity = (bool) $request->user()?->currentIdentity()->exists();
-        $data = $request->validate($this->rules($hold, $hasAccountIdentity));
+        $data = $request->validate($this->rules($hold));
 
-        return DB::transaction(function () use ($request, $hold, $data, $hasAccountIdentity): Booking {
+        return DB::transaction(function () use ($request, $user, $hold, $data): Booking {
             $lockedHold = BookingHold::query()
                 ->with('property')
                 ->active()
@@ -84,7 +88,7 @@ class BookingCreationService
 
             $booking = Booking::query()->create([
                 'reference' => $this->reference(),
-                'user_id' => $request->user()?->id,
+                'user_id' => $user->id,
                 'property_id' => $lockedHold->property_id,
                 'hold_token' => $lockedHold->token,
                 'guest_name' => $data['first_name'].' '.$data['last_name'],
@@ -122,6 +126,19 @@ class BookingCreationService
                 'expires_at' => now()->addMinutes((int) config('azari.booking.unpaid_booking_minutes', 60)),
             ]);
 
+            $verifiedUserIdentity = IdentityVerification::query()
+                ->where('provider', IdentityVerification::PROVIDER_DOJAH)
+                ->where('user_id', $user->id)
+                ->whereNull('booking_guest_id')
+                ->latest('id')
+                ->first();
+
+            if (! $verifiedUserIdentity?->isVerified()) {
+                throw ValidationException::withMessages([
+                    'identity' => 'Your Dojah verification is no longer valid. Verify again before continuing.',
+                ]);
+            }
+
             foreach ($data['adults'] as $index => $adult) {
                 $guest = BookingGuest::query()->create([
                     'booking_id' => $booking->id,
@@ -132,42 +149,20 @@ class BookingCreationService
                     'is_lead' => $index === 0,
                 ]);
 
-                if ($index === 0 && $hasAccountIdentity && $request->user()) {
-                    $this->identityService->attachOwnerIdentity($booking, $request->user(), $guest);
-                } else {
-                    $this->identityService->storeGuestIdentity(
-                        $booking,
-                        $guest,
-                        $adult['document_type'],
-                        $request->file("adults.$index.document"),
-                        $request->user()?->id
-                    );
-                }
-
-                if ($index === 0 && $request->user() && (bool) config('azari.identity.dojah.enabled', false)) {
-                    $verifiedUserIdentity = IdentityVerification::query()
-                        ->where('provider', IdentityVerification::PROVIDER_DOJAH)
-                        ->where('user_id', $request->user()->id)
-                        ->whereNull('booking_guest_id')
-                        ->where('status', IdentityVerification::STATUS_VERIFIED)
-                        ->latest('id')
-                        ->first();
-
-                    if ($verifiedUserIdentity) {
-                        IdentityVerification::query()->create([
-                            'user_id' => $request->user()->id,
-                            'booking_guest_id' => $guest->id,
-                            'provider' => IdentityVerification::PROVIDER_DOJAH,
-                            'reference' => (string) Str::uuid(),
-                            'widget_id' => $verifiedUserIdentity->widget_id,
-                            'status' => IdentityVerification::STATUS_VERIFIED,
-                            'provider_status' => $verifiedUserIdentity->provider_status,
-                            'verification_type' => $verifiedUserIdentity->verification_type,
-                            'verification_mode' => $verifiedUserIdentity->verification_mode,
-                            'verified_at' => $verifiedUserIdentity->verified_at ?: now(),
-                            'metadata' => ['source_user_verification_id' => $verifiedUserIdentity->id],
-                        ]);
-                    }
+                if ($index === 0) {
+                    IdentityVerification::query()->create([
+                        'user_id' => $user->id,
+                        'booking_guest_id' => $guest->id,
+                        'provider' => IdentityVerification::PROVIDER_DOJAH,
+                        'reference' => (string) Str::uuid(),
+                        'widget_id' => $verifiedUserIdentity->widget_id,
+                        'status' => IdentityVerification::STATUS_VERIFIED,
+                        'provider_status' => $verifiedUserIdentity->provider_status,
+                        'verification_type' => $verifiedUserIdentity->verification_type,
+                        'verification_mode' => $verifiedUserIdentity->verification_mode,
+                        'verified_at' => $verifiedUserIdentity->verified_at ?: now(),
+                        'metadata' => ['source_user_verification_id' => $verifiedUserIdentity->id],
+                    ]);
                 }
             }
 
@@ -184,11 +179,11 @@ class BookingCreationService
 
             BookingStatusHistory::query()->create([
                 'booking_id' => $booking->id,
-                'changed_by' => $request->user()?->id,
+                'changed_by' => $user->id,
                 'from_status' => null,
                 'to_status' => 'pending_payment',
                 'note' => 'Booking created and awaiting payment.',
-                'metadata' => ['channel' => $request->user() ? 'registered' : 'guest'],
+                'metadata' => ['channel' => 'registered'],
             ]);
 
             $lockedHold->delete();
@@ -197,7 +192,7 @@ class BookingCreationService
         }, 5);
     }
 
-    private function rules(BookingHold $hold, bool $hasAccountIdentity): array
+    private function rules(BookingHold $hold): array
     {
         $rules = [
             'hold_token' => ['required', 'uuid'],
@@ -219,17 +214,6 @@ class BookingCreationService
         for ($index = 0; $index < $hold->adults; $index++) {
             $rules["adults.$index.first_name"] = ['required', 'string', 'max:80'];
             $rules["adults.$index.last_name"] = ['required', 'string', 'max:80'];
-            $rules["adults.$index.document_type"] = [
-                $index === 0 && $hasAccountIdentity ? 'nullable' : 'required',
-                Rule::in(['passport', 'national_id', 'drivers_licence', 'other_government_id']),
-            ];
-            $rules["adults.$index.document"] = [
-                $index === 0 && $hasAccountIdentity ? 'nullable' : 'required',
-                'file',
-                'mimes:jpg,jpeg,png,webp,pdf',
-                'mimetypes:image/jpeg,image/png,image/webp,application/pdf',
-                'max:10240',
-            ];
         }
 
         for ($index = 0; $index < $hold->children; $index++) {

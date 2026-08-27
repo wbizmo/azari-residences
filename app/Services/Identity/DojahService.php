@@ -66,6 +66,7 @@ class DojahService
         return IdentityVerification::query()
             ->where('provider', IdentityVerification::PROVIDER_DOJAH)
             ->where('user_id', $user->id)
+            ->whereNull('booking_guest_id')
             ->latest('id')
             ->first();
     }
@@ -173,11 +174,60 @@ class DojahService
         } elseif ($outcome['status'] === IdentityVerification::STATUS_FAILED) {
             $verification->failed_at ??= now();
             $verification->verified_at = null;
+        } else {
+            $verification->verified_at = null;
+            if ($outcome['status'] !== IdentityVerification::STATUS_FAILED) {
+                $verification->failed_at = null;
+            }
         }
 
         $verification->save();
 
+        if ($verification->user_id && $verification->booking_guest_id === null) {
+            $this->syncUserVerificationToLeadGuests($verification);
+        }
+
         return $verification;
+    }
+
+    private function syncUserVerificationToLeadGuests(IdentityVerification $source): void
+    {
+        $leadGuests = BookingGuest::query()
+            ->where('type', 'adult')
+            ->where('is_lead', true)
+            ->whereHas('booking', fn ($query) => $query->where('user_id', $source->user_id))
+            ->get();
+
+        foreach ($leadGuests as $guest) {
+            $mirror = IdentityVerification::query()
+                ->where('provider', IdentityVerification::PROVIDER_DOJAH)
+                ->where('booking_guest_id', $guest->id)
+                ->latest('id')
+                ->first();
+
+            if (! $mirror) {
+                $mirror = new IdentityVerification([
+                    'provider' => IdentityVerification::PROVIDER_DOJAH,
+                    'reference' => (string) Str::uuid(),
+                    'booking_guest_id' => $guest->id,
+                ]);
+            }
+
+            $mirror->fill([
+                'user_id' => $source->user_id,
+                'widget_id' => $source->widget_id,
+                'status' => $source->status,
+                'provider_status' => $source->provider_status,
+                'verification_type' => $source->verification_type,
+                'verification_mode' => $source->verification_mode,
+                'verified_at' => $source->isVerified() ? ($source->verified_at ?: now()) : null,
+                'failed_at' => $source->status === IdentityVerification::STATUS_FAILED ? ($source->failed_at ?: now()) : null,
+                'failure_reason' => $source->failure_reason,
+                'last_event_at' => $source->last_event_at,
+                'metadata' => ['source_user_verification_id' => $source->id],
+            ]);
+            $mirror->save();
+        }
     }
 
     private function extractReference(array $payload): ?string
@@ -323,9 +373,6 @@ class DojahService
         $widgetId = trim((string) config('azari.identity.dojah.widget_id'));
         $tokenId = trim((string) config('azari.identity.dojah.token_id'));
 
-        // Older configuration temporarily fell back to DOJAH_TOKEN_ID. An API
-        // token ID is not an EasyOnboard Widget ID, so never launch the hosted
-        // verification flow unless a distinct DOJAH_WIDGET_ID is configured.
         if ($widgetId === '' || ($tokenId !== '' && hash_equals($tokenId, $widgetId))) {
             return '';
         }

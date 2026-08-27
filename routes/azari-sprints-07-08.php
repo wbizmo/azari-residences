@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\Admin\IdentityManagementController;
 use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
 use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\SystemSettingsController;
@@ -13,7 +12,6 @@ use App\Http\Controllers\UserArea\UserBookingController;
 use App\Http\Controllers\UserArea\UserContactController;
 use App\Http\Controllers\UserArea\UserDashboardController;
 use App\Http\Controllers\UserArea\UserDocumentController;
-use App\Http\Controllers\UserArea\UserIdentityController;
 use App\Http\Controllers\UserArea\UserNotificationController;
 use App\Http\Controllers\UserArea\UserPaymentController;
 use App\Http\Controllers\UserArea\UserProfileController;
@@ -34,17 +32,14 @@ Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer', 'azari.
         Route::post('/payments/{payment}/retry', [UserPaymentController::class, 'retry'])->name('payments.retry');
         Route::get('/documents', [UserDocumentController::class, 'index'])->name('documents.index');
         Route::get('/additional-guests', [AdditionalGuestController::class, 'index'])->name('guests.index');
-        Route::post('/bookings/{reference}/guests/{guest}/identity', [AdditionalGuestController::class, 'store'])->name('guests.identity.store');
         Route::get('/bookings/{reference}/guests/{guest}/identity/dojah', [DojahVerificationController::class, 'guest'])->name('guests.identity.dojah');
-        Route::get('/bookings/{reference}/guests/{guest}/identity/{document}/download', [AdditionalGuestController::class, 'download'])->name('guests.identity.download');
     });
 
-    // Identity, profile, security and support remain reachable so an unverified
-    // customer can complete KYC, correct account details, or ask for help.
-    Route::get('/identity', [UserIdentityController::class, 'index'])->name('identity.index');
-    Route::post('/identity', [UserIdentityController::class, 'store'])->name('identity.store');
+    // Dojah verification itself must remain reachable while the customer is
+    // unverified. Profile/security/support are also reachable so they can
+    // correct account data or get help without bypassing KYC.
+    Route::get('/identity', [DojahVerificationController::class, 'user'])->name('identity.index');
     Route::get('/identity/dojah', [DojahVerificationController::class, 'user'])->name('identity.dojah');
-    Route::get('/identity/{document}/download', [UserIdentityController::class, 'download'])->name('identity.download');
     Route::get('/notifications', [UserNotificationController::class, 'index'])->name('notifications.index');
     Route::patch('/notifications/{notification}/read', [UserNotificationController::class, 'read'])->name('notifications.read');
     Route::patch('/notifications/read-all', [UserNotificationController::class, 'readAll'])->name('notifications.read-all');
@@ -74,6 +69,7 @@ Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer', 'azari.
     Route::get('/booking/{reference}/payment/flutterwave/{payment}/instructions', [PaymentCheckoutController::class, 'flutterwaveInstructions'])->name('public.payment.flutterwave.instructions');
     Route::get('/booking/{reference}/payment-receipt/{payment}', [PaymentCheckoutController::class, 'receipt'])->name('public.payment.receipt');
 });
+
 Route::match(['GET', 'POST'], '/payments/{provider}/callback/{payment}', [PaymentCheckoutController::class, 'callback'])->middleware('throttle:120,1')->name('payments.callback');
 Route::match(['GET', 'POST'], '/payments/{provider}/webhook', [PaymentCheckoutController::class, 'webhook'])->middleware('throttle:240,1')->name('payments.webhook');
 
@@ -97,25 +93,6 @@ Route::prefix('azari-admin')->name('azari.admin.')->middleware(['auth.session', 
         ->middleware('azari.permission:payments.manage')
         ->name('payments.reconcile');
     Route::get('/payments/{payment}/proof', [AdminPaymentController::class, 'proof'])->name('payments.proof');
-
-    Route::get('/identities', [IdentityManagementController::class, 'index'])->name('identities.index');
-    Route::get('/identities/types', [IdentityManagementController::class, 'types'])->name('identities.types');
-    Route::post('/identities/types', [IdentityManagementController::class, 'storeType'])
-        ->middleware('azari.admin')
-        ->name('identities.types.store');
-    Route::put('/identities/types/{identityType}', [IdentityManagementController::class, 'updateType'])
-        ->middleware('azari.admin')
-        ->name('identities.types.update');
-    Route::get('/identities/missing', [IdentityManagementController::class, 'missing'])->name('identities.missing');
-    Route::get('/identities/audit', [IdentityManagementController::class, 'audit'])->name('identities.audit');
-    Route::patch('/identities/users/{document}/review', [IdentityManagementController::class, 'reviewUser'])
-        ->middleware('azari.permission:identities.manage')
-        ->name('identities.users.review');
-    Route::patch('/identities/guests/{document}/review', [IdentityManagementController::class, 'reviewGuest'])
-        ->middleware('azari.permission:identities.manage')
-        ->name('identities.guests.review');
-    Route::get('/identities/users/{document}/download', [IdentityManagementController::class, 'downloadUser'])->name('identities.users.download');
-    Route::get('/identities/guests/{document}/download', [IdentityManagementController::class, 'downloadGuest'])->name('identities.guests.download');
 });
 
 Route::prefix('azaridevadmin')->name('azari.admin.')->middleware(['azari.admin'])->group(function (): void {

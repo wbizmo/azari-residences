@@ -48,12 +48,14 @@ class IdentityVerification extends Model
             return false;
         }
 
-        return static::query()
+        $latest = static::query()
             ->where('provider', self::PROVIDER_DOJAH)
             ->where('user_id', $userId)
-            ->where('status', self::STATUS_VERIFIED)
-            ->whereNotNull('verified_at')
-            ->exists();
+            ->whereNull('booking_guest_id')
+            ->latest('id')
+            ->first();
+
+        return $latest?->isVerified() ?? false;
     }
 
     public static function guestIsVerified(int $guestId): bool
@@ -62,11 +64,12 @@ class IdentityVerification extends Model
             return false;
         }
 
-        return static::query()
+        $latest = static::query()
             ->where('provider', self::PROVIDER_DOJAH)
             ->where('booking_guest_id', $guestId)
-            ->where('status', self::STATUS_VERIFIED)
-            ->whereNotNull('verified_at')
-            ->exists();
+            ->latest('id')
+            ->first();
+
+        return $latest?->isVerified() ?? false;
     }
 }

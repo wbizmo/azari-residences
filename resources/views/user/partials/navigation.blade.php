@@ -1,19 +1,16 @@
 @php
 $unread=auth()->user()->unreadNotifications()->count();
 $contactEmail=\App\Models\SiteSetting::valueFor('customer_dashboard_contact_email',\App\Models\SiteSetting::valueFor('public_contact_email',config('mail.from.address')));
-$identityVerified=(bool) config('azari.identity.dojah.enabled',false)
-    ? \App\Models\IdentityVerification::userIsVerified(auth()->id())
-    : auth()->user()->currentIdentity()->exists();
+$identityVerified=auth()->user()->hasVerifiedIdentity();
 @endphp
 
 <section class="az-user-nav-group">
-    <a class="az-user-nav-link"
-           href="{{ route('home') }}">
-            <span class="material-symbols-outlined">language</span>
-            <span>Public site</span>
+    <a class="az-user-nav-link" href="{{ route('home') }}">
+        <span class="material-symbols-outlined">language</span>
+        <span>Public site</span>
     </a>
-    <p class="az-user-nav-label">Stay</p>
 
+    <p class="az-user-nav-label">Stay</p>
     <nav class="az-user-nav-list">
         @foreach([
             ['user.dashboard','space_dashboard','Dashboard'],
@@ -23,10 +20,8 @@ $identityVerified=(bool) config('azari.identity.dojah.enabled',false)
             ['user.identity.index','badge','My identity'],
             ['user.guests.index','group','Additional guests']
         ] as [$route,$icon,$label])
-
             @if(Route::has($route))
-                <a class="az-user-nav-link {{ request()->routeIs(str_replace('.index','.*',$route))?'is-active':'' }}"
-                   href="{{ route($route) }}">
+                <a class="az-user-nav-link {{ request()->routeIs(str_replace('.index','.*',$route))?'is-active':'' }}" href="{{ route($route) }}">
                     <span class="material-symbols-outlined">{{ $icon }}</span>
                     <span>{{ $label }}</span>
                     @if($route === 'user.identity.index')
@@ -34,57 +29,49 @@ $identityVerified=(bool) config('azari.identity.dojah.enabled',false)
                     @endif
                 </a>
             @endif
-
         @endforeach
     </nav>
-
 </section>
 
 @if(Route::has('user.owner.dashboard'))
 <section class="az-user-nav-group">
     <p class="az-user-nav-label">Property Owner</p>
     <nav class="az-user-nav-list">
-        <a class="az-user-nav-link {{ request()->routeIs('user.owner.dashboard') ? 'is-active' : '' }}"
-           href="{{ route('user.owner.dashboard') }}">
+        <a class="az-user-nav-link {{ request()->routeIs('user.owner.dashboard') ? 'is-active' : '' }}" href="{{ route('user.owner.dashboard') }}">
             <span class="material-symbols-outlined" aria-hidden="true">domain</span>
             <span>Property centre</span>
         </a>
 
         @if(Route::has('user.owner.listings.index'))
-            <a class="az-user-nav-link {{ request()->routeIs('user.owner.listings.index', 'user.owner.listings.show', 'user.owner.listings.edit') ? 'is-active' : '' }}"
-               href="{{ route('user.owner.listings.index') }}">
+            <a class="az-user-nav-link {{ request()->routeIs('user.owner.listings.index', 'user.owner.listings.show', 'user.owner.listings.edit') ? 'is-active' : '' }}" href="{{ route('user.owner.listings.index') }}">
                 <span class="material-symbols-outlined" aria-hidden="true">real_estate_agent</span>
                 <span>My properties</span>
             </a>
         @endif
 
         @if(Route::has('user.owner.listings.create'))
-            <a class="az-user-nav-link {{ request()->routeIs('user.owner.listings.create') ? 'is-active' : '' }}"
-               href="{{ route('user.owner.listings.create') }}">
+            <a class="az-user-nav-link {{ request()->routeIs('user.owner.listings.create') ? 'is-active' : '' }}" href="{{ route('user.owner.listings.create') }}">
                 <span class="material-symbols-outlined" aria-hidden="true">add_home_work</span>
                 <span>List a property</span>
             </a>
         @endif
 
         @if(Route::has('user.owner.earnings'))
-            <a class="az-user-nav-link {{ request()->routeIs('user.owner.earnings') ? 'is-active' : '' }}"
-               href="{{ route('user.owner.earnings') }}">
+            <a class="az-user-nav-link {{ request()->routeIs('user.owner.earnings') ? 'is-active' : '' }}" href="{{ route('user.owner.earnings') }}">
                 <span class="material-symbols-outlined" aria-hidden="true">payments</span>
                 <span>Owner earnings</span>
             </a>
         @endif
 
         @if(Route::has('user.owner.withdrawals'))
-            <a class="az-user-nav-link {{ request()->routeIs('user.owner.withdrawals') ? 'is-active' : '' }}"
-               href="{{ route('user.owner.withdrawals') }}">
+            <a class="az-user-nav-link {{ request()->routeIs('user.owner.withdrawals') ? 'is-active' : '' }}" href="{{ route('user.owner.withdrawals') }}">
                 <span class="material-symbols-outlined" aria-hidden="true">account_balance</span>
                 <span>Withdrawals</span>
             </a>
         @endif
 
         @if(Route::has('user.owner.agreement'))
-            <a class="az-user-nav-link {{ request()->routeIs('user.owner.agreement') ? 'is-active' : '' }}"
-               href="{{ route('user.owner.agreement') }}">
+            <a class="az-user-nav-link {{ request()->routeIs('user.owner.agreement') ? 'is-active' : '' }}" href="{{ route('user.owner.agreement') }}">
                 <span class="material-symbols-outlined" aria-hidden="true">contract</span>
                 <span>Listing agreement</span>
             </a>
@@ -95,69 +82,55 @@ $identityVerified=(bool) config('azari.identity.dojah.enabled',false)
 
 <section class="az-user-nav-group">
     <p class="az-user-nav-label">Services</p>
-
-
     <nav class="az-user-nav-list">
-
         @if(Route::has('user.service-requests.index'))
-            <a class="az-user-nav-link {{ request()->routeIs('user.service-requests.*')?'is-active':'' }}"
-               href="{{ route('user.service-requests.index') }}">
+            <a class="az-user-nav-link {{ request()->routeIs('user.service-requests.*')?'is-active':'' }}" href="{{ route('user.service-requests.index') }}">
                 <span class="material-symbols-outlined">room_service</span>
                 <span>Service requests</span>
             </a>
         @endif
 
         @if(Route::has('user.support.index'))
-            <a class="az-user-nav-link {{ request()->routeIs('user.support.*')?'is-active':'' }}"
-               href="{{ route('user.support.index') }}">
+            <a class="az-user-nav-link {{ request()->routeIs('user.support.*')?'is-active':'' }}" href="{{ route('user.support.index') }}">
                 <span class="material-symbols-outlined">support_agent</span>
                 <span>Support tickets</span>
             </a>
         @endif
 
         @if(Route::has('user.notifications.index'))
-            <a class="az-user-nav-link {{ request()->routeIs('user.notifications.*')?'is-active':'' }}"
-               href="{{ route('user.notifications.index') }}">
+            <a class="az-user-nav-link {{ request()->routeIs('user.notifications.*')?'is-active':'' }}" href="{{ route('user.notifications.index') }}">
                 <span class="material-symbols-outlined">notifications</span>
                 <span>Notifications</span>
-
                 @if($unread)
                     <span class="az-user-nav-badge">{{ min($unread,99) }}</span>
                 @endif
             </a>
         @endif
-
     </nav>
 </section>
 
 <section class="az-user-nav-group">
     <p class="az-user-nav-label">Account</p>
-
     <nav class="az-user-nav-list">
-
         @if(Route::has('user.profile.edit'))
-            <a class="az-user-nav-link {{ request()->routeIs('user.profile.*')?'is-active':'' }}"
-               href="{{ route('user.profile.edit') }}">
+            <a class="az-user-nav-link {{ request()->routeIs('user.profile.*')?'is-active':'' }}" href="{{ route('user.profile.edit') }}">
                 <span class="material-symbols-outlined">person</span>
                 <span>Profile</span>
             </a>
         @endif
 
         @if(Route::has('user.security.index'))
-            <a class="az-user-nav-link {{ request()->routeIs('user.security.*')?'is-active':'' }}"
-               href="{{ route('user.security.index') }}">
+            <a class="az-user-nav-link {{ request()->routeIs('user.security.*')?'is-active':'' }}" href="{{ route('user.security.index') }}">
                 <span class="material-symbols-outlined">shield</span>
                 <span>Security</span>
             </a>
         @endif
 
         @if(Route::has('user.contact'))
-            <a class="az-user-nav-link {{ request()->routeIs('user.contact')?'is-active':'' }}"
-               href="{{ route('user.contact') }}">
+            <a class="az-user-nav-link {{ request()->routeIs('user.contact')?'is-active':'' }}" href="{{ route('user.contact') }}">
                 <span class="material-symbols-outlined">mail</span>
                 <span>Contact Azari</span>
             </a>
         @endif
-
     </nav>
 </section>

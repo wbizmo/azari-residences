@@ -8,9 +8,24 @@
     $image = $featured?->property?->cover_image ? Storage::url($featured->property->cover_image) : asset('images/azari-residence-fallback.png');
     $payment = $featured?->payments?->firstWhere('status','successful') ?: $featured?->payments?->first();
 @endphp
+
+@if(!$identityVerified)
+<section class="az-user-panel" style="margin-bottom:18px">
+    <div class="az-user-panel-body">
+        <div class="az-user-alert az-user-alert--danger">
+            <strong>Identity verification required.</strong>
+            <p>Your account is currently unverified. Complete Dojah verification before bookings, payments, property listings or other KYC-protected actions can continue.</p>
+        </div>
+        <div class="az-user-actions" style="margin-top:14px">
+            <a class="az-user-button az-user-button--dark" href="{{ route('user.identity.index') }}">Verify with Dojah</a>
+        </div>
+    </div>
+</section>
+@endif
+
 <section class="az-user-hero-grid">
     <article class="az-user-welcome">
-        <div class="az-user-eyebrow"><span class="material-symbols-outlined">verified</span> Welcome back</div>
+        <div class="az-user-eyebrow"><span class="material-symbols-outlined">{{ $identityVerified ? 'verified' : 'shield' }}</span> Welcome back</div>
         <h2>{{ $currentStay ? 'Your stay is now underway.' : ($nextBooking ? 'Your next stay is beautifully arranged.' : 'Your next Azari stay begins here.') }}</h2>
         <p>{{ $featured ? 'Review your reservation, payment status, identities and documents from one private guest area.' : 'Browse hotels & residences, choose your dates and complete a new booking whenever you are ready.' }}</p>
         <div class="az-user-actions">
@@ -23,11 +38,13 @@
         <div class="az-user-timezone-value"><span>Showing times in</span><strong data-user-timezone>{{ auth()->user()->timezone ?: config('azari.timezone','Africa/Lagos') }}</strong></div>
     </aside>
 </section>
+
 <section class="az-user-summary-grid" aria-label="Account summary">
     <article class="az-user-summary-card"><div class="az-user-summary-icon"><span class="material-symbols-outlined">calendar_today</span></div><div class="az-user-summary-value">{{ $upcomingCount }}</div><div class="az-user-summary-label">Upcoming {{ Str::plural('booking',$upcomingCount) }}</div></article>
     <article class="az-user-summary-card"><div class="az-user-summary-icon"><span class="material-symbols-outlined">account_balance_wallet</span></div><div class="az-user-summary-value">{{ $pendingPaymentCount }}</div><div class="az-user-summary-label">Pending {{ Str::plural('payment',$pendingPaymentCount) }}</div></article>
-    <article class="az-user-summary-card"><div class="az-user-summary-icon"><span class="material-symbols-outlined">badge</span></div><div class="az-user-summary-value">{{ auth()->user()->currentIdentity()->exists() ? 'Ready' : 'Needed' }}</div><div class="az-user-summary-label">Government identity status</div></article>
+    <article class="az-user-summary-card"><div class="az-user-summary-icon"><span class="material-symbols-outlined">badge</span></div><div class="az-user-summary-value">{{ $identityVerified ? 'Verified' : 'Required' }}</div><div class="az-user-summary-label">Dojah identity status</div></article>
 </section>
+
 <section class="az-user-dashboard-grid">
     <div class="az-user-panel">
         <header class="az-user-panel-header"><div><h2 class="az-user-panel-title">{{ $currentStay ? 'Current stay' : 'Next booking' }}</h2><p class="az-user-panel-subtitle">Live reservation and payment status</p></div><a class="az-user-button az-user-button--light" href="{{ route('user.bookings.index') }}">All bookings</a></header>
@@ -42,12 +59,14 @@
         <div class="az-user-empty"><span class="material-symbols-outlined">hotel</span><h3>No upcoming booking</h3><p>Your future reservations will appear here.</p><a class="az-user-button az-user-button--dark" href="{{ route('availability.index') }}">Search hotels & residences</a></div>
         @endif
     </div>
+
     <aside class="az-user-panel"><header class="az-user-panel-header"><div><h2 class="az-user-panel-title">Guest essentials</h2><p class="az-user-panel-subtitle">Complete the items needed for a smooth stay</p></div></header><div class="az-user-panel-body az-user-list">
-        <a class="az-user-list-item" href="{{ route('user.identity.index') }}"><div><h3>My identity</h3><p>{{ auth()->user()->currentIdentity()->exists() ? 'Your current government ID is securely on file.' : 'Upload one government-issued photo ID.' }}</p></div><span class="material-symbols-outlined">chevron_right</span></a>
-        <a class="az-user-list-item" href="{{ route('user.guests.index') }}"><div><h3>Additional adult guests</h3><p>Attach an ID for every additional adult on a reservation.</p></div><span class="material-symbols-outlined">chevron_right</span></a>
+        <a class="az-user-list-item" href="{{ route('user.identity.index') }}"><div><h3>My identity</h3><p>{{ $identityVerified ? 'Your Azari account is verified by Dojah.' : 'Dojah verification is required.' }}</p></div><span class="material-symbols-outlined">chevron_right</span></a>
+        <a class="az-user-list-item" href="{{ route('user.guests.index') }}"><div><h3>Additional adult guests</h3><p>Every additional adult completes their own Dojah verification.</p></div><span class="material-symbols-outlined">chevron_right</span></a>
         <a class="az-user-list-item" href="{{ route('user.contact') }}"><div><h3>Contact Azari</h3><p>See the dynamically configured phone, email and support hours.</p></div><span class="material-symbols-outlined">chevron_right</span></a>
     </div></aside>
 </section>
+
 <section class="az-user-panel"><header class="az-user-panel-header"><div><h2 class="az-user-panel-title">Recent receipts</h2><p class="az-user-panel-subtitle">Successful payments associated with your bookings</p></div><a class="az-user-button az-user-button--light" href="{{ route('user.documents.index') }}">Document centre</a></header><div class="az-user-panel-body">
 @if($recentPayments->isEmpty())<div class="az-user-empty"><span class="material-symbols-outlined">receipt_long</span><p>Receipts will appear after a verified successful payment.</p></div>@else<div class="az-user-list">@foreach($recentPayments as $recent)<a class="az-user-list-item" href="{{ route('user.payments.show',$recent) }}"><div><h3>{{ $recent->receipt_number ?? $recent->reference }}</h3><p>{{ $recent->booking?->property?->name }} · {{ $recent->currency }} {{ number_format((float)$recent->amount,2) }}</p></div><span class="az-user-status">{{ ucfirst($recent->provider) }}</span></a>@endforeach</div>@endif
 </div></section>

@@ -11,23 +11,19 @@ class EnsureDojahVerified
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (! (bool) config('azari.identity.dojah.enabled', false)) {
-            return $next($request);
-        }
-
         $user = $request->user();
 
         if (! $user || $user->isStaff()) {
             return $next($request);
         }
 
-        if (IdentityVerification::userIsVerified($user->id)) {
+        if (IdentityVerification::userIsVerified((int) $user->id)) {
             return $next($request);
         }
 
         if ($request->expectsJson()) {
             return response()->json([
-                'message' => 'Complete identity verification before continuing.',
+                'message' => 'Complete Dojah identity verification before continuing.',
                 'code' => 'identity_verification_required',
             ], 403);
         }
@@ -38,6 +34,6 @@ class EnsureDojahVerified
 
         return redirect()
             ->route('user.identity.index')
-            ->with('warning', 'Complete identity verification before continuing with bookings, payments, property listings or other protected Azari actions.');
+            ->with('warning', 'Complete Dojah identity verification before continuing with bookings, payments, property listings or other protected Azari actions.');
     }
 }

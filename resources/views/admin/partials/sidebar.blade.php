@@ -18,7 +18,6 @@
         ['azari.admin.owner-settings.edit','tune','Owner marketplace','owner-settings.manage'],
 
         ['azari.admin.users.index','group','Users','guests.view'],
-        ['azari.admin.identities.index','id_card','Guest identities','guest-identities.view'],
         ['azari.admin.payments.index','account_balance_wallet','Payments','payments.view'],
         ['azari.admin.documents.index','description','Documents','documents.view'],
         ['azari.admin.service-requests.index','room_service','Service requests','service-requests.view'],

@@ -25,6 +25,7 @@ class UserDashboardController extends Controller
             'upcomingCount' => $user->bookings()->whereDate('check_in', '>=', today())->whereNotIn('status', ['cancelled', 'completed'])->count(),
             'pendingPaymentCount' => $user->bookings()->whereIn('status', ['pending', 'pending_payment'])->count(),
             'recentPayments' => $user->payments()->with('booking.property')->where('status', Payment::SUCCESSFUL)->latest('paid_at')->limit(3)->get(),
+            'identityVerified' => $user->hasVerifiedIdentity(),
             'openServiceRequests' => 0,
             'openSupportTickets' => 0,
         ]);

@@ -1,11 +1,11 @@
 @extends('layouts.user')
 @section('title','Additional guests')
-@section('kicker','Booking identities')
+@section('kicker','Dojah identity verification')
 @section('page_title','Additional guests')
 @section('content')
-<div class="az-user-restricted-note">Every additional adult must complete Dojah identity verification before eligible check-in. Supporting government-ID files remain available for secure manual records.</div>
+<div class="az-user-restricted-note">Every additional adult must pass Dojah identity verification. Manual ID uploads are no longer used or accepted for verification.</div>
 <section class="az-user-panel" style="margin-top:18px">
-<header class="az-user-panel-header"><div><h2 class="az-user-panel-title">Additional adult identities</h2><p class="az-user-panel-subtitle">Only adult guests attached to your bookings appear here</p></div></header>
+<header class="az-user-panel-header"><div><h2 class="az-user-panel-title">Additional adult verification</h2><p class="az-user-panel-subtitle">Each adult must be verified before the booking can proceed to payment or become eligible for check-in.</p></div></header>
 <div class="az-user-panel-body">
 @if($guests->isEmpty())
     <div class="az-user-empty"><span class="material-symbols-outlined">group</span><p>No additional adults are currently attached to your bookings.</p></div>
@@ -13,30 +13,19 @@
     <div class="az-user-list">
     @foreach($guests as $guest)
         @php
-            $identity = $guest->identityLink?->userIdentityDocument ?: $guest->identityDocument;
             $dojah = $guest->latestIdentityVerification;
-            $dojahEnabled = (bool) config('azari.identity.dojah.enabled', false);
-            $ready = $dojahEnabled ? $dojah?->isVerified() : (bool) $identity;
+            $ready = $dojah?->isVerified() ?? false;
         @endphp
         <article class="az-user-list-item">
             <div>
                 <h3>{{ $guest->full_name }} · {{ $guest->booking?->reference }}</h3>
-                <p>{{ $guest->booking?->property?->name }} · {{ $dojahEnabled ? 'Dojah '.str_replace('_',' ',$dojah?->status ?? 'required') : ($identity?'Identity attached':'Identity required') }}</p>
+                <p>{{ $guest->booking?->property?->name }} · {{ $ready ? 'Dojah verified' : 'Dojah verification required' }}</p>
             </div>
             <div class="az-user-actions">
-                <span class="az-user-status {{ $ready ? '' : 'az-user-status--warning' }}">{{ $ready ? 'Verified' : 'Pending' }}</span>
-                @if($dojahEnabled && !$dojah?->isVerified())
+                <span class="az-user-status {{ $ready ? '' : 'az-user-status--warning' }}">{{ $ready ? 'Verified' : 'Required' }}</span>
+                @if(!$ready)
                     <a class="az-user-button az-user-button--dark" href="{{ route('user.guests.identity.dojah',[$guest->booking->reference,$guest]) }}">Verify with Dojah</a>
                 @endif
-                @if($guest->identityDocument)<a class="az-user-button az-user-button--light" href="{{ route('user.guests.identity.download',[$guest->booking->reference,$guest,$guest->identityDocument]) }}">Download ID</a>@endif
-                <details>
-                    <summary class="az-user-button az-user-button--light">{{ $identity?'Replace supporting ID':'Upload supporting ID' }}</summary>
-                    <form method="POST" action="{{ route('user.guests.identity.store',[$guest->booking->reference,$guest]) }}" enctype="multipart/form-data" style="margin-top:12px;min-width:min(460px,80vw)">@csrf
-                        <div class="az-user-field"><label>Document type</label><select name="document_type" required><option value="passport">Passport</option><option value="national_id">National ID</option><option value="drivers_licence">Driver's licence</option><option value="other_government_id">Other government ID</option></select></div>
-                        <div class="az-user-field az-user-upload" style="margin-top:10px"><label>Secure file</label><input type="file" name="document" accept=".jpg,.jpeg,.png,.webp,.pdf" required></div>
-                        <button class="az-user-button az-user-button--dark" type="submit" style="margin-top:10px">Save identity</button>
-                    </form>
-                </details>
             </div>
         </article>
     @endforeach

@@ -1,5 +1,0 @@
-@extends('admin.layouts.app')
-@section('title','Identity audit history')
-@section('content')
-<section class="az-page-heading"><div><p class="az-eyebrow">Protected access audit</p><h1>Identity audit history</h1><p>Downloads, replacements, attachments and review actions. Ten records per page.</p></div></section><div class="az-s78-table-wrap"><table class="az-s78-table"><thead><tr><th>Time</th><th>Actor</th><th>Action</th><th>Document</th><th>Booking</th><th>Safe metadata</th></tr></thead><tbody>@forelse($history as $item)<tr><td>{{ $item->created_at?->format('d M Y H:i:s') }}</td><td>{{ $item->actor?->name ?? 'System' }}</td><td>{{ Str::headline($item->action) }}</td><td>{{ Str::headline($item->document_type) }} #{{ $item->document_id }}</td><td>{{ $item->booking?->reference ?: '—' }}</td><td><small>{{ $item->metadata ? json_encode($item->metadata,JSON_UNESCAPED_SLASHES) : '—' }}</small></td></tr>@empty<tr><td colspan="6" class="az-s78-empty">No identity audit history.</td></tr>@endforelse</tbody></table></div>{{ $history->links() }}
-@endsection

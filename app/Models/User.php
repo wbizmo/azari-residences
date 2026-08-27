@@ -63,6 +63,7 @@ class User extends Authenticatable implements MustVerifyEmail
     public function payments(): HasMany { return $this->hasMany(Payment::class); }
     public function identityDocuments(): HasMany { return $this->hasMany(UserIdentityDocument::class); }
     public function currentIdentity(): HasOne { return $this->hasOne(UserIdentityDocument::class)->where('is_current', true)->latestOfMany(); }
+    public function identityVerifications(): HasMany { return $this->hasMany(IdentityVerification::class); }
     public function staffLoginHistories(): HasMany { return $this->hasMany(StaffLoginHistory::class); }
     public function serviceRequests(): HasMany { return $this->hasMany(ServiceRequest::class); }
     public function supportTickets(): HasMany { return $this->hasMany(SupportTicket::class); }
@@ -72,6 +73,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function ownerLedgerEntries(): HasMany { return $this->hasMany(\App\Models\OwnerLedgerEntry::class); }
     public function withdrawalRequests(): HasMany { return $this->hasMany(\App\Models\WithdrawalRequest::class); }
     public function ownerPayoutProfile(): HasOne { return $this->hasOne(\App\Models\OwnerPayoutProfile::class); }
+
+    public function hasVerifiedIdentity(): bool
+    {
+        return $this->exists && IdentityVerification::userIsVerified((int) $this->id);
+    }
 
     public function isStaff(): bool
     {

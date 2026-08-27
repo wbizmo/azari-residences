@@ -164,31 +164,14 @@ class Booking extends Model
             && ! $this->checked_in_at
             && now(config('azari.timezone', 'Africa/Lagos'))->toDateString() === optional($this->check_in)->toDateString();
 
-        if (! $baseEligible) {
+        if (! $baseEligible || ! Schema::hasTable('identity_verifications')) {
             return false;
         }
 
-        if ((bool) config('azari.identity.dojah.enabled', false) && Schema::hasTable('identity_verifications')) {
-            $adultIds = $this->guests()->where('type', 'adult')->pluck('id');
-            if ($adultIds->isEmpty()) {
-                return false;
-            }
+        $adultIds = $this->guests()->where('type', 'adult')->pluck('id');
 
-            $verifiedAdults = IdentityVerification::query()
-                ->where('provider', IdentityVerification::PROVIDER_DOJAH)
-                ->where('status', IdentityVerification::STATUS_VERIFIED)
-                ->whereIn('booking_guest_id', $adultIds)
-                ->distinct('booking_guest_id')
-                ->count('booking_guest_id');
-
-            return $verifiedAdults === $adultIds->count();
-        }
-
-        return ! $this->guests()
-            ->where('type', 'adult')
-            ->whereDoesntHave('identityDocument')
-            ->whereDoesntHave('identityLink')
-            ->exists();
+        return $adultIds->isNotEmpty()
+            && $adultIds->every(fn ($guestId) => IdentityVerification::guestIsVerified((int) $guestId));
     }
 
     public function directionsUrl(): ?string

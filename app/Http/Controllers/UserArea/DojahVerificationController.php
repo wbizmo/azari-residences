@@ -17,6 +17,9 @@ class DojahVerificationController extends Controller
         $verification = $latest?->isVerified() ? $latest : $dojah->verificationForUser($user);
 
         $parts = preg_split('/\s+/', trim((string) $user->name), 2) ?: [];
+        $continueUrl = $verification->isVerified()
+            ? $request->session()->pull('url.intended', route('user.dashboard'))
+            : $request->session()->get('url.intended', route('user.dashboard'));
 
         return view('user.identity.dojah', [
             'verification' => $verification,
@@ -27,7 +30,8 @@ class DojahVerificationController extends Controller
                 'email' => $user->email,
             ]),
             'subjectName' => $user->name,
-            'backUrl' => route('user.identity.index'),
+            'backUrl' => route('user.dashboard'),
+            'continueUrl' => $continueUrl,
         ]);
     }
 
@@ -49,6 +53,7 @@ class DojahVerificationController extends Controller
             ]),
             'subjectName' => $guest->full_name,
             'backUrl' => route('user.guests.index'),
+            'continueUrl' => route('user.guests.index'),
         ]);
     }
 }
