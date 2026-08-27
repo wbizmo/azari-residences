@@ -1,6 +1,9 @@
 @php
 $unread=auth()->user()->unreadNotifications()->count();
 $contactEmail=\App\Models\SiteSetting::valueFor('customer_dashboard_contact_email',\App\Models\SiteSetting::valueFor('public_contact_email',config('mail.from.address')));
+$identityVerified=(bool) config('azari.identity.dojah.enabled',false)
+    ? \App\Models\IdentityVerification::userIsVerified(auth()->id())
+    : auth()->user()->currentIdentity()->exists();
 @endphp
 
 <section class="az-user-nav-group">
@@ -26,6 +29,9 @@ $contactEmail=\App\Models\SiteSetting::valueFor('customer_dashboard_contact_emai
                    href="{{ route($route) }}">
                     <span class="material-symbols-outlined">{{ $icon }}</span>
                     <span>{{ $label }}</span>
+                    @if($route === 'user.identity.index')
+                        <span class="az-user-nav-badge">{{ $identityVerified ? 'Verified' : 'Required' }}</span>
+                    @endif
                 </a>
             @endif
 
