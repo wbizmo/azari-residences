@@ -12,7 +12,7 @@ Route::get('/list-your-property', function () {
 
 Route::prefix('user/property-centre')
     ->name('user.owner.')
-    ->middleware(['auth', 'auth.session', 'verified', 'azari.customer'])
+    ->middleware(['auth', 'auth.session', 'verified', 'azari.customer', 'azari.identity.verified'])
     ->group(function (): void {
         Route::get('/', [PropertyOwnerController::class, 'dashboard'])->name('dashboard');
         Route::get('/agreement', [PropertyOwnerController::class, 'agreement'])->name('agreement');
