@@ -273,8 +273,6 @@ class PropertyOwnerController extends Controller
 
     private function validatedListingPayload(Request $request, ?PropertyListing $listing = null): array
     {
-        $mapsRequired = (bool) config('azari.maps.enabled', false) && config('azari.maps.provider', 'google') === 'google';
-
         $data = $request->validate([
             'name' => ['required', 'string', 'max:180'],
             'location_id' => ['required', 'integer', 'exists:locations,id'],
@@ -286,9 +284,8 @@ class PropertyOwnerController extends Controller
             'address_region' => ['nullable', 'string', 'max:120'],
             'address_postal_code' => ['nullable', 'string', 'max:40'],
             'address_country_code' => ['nullable', 'string', 'size:2'],
-            'google_place_id' => [$mapsRequired ? 'required' : 'nullable', 'string', 'max:255'],
-            'latitude' => [$mapsRequired ? 'required' : 'nullable', 'numeric', 'between:-90,90'],
-            'longitude' => [$mapsRequired ? 'required' : 'nullable', 'numeric', 'between:-180,180'],
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
             'bedrooms' => ['required', 'integer', 'min:0', 'max:30'],
             'bathrooms' => ['required', 'integer', 'min:1', 'max:30'],
             'max_guests' => ['required', 'integer', 'min:1', 'max:100'],

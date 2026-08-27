@@ -31,8 +31,6 @@ return [
             'app_id' => env('DOJAH_APP_ID'),
             'secret_key' => env('DOJAH_SECRET_KEY'),
             'public_key' => env('DOJAH_PUBLIC_KEY'),
-            // Current EasyOnboard flows use a widget ID. DOJAH_TOKEN_ID remains
-            // supported as a fallback for deployments that already store the published flow ID there.
             'widget_id' => env('DOJAH_WIDGET_ID', env('DOJAH_TOKEN_ID')),
             'widget_type' => env('DOJAH_WIDGET_TYPE', 'custom'),
             'token_name' => env('DOJAH_TOKEN_NAME'),
@@ -44,12 +42,6 @@ return [
                 explode(',', (string) env('DOJAH_REQUIRED_STEPS', ''))
             ))),
         ],
-    ],
-
-    'maps' => [
-        'enabled' => filter_var(env('MAPS_ENABLED', false), FILTER_VALIDATE_BOOL),
-        'provider' => strtolower((string) env('MAPS_PROVIDER', 'google')),
-        'api_key' => env('MAPS_API_KEY'),
     ],
 
     'phone_verification' => [

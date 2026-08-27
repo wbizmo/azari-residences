@@ -7,7 +7,7 @@
     <div>
         <span class="az-premium-kicker">Owner marketplace</span>
         <h1>{{ $listing->exists?'Correct and resubmit':'List your property' }}</h1>
-        <p>Provide the exact property details and Google location. Approved listings can become bookable without duplicate data entry.</p>
+        <p>Provide the exact property details and location. Approved listings can become bookable without duplicate data entry.</p>
     </div>
 </div>
 
@@ -34,7 +34,6 @@
 
         <x-property-address-fields :source="$data" wrapper-class="is-full" label-class="az-s78-field is-full" />
         @error('formatted_address')<small class="az-s78-field is-full">{{ $message }}</small>@enderror
-        @error('google_place_id')<small class="az-s78-field is-full">Select the property from Google address suggestions.</small>@enderror
 
         <label class="az-s78-field{{ $field('bedrooms') }}"><span>Bedrooms</span><input type="number" name="bedrooms" min="0" value="{{ old('bedrooms',data_get($data,'bedrooms',1)) }}" required>@error('bedrooms')<small>{{ $message }}</small>@enderror</label>
         <label class="az-s78-field{{ $field('bathrooms') }}"><span>Bathrooms</span><input type="number" name="bathrooms" min="1" value="{{ old('bathrooms',data_get($data,'bathrooms',1)) }}" required>@error('bathrooms')<small>{{ $message }}</small>@enderror</label>

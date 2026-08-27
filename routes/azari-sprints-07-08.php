@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\IdentityManagementController;
 use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
 use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\SystemSettingsController;
+use App\Http\Controllers\Location\AddressLookupController;
 use App\Http\Controllers\PublicSite\PaymentCheckoutController;
 use App\Http\Controllers\UserArea\AdditionalGuestController;
 use App\Http\Controllers\UserArea\DojahVerificationController;
@@ -51,6 +52,11 @@ Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer', 'azari.
     Route::get('/contact', fn (UserContactController $controller) => $controller('contact'))->name('contact');
     Route::get('/service-requests', fn (UserContactController $controller) => $controller('service-requests'))->name('service-requests');
     Route::get('/support-tickets', fn (UserContactController $controller) => $controller('support-tickets'))->name('support-tickets');
+});
+
+Route::middleware(['auth', 'auth.session', 'throttle:60,1'])->prefix('location')->name('location.address.')->group(function (): void {
+    Route::get('/search', [AddressLookupController::class, 'search'])->name('search');
+    Route::get('/reverse', [AddressLookupController::class, 'reverse'])->name('reverse');
 });
 
 Route::post('/webhooks/dojah/kyc', DojahWebhookController::class)->middleware('throttle:240,1')->name('webhooks.dojah.kyc');

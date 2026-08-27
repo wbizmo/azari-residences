@@ -38,7 +38,6 @@ class Property extends Model
         'address_region',
         'address_postal_code',
         'address_country_code',
-        'google_place_id',
         'latitude',
         'longitude',
         'property_type',

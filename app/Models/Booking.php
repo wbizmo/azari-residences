@@ -23,7 +23,7 @@ class Booking extends Model
         'check_out', 'adults', 'children', 'rooms', 'status', 'verification_status',
         'currency', 'nightly_rate', 'nights', 'subtotal', 'fee_total',
         'add_on_total', 'tax_rate', 'tax_total', 'total', 'pricing_snapshot',
-        'property_name_snapshot', 'property_formatted_address', 'property_google_place_id',
+        'property_name_snapshot', 'property_formatted_address',
         'property_latitude', 'property_longitude',
         'guest_notes', 'admin_notes', 'paid_at', 'receipt_number', 'payment_reference',
         'cancelled_at', 'cancellation_reason', 'cancellation_internal_note',
@@ -205,16 +205,10 @@ class Booking extends Model
             return null;
         }
 
-        $query = [
+        return 'https://www.google.com/maps/dir/?'.http_build_query([
             'api' => 1,
             'destination' => $destination,
-        ];
-
-        if (filled($this->property_google_place_id)) {
-            $query['destination_place_id'] = $this->property_google_place_id;
-        }
-
-        return 'https://www.google.com/maps/dir/?'.http_build_query($query, '', '&', PHP_QUERY_RFC3986);
+        ], '', '&', PHP_QUERY_RFC3986);
     }
 
     public function balanceDue(): float

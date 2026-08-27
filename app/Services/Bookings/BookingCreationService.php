@@ -117,7 +117,6 @@ class BookingCreationService
                 'pricing_snapshot' => array_merge($quote, ['currency' => (string) config('azari.currency', 'USD')]),
                 'property_name_snapshot' => $property->name,
                 'property_formatted_address' => $property->formatted_address ?: $property->location,
-                'property_google_place_id' => $property->google_place_id,
                 'property_latitude' => $property->latitude,
                 'property_longitude' => $property->longitude,
                 'expires_at' => now()->addMinutes((int) config('azari.booking.unpaid_booking_minutes', 60)),
