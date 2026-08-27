@@ -7,6 +7,7 @@ use App\Models\BookingGuest;
 use App\Models\BookingHold;
 use App\Models\BookingStatusHistory;
 use App\Models\IdentityVerification;
+use App\Services\Identity\GuestVerificationInvitationService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -18,6 +19,7 @@ class BookingCreationService
     public function __construct(
         private readonly AzariAvailabilityEngine $availability,
         private readonly AzariPricingEngine $pricing,
+        private readonly GuestVerificationInvitationService $guestInvitations,
     ) {}
 
     public function create(Request $request): Booking
@@ -42,9 +44,13 @@ class BookingCreationService
             ]);
         }
 
-        $data = $request->validate($this->rules($hold));
+        if ($hold->user_id && (int) $hold->user_id !== (int) $user->id) {
+            abort(403);
+        }
 
-        return DB::transaction(function () use ($request, $user, $hold, $data): Booking {
+        $data = $this->validateDraft($request, $hold);
+
+        $booking = DB::transaction(function () use ($request, $user, $hold, $data): Booking {
             $lockedHold = BookingHold::query()
                 ->with('property')
                 ->active()
@@ -59,6 +65,10 @@ class BookingCreationService
                 throw ValidationException::withMessages([
                     'hold_token' => 'Your reservation hold expired. Please search again.',
                 ]);
+            }
+
+            if ($lockedHold->user_id && (int) $lockedHold->user_id !== (int) $user->id) {
+                abort(403);
             }
 
             $property = $lockedHold->property()
@@ -118,12 +128,16 @@ class BookingCreationService
                 'tax_rate' => $quote['tax_rate'],
                 'tax_total' => $quote['tax_total'],
                 'total' => $quote['total'],
-                'pricing_snapshot' => array_merge($quote, ['currency' => (string) config('azari.currency', 'USD')]),
+                'pricing_snapshot' => array_merge($quote, [
+                    'currency' => (string) config('azari.currency', 'USD'),
+                ]),
                 'property_name_snapshot' => $property->name,
                 'property_formatted_address' => $property->formatted_address ?: $property->location,
                 'property_latitude' => $property->latitude,
                 'property_longitude' => $property->longitude,
-                'expires_at' => now()->addMinutes((int) config('azari.booking.unpaid_booking_minutes', 60)),
+                'expires_at' => now()->addMinutes(
+                    (int) config('azari.booking.unpaid_booking_minutes', 60)
+                ),
             ]);
 
             $verifiedUserIdentity = IdentityVerification::query()
@@ -142,10 +156,14 @@ class BookingCreationService
             foreach ($data['adults'] as $index => $adult) {
                 $guest = BookingGuest::query()->create([
                     'booking_id' => $booking->id,
+                    'user_id' => $index === 0 ? $user->id : null,
                     'type' => 'adult',
                     'position' => $index + 1,
                     'first_name' => $adult['first_name'],
                     'last_name' => $adult['last_name'],
+                    'email' => $index === 0
+                        ? $data['guest_email']
+                        : mb_strtolower((string) $adult['email']),
                     'is_lead' => $index === 0,
                 ]);
 
@@ -161,7 +179,9 @@ class BookingCreationService
                         'verification_type' => $verifiedUserIdentity->verification_type,
                         'verification_mode' => $verifiedUserIdentity->verification_mode,
                         'verified_at' => $verifiedUserIdentity->verified_at ?: now(),
-                        'metadata' => ['source_user_verification_id' => $verifiedUserIdentity->id],
+                        'metadata' => [
+                            'source_user_verification_id' => $verifiedUserIdentity->id,
+                        ],
                     ]);
                 }
             }
@@ -190,12 +210,54 @@ class BookingCreationService
 
             return $booking->refresh();
         }, 5);
+
+        $this->guestInvitations->sendForBooking(
+            $booking,
+            $request->getSchemeAndHttpHost()
+        );
+
+        return $booking;
+    }
+
+    public function validateDraft(Request $request, BookingHold $hold): array
+    {
+        $data = $request->validate($this->rules($hold));
+
+        $leadEmail = mb_strtolower((string) $data['guest_email']);
+        $seen = [];
+
+        foreach (($data['adults'] ?? []) as $index => $adult) {
+            if ($index === 0) {
+                continue;
+            }
+
+            $email = mb_strtolower((string) ($adult['email'] ?? ''));
+
+            if ($email === $leadEmail) {
+                throw ValidationException::withMessages([
+                    "adults.$index.email" => 'An additional adult must use their own email address.',
+                ]);
+            }
+
+            if (isset($seen[$email])) {
+                throw ValidationException::withMessages([
+                    "adults.$index.email" => 'Each additional adult must use a different email address.',
+                ]);
+            }
+
+            $seen[$email] = true;
+            $data['adults'][$index]['email'] = $email;
+        }
+
+        $data['guest_email'] = $leadEmail;
+
+        return $data;
     }
 
     private function rules(BookingHold $hold): array
     {
         $rules = [
-            'hold_token' => ['required', 'uuid'],
+            'hold_token' => ['nullable', 'uuid'],
             'first_name' => ['required', 'string', 'max:80'],
             'last_name' => ['required', 'string', 'max:80'],
             'guest_email' => ['required', 'email:rfc', 'max:190'],
@@ -214,6 +276,15 @@ class BookingCreationService
         for ($index = 0; $index < $hold->adults; $index++) {
             $rules["adults.$index.first_name"] = ['required', 'string', 'max:80'];
             $rules["adults.$index.last_name"] = ['required', 'string', 'max:80'];
+
+            if ($index > 0) {
+                $rules["adults.$index.email"] = [
+                    'required',
+                    'email:rfc',
+                    'max:190',
+                    'distinct',
+                ];
+            }
         }
 
         for ($index = 0; $index < $hold->children; $index++) {

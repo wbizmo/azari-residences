@@ -23,7 +23,11 @@ class DojahService
 
     public function verificationForUser(User $user): IdentityVerification
     {
-        abort_unless(Schema::hasTable('identity_verifications'), 503, 'Identity verification storage is not ready.');
+        abort_unless(
+            Schema::hasTable('identity_verifications'),
+            503,
+            'Identity verification storage is not ready.'
+        );
 
         return IdentityVerification::query()->firstOrCreate(
             [
@@ -41,16 +45,20 @@ class DojahService
 
     public function verificationForGuest(BookingGuest $guest): IdentityVerification
     {
-        abort_unless(Schema::hasTable('identity_verifications'), 503, 'Identity verification storage is not ready.');
+        abort_unless(
+            Schema::hasTable('identity_verifications'),
+            503,
+            'Identity verification storage is not ready.'
+        );
 
         return IdentityVerification::query()->firstOrCreate(
             [
-                'user_id' => null,
                 'booking_guest_id' => $guest->id,
                 'provider' => IdentityVerification::PROVIDER_DOJAH,
                 'status' => IdentityVerification::STATUS_PENDING,
             ],
             [
+                'user_id' => $guest->user_id,
                 'reference' => (string) Str::uuid(),
                 'widget_id' => $this->widgetId() ?: null,
             ]
@@ -99,25 +107,39 @@ class DojahService
             'widget_id' => $widgetId,
             'type' => $widgetType,
             'reference_id' => $verification->reference,
-            'launch_url' => $widgetId !== '' ? 'https://identity.dojah.io/?'.$query : null,
+            'launch_url' => $widgetId !== ''
+                ? 'https://identity.dojah.io/?'.$query
+                : null,
         ];
     }
 
-    public function verifyWebhookSignature(string $rawBody, ?string $signature, ?string $signatureV2 = null): bool
-    {
+    public function verifyWebhookSignature(
+        string $rawBody,
+        ?string $signature,
+        ?string $signatureV2 = null
+    ): bool {
         $secret = (string) config('azari.identity.dojah.secret_key');
+
         if ($secret === '') {
             return false;
         }
 
         if (filled($signature)) {
             $expected = hash_hmac('sha256', $rawBody, $secret);
-            return hash_equals($expected, strtolower(trim((string) $signature)));
+
+            return hash_equals(
+                $expected,
+                strtolower(trim((string) $signature))
+            );
         }
 
         if (filled($signatureV2)) {
             $expected = hash('sha256', $secret);
-            return hash_equals($expected, strtolower(trim((string) $signatureV2)));
+
+            return hash_equals(
+                $expected,
+                strtolower(trim((string) $signatureV2))
+            );
         }
 
         return false;
@@ -130,6 +152,7 @@ class DojahService
         }
 
         $reference = $this->extractReference($payload);
+
         if (! $reference) {
             return null;
         }
@@ -144,7 +167,11 @@ class DojahService
         }
 
         $payloadHash = hash('sha256', $rawBody);
-        if ($verification->last_payload_hash && hash_equals($verification->last_payload_hash, $payloadHash)) {
+
+        if (
+            $verification->last_payload_hash
+            && hash_equals($verification->last_payload_hash, $payloadHash)
+        ) {
             return $verification;
         }
 
@@ -152,11 +179,23 @@ class DojahService
         $outcome = $this->resolveOutcome($payload, $providerStatus);
 
         $verification->fill([
-            'provider_event_id' => $this->stringValue(Arr::get($payload, 'event_id') ?? Arr::get($payload, 'id')),
+            'provider_event_id' => $this->stringValue(
+                Arr::get($payload, 'event_id')
+                ?? Arr::get($payload, 'id')
+            ),
             'provider_status' => $providerStatus,
-            'verification_type' => $this->stringValue(Arr::get($payload, 'verification_type') ?? Arr::get($payload, 'data.verification_type')),
-            'verification_mode' => $this->stringValue(Arr::get($payload, 'verification_mode') ?? Arr::get($payload, 'data.verification_mode')),
-            'verification_url' => $this->stringValue(Arr::get($payload, 'verification_url') ?? Arr::get($payload, 'data.verification_url')),
+            'verification_type' => $this->stringValue(
+                Arr::get($payload, 'verification_type')
+                ?? Arr::get($payload, 'data.verification_type')
+            ),
+            'verification_mode' => $this->stringValue(
+                Arr::get($payload, 'verification_mode')
+                ?? Arr::get($payload, 'data.verification_mode')
+            ),
+            'verification_url' => $this->stringValue(
+                Arr::get($payload, 'verification_url')
+                ?? Arr::get($payload, 'data.verification_url')
+            ),
             'status' => $outcome['status'],
             'failure_reason' => $outcome['reason'],
             'last_event_at' => now(),
@@ -176,6 +215,7 @@ class DojahService
             $verification->verified_at = null;
         } else {
             $verification->verified_at = null;
+
             if ($outcome['status'] !== IdentityVerification::STATUS_FAILED) {
                 $verification->failed_at = null;
             }
@@ -187,15 +227,104 @@ class DojahService
             $this->syncUserVerificationToLeadGuests($verification);
         }
 
+        if (
+            $verification->booking_guest_id
+            && $verification->isVerified()
+        ) {
+            $guest = BookingGuest::query()->find($verification->booking_guest_id);
+
+            if ($guest?->user_id) {
+                $user = User::query()->find($guest->user_id);
+
+                if ($user) {
+                    $this->syncVerifiedGuestToUser($guest, $user);
+                }
+            }
+        }
+
         return $verification;
     }
 
-    private function syncUserVerificationToLeadGuests(IdentityVerification $source): void
-    {
+    public function syncVerifiedUserToGuest(
+        User $user,
+        BookingGuest $guest
+    ): ?IdentityVerification {
+        $source = $this->latestForUser($user);
+
+        if (! $source?->isVerified()) {
+            return null;
+        }
+
+        $latestGuest = $this->latestForGuest($guest);
+
+        if ($latestGuest?->isVerified()) {
+            return $latestGuest;
+        }
+
+        return IdentityVerification::query()->create([
+            'user_id' => $user->id,
+            'booking_guest_id' => $guest->id,
+            'provider' => IdentityVerification::PROVIDER_DOJAH,
+            'reference' => (string) Str::uuid(),
+            'widget_id' => $source->widget_id,
+            'status' => IdentityVerification::STATUS_VERIFIED,
+            'provider_status' => $source->provider_status,
+            'verification_type' => $source->verification_type,
+            'verification_mode' => $source->verification_mode,
+            'verified_at' => $source->verified_at ?: now(),
+            'metadata' => [
+                'source_user_verification_id' => $source->id,
+            ],
+        ]);
+    }
+
+    public function syncVerifiedGuestToUser(
+        BookingGuest $guest,
+        User $user
+    ): ?IdentityVerification {
+        $source = $this->latestForGuest($guest);
+
+        if (! $source?->isVerified()) {
+            return null;
+        }
+
+        $latestUser = $this->latestForUser($user);
+
+        if ($latestUser?->isVerified()) {
+            return $latestUser;
+        }
+
+        $created = IdentityVerification::query()->create([
+            'user_id' => $user->id,
+            'booking_guest_id' => null,
+            'provider' => IdentityVerification::PROVIDER_DOJAH,
+            'reference' => (string) Str::uuid(),
+            'widget_id' => $source->widget_id,
+            'status' => IdentityVerification::STATUS_VERIFIED,
+            'provider_status' => $source->provider_status,
+            'verification_type' => $source->verification_type,
+            'verification_mode' => $source->verification_mode,
+            'verified_at' => $source->verified_at ?: now(),
+            'metadata' => [
+                'source_guest_verification_id' => $source->id,
+            ],
+        ]);
+
+        $this->syncUserVerificationToLeadGuests($created);
+
+        return $created;
+    }
+
+    private function syncUserVerificationToLeadGuests(
+        IdentityVerification $source
+    ): void {
         $leadGuests = BookingGuest::query()
             ->where('type', 'adult')
             ->where('is_lead', true)
-            ->whereHas('booking', fn ($query) => $query->where('user_id', $source->user_id))
+            ->whereHas(
+                'booking',
+                fn ($query) => $query->where('user_id', $source->user_id)
+            )
             ->get();
 
         foreach ($leadGuests as $guest) {
@@ -220,12 +349,19 @@ class DojahService
                 'provider_status' => $source->provider_status,
                 'verification_type' => $source->verification_type,
                 'verification_mode' => $source->verification_mode,
-                'verified_at' => $source->isVerified() ? ($source->verified_at ?: now()) : null,
-                'failed_at' => $source->status === IdentityVerification::STATUS_FAILED ? ($source->failed_at ?: now()) : null,
+                'verified_at' => $source->isVerified()
+                    ? ($source->verified_at ?: now())
+                    : null,
+                'failed_at' => $source->status === IdentityVerification::STATUS_FAILED
+                    ? ($source->failed_at ?: now())
+                    : null,
                 'failure_reason' => $source->failure_reason,
                 'last_event_at' => $source->last_event_at,
-                'metadata' => ['source_user_verification_id' => $source->id],
+                'metadata' => [
+                    'source_user_verification_id' => $source->id,
+                ],
             ]);
+
             $mirror->save();
         }
     }
@@ -245,19 +381,39 @@ class DojahService
             ?? Arr::get($payload, 'data.verification_status')
             ?? Arr::get($payload, 'status');
 
-        return filled($value) ? strtolower(trim((string) $value)) : null;
+        return filled($value)
+            ? strtolower(trim((string) $value))
+            : null;
     }
 
-    private function resolveOutcome(array $payload, ?string $providerStatus): array
-    {
+    private function resolveOutcome(
+        array $payload,
+        ?string $providerStatus
+    ): array {
         $checks = $this->extractChecks($payload);
-        $required = collect(config('azari.identity.dojah.required_steps', []))
+
+        $required = collect(
+            config('azari.identity.dojah.required_steps', [])
+        )
             ->map(fn ($step) => strtolower(trim((string) $step)))
             ->filter()
             ->values();
 
-        $failedStatuses = ['failed', 'failure', 'declined', 'rejected', 'invalid', 'cancelled', 'canceled', 'abandoned'];
-        if ($providerStatus && in_array($providerStatus, $failedStatuses, true)) {
+        $failedStatuses = [
+            'failed',
+            'failure',
+            'declined',
+            'rejected',
+            'invalid',
+            'cancelled',
+            'canceled',
+            'abandoned',
+        ];
+
+        if (
+            $providerStatus
+            && in_array($providerStatus, $failedStatuses, true)
+        ) {
             return [
                 'status' => IdentityVerification::STATUS_FAILED,
                 'reason' => 'Dojah reported a failed identity verification.',
@@ -267,7 +423,10 @@ class DojahService
 
         if ($required->isNotEmpty()) {
             foreach ($required as $requiredStep) {
-                if (! array_key_exists($requiredStep, $checks) || $checks[$requiredStep] !== true) {
+                if (
+                    ! array_key_exists($requiredStep, $checks)
+                    || $checks[$requiredStep] !== true
+                ) {
                     return [
                         'status' => IdentityVerification::STATUS_NEEDS_REVIEW,
                         'reason' => 'A required Dojah verification step is incomplete or did not pass.',
@@ -285,8 +444,18 @@ class DojahService
             ];
         }
 
-        $verifiedStatuses = ['verified', 'approved', 'successful', 'success', 'passed'];
-        if ($providerStatus && in_array($providerStatus, $verifiedStatuses, true)) {
+        $verifiedStatuses = [
+            'verified',
+            'approved',
+            'successful',
+            'success',
+            'passed',
+        ];
+
+        if (
+            $providerStatus
+            && in_array($providerStatus, $verifiedStatuses, true)
+        ) {
             return [
                 'status' => IdentityVerification::STATUS_VERIFIED,
                 'reason' => null,
@@ -294,7 +463,11 @@ class DojahService
             ];
         }
 
-        if ($providerStatus === 'completed' && $checks !== [] && ! in_array(false, $checks, true)) {
+        if (
+            $providerStatus === 'completed'
+            && $checks !== []
+            && ! in_array(false, $checks, true)
+        ) {
             return [
                 'status' => IdentityVerification::STATUS_VERIFIED,
                 'reason' => null,
@@ -338,7 +511,14 @@ class DojahService
                 continue;
             }
 
-            $checkName = strtolower((string) ($value['type'] ?? $value['name'] ?? $value['verification_type'] ?? $name ?? ''));
+            $checkName = strtolower((string) (
+                $value['type']
+                ?? $value['name']
+                ?? $value['verification_type']
+                ?? $name
+                ?? ''
+            ));
+
             if ($checkName === '') {
                 continue;
             }
@@ -365,7 +545,21 @@ class DojahService
             return (int) $value === 1;
         }
 
-        return in_array(strtolower(trim((string) $value)), ['true', '1', 'passed', 'pass', 'verified', 'approved', 'successful', 'success', 'completed'], true);
+        return in_array(
+            strtolower(trim((string) $value)),
+            [
+                'true',
+                '1',
+                'passed',
+                'pass',
+                'verified',
+                'approved',
+                'successful',
+                'success',
+                'completed',
+            ],
+            true
+        );
     }
 
     private function widgetId(): string
@@ -373,7 +567,10 @@ class DojahService
         $widgetId = trim((string) config('azari.identity.dojah.widget_id'));
         $tokenId = trim((string) config('azari.identity.dojah.token_id'));
 
-        if ($widgetId === '' || ($tokenId !== '' && hash_equals($tokenId, $widgetId))) {
+        if (
+            $widgetId === ''
+            || ($tokenId !== '' && hash_equals($tokenId, $widgetId))
+        ) {
             return '';
         }
 
@@ -382,6 +579,8 @@ class DojahService
 
     private function stringValue(mixed $value): ?string
     {
-        return is_scalar($value) && filled($value) ? (string) $value : null;
+        return is_scalar($value) && filled($value)
+            ? (string) $value
+            : null;
     }
 }

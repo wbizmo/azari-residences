@@ -20,86 +20,119 @@ use App\Http\Controllers\Webhooks\DojahWebhookController;
 use App\Http\Controllers\Webhooks\TwilioMessageStatusController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer', 'azari.owns-route'])->prefix('account')->name('user.')->group(function (): void {
-    Route::get('/', UserDashboardController::class)->name('dashboard');
+Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer', 'azari.owns-route'])
+    ->prefix('account')
+    ->name('user.')
+    ->group(function (): void {
+        Route::get('/', UserDashboardController::class)->name('dashboard');
 
-    Route::middleware('azari.identity.verified')->group(function (): void {
-        Route::get('/bookings', [UserBookingController::class, 'index'])->name('bookings.index');
-        Route::get('/bookings/{reference}', [UserBookingController::class, 'show'])->name('bookings.show');
-        Route::get('/bookings/{reference}/receipt', [UserBookingController::class, 'receipt'])->name('bookings.receipt');
-        Route::get('/payments', [UserPaymentController::class, 'index'])->name('payments.index');
-        Route::get('/payments/{payment}', [UserPaymentController::class, 'show'])->name('payments.show');
-        Route::post('/payments/{payment}/retry', [UserPaymentController::class, 'retry'])->name('payments.retry');
-        Route::get('/documents', [UserDocumentController::class, 'index'])->name('documents.index');
-        Route::get('/additional-guests', [AdditionalGuestController::class, 'index'])->name('guests.index');
-        Route::get('/bookings/{reference}/guests/{guest}/identity/dojah', [DojahVerificationController::class, 'guest'])->name('guests.identity.dojah');
+        Route::middleware('azari.identity.verified')->group(function (): void {
+            Route::get('/bookings', [UserBookingController::class, 'index'])->name('bookings.index');
+            Route::get('/bookings/{reference}', [UserBookingController::class, 'show'])->name('bookings.show');
+            Route::get('/bookings/{reference}/receipt', [UserBookingController::class, 'receipt'])->name('bookings.receipt');
+            Route::get('/payments', [UserPaymentController::class, 'index'])->name('payments.index');
+            Route::get('/payments/{payment}', [UserPaymentController::class, 'show'])->name('payments.show');
+            Route::post('/payments/{payment}/retry', [UserPaymentController::class, 'retry'])->name('payments.retry');
+            Route::get('/documents', [UserDocumentController::class, 'index'])->name('documents.index');
+
+            Route::get('/additional-guests', [AdditionalGuestController::class, 'index'])
+                ->name('guests.index');
+
+            Route::post('/bookings/{reference}/guests/{guest}/verification-invite', [AdditionalGuestController::class, 'sendInvite'])
+                ->middleware('throttle:10,1')
+                ->name('guests.verification-invite.send');
+        });
+
+        // Dojah verification itself remains reachable while the customer is
+        // unverified. Profile/security/support are also reachable so account
+        // data can be corrected without bypassing KYC.
+        Route::get('/identity', [DojahVerificationController::class, 'user'])->name('identity.index');
+        Route::get('/identity/dojah', [DojahVerificationController::class, 'user'])->name('identity.dojah');
+        Route::get('/identity/status', [DojahVerificationController::class, 'status'])->middleware('throttle:60,1')->name('identity.status');
+        Route::get('/notifications', [UserNotificationController::class, 'index'])->name('notifications.index');
+        Route::patch('/notifications/{notification}/read', [UserNotificationController::class, 'read'])->name('notifications.read');
+        Route::patch('/notifications/read-all', [UserNotificationController::class, 'readAll'])->name('notifications.read-all');
+        Route::get('/profile', [UserProfileController::class, 'edit'])->name('profile.edit');
+        Route::patch('/profile', [UserProfileController::class, 'update'])->name('profile.update');
+        Route::patch('/preferences', [UserProfileController::class, 'preferences'])->name('preferences.update');
+        Route::post('/phone-verification/send', [PhoneVerificationController::class, 'send'])->name('phone.send');
+        Route::post('/phone-verification/verify', [PhoneVerificationController::class, 'verify'])->name('phone.verify');
+        Route::get('/security', [UserSecurityController::class, 'index'])->name('security.index');
+        Route::delete('/security/sessions/{session}', [UserSecurityController::class, 'destroySession'])->name('security.sessions.destroy');
+        Route::get('/contact', fn (UserContactController $controller) => $controller('contact'))->name('contact');
+        Route::get('/service-requests', fn (UserContactController $controller) => $controller('service-requests'))->name('service-requests');
+        Route::get('/support-tickets', fn (UserContactController $controller) => $controller('support-tickets'))->name('support-tickets');
     });
 
-    // Dojah verification itself must remain reachable while the customer is
-    // unverified. Profile/security/support are also reachable so they can
-    // correct account data or get help without bypassing KYC.
-    Route::get('/identity', [DojahVerificationController::class, 'user'])->name('identity.index');
-    Route::get('/identity/dojah', [DojahVerificationController::class, 'user'])->name('identity.dojah');
-    Route::get('/notifications', [UserNotificationController::class, 'index'])->name('notifications.index');
-    Route::patch('/notifications/{notification}/read', [UserNotificationController::class, 'read'])->name('notifications.read');
-    Route::patch('/notifications/read-all', [UserNotificationController::class, 'readAll'])->name('notifications.read-all');
-    Route::get('/profile', [UserProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [UserProfileController::class, 'update'])->name('profile.update');
-    Route::patch('/preferences', [UserProfileController::class, 'preferences'])->name('preferences.update');
-    Route::post('/phone-verification/send', [PhoneVerificationController::class, 'send'])->name('phone.send');
-    Route::post('/phone-verification/verify', [PhoneVerificationController::class, 'verify'])->name('phone.verify');
-    Route::get('/security', [UserSecurityController::class, 'index'])->name('security.index');
-    Route::delete('/security/sessions/{session}', [UserSecurityController::class, 'destroySession'])->name('security.sessions.destroy');
-    Route::get('/contact', fn (UserContactController $controller) => $controller('contact'))->name('contact');
-    Route::get('/service-requests', fn (UserContactController $controller) => $controller('service-requests'))->name('service-requests');
-    Route::get('/support-tickets', fn (UserContactController $controller) => $controller('support-tickets'))->name('support-tickets');
-});
+Route::middleware(['auth', 'auth.session', 'throttle:60,1'])
+    ->prefix('location')
+    ->name('location.address.')
+    ->group(function (): void {
+        Route::get('/search', [AddressLookupController::class, 'search'])->name('search');
+        Route::get('/reverse', [AddressLookupController::class, 'reverse'])->name('reverse');
+    });
 
-Route::middleware(['auth', 'auth.session', 'throttle:60,1'])->prefix('location')->name('location.address.')->group(function (): void {
-    Route::get('/search', [AddressLookupController::class, 'search'])->name('search');
-    Route::get('/reverse', [AddressLookupController::class, 'reverse'])->name('reverse');
-});
+Route::post('/webhooks/dojah/kyc', DojahWebhookController::class)
+    ->middleware('throttle:240,1')
+    ->name('webhooks.dojah.kyc');
 
-Route::post('/webhooks/dojah/kyc', DojahWebhookController::class)->middleware('throttle:240,1')->name('webhooks.dojah.kyc');
-Route::post('/webhooks/twilio/message-status', TwilioMessageStatusController::class)->middleware('throttle:600,1')->name('webhooks.twilio.message-status');
+Route::post('/webhooks/twilio/message-status', TwilioMessageStatusController::class)
+    ->middleware('throttle:600,1')
+    ->name('webhooks.twilio.message-status');
 
-Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer', 'azari.identity.verified'])->group(function (): void {
-    Route::get('/booking/{reference}/payment', [PaymentCheckoutController::class, 'select'])->name('public.payment.select');
-    Route::post('/booking/{reference}/payment', [PaymentCheckoutController::class, 'initialise'])->middleware('throttle:20,1')->name('public.payment.initialise');
-    Route::get('/booking/{reference}/payment/flutterwave/{payment}/instructions', [PaymentCheckoutController::class, 'flutterwaveInstructions'])->name('public.payment.flutterwave.instructions');
-    Route::get('/booking/{reference}/payment-receipt/{payment}', [PaymentCheckoutController::class, 'receipt'])->name('public.payment.receipt');
-});
+Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer', 'azari.identity.verified'])
+    ->group(function (): void {
+        Route::get('/booking/{reference}/payment', [PaymentCheckoutController::class, 'select'])->name('public.payment.select');
+        Route::post('/booking/{reference}/payment', [PaymentCheckoutController::class, 'initialise'])
+            ->middleware('throttle:20,1')
+            ->name('public.payment.initialise');
+        Route::get('/booking/{reference}/payment/flutterwave/{payment}/instructions', [PaymentCheckoutController::class, 'flutterwaveInstructions'])
+            ->name('public.payment.flutterwave.instructions');
+        Route::get('/booking/{reference}/payment-receipt/{payment}', [PaymentCheckoutController::class, 'receipt'])
+            ->name('public.payment.receipt');
+    });
 
-Route::match(['GET', 'POST'], '/payments/{provider}/callback/{payment}', [PaymentCheckoutController::class, 'callback'])->middleware('throttle:120,1')->name('payments.callback');
-Route::match(['GET', 'POST'], '/payments/{provider}/webhook', [PaymentCheckoutController::class, 'webhook'])->middleware('throttle:240,1')->name('payments.webhook');
+Route::match(['GET', 'POST'], '/payments/{provider}/callback/{payment}', [PaymentCheckoutController::class, 'callback'])
+    ->middleware('throttle:120,1')
+    ->name('payments.callback');
 
-Route::prefix('azari-admin')->name('azari.admin.')->middleware(['auth.session', 'azari.staff'])->group(function (): void {
-    Route::get('/settings/integrations', [SystemSettingsController::class, 'edit'])->name('settings.integrations');
-    Route::put('/settings/integrations', [SystemSettingsController::class, 'update'])
-        ->middleware('azari.admin')
-        ->name('settings.integrations.update');
+Route::match(['GET', 'POST'], '/payments/{provider}/webhook', [PaymentCheckoutController::class, 'webhook'])
+    ->middleware('throttle:240,1')
+    ->name('payments.webhook');
 
-    Route::get('/payments/providers', [AdminPaymentController::class, 'providers'])->name('payments.providers');
-    Route::post('/payments/providers/{provider}/test', [AdminPaymentController::class, 'testProvider'])
-        ->middleware('azari.admin')
-        ->name('payments.providers.test');
-    Route::get('/payments/create', [AdminPaymentController::class, 'create'])->name('payments.create');
-    Route::post('/payments', [AdminPaymentController::class, 'store'])
-        ->middleware('azari.permission:payments.manage')
-        ->name('payments.store');
-    Route::get('/payments', [AdminPaymentController::class, 'index'])->name('payments.index');
-    Route::get('/payments/{payment}', [AdminPaymentController::class, 'show'])->name('payments.show');
-    Route::post('/payments/{payment}/reconcile', [AdminPaymentController::class, 'reconcile'])
-        ->middleware('azari.permission:payments.manage')
-        ->name('payments.reconcile');
-    Route::get('/payments/{payment}/proof', [AdminPaymentController::class, 'proof'])->name('payments.proof');
-});
+Route::prefix('azari-admin')
+    ->name('azari.admin.')
+    ->middleware(['auth.session', 'azari.staff'])
+    ->group(function (): void {
+        Route::get('/settings/integrations', [SystemSettingsController::class, 'edit'])->name('settings.integrations');
+        Route::put('/settings/integrations', [SystemSettingsController::class, 'update'])
+            ->middleware('azari.admin')
+            ->name('settings.integrations.update');
 
-Route::prefix('azaridevadmin')->name('azari.admin.')->middleware(['azari.admin'])->group(function (): void {
-    Route::get('/staff/{user}/edit', [StaffController::class, 'edit'])->name('staff.edit');
-    Route::put('/staff/{user}', [StaffController::class, 'update'])->name('staff.update');
-    Route::put('/staff/{user}/password', [StaffController::class, 'replacePassword'])->name('staff.password');
-    Route::put('/staff/{user}/suspend', [StaffController::class, 'suspend'])->name('staff.suspend');
-    Route::put('/staff/{user}/reactivate', [StaffController::class, 'reactivate'])->name('staff.reactivate');
-    Route::get('/staff/{user}/activity', [StaffController::class, 'activity'])->name('staff.activity');
-});
+        Route::get('/payments/providers', [AdminPaymentController::class, 'providers'])->name('payments.providers');
+        Route::post('/payments/providers/{provider}/test', [AdminPaymentController::class, 'testProvider'])
+            ->middleware('azari.admin')
+            ->name('payments.providers.test');
+        Route::get('/payments/create', [AdminPaymentController::class, 'create'])->name('payments.create');
+        Route::post('/payments', [AdminPaymentController::class, 'store'])
+            ->middleware('azari.permission:payments.manage')
+            ->name('payments.store');
+        Route::get('/payments', [AdminPaymentController::class, 'index'])->name('payments.index');
+        Route::get('/payments/{payment}', [AdminPaymentController::class, 'show'])->name('payments.show');
+        Route::post('/payments/{payment}/reconcile', [AdminPaymentController::class, 'reconcile'])
+            ->middleware('azari.permission:payments.manage')
+            ->name('payments.reconcile');
+        Route::get('/payments/{payment}/proof', [AdminPaymentController::class, 'proof'])->name('payments.proof');
+    });
+
+Route::prefix('azaridevadmin')
+    ->name('azari.admin.')
+    ->middleware(['azari.admin'])
+    ->group(function (): void {
+        Route::get('/staff/{user}/edit', [StaffController::class, 'edit'])->name('staff.edit');
+        Route::put('/staff/{user}', [StaffController::class, 'update'])->name('staff.update');
+        Route::put('/staff/{user}/password', [StaffController::class, 'replacePassword'])->name('staff.password');
+        Route::put('/staff/{user}/suspend', [StaffController::class, 'suspend'])->name('staff.suspend');
+        Route::put('/staff/{user}/reactivate', [StaffController::class, 'reactivate'])->name('staff.reactivate');
+        Route::get('/staff/{user}/activity', [StaffController::class, 'activity'])->name('staff.activity');
+    });
