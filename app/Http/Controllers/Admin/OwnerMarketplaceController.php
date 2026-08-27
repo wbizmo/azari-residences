@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Amenity;
-use App\Models\IdentityVerification;
 use App\Models\OwnerPayoutProfile;
 use App\Models\Property;
 use App\Models\PropertyListing;
@@ -37,12 +36,11 @@ class OwnerMarketplaceController extends Controller
 
     public function showListing(PropertyListing $listing): View
     {
-        $listing->load(['user.currentIdentity', 'agreement', 'approvedProperty', 'reviewedBy']);
+        $listing->load(['user', 'agreement', 'approvedProperty', 'reviewedBy']);
 
         return view('admin.owner-listings.show', [
             'listing' => $listing,
             'amenities' => Amenity::query()->whereIn('id', $listing->amenity_ids ?? [])->pluck('name'),
-            'dojahVerified' => $listing->user_id ? IdentityVerification::userIsVerified($listing->user_id) : false,
         ]);
     }
 
@@ -62,14 +60,6 @@ class OwnerMarketplaceController extends Controller
     public function approveListing(Request $request, PropertyListing $listing): RedirectResponse
     {
         abort_unless(in_array($listing->status, ['submitted', 'under_review'], true), 422);
-
-        if ((bool) config('azari.identity.dojah.enabled', false)) {
-            abort_unless(
-                $listing->user_id && IdentityVerification::userIsVerified($listing->user_id),
-                422,
-                'The property owner must complete Dojah identity verification before this listing can be approved.'
-            );
-        }
 
         $data = $request->validate([
             'approved_owner_share_percentage' => ['required', 'numeric', 'min:0', 'max:100'],
@@ -167,14 +157,6 @@ class OwnerMarketplaceController extends Controller
 
     public function processWithdrawal(Request $request, WithdrawalRequest $withdrawal, OwnerWithdrawalService $withdrawals): RedirectResponse
     {
-        if ((bool) config('azari.identity.dojah.enabled', false)) {
-            abort_unless(
-                $withdrawal->user_id && IdentityVerification::userIsVerified($withdrawal->user_id),
-                422,
-                'The owner must have a verified Dojah identity before this withdrawal can be processed.'
-            );
-        }
-
         $data = $request->validate(['admin_note' => ['nullable', 'string', 'max:3000']]);
 
         try {

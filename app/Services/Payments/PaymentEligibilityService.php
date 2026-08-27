@@ -3,6 +3,7 @@
 namespace App\Services\Payments;
 
 use App\Models\Booking;
+use App\Models\IdentityVerification;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -14,11 +15,13 @@ class PaymentEligibilityService
      *
      * Cancelled bookings are hidden with 404.
      * Fully paid bookings are rejected with 409.
-     * Only active bookings with an outstanding balance may proceed.
+     * Only active bookings with an outstanding balance and fully Dojah-verified
+     * adult guests may proceed.
      */
     public function assertCheckoutAccessible(Booking $booking): void
     {
         $this->assertNotCancelled($booking);
+        $this->assertAdultsVerified($booking, conflict: true);
 
         if ($this->isFullyPaid($booking)) {
             throw new ConflictHttpException('This booking has already been fully paid.');
@@ -33,7 +36,7 @@ class PaymentEligibilityService
      * Guard payment creation and retry at service level.
      *
      * This is intentionally called again after the booking row is locked,
-     * preventing stale-page, duplicate-tab, and direct-route bypasses.
+     * preventing stale-page, duplicate-tab, direct-route, and KYC bypasses.
      */
     public function assertCanInitiate(Booking $booking): void
     {
@@ -42,6 +45,8 @@ class PaymentEligibilityService
                 'booking' => 'This booking has been cancelled and cannot accept payment.',
             ]);
         }
+
+        $this->assertAdultsVerified($booking);
 
         if ($this->isFullyPaid($booking)) {
             throw ValidationException::withMessages([
@@ -89,6 +94,25 @@ class PaymentEligibilityService
             || in_array(strtolower((string) $booking->status), ['paid', 'confirmed'], true);
 
         return $legacyPaid || $booking->balanceDue() <= 0;
+    }
+
+    private function assertAdultsVerified(Booking $booking, bool $conflict = false): void
+    {
+        $adultIds = $booking->guests()->where('type', 'adult')->pluck('id');
+        $verified = $adultIds->isNotEmpty()
+            && $adultIds->every(fn ($guestId) => IdentityVerification::guestIsVerified((int) $guestId));
+
+        if ($verified) {
+            return;
+        }
+
+        $message = 'Every adult on this booking must complete Dojah identity verification before payment.';
+
+        if ($conflict) {
+            throw new ConflictHttpException($message);
+        }
+
+        throw ValidationException::withMessages(['identity' => $message]);
     }
 
     private function assertNotCancelled(Booking $booking): void

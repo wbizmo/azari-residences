@@ -2,11 +2,15 @@
 
 namespace Tests\Feature;
 
+use App\Models\Booking;
+use App\Models\BookingGuest;
 use App\Models\IdentityVerification;
 use App\Models\User;
 use App\Services\Identity\DojahService;
+use App\Services\Payments\PaymentEligibilityService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
 class DojahIdentityVerificationFlowTest extends TestCase
@@ -117,5 +121,51 @@ class DojahIdentityVerificationFlowTest extends TestCase
             ->get('/__test/dojah-protected')
             ->assertOk()
             ->assertSee('ok');
+    }
+
+    public function test_direct_payment_initialisation_is_blocked_until_every_adult_is_dojah_verified(): void
+    {
+        $user = User::factory()->create();
+        $booking = Booking::factory()->create([
+            'user_id' => $user->id,
+            'status' => 'pending_payment',
+            'paid_at' => null,
+            'receipt_number' => null,
+            'payment_reference' => null,
+            'subtotal' => 100,
+            'tax_total' => 0,
+            'total' => 100,
+        ]);
+
+        $lead = BookingGuest::query()->create([
+            'booking_id' => $booking->id,
+            'type' => 'adult',
+            'position' => 1,
+            'first_name' => 'Lead',
+            'last_name' => 'Guest',
+            'is_lead' => true,
+        ]);
+        BookingGuest::query()->create([
+            'booking_id' => $booking->id,
+            'type' => 'adult',
+            'position' => 2,
+            'first_name' => 'Second',
+            'last_name' => 'Guest',
+            'is_lead' => false,
+        ]);
+
+        IdentityVerification::query()->create([
+            'user_id' => $user->id,
+            'booking_guest_id' => $lead->id,
+            'provider' => IdentityVerification::PROVIDER_DOJAH,
+            'reference' => 'lead-verified-reference',
+            'status' => IdentityVerification::STATUS_VERIFIED,
+            'verified_at' => now(),
+        ]);
+
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessage('Every adult on this booking must complete Dojah identity verification before payment.');
+
+        app(PaymentEligibilityService::class)->assertCanInitiate($booking);
     }
 }
