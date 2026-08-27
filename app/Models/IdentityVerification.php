@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Schema;
 
 class IdentityVerification extends Model
 {
@@ -43,6 +44,10 @@ class IdentityVerification extends Model
 
     public static function userIsVerified(int $userId): bool
     {
+        if (! Schema::hasTable('identity_verifications')) {
+            return false;
+        }
+
         return static::query()
             ->where('provider', self::PROVIDER_DOJAH)
             ->where('user_id', $userId)
@@ -53,6 +58,10 @@ class IdentityVerification extends Model
 
     public static function guestIsVerified(int $guestId): bool
     {
+        if (! Schema::hasTable('identity_verifications')) {
+            return false;
+        }
+
         return static::query()
             ->where('provider', self::PROVIDER_DOJAH)
             ->where('booking_guest_id', $guestId)

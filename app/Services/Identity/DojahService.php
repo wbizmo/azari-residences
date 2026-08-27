@@ -6,6 +6,7 @@ use App\Models\BookingGuest;
 use App\Models\IdentityVerification;
 use App\Models\User;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class DojahService
@@ -22,6 +23,8 @@ class DojahService
 
     public function verificationForUser(User $user): IdentityVerification
     {
+        abort_unless(Schema::hasTable('identity_verifications'), 503, 'Identity verification storage is not ready.');
+
         return IdentityVerification::query()->firstOrCreate(
             [
                 'user_id' => $user->id,
@@ -38,6 +41,8 @@ class DojahService
 
     public function verificationForGuest(BookingGuest $guest): IdentityVerification
     {
+        abort_unless(Schema::hasTable('identity_verifications'), 503, 'Identity verification storage is not ready.');
+
         return IdentityVerification::query()->firstOrCreate(
             [
                 'user_id' => null,
@@ -54,6 +59,10 @@ class DojahService
 
     public function latestForUser(User $user): ?IdentityVerification
     {
+        if (! Schema::hasTable('identity_verifications')) {
+            return null;
+        }
+
         return IdentityVerification::query()
             ->where('provider', IdentityVerification::PROVIDER_DOJAH)
             ->where('user_id', $user->id)
@@ -63,6 +72,10 @@ class DojahService
 
     public function latestForGuest(BookingGuest $guest): ?IdentityVerification
     {
+        if (! Schema::hasTable('identity_verifications')) {
+            return null;
+        }
+
         return IdentityVerification::query()
             ->where('provider', IdentityVerification::PROVIDER_DOJAH)
             ->where('booking_guest_id', $guest->id)
@@ -111,6 +124,10 @@ class DojahService
 
     public function processWebhook(array $payload, string $rawBody): ?IdentityVerification
     {
+        if (! Schema::hasTable('identity_verifications')) {
+            return null;
+        }
+
         $reference = $this->extractReference($payload);
         if (! $reference) {
             return null;
