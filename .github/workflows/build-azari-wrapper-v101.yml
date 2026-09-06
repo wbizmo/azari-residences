@@ -44,9 +44,16 @@ jobs:
 
       - name: Run release lint
         working-directory: android-wrapper-v101
-        run: gradle :app:lintRelease --stacktrace
+        run: |
+          set +e
+          gradle :app:lintRelease --stacktrace
+          status=$?
+          echo '----- FULL LINT REPORT -----'
+          cat app/build/intermediates/lint_intermediate_text_report/release/lintReportRelease/lint-results-release.txt || true
+          exit $status
 
       - name: Upload unsigned AAB
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: azari-residences-v1.0.1-unsigned
