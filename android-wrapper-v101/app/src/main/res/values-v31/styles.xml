@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Azari" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:windowActionModeOverlay">true</item>
+        <item name="android:windowBackground">@color/azari_green_dark</item>
+        <item name="android:colorAccent">@color/azari_brass</item>
+        <item name="android:statusBarColor">@color/azari_green_dark</item>
+        <item name="android:navigationBarColor">@color/azari_green_dark</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowSplashScreenBackground">@color/azari_green_dark</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/azari_logo</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">@color/azari_ivory</item>
+    </style>
+</resources>
