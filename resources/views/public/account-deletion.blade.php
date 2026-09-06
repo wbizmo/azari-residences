@@ -4,7 +4,7 @@
 @section('description', 'Request deletion of your Azari Hotels & Residences account and associated personal data.')
 
 @section('content')
-<section style="min-height:70vh;background:#f8f5ef;padding:72px 20px;">
+<section style="min-height:70vh;background:#f8f5ef;padding:148px 20px 72px;">
     <div style="max-width:760px;margin:0 auto;background:#fffdf9;border:1px solid #e7e1d7;border-radius:24px;padding:36px;box-shadow:0 18px 50px rgba(12,43,36,.08);">
         <p style="margin:0 0 10px;color:#b58a4a;font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:12px;">Privacy & account controls</p>
         <h1 style="margin:0;color:#0c2b24;font-size:38px;line-height:1.15;">Account & Data Deletion</h1>
