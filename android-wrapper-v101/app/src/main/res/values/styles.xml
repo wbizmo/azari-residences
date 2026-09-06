@@ -7,8 +7,6 @@
         <item name="android:colorAccent">@color/azari_brass</item>
         <item name="android:statusBarColor">@color/azari_green_dark</item>
         <item name="android:navigationBarColor">@color/azari_green_dark</item>
-        <item name="android:windowLightStatusBar">false</item>
-        <item name="android:windowLightNavigationBar">false</item>
         <item name="android:windowNoTitle">true</item>
     </style>
 </resources>
