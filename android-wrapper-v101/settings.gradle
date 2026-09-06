@@ -16,3 +16,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "AzariResidencesAndroid"
 include(":app")
+
+// Release build source for Azari Residences Android v1.0.1.
