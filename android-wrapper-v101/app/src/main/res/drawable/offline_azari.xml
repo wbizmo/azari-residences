@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="320dp"
+    android:height="320dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+
+    <!-- subtle brass floor accent -->
+    <path
+        android:fillColor="#33B58A4A"
+        android:pathData="M62,422 C138,401 375,401 450,422 C378,443 134,443 62,422 Z" />
+
+    <!-- disconnected Wi-Fi arcs -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="11"
+        android:strokeLineCap="round"
+        android:pathData="M327,118 C365,91 414,91 452,118" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="11"
+        android:strokeLineCap="round"
+        android:pathData="M344,146 C370,128 407,128 433,146" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M388,170 m-8,0 a8,8 0,1 0,16,0 a8,8 0,1 0,-16,0" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#B58A4A"
+        android:strokeWidth="9"
+        android:strokeLineCap="round"
+        android:pathData="M330,91 L450,184" />
+
+    <!-- lounge chair -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="9"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M112,287 L139,390 L322,390 L349,287 M126,335 L334,335 M148,390 L133,432 M313,390 L328,432" />
+
+    <!-- seated guest head -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M240,185 m-30,0 a30,30 0,1 0,60,0 a30,30 0,1 0,-60,0" />
+
+    <!-- seated guest torso / arm -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M211,224 C229,211 258,211 276,224 C290,235 299,260 300,289 L291,334 L199,334 L191,288 C193,258 198,236 211,224 Z" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#0C2B24"
+        android:strokeWidth="10"
+        android:strokeLineCap="round"
+        android:pathData="M221,251 L252,277 L293,258" />
+
+    <!-- phone -->
+    <path
+        android:fillColor="#B58A4A"
+        android:pathData="M289,238 L316,245 L306,282 L279,275 Z" />
+    <path
+        android:fillColor="#0C2B24"
+        android:pathData="M294,247 L309,251 L302,269 L287,265 Z" />
+
+    <!-- plant / hospitality detail -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="7"
+        android:strokeLineCap="round"
+        android:pathData="M92,373 L92,305 M92,330 C72,312 65,287 72,268 M92,340 C111,320 119,296 115,278" />
+    <path
+        android:fillColor="#B58A4A"
+        android:pathData="M68,265 C80,263 89,270 91,283 C78,286 68,279 68,265 Z M115,275 C126,281 128,293 121,304 C110,298 107,287 115,275 Z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M72,371 L112,371 L106,419 L78,419 Z" />
+</vector>
