@@ -29,5 +29,8 @@ android {
     lint {
         abortOnError true
         checkReleaseBuilds true
+        // API 33+ is explicitly handled by OnBackInvokedDispatcher in MainActivity;
+        // retain onBackPressed only as the API 21–32 fallback.
+        disable 'GestureBackNavigation'
     }
 }
