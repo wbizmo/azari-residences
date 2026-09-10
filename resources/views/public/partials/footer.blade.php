@@ -71,6 +71,30 @@
                 height: 48px;
             }
         }
+
+        /* AZARI PLAY BADGE CLICK FIX */
+        .site-footer .azari-footer-store-row {
+            position: relative;
+            z-index: 20;
+            isolation: isolate;
+        }
+
+        .site-footer .azari-footer-store-row::before,
+        .site-footer .azari-footer-store-row::after {
+            pointer-events: none !important;
+        }
+
+        .site-footer .azari-footer-play-badge {
+            position: relative;
+            z-index: 30;
+            pointer-events: auto !important;
+            cursor: pointer;
+        }
+
+        .site-footer .azari-footer-play-badge img {
+            pointer-events: none;
+        }
+
     </style>
 
     <div class="site-container">
