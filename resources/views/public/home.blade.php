@@ -505,7 +505,7 @@
         </div>
     </section>
 
-    <!-- AZARI PWA HOME INSTALL START -->
+    <!-- AZARI APP DOWNLOAD START -->
     <section
         class="azari-app-section"
         aria-labelledby="azari-app-title"
@@ -590,7 +590,7 @@
                 display: flex;
                 flex-wrap: wrap;
                 gap: 10px;
-                margin: 28px 0 32px;
+                margin: 28px 0 30px;
             }
 
             .azari-app-device {
@@ -614,44 +614,43 @@
                 display: flex;
                 flex-wrap: wrap;
                 align-items: center;
-                gap: 16px;
+                gap: 14px;
             }
 
-            .azari-app-install {
+            .azari-google-play-link {
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
-                gap: 10px;
-                min-height: 54px;
-                padding: 0 24px;
-                border-radius: 999px;
-                background: #0c2b24;
-                color: #fff !important;
+                flex: 0 0 auto;
+                border-radius: 10px;
                 text-decoration: none;
-                font-size: 14px;
-                font-weight: 700;
-                letter-spacing: .01em;
-                box-shadow: 0 14px 32px rgba(12, 43, 36, .20);
                 transition:
                     transform .2s ease,
-                    box-shadow .2s ease,
-                    background .2s ease;
+                    opacity .2s ease;
             }
 
-            .azari-app-install:hover {
+            .azari-google-play-link:hover {
                 transform: translateY(-2px);
-                background: #143d34;
-                box-shadow: 0 18px 38px rgba(12, 43, 36, .24);
             }
 
-            .azari-app-install .material-symbols-outlined {
-                font-size: 21px;
+            .azari-google-play-link:focus-visible {
+                outline: 3px solid rgba(181, 138, 74, .42);
+                outline-offset: 4px;
+            }
+
+            .azari-google-play-link img {
+                display: block;
+                width: auto;
+                height: 58px;
+                object-fit: contain;
             }
 
             .azari-app-note {
+                display: block;
+                margin-top: 14px;
                 color: #7c8581;
                 font-size: 12px;
-                line-height: 1.5;
+                line-height: 1.55;
             }
 
             .azari-app-visual {
@@ -765,16 +764,12 @@
                 }
 
                 .azari-app-actions {
-                    align-items: stretch;
+                    align-items: flex-start;
                     flex-direction: column;
                 }
 
-                .azari-app-install {
-                    width: 100%;
-                }
-
-                .azari-app-note {
-                    text-align: center;
+                .azari-google-play-link img {
+                    height: 56px;
                 }
             }
         </style>
@@ -794,63 +789,46 @@
                     </h2>
 
                     <p class="azari-app-description">
-                        Download the Azari app on desktop, tablet or mobile
-                        for quick access to your bookings, guest account and
-                        Azari experience. Simply select download on the device
-                        you are currently using and install the version made
-                        for that device.
+                        Download the Azari Residences app on Google Play
+                        for convenient access to your bookings, guest account
+                        and Azari experience on Android.
                     </p>
 
                     <div
                         class="azari-app-devices"
-                        aria-label="Available devices"
+                        aria-label="Available platform"
                     >
                         <span class="azari-app-device">
                             <span
                                 class="material-symbols-outlined"
                                 aria-hidden="true"
-                            >smartphone</span>
-                            Mobile
-                        </span>
-
-                        <span class="azari-app-device">
-                            <span
-                                class="material-symbols-outlined"
-                                aria-hidden="true"
-                            >tablet</span>
-                            Tablet
-                        </span>
-
-                        <span class="azari-app-device">
-                            <span
-                                class="material-symbols-outlined"
-                                aria-hidden="true"
-                            >computer</span>
-                            Desktop
+                            >android</span>
+                            Android
                         </span>
                     </div>
 
                     <div class="azari-app-actions">
                         <a
-                            href="/login"
-                            class="azari-app-install"
-                            data-azari-pwa-install
-                            aria-label="Download the Azari App"
+                            href="https://play.google.com/store/apps/details?id=com.azariresidences.app"
+                            class="azari-google-play-link"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label="Get Azari Residences on Google Play"
                         >
-                            <span
-                                class="material-symbols-outlined"
-                                aria-hidden="true"
-                            >download</span>
-
-                            <span data-pwa-label>
-                                Download the Azari App
-                            </span>
+                            <img
+                                src="{{ asset('images/google-play-badge.png') }}"
+                                alt="Get it on Google Play"
+                                width="646"
+                                height="250"
+                                loading="lazy"
+                                decoding="async"
+                            >
                         </a>
-
-                        <span class="azari-app-note">
-                            Installs directly from your browser.
-                        </span>
                     </div>
+
+                    <span class="azari-app-note">
+                        Available now on Google Play for Android.
+                    </span>
                 </div>
 
                 <div class="azari-app-visual">
@@ -868,14 +846,14 @@
                         >devices</span>
 
                         <div>
-                            <strong>One app. Every screen.</strong>
-                            <span>Desktop · Tablet · Mobile</span>
+                            <strong>Azari on Android.</strong>
+                            <span>Available on Google Play</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
-    <!-- AZARI PWA HOME INSTALL END -->
+    <!-- AZARI APP DOWNLOAD END -->
 
 </x-public-site.layout>
