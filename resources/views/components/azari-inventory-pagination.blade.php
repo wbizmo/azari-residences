@@ -4,17 +4,34 @@
 ])
 
 @php
-    $current = $paginator->currentPage();
-    $last = max(1, $paginator->lastPage());
+    $current = max(1, (int) $paginator->currentPage());
+    $last = max(1, (int) $paginator->lastPage());
 
-    $start = max(1, $current - 2);
-    $end = min($last, $current + 2);
+    /*
+    |--------------------------------------------------------------------------
+    | AZARI PAGINATION WINDOW
+    |--------------------------------------------------------------------------
+    | Maximum four numbered page buttons.
+    |
+    | Examples:
+    | 1 2 3 4
+    | 2 3 4 5
+    | 7 8 9 10
+    |--------------------------------------------------------------------------
+    */
 
-    if (($end - $start) < 4) {
-        if ($start === 1) {
-            $end = min($last, 5);
-        } elseif ($end === $last) {
-            $start = max(1, $last - 4);
+    $windowSize = 4;
+
+    if ($last <= $windowSize) {
+        $start = 1;
+        $end = $last;
+    } else {
+        $start = max(1, $current - 1);
+        $end = $start + ($windowSize - 1);
+
+        if ($end > $last) {
+            $end = $last;
+            $start = max(1, $last - ($windowSize - 1));
         }
     }
 @endphp
@@ -27,61 +44,111 @@
     </div>
 
     <nav
+        class="az-fancy-pagination"
+        role="navigation"
         aria-label="{{ $label }} pagination"
-        style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-top:.75rem"
     >
-        @if($paginator->onFirstPage())
-            <span
-                class="button button-secondary"
-                aria-disabled="true"
-                style="opacity:.45;cursor:not-allowed;pointer-events:none"
-            >
-                Previous
-            </span>
-        @else
-            <a
-                class="button button-secondary"
-                href="{{ $paginator->previousPageUrl() }}"
-                rel="prev"
-            >
-                Previous
-            </a>
-        @endif
+        <div class="az-fancy-pagination__controls">
 
-        @for($page = $start; $page <= $end; $page++)
-            @if($page === $current)
+            {{-- FIRST --}}
+            @if($current <= 1)
                 <span
-                    class="button button-primary"
-                    aria-current="page"
+                    class="az-fancy-pagination__button is-disabled"
+                    aria-disabled="true"
                 >
-                    {{ $page }}
+                    First
                 </span>
             @else
                 <a
-                    class="button button-secondary"
-                    href="{{ $paginator->url($page) }}"
+                    class="az-fancy-pagination__button"
+                    href="{{ $paginator->url(1) }}"
                 >
-                    {{ $page }}
+                    First
                 </a>
             @endif
-        @endfor
 
-        @if($paginator->hasMorePages())
-            <a
-                class="button button-secondary"
-                href="{{ $paginator->nextPageUrl() }}"
-                rel="next"
-            >
-                Next
-            </a>
-        @else
-            <span
-                class="button button-secondary"
-                aria-disabled="true"
-                style="opacity:.45;cursor:not-allowed;pointer-events:none"
-            >
-                Next
-            </span>
-        @endif
+
+            {{-- PREVIOUS --}}
+            @if($paginator->onFirstPage())
+                <span
+                    class="az-fancy-pagination__button is-disabled"
+                    aria-disabled="true"
+                >
+                    <span class="material-symbols-outlined">west</span>
+                    <span>Previous</span>
+                </span>
+            @else
+                <a
+                    class="az-fancy-pagination__button"
+                    href="{{ $paginator->previousPageUrl() }}"
+                    rel="prev"
+                >
+                    <span class="material-symbols-outlined">west</span>
+                    <span>Previous</span>
+                </a>
+            @endif
+
+
+            {{-- MAXIMUM FOUR NUMBERED PAGES --}}
+            <div class="az-fancy-pagination__pages">
+                @for($page = $start; $page <= $end; $page++)
+                    @if($page === $current)
+                        <span
+                            class="az-fancy-pagination__page is-current"
+                            aria-current="page"
+                        >
+                            {{ $page }}
+                        </span>
+                    @else
+                        <a
+                            class="az-fancy-pagination__page"
+                            href="{{ $paginator->url($page) }}"
+                        >
+                            {{ $page }}
+                        </a>
+                    @endif
+                @endfor
+            </div>
+
+
+            {{-- NEXT --}}
+            @if($paginator->hasMorePages())
+                <a
+                    class="az-fancy-pagination__button"
+                    href="{{ $paginator->nextPageUrl() }}"
+                    rel="next"
+                >
+                    <span>Next</span>
+                    <span class="material-symbols-outlined">east</span>
+                </a>
+            @else
+                <span
+                    class="az-fancy-pagination__button is-disabled"
+                    aria-disabled="true"
+                >
+                    <span>Next</span>
+                    <span class="material-symbols-outlined">east</span>
+                </span>
+            @endif
+
+
+            {{-- LAST --}}
+            @if($current >= $last)
+                <span
+                    class="az-fancy-pagination__button is-disabled"
+                    aria-disabled="true"
+                >
+                    Last
+                </span>
+            @else
+                <a
+                    class="az-fancy-pagination__button"
+                    href="{{ $paginator->url($last) }}"
+                >
+                    Last
+                </a>
+            @endif
+
+        </div>
     </nav>
 </div>
