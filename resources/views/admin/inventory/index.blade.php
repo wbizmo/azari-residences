@@ -49,15 +49,10 @@
             @endforelse
         </div>
 
-        <div class="az-inventory-pagination">
-            <span class="az-pagination-label">
-                Properties · Page {{ $properties->currentPage() }} of {{ $properties->lastPage() }}
-                · {{ $properties->count() }} shown of {{ $properties->total() }}
-            </span>
-            @if($properties->hasPages())
-                {{ $properties->onEachSide(1)->links() }}
-            @endif
-        </div>
+        <x-azari-inventory-pagination
+            :paginator="$properties"
+            label="Properties"
+        />
     </section>
 
     <section class="az-admin-panel" data-tab-panel="locations">
@@ -79,15 +74,10 @@
             @endforeach
         </div>
 
-        <div class="az-inventory-pagination">
-            <span class="az-pagination-label">
-                Locations · Page {{ $locations->currentPage() }} of {{ $locations->lastPage() }}
-                · {{ $locations->count() }} shown of {{ $locations->total() }}
-            </span>
-            @if($locations->hasPages())
-                {{ $locations->onEachSide(1)->links() }}
-            @endif
-        </div>
+        <x-azari-inventory-pagination
+            :paginator="$locations"
+            label="Locations"
+        />
     </section>
 
     <section class="az-admin-panel" data-tab-panel="buildings">
@@ -108,15 +98,10 @@
             @endforeach
         </div>
 
-        <div class="az-inventory-pagination">
-            <span class="az-pagination-label">
-                Buildings · Page {{ $buildings->currentPage() }} of {{ $buildings->lastPage() }}
-                · {{ $buildings->count() }} shown of {{ $buildings->total() }}
-            </span>
-            @if($buildings->hasPages())
-                {{ $buildings->onEachSide(1)->links() }}
-            @endif
-        </div>
+        <x-azari-inventory-pagination
+            :paginator="$buildings"
+            label="Buildings"
+        />
     </section>
 
     <section class="az-admin-panel" data-tab-panel="types">
@@ -136,15 +121,10 @@
             @endforeach
         </div>
 
-        <div class="az-inventory-pagination">
-            <span class="az-pagination-label">
-                Room types · Page {{ $roomTypes->currentPage() }} of {{ $roomTypes->lastPage() }}
-                · {{ $roomTypes->count() }} shown of {{ $roomTypes->total() }}
-            </span>
-            @if($roomTypes->hasPages())
-                {{ $roomTypes->onEachSide(1)->links() }}
-            @endif
-        </div>
+        <x-azari-inventory-pagination
+            :paginator="$roomTypes"
+            label="Room types"
+        />
     </section>
 
     <section class="az-admin-panel" data-tab-panel="amenities">
@@ -163,14 +143,9 @@
             @endforeach
         </div>
 
-        <div class="az-inventory-pagination">
-            <span class="az-pagination-label">
-                Amenities · Page {{ $amenities->currentPage() }} of {{ $amenities->lastPage() }}
-                · {{ $amenities->count() }} shown of {{ $amenities->total() }}
-            </span>
-            @if($amenities->hasPages())
-                {{ $amenities->onEachSide(1)->links() }}
-            @endif
-        </div>
+        <x-azari-inventory-pagination
+            :paginator="$amenities"
+            label="Amenities"
+        />
     </section>
 @endsection
