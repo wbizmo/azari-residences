@@ -35,25 +35,44 @@ class ReportController extends Controller {
   if(in_array($type,['email_delivery','sms_delivery'],true))return $this->apply(CommunicationLog::query()->where('channel',$type==='email_delivery'?'email':'sms')->select('template','booking_id','user_id','masked_recipient','provider','status','retry_count','queued_at','sent_at','delivered_at','failed_at','created_at'),$r);
   if($type==='provider_performance')return PaymentProviderStatus::query()->select('provider','enabled','mode','connection_status','last_webhook_at','last_successful_payment_at','last_error','updated_at as created_at')->latest();
   if(in_array($type,['property_performance','occupancy','revenue'],true))return Booking::query()->selectRaw(
-   'property_id, currency,
+   'bookings.property_id, bookings.currency,
     COUNT(*) as bookings_count,
-    SUM(CASE WHEN status IN (?, ?, ?, ?, ?) THEN 1 ELSE 0 END) as occupied_count,
-    SUM(CASE WHEN payment_status IN (?, ?, ?) THEN total ELSE 0 END) as revenue_total,
-    MIN(created_at) as period_start,
-    MAX(created_at) as period_end,
-    MAX(created_at) as created_at',
+    SUM(CASE WHEN bookings.status IN (?, ?, ?, ?, ?) THEN 1 ELSE 0 END) as occupied_count,
+    SUM(
+        CASE
+            WHEN EXISTS (
+                SELECT 1
+                FROM payments
+                WHERE payments.booking_id = bookings.id
+                  AND payments.status = ?
+            )
+            OR (
+                bookings.paid_at IS NOT NULL
+                AND bookings.status IN (?, ?, ?, ?, ?, ?)
+            )
+            THEN bookings.total
+            ELSE 0
+        END
+    ) as revenue_total,
+    MIN(bookings.created_at) as period_start,
+    MAX(bookings.created_at) as period_end,
+    MAX(bookings.created_at) as created_at',
    [
     'confirmed',
+    'check_in',
     'checked_in',
-    'active',
     'checked_out',
     'completed',
-    'paid',
-    'completed',
     'successful',
+    'paid',
+    'confirmed',
+    'check_in',
+    'checked_in',
+    'checked_out',
+    'completed',
    ]
-  )->groupBy('property_id','currency')->orderByDesc('created_at');
-  return $this->apply(Booking::query()->select('reference','property_id','user_id','guest_name','status','payment_status','currency','total','check_in','check_out','created_at'),$r);
+  )->groupBy('bookings.property_id','bookings.currency')->orderByDesc('created_at');
+  return $this->apply(Booking::query()->select('reference','property_id','user_id','guest_name','status','currency','total','check_in','check_out','created_at'),$r);
  }
  private function scalar(mixed $v):mixed{return is_scalar($v)||$v===null?$v:json_encode($v);}
  private function spreadsheetXml(string $type,array $headers,Collection $rows):string{$esc=fn($v)=>htmlspecialchars((string)$this->scalar($v),ENT_XML1|ENT_QUOTES,'UTF-8');$xml='<?xml version="1.0" encoding="UTF-8"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Worksheet ss:Name="'.$esc(substr($type,0,31)).'"><Table><Row>';foreach($headers as $h)$xml.='<Cell><Data ss:Type="String">'.$esc($h).'</Data></Cell>';$xml.='</Row>';foreach($rows as $row){$xml.='<Row>';foreach($headers as $h)$xml.='<Cell><Data ss:Type="String">'.$esc($row[$h]??'').'</Data></Cell>';$xml.='</Row>';}$xml.='</Table></Worksheet></Workbook>';return $xml;}

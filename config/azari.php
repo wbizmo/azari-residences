@@ -6,8 +6,9 @@ return [
     'currency' => 'USD',
 
     'owners' => [
-        'default_azari_share_percentage' => 12.00,
-        'default_owner_share_percentage' => 88.00,
+        // Platform commission on owner-property room sales is disabled.
+        'default_azari_share_percentage' => 0.00,
+        'default_owner_share_percentage' => 100.00,
     ],
 
     'booking' => [

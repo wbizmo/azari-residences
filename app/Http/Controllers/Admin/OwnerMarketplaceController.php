@@ -62,7 +62,6 @@ class OwnerMarketplaceController extends Controller
         abort_unless(in_array($listing->status, ['submitted', 'under_review'], true), 422);
 
         $data = $request->validate([
-            'approved_owner_share_percentage' => ['required', 'numeric', 'min:0', 'max:100'],
             'admin_notes' => ['nullable', 'string', 'max:3000'],
             'publish_now' => ['nullable', 'boolean'],
             'feature_now' => ['nullable', 'boolean'],
@@ -75,7 +74,9 @@ class OwnerMarketplaceController extends Controller
             $payload['gallery'] = $listing->gallery ?? [];
             $payload['owner_id'] = $listing->user_id;
             $payload['owner_listing_id'] = $listing->id;
-            $payload['owner_share_percentage'] = round((float) $data['approved_owner_share_percentage'], 2);
+            // Azari platform commission on owner-property room sales is
+            // disabled. Approved owner properties retain 100% revenue.
+            $payload['owner_share_percentage'] = 100.00;
             $payload['managed_for_owner'] = true;
             $payload['currency'] = (string) config('azari.currency', 'USD');
             $payload['is_published'] = $request->boolean('publish_now');
@@ -88,7 +89,7 @@ class OwnerMarketplaceController extends Controller
             $listing->update([
                 'status' => 'approved',
                 'approved_property_id' => $property->id,
-                'approved_owner_share_percentage' => $data['approved_owner_share_percentage'],
+                'approved_owner_share_percentage' => 100.00,
                 'admin_notes' => $data['admin_notes'] ?? null,
                 'decline_reason' => null,
                 'reviewed_by' => $request->user()->id,
@@ -246,7 +247,6 @@ class OwnerMarketplaceController extends Controller
     {
         return view('admin.owner-settings.edit', [
             'settings' => collect([
-                'owner_default_share_percentage',
                 'owner_withdrawal_days',
                 'owner_withdrawal_minimum',
                 'owner_paypal_enabled',
@@ -260,7 +260,6 @@ class OwnerMarketplaceController extends Controller
     public function updateSettings(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'owner_default_share_percentage' => ['required', 'numeric', 'min:0', 'max:100'],
             'owner_withdrawal_days' => ['required', 'string', 'regex:/^[1-7](,[1-7])*$/'],
             'owner_withdrawal_minimum' => ['required', 'numeric', 'min:0'],
             'owner_listing_agreement_version' => ['required', 'string', 'max:40'],

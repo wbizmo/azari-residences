@@ -12,7 +12,7 @@
     @if($listing->cover_image)<img class="az-owner-cover" src="{{ Storage::disk('public')->url($listing->cover_image) }}" alt="{{ data_get($listing->property_data,'name','Property cover') }}">@endif
     <dl class="az-admin-detail-list">@foreach($listing->property_data as $key=>$value)@unless(is_array($value))<dt>{{ ucfirst(str_replace('_',' ',$key)) }}</dt><dd>{{ $value }}</dd>@endunless @endforeach</dl>
     <p><strong>Amenities:</strong> {{ $amenities->join(', ') ?: 'None selected' }}</p>
-    <p><strong>Default split:</strong> Owner {{ number_format((float)($listing->proposed_owner_share_percentage ?: config('azari.owners.default_owner_share_percentage',88)),2) }}% · Azari {{ number_format(100-(float)($listing->proposed_owner_share_percentage ?: config('azari.owners.default_owner_share_percentage',88)),2) }}%</p>
+    <p><strong>Owner revenue:</strong> No Azari platform commission is deducted from owner-property room sales.</p>
     @if($listing->decline_reason)<p><strong>Previous decline:</strong> {{ $listing->decline_reason }}</p>@endif
 </div>
 
@@ -29,7 +29,7 @@
 <div class="az-admin-grid">
     <form method="post" action="{{ route('azari.admin.owner-listings.approve',$listing) }}" class="az-admin-form az-admin-card">@csrf
         <h2>Approve listing</h2>
-        <label>Owner share percentage<input type="number" name="approved_owner_share_percentage" min="0" max="100" step="0.01" value="{{ old('approved_owner_share_percentage',$listing->proposed_owner_share_percentage ?: config('azari.owners.default_owner_share_percentage',88)) }}" required><small>Azari receives the remaining percentage. The default is 12% Azari / 88% owner.</small></label>
+        <p><strong>Revenue treatment:</strong> Owner receives 100% of applicable owner-property room-sale revenue. Azari platform commission: 0%.</p>
         <label><input type="checkbox" name="publish_now" value="1"> Publish immediately</label>
         <label><input type="checkbox" name="feature_now" value="1"> Feature immediately</label>
         <label>Internal notes<textarea name="admin_notes">{{ old('admin_notes') }}</textarea></label>

@@ -266,8 +266,6 @@ class PropertyOwnerController extends Controller
             'roomTypes' => RoomType::query()->where('is_active', true)->orderBy('sort_order')->orderBy('name')->get(),
             'amenities' => Amenity::query()->orderBy('name')->get(),
             'currency' => (string) config('azari.currency', 'USD'),
-            'defaultOwnerShare' => (float) config('azari.owners.default_owner_share_percentage', 88),
-            'defaultAzariShare' => (float) config('azari.owners.default_azari_share_percentage', 12),
         ];
     }
 
@@ -344,7 +342,7 @@ class PropertyOwnerController extends Controller
             'amenity_ids' => array_values($data['amenities'] ?? []),
             'cover_image' => $cover,
             'gallery' => $gallery,
-            'proposed_owner_share_percentage' => (float) config('azari.owners.default_owner_share_percentage', 88),
+            'proposed_owner_share_percentage' => 100.00,
             'owner_notes' => $data['owner_notes'] ?? null,
         ];
     }
@@ -352,7 +350,7 @@ class PropertyOwnerController extends Controller
     private function agreementText(): string
     {
         return <<<'TEXT'
-By submitting a property to Azari Residences, I confirm that I am legally authorised to offer the property for accommodation and management. I authorise Azari Residences to review the property, contact me for verification, approve or decline the listing, receive guest payments, deduct the agreed management share, credit my approved owner share to my account balance, and process eligible withdrawals through the payout destination I provide. I confirm that all information and documents supplied are accurate and understand that approval is not guaranteed. I agree to keep property availability, pricing, safety information, ownership authority, and payout details accurate at all times.
+By submitting a property to Azari Residences, I confirm that I am legally authorised to offer the property for accommodation and management. I authorise Azari Residences to review the property, contact me for verification, approve or decline the listing, receive guest payments, credit the applicable owner-property booking revenue to my account balance, and process eligible withdrawals through the payout destination I provide. I confirm that all information and documents supplied are accurate and understand that approval is not guaranteed. I agree to keep property availability, pricing, safety information, ownership authority, and payout details accurate at all times.
 TEXT;
     }
 

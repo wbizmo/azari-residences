@@ -22,20 +22,22 @@ class OwnerEarningsService
             return null;
         }
 
-        $share = max(0, min(100, (float) ($property->owner_share_percentage
-            ?: config('azari.owners.default_owner_share_percentage', 88))));
-        if ($share <= 0) {
-            return null;
-        }
-
+        // Azari does not deduct a platform commission from owner-property
+        // room sales. Future successful payments credit the full applicable
+        // booking payment to the property owner.
+        //
+        // Historical ledger entries remain untouched because the ledger entry
+        // below is idempotently keyed by payment_id.
+        $share = 100.00;
         $grossAmount = round((float) $payment->amount, 2);
-        $amount = round($grossAmount * ($share / 100), 2);
+        $amount = $grossAmount;
+
         if ($amount <= 0) {
             return null;
         }
 
-        $azariShare = round(100 - $share, 2);
-        $azariAmount = round($grossAmount - $amount, 2);
+        $azariShare = 0.00;
+        $azariAmount = 0.00;
 
         return OwnerLedgerEntry::query()->firstOrCreate(
             ['payment_id' => $payment->id],
@@ -52,7 +54,7 @@ class OwnerEarningsService
                 'azari_share_percentage' => $azariShare,
                 'azari_share_amount' => $azariAmount,
                 'reference' => 'EARN-'.Str::upper(Str::random(14)),
-                'description' => 'Owner share credited from booking '.$booking->reference.'.',
+                'description' => 'Owner booking revenue credited from booking '.$booking->reference.'.',
                 'metadata' => [
                     'payment_reference' => $payment->reference,
                     'property_name' => $property->name,

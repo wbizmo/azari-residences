@@ -1,9 +1,8 @@
 @extends('layouts.admin')
 @section('title','Property owner settings')
 @section('content')
-<div class="az-admin-page-header"><div><h1>Property owner marketplace</h1><p>Control agreements, earnings share, withdrawal days and payout gateways. Platform currency is locked to USD.</p></div></div>
+<div class="az-admin-page-header"><div><h1>Property owner marketplace</h1><p>Control agreements, withdrawal days and payout gateways. Azari platform commission on owner-property room sales is disabled. Platform currency is locked to USD.</p></div></div>
 <form method="post" action="{{ route('azari.admin.owner-settings.update') }}" class="az-admin-form az-admin-card">@csrf @method('PUT')
-<label>Default owner share (%)<input type="number" name="owner_default_share_percentage" min="0" max="100" step="0.01" value="{{ old('owner_default_share_percentage',$settings['owner_default_share_percentage']) }}" required><small>Default Azari share is the remainder. At 88% owner share, Azari receives 12%.</small></label>
 <label>Withdrawal weekdays (ISO 1–7, comma-separated)<input name="owner_withdrawal_days" value="{{ old('owner_withdrawal_days',$settings['owner_withdrawal_days']) }}" required></label>
 <label>Minimum withdrawal ({{ $currency }})<input type="number" name="owner_withdrawal_minimum" min="0" step="0.01" value="{{ old('owner_withdrawal_minimum',$settings['owner_withdrawal_minimum']) }}" required></label>
 <label>Withdrawal currency<input value="{{ $currency }}" readonly disabled><small>Locked globally and cannot be edited.</small></label>

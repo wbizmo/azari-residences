@@ -41,7 +41,11 @@ class OwnerEarningsIdempotencyTest extends TestCase
         $this->assertDatabaseHas('owner_ledger_entries', [
             'payment_id' => $payment->id,
             'user_id' => $owner->id,
-            'amount' => 70,
+            'amount' => 100,
+            'gross_amount' => 100,
+            'owner_share_percentage' => 100,
+            'azari_share_percentage' => 0,
+            'azari_share_amount' => 0,
             'direction' => 'credit',
         ]);
     }
