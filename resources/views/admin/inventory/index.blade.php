@@ -48,6 +48,12 @@
                 <div class="production-empty-state">No properties have been created.</div>
             @endforelse
         </div>
+
+        @if($properties->hasPages())
+            <div class="az-inventory-pagination">
+                {{ $properties->onEachSide(1)->links() }}
+            </div>
+        @endif
     </section>
 
     <section class="az-admin-panel" data-tab-panel="locations">
@@ -68,6 +74,12 @@
                 <article class="az-summary-card"><span class="material-symbols-outlined">location_on</span><h3>{{ $location->name }}</h3><p>{{ $location->city }}, {{ $location->country }}</p><small>{{ $location->buildings_count }} buildings · {{ $location->properties_count }} properties</small></article>
             @endforeach
         </div>
+
+        @if($locations->hasPages())
+            <div class="az-inventory-pagination">
+                {{ $locations->onEachSide(1)->links() }}
+            </div>
+        @endif
     </section>
 
     <section class="az-admin-panel" data-tab-panel="buildings">
@@ -87,6 +99,12 @@
                 <article class="az-summary-card"><span class="material-symbols-outlined">apartment</span><h3>{{ $building->name }}</h3><p>{{ $building->location->name }}</p><small>{{ $building->properties_count }} properties</small></article>
             @endforeach
         </div>
+
+        @if($buildings->hasPages())
+            <div class="az-inventory-pagination">
+                {{ $buildings->onEachSide(1)->links() }}
+            </div>
+        @endif
     </section>
 
     <section class="az-admin-panel" data-tab-panel="types">
@@ -105,6 +123,12 @@
                 <article class="az-summary-card"><span class="material-symbols-outlined">{{ $type->icon }}</span><h3>{{ $type->name }}</h3><p>{{ $type->description }}</p><small>{{ $type->properties_count }} properties</small></article>
             @endforeach
         </div>
+
+        @if($roomTypes->hasPages())
+            <div class="az-inventory-pagination">
+                {{ $roomTypes->onEachSide(1)->links() }}
+            </div>
+        @endif
     </section>
 
     <section class="az-admin-panel" data-tab-panel="amenities">
@@ -122,6 +146,11 @@
                 <article class="az-summary-card"><span class="material-symbols-outlined">{{ $amenity->icon }}</span><h3>{{ $amenity->name }}</h3><p>{{ $amenity->description }}</p><small>{{ $amenity->properties_count }} assignments</small></article>
             @endforeach
         </div>
+
+        @if($amenities->hasPages())
+            <div class="az-inventory-pagination">
+                {{ $amenities->onEachSide(1)->links() }}
+            </div>
+        @endif
     </section>
-<x-azari-pagination-stack :items="get_defined_vars()" />
 @endsection
