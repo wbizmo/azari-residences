@@ -27,117 +27,75 @@
     class="az-fancy-pagination"
     role="navigation"
     aria-label="Pagination"
+    style="padding:1rem 1.25rem;border-radius:1.25rem"
 >
     @if($hasTotal)
         <div class="az-fancy-pagination__summary">
             <span>Showing</span>
-            <strong>
-                {{ $paginator->firstItem() ?? 0 }}–{{ $paginator->lastItem() ?? 0 }}
-            </strong>
+            <strong>{{ $paginator->firstItem() ?? 0 }}–{{ $paginator->lastItem() ?? 0 }}</strong>
             <span>of {{ $paginator->total() }}</span>
         </div>
     @endif
 
-    <div class="az-fancy-pagination__controls">
-
-        {{-- FIRST --}}
+    <div
+        class="az-fancy-pagination__controls"
+        style="margin-top:.75rem;gap:.75rem;flex-wrap:wrap"
+    >
         @if($current <= 1)
-            <span
-                class="az-fancy-pagination__button is-disabled"
-                aria-disabled="true"
-            >
+            <span class="az-fancy-pagination__button is-disabled" aria-disabled="true">
                 First
             </span>
         @else
-            <a
-                class="az-fancy-pagination__button"
-                href="{{ $paginator->url(1) }}"
-            >
+            <a class="az-fancy-pagination__button" href="{{ $paginator->url(1) }}">
                 First
             </a>
         @endif
 
-
-        {{-- PREVIOUS --}}
         @if($paginator->onFirstPage())
-            <span
-                class="az-fancy-pagination__button is-disabled"
-                aria-disabled="true"
-            >
-                <span class="material-symbols-outlined">west</span>
-                <span>Previous</span>
+            <span class="az-fancy-pagination__button is-disabled" aria-disabled="true">
+                Previous
             </span>
         @else
-            <a
-                class="az-fancy-pagination__button"
-                href="{{ $paginator->previousPageUrl() }}"
-                rel="prev"
-            >
-                <span class="material-symbols-outlined">west</span>
-                <span>Previous</span>
+            <a class="az-fancy-pagination__button" href="{{ $paginator->previousPageUrl() }}" rel="prev">
+                Previous
             </a>
         @endif
 
-
-        {{-- MAXIMUM FOUR PAGE NUMBERS --}}
-        <div class="az-fancy-pagination__pages">
+        <div
+            class="az-fancy-pagination__pages"
+            style="gap:.5rem"
+        >
             @for($page = $start; $page <= $end; $page++)
                 @if($page === $current)
-                    <span
-                        class="az-fancy-pagination__page is-current"
-                        aria-current="page"
-                    >
+                    <span class="az-fancy-pagination__page is-current" aria-current="page">
                         {{ $page }}
                     </span>
                 @else
-                    <a
-                        class="az-fancy-pagination__page"
-                        href="{{ $paginator->url($page) }}"
-                    >
+                    <a class="az-fancy-pagination__page" href="{{ $paginator->url($page) }}">
                         {{ $page }}
                     </a>
                 @endif
             @endfor
         </div>
 
-
-        {{-- NEXT --}}
         @if($paginator->hasMorePages())
-            <a
-                class="az-fancy-pagination__button"
-                href="{{ $paginator->nextPageUrl() }}"
-                rel="next"
-            >
-                <span>Next</span>
-                <span class="material-symbols-outlined">east</span>
+            <a class="az-fancy-pagination__button" href="{{ $paginator->nextPageUrl() }}" rel="next">
+                Next
             </a>
         @else
-            <span
-                class="az-fancy-pagination__button is-disabled"
-                aria-disabled="true"
-            >
-                <span>Next</span>
-                <span class="material-symbols-outlined">east</span>
+            <span class="az-fancy-pagination__button is-disabled" aria-disabled="true">
+                Next
             </span>
         @endif
 
-
-        {{-- LAST --}}
         @if($current >= $last)
-            <span
-                class="az-fancy-pagination__button is-disabled"
-                aria-disabled="true"
-            >
+            <span class="az-fancy-pagination__button is-disabled" aria-disabled="true">
                 Last
             </span>
         @else
-            <a
-                class="az-fancy-pagination__button"
-                href="{{ $paginator->url($last) }}"
-            >
+            <a class="az-fancy-pagination__button" href="{{ $paginator->url($last) }}">
                 Last
             </a>
         @endif
-
     </div>
 </nav>

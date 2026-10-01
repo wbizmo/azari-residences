@@ -7,19 +7,6 @@
     $current = max(1, (int) $paginator->currentPage());
     $last = max(1, (int) $paginator->lastPage());
 
-    /*
-    |--------------------------------------------------------------------------
-    | AZARI PAGINATION WINDOW
-    |--------------------------------------------------------------------------
-    | Maximum four numbered page buttons.
-    |
-    | Examples:
-    | 1 2 3 4
-    | 2 3 4 5
-    | 7 8 9 10
-    |--------------------------------------------------------------------------
-    */
-
     $windowSize = 4;
 
     if ($last <= $windowSize) {
@@ -36,119 +23,82 @@
     }
 @endphp
 
-<div class="az-inventory-pagination">
-    <div class="az-pagination-label">
-        {{ $label }}
-        · Page {{ $current }} of {{ $last }}
-        · {{ $paginator->count() }} shown of {{ $paginator->total() }}
-    </div>
-
+<div
+    class="az-inventory-pagination"
+    style="margin-top:1rem"
+>
     <nav
         class="az-fancy-pagination"
         role="navigation"
         aria-label="{{ $label }} pagination"
+        style="padding:1rem 1.25rem;border-radius:1.25rem"
     >
-        <div class="az-fancy-pagination__controls">
+        <div class="az-fancy-pagination__summary">
+            <span>{{ $label }}</span>
+            <strong>{{ $paginator->count() }}</strong>
+            <span>shown of {{ $paginator->total() }}</span>
+        </div>
 
-            {{-- FIRST --}}
+        <div
+            class="az-fancy-pagination__controls"
+            style="margin-top:.75rem;gap:.75rem;flex-wrap:wrap"
+        >
             @if($current <= 1)
-                <span
-                    class="az-fancy-pagination__button is-disabled"
-                    aria-disabled="true"
-                >
+                <span class="az-fancy-pagination__button is-disabled" aria-disabled="true">
                     First
                 </span>
             @else
-                <a
-                    class="az-fancy-pagination__button"
-                    href="{{ $paginator->url(1) }}"
-                >
+                <a class="az-fancy-pagination__button" href="{{ $paginator->url(1) }}">
                     First
                 </a>
             @endif
 
-
-            {{-- PREVIOUS --}}
             @if($paginator->onFirstPage())
-                <span
-                    class="az-fancy-pagination__button is-disabled"
-                    aria-disabled="true"
-                >
-                    <span class="material-symbols-outlined">west</span>
-                    <span>Previous</span>
+                <span class="az-fancy-pagination__button is-disabled" aria-disabled="true">
+                    Previous
                 </span>
             @else
-                <a
-                    class="az-fancy-pagination__button"
-                    href="{{ $paginator->previousPageUrl() }}"
-                    rel="prev"
-                >
-                    <span class="material-symbols-outlined">west</span>
-                    <span>Previous</span>
+                <a class="az-fancy-pagination__button" href="{{ $paginator->previousPageUrl() }}" rel="prev">
+                    Previous
                 </a>
             @endif
 
-
-            {{-- MAXIMUM FOUR NUMBERED PAGES --}}
-            <div class="az-fancy-pagination__pages">
+            <div
+                class="az-fancy-pagination__pages"
+                style="gap:.5rem"
+            >
                 @for($page = $start; $page <= $end; $page++)
                     @if($page === $current)
-                        <span
-                            class="az-fancy-pagination__page is-current"
-                            aria-current="page"
-                        >
+                        <span class="az-fancy-pagination__page is-current" aria-current="page">
                             {{ $page }}
                         </span>
                     @else
-                        <a
-                            class="az-fancy-pagination__page"
-                            href="{{ $paginator->url($page) }}"
-                        >
+                        <a class="az-fancy-pagination__page" href="{{ $paginator->url($page) }}">
                             {{ $page }}
                         </a>
                     @endif
                 @endfor
             </div>
 
-
-            {{-- NEXT --}}
             @if($paginator->hasMorePages())
-                <a
-                    class="az-fancy-pagination__button"
-                    href="{{ $paginator->nextPageUrl() }}"
-                    rel="next"
-                >
-                    <span>Next</span>
-                    <span class="material-symbols-outlined">east</span>
+                <a class="az-fancy-pagination__button" href="{{ $paginator->nextPageUrl() }}" rel="next">
+                    Next
                 </a>
             @else
-                <span
-                    class="az-fancy-pagination__button is-disabled"
-                    aria-disabled="true"
-                >
-                    <span>Next</span>
-                    <span class="material-symbols-outlined">east</span>
+                <span class="az-fancy-pagination__button is-disabled" aria-disabled="true">
+                    Next
                 </span>
             @endif
 
-
-            {{-- LAST --}}
             @if($current >= $last)
-                <span
-                    class="az-fancy-pagination__button is-disabled"
-                    aria-disabled="true"
-                >
+                <span class="az-fancy-pagination__button is-disabled" aria-disabled="true">
                     Last
                 </span>
             @else
-                <a
-                    class="az-fancy-pagination__button"
-                    href="{{ $paginator->url($last) }}"
-                >
+                <a class="az-fancy-pagination__button" href="{{ $paginator->url($last) }}">
                     Last
                 </a>
             @endif
-
         </div>
     </nav>
 </div>
