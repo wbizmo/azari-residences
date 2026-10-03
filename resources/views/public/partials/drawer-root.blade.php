@@ -228,7 +228,7 @@
                 <a href="{{ route('public.airport-transfers') }}">Airport transfers</a>
                 <!-- <a href="{{ route('user.owner.listings.create') }}">List my property</a> -->
                 <a href="{{ route('public.local-guide') }}">Local guide</a>
-                <a href="{{ route('public.about') }}">About Azari</a>
+                <a href="{{ route('public.about') }}">About Resavar</a>
 
                 <a href="{{ route('public.contact') }}">Contact</a>
                 @if(Route::has('public.list-property'))
