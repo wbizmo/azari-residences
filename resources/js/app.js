@@ -730,69 +730,6 @@ document.body?.classList.toggle(
 
 /*
 |--------------------------------------------------------------------------
-| Azari public-header single-logo controller
-|--------------------------------------------------------------------------
-|
-| There is only one physical <img> element in the public header.
-| This script changes only its src, so the logo position and navigation
-| layout never move.
-|
-*/
-
-document.addEventListener('DOMContentLoaded', () => {
-    const logo = document.querySelector('[data-azari-public-logo]');
-
-    if (!logo) {
-        return;
-    }
-
-    const darkLogo = logo.dataset.darkLogo;
-    const lightLogo = logo.dataset.lightLogo;
-
-    const normalizedPath = window.location.pathname.replace(/\/+$/, '');
-    const isHomepage = normalizedPath === '';
-
-    const updateAzariPublicLogo = () => {
-        const hasScrolled = window.scrollY > 24;
-
-        /*
-         * Homepage:
-         *   top       -> logo-dark.png
-         *   scrolled  -> logo-light.png
-         *
-         * Other public pages:
-         *   always    -> logo-light.png
-         */
-        const requiredLogo =
-            isHomepage && !hasScrolled
-                ? darkLogo
-                : lightLogo;
-
-        if (
-            requiredLogo &&
-            logo.getAttribute('src') !== requiredLogo
-        ) {
-            logo.setAttribute('src', requiredLogo);
-        }
-
-        logo.dataset.logoVariant =
-            isHomepage && !hasScrolled
-                ? 'dark'
-                : 'light';
-    };
-
-    updateAzariPublicLogo();
-
-    window.addEventListener(
-        'scroll',
-        updateAzariPublicLogo,
-        { passive: true }
-    );
-});
-
-
-/*
-|--------------------------------------------------------------------------
 | Azari public hamburger colour controller
 |--------------------------------------------------------------------------
 |
@@ -854,8 +791,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 document.addEventListener('DOMContentLoaded', () => {
     const menuToggle = document.querySelector('[data-azari-menu-toggle]');
-    const publicLogo = document.querySelector('[data-azari-public-logo]');
-
     const normalizedPath =
         window.location.pathname.replace(/\/+$/, '');
 
