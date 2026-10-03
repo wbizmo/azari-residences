@@ -40,11 +40,11 @@ html,body{max-width:100%;overflow-x:hidden}
 .az-premium-field input,.az-premium-field select,.az-premium-field textarea{width:100%;padding:12px 13px;border:1px solid rgba(22,55,45,.18);border-radius:12px;background:#fff}
 .az-premium-field textarea{min-height:112px;resize:vertical}
 .az-premium-actions{display:flex;align-items:center;justify-content:flex-end;gap:10px;grid-column:1/-1;padding-top:4px}
-.az-premium-button{display:inline-flex;min-height:44px;align-items:center;justify-content:center;gap:8px;padding:10px 16px;border:0;border-radius:12px;background:#123a30;color:#fff;font-weight:800;cursor:pointer}
-.az-premium-button:hover{background:#1b4d40}
+.az-premium-button{display:inline-flex;min-height:44px;align-items:center;justify-content:center;gap:8px;padding:10px 16px;border:0;border-radius:12px;background:#052058;color:#fff;font-weight:800;cursor:pointer}
+.az-premium-button:hover{background:#0577F5}
 .az-premium-toggle-row{display:flex;flex-wrap:wrap;gap:18px;align-items:center;grid-column:1/-1;padding:13px 15px;border:1px solid rgba(22,55,45,.11);border-radius:14px;background:#f8f5ef}
 .az-premium-toggle-row label{display:inline-flex;align-items:center;gap:9px;font-size:.84rem;font-weight:700}
-.az-premium-toggle-row input[type="checkbox"]{width:18px;height:18px;accent-color:#123a30}
+.az-premium-toggle-row input[type="checkbox"]{width:18px;height:18px;accent-color:#052058}
 .az-premium-status{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px;background:#e3efe9;color:#195b46;font-size:.75rem;font-weight:800;text-transform:capitalize;white-space:nowrap}
 .az-premium-status.is-muted{background:#eeeae2;color:#6a6d69}
 .az-premium-status.is-warning{background:#f5e8d5;color:#88571c}
@@ -56,11 +56,11 @@ html,body{max-width:100%;overflow-x:hidden}
 
 /* Service-request user page. */
 .az-service-hero{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(250px,.6fr);gap:18px;margin-bottom:20px}
-.az-service-hero__main{padding:clamp(25px,5vw,48px);border-radius:26px;background:radial-gradient(circle at 88% 12%,rgba(181,138,74,.28),transparent 30%),linear-gradient(135deg,#0c2b24,#1b4d40);color:#fff;box-shadow:0 22px 60px rgba(12,43,36,.16)}
+.az-service-hero__main{padding:clamp(25px,5vw,48px);border-radius:26px;background:radial-gradient(circle at 88% 12%,rgba(181,138,74,.28),transparent 30%),linear-gradient(135deg,#0c2b24,#0577F5);color:#fff;box-shadow:0 22px 60px rgba(12,43,36,.16)}
 .az-service-hero__main h2{margin:12px 0 12px;font-family:var(--font-heading,Georgia,serif);font-size:clamp(2rem,4vw,3.2rem);font-weight:500;line-height:1.05}
 .az-service-hero__main p{max-width:650px;margin:0;color:rgba(255,255,255,.74);line-height:1.7}
 .az-service-hero__side{display:grid;align-content:center;padding:26px;border:1px solid rgba(181,138,74,.22);border-radius:26px;background:#fff}
-.az-service-hero__side .material-symbols-outlined{width:50px;height:50px;display:grid;place-items:center;border-radius:15px;background:#dfece6;color:#1b4d40;font-size:27px}
+.az-service-hero__side .material-symbols-outlined{width:50px;height:50px;display:grid;place-items:center;border-radius:15px;background:#dfece6;color:#0577F5;font-size:27px}
 .az-service-hero__side strong{display:block;margin-top:16px;color:#0c2b24;font-family:var(--font-heading,Georgia,serif);font-size:1.25rem}
 .az-service-hero__side p{margin:7px 0 0;color:#68736e;line-height:1.55;font-size:.88rem}
 .az-service-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(330px,.72fr);gap:20px;align-items:start}
@@ -74,20 +74,20 @@ html,body{max-width:100%;overflow-x:hidden}
 /* Homepage promotion popup. Lower than the preloader (99999), above all ordinary UI. */
 .az-promo-popup{position:fixed;z-index:9000;inset:0;display:grid;place-items:center;padding:20px;background:rgba(6,22,18,.60);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .24s ease,visibility .24s ease}
 .az-promo-popup.is-visible{opacity:1;visibility:visible;pointer-events:auto}
-.az-promo-popup__dialog{position:relative;width:min(100%,720px);max-height:min(86vh,760px);overflow:auto;border:1px solid rgba(255,255,255,.14);border-radius:28px;background:#fffdf9;box-shadow:0 40px 110px rgba(0,0,0,.38);transform:translateY(14px) scale(.985);transition:transform .24s ease}
+.az-promo-popup__dialog{position:relative;width:min(100%,720px);max-height:min(86vh,760px);overflow:auto;border:1px solid rgba(255,255,255,.14);border-radius:28px;background:#FFFFFF;box-shadow:0 40px 110px rgba(0,0,0,.38);transform:translateY(14px) scale(.985);transition:transform .24s ease}
 .az-promo-popup.is-visible .az-promo-popup__dialog{transform:none}
-.az-promo-popup__media{position:relative;min-height:210px;overflow:hidden;background:radial-gradient(circle at 80% 20%,rgba(181,138,74,.42),transparent 28%),linear-gradient(135deg,#0c2b24,#1b4d40)}
+.az-promo-popup__media{position:relative;min-height:210px;overflow:hidden;background:radial-gradient(circle at 80% 20%,rgba(181,138,74,.42),transparent 28%),linear-gradient(135deg,#0c2b24,#0577F5)}
 .az-promo-popup__media img{width:100%;height:100%;min-height:210px;max-height:340px;object-fit:cover}
 .az-promo-popup__media:after{position:absolute;inset:0;background:linear-gradient(180deg,transparent 25%,rgba(6,25,20,.62));content:""}
-.az-promo-popup__badge{position:absolute;z-index:2;left:24px;bottom:20px;display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:rgba(255,253,249,.92);color:#123a30;font-size:.72rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase}
+.az-promo-popup__badge{position:absolute;z-index:2;left:24px;bottom:20px;display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:rgba(255,253,249,.92);color:#052058;font-size:.72rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase}
 .az-promo-popup__close{position:absolute;z-index:4;top:16px;right:16px;width:42px;height:42px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.28);border-radius:50%;background:rgba(7,30,24,.64);color:#fff;backdrop-filter:blur(10px)}
 .az-promo-popup__body{padding:clamp(24px,5vw,42px)}
 .az-promo-popup__body h2{margin:0 0 12px;color:#0c2b24;font-family:var(--font-heading,Georgia,serif);font-size:clamp(2rem,5vw,3.35rem);font-weight:500;line-height:1.02}
 .az-promo-popup__summary{margin:0;color:#4e5d57;font-size:1rem;line-height:1.7}
 .az-promo-popup__copy{margin-top:16px;color:#64706b;line-height:1.7}
 .az-promo-popup__actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
-.az-promo-popup__cta{display:inline-flex;min-height:46px;align-items:center;gap:9px;padding:11px 18px;border-radius:12px;background:#123a30;color:#fff;font-weight:800;text-decoration:none}
-.az-promo-popup__dismiss{display:inline-flex;min-height:46px;align-items:center;padding:11px 18px;border:1px solid rgba(22,55,45,.16);border-radius:12px;background:#fff;color:#123a30;font-weight:800}
+.az-promo-popup__cta{display:inline-flex;min-height:46px;align-items:center;gap:9px;padding:11px 18px;border-radius:12px;background:#052058;color:#fff;font-weight:800;text-decoration:none}
+.az-promo-popup__dismiss{display:inline-flex;min-height:46px;align-items:center;padding:11px 18px;border:1px solid rgba(22,55,45,.16);border-radius:12px;background:#fff;color:#052058;font-weight:800}
 
 @media(max-width:980px){
  .az-admin-content,.az-user-content{width:100%;max-width:100vw;overflow-x:hidden}
