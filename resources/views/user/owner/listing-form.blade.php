@@ -45,8 +45,8 @@
         <label class="az-s78-field{{ $field('cleaning_fee') }}"><span>Cleaning fee (USD)</span><input type="number" step=".01" min="0" name="cleaning_fee" value="{{ old('cleaning_fee',data_get($data,'cleaning_fee')) }}">@error('cleaning_fee')<small>{{ $message }}</small>@enderror</label>
         <label class="az-s78-field{{ $field('service_charge') }}"><span>Service charge (USD)</span><input type="number" step=".01" min="0" name="service_charge" value="{{ old('service_charge',data_get($data,'service_charge')) }}">@error('service_charge')<small>{{ $message }}</small>@enderror</label>
         <label class="az-s78-field{{ $field('tax_rate') }}"><span>Tax rate (%)</span><input type="number" step=".001" min="0" max="100" name="tax_rate" value="{{ old('tax_rate',data_get($data,'tax_rate')) }}">@error('tax_rate')<small>{{ $message }}</small>@enderror</label>
-        <label class="az-s78-field"><span>Currency</span><input value="{{ $currency }}" readonly disabled><small>Azari property pricing is locked to USD.</small></label>
-        <label class="az-s78-field"><span>Owner revenue</span><input value="No Azari platform commission" readonly disabled><small>Azari does not deduct a platform percentage from owner-property room sales.</small></label>
+        <label class="az-s78-field"><span>Currency</span><input value="{{ $currency }}" readonly disabled><small>Resavar property pricing is locked to USD.</small></label>
+        <label class="az-s78-field"><span>Owner revenue</span><input value="No Resavar platform commission" readonly disabled><small>Resavar does not deduct a platform percentage from owner-property room sales.</small></label>
 
         <label class="az-s78-field is-full{{ $field('short_description') }}"><span>Short description</span><textarea name="short_description" required>{{ old('short_description',data_get($data,'short_description')) }}</textarea>@error('short_description')<small>{{ $message }}</small>@enderror</label>
         <label class="az-s78-field is-full{{ $field('description') }}"><span>Full description</span><textarea name="description" required>{{ old('description',data_get($data,'description')) }}</textarea>@error('description')<small>{{ $message }}</small>@enderror</label>
@@ -78,7 +78,7 @@
         </div>
         <label class="az-s78-field is-full"><span>Add gallery images</span><input type="file" name="gallery[]" accept="image/*" multiple>@error('gallery.*')<small>{{ $message }}</small>@enderror</label>
 
-        <label class="az-s78-field is-full{{ $field('owner_notes') }}"><span>Notes for Azari review</span><textarea name="owner_notes">{{ old('owner_notes',$listing->owner_notes) }}</textarea>@error('owner_notes')<small>{{ $message }}</small>@enderror</label>
+        <label class="az-s78-field is-full{{ $field('owner_notes') }}"><span>Notes for Resavar review</span><textarea name="owner_notes">{{ old('owner_notes',$listing->owner_notes) }}</textarea>@error('owner_notes')<small>{{ $message }}</small>@enderror</label>
     </div>
 
     <fieldset class="az-s78-permissions">
