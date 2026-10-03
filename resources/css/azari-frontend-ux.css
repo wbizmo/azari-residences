@@ -109,7 +109,7 @@ form.is-submitting input[type='submit'] {
     max-height: min(90dvh, 42rem);
     overflow-y: auto;
     padding: clamp(1.5rem, 4vw, 2.25rem);
-    background: var(--azari-ivory, #f3ecdd);
+    background: var(--azari-ivory, #FFFFFF);
     border: 1px solid var(--azari-border, rgba(18, 33, 27, 0.16));
     border-radius: 1.25rem;
     box-shadow: 0 2rem 5rem rgba(0, 0, 0, 0.35);
@@ -138,7 +138,7 @@ form.is-submitting input[type='submit'] {
     display: grid;
     place-items: center;
     color: var(--azari-ink, #12211b);
-    background: var(--azari-ivory-deep, #e8dec6);
+    background: var(--azari-ivory-deep, #FFFFFF);
     border-radius: 1rem;
 }
 
@@ -152,7 +152,7 @@ form.is-submitting input[type='submit'] {
 .azari-confirmation-card p {
     margin: 0.8rem auto 0;
     max-width: 34rem;
-    color: var(--azari-muted, #6e7268);
+    color: var(--azari-muted, #052058);
     line-height: 1.65;
 }
 
