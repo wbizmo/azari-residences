@@ -5,11 +5,6 @@ $identityVerified=auth()->user()->hasVerifiedIdentity();
 @endphp
 
 <section class="az-user-nav-group">
-    <a class="az-user-nav-link" href="{{ route('home') }}">
-        <span class="material-symbols-outlined">language</span>
-        <span>Public site</span>
-    </a>
-
     <p class="az-user-nav-label">Stay</p>
     <nav class="az-user-nav-list">
         @foreach([
