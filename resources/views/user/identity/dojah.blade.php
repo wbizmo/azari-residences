@@ -10,7 +10,7 @@
     <header class="az-user-panel-header">
         <div>
             <h2 class="az-user-panel-title">Dojah verification · {{ $subjectName }}</h2>
-            <p class="az-user-panel-subtitle">Dojah is the only identity-verification authority for Reserva customer accounts and adult booking guests.</p>
+            <p class="az-user-panel-subtitle">Dojah is the only identity-verification authority for Resavar customer accounts and adult booking guests.</p>
         </div>
 
         <span class="az-user-status {{ $verified ? '' : 'az-user-status--warning' }}" data-dojah-status>
@@ -48,7 +48,7 @@
         @if($verified)
             <div class="az-user-alert" style="margin-top:18px">
                 <strong>Identity verified.</strong>
-                <p>Your Reserva account is verified. Bookings, payments, property-owner actions and other KYC-gated features are available.</p>
+                <p>Your Resavar account is verified. Bookings, payments, property-owner actions and other KYC-gated features are available.</p>
             </div>
 
             <div class="az-user-actions" style="margin-top:18px">
@@ -57,14 +57,14 @@
         @elseif(!$widgetConfigured)
             <div class="az-user-alert az-user-alert--danger" style="margin-top:18px">
                 <strong>Identity verification is temporarily unavailable.</strong>
-                <p>The Dojah EasyOnboard flow is not currently available. Reserva fails closed: protected actions stay locked until Dojah verification can be completed successfully.</p>
+                <p>The Dojah EasyOnboard flow is not currently available. Resavar fails closed: protected actions stay locked until Dojah verification can be completed successfully.</p>
             </div>
         @else
             <div class="az-user-alert" style="margin-top:18px">
                 <strong>Complete verification with Dojah.</strong>
                 <p>
-                    The secure Dojah flow opens in a new tab. Keep this Reserva page open.
-                    As soon as Reserva receives and validates Dojah's signed result, this page automatically returns you to the booking or action you were completing.
+                    The secure Dojah flow opens in a new tab. Keep this Resavar page open.
+                    As soon as Resavar receives and validates Dojah's signed result, this page automatically returns you to the booking or action you were completing.
                 </p>
             </div>
 
