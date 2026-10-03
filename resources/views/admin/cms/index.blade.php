@@ -89,13 +89,13 @@
             </label>
 
             @foreach([
-                'primary' => ['Primary', '#12211b'],
-                'secondary' => ['Secondary', '#f3ecdd'],
-                'accent' => ['Accent', '#bb8a3e'],
-                'background' => ['Background', '#f3ecdd'],
-                'surface' => ['Surface', '#ffffff'],
-                'text' => ['Text', '#1c231f'],
-                'muted' => ['Muted text', '#6e7268'],
+                'primary' => ['Primary', '#052058'],
+                'secondary' => ['Secondary', '#052058'],
+                'accent' => ['Accent', '#052058'],
+                'background' => ['Background', '#052058'],
+                'surface' => ['Surface', '#FFFFFF'],
+                'text' => ['Text', '#052058'],
+                'muted' => ['Muted text', '#052058'],
             ] as $name => [$label, $default])
                 <label class="az-color-field">
                     <span>{{ $label }}</span>
@@ -109,7 +109,7 @@
             <label class="az-field">
                 <span>Heading font</span>
                 <select name="heading_font">
-                    @foreach(['Fraunces', 'Cormorant Garamond', 'Playfair Display'] as $font)
+                    @foreach(['Montserrat', 'Cormorant Garamond', 'Playfair Display'] as $font)
                         <option value="{{ $font }}">{{ $font }}</option>
                     @endforeach
                 </select>
@@ -118,7 +118,7 @@
             <label class="az-field">
                 <span>Body font</span>
                 <select name="body_font">
-                    @foreach(['Public Sans', 'Inter', 'Manrope'] as $font)
+                    @foreach(['Montserrat', 'Inter', 'Manrope'] as $font)
                         <option value="{{ $font }}">{{ $font }}</option>
                     @endforeach
                 </select>
@@ -367,9 +367,9 @@
 <style>
 /* AZARI_CMS_PROMOTION_STYLES */
 .az-cms-promotion-form,.az-promotion-current{max-width:100%;min-width:0}
-.az-promotion-switch{display:flex;align-items:center;justify-content:space-between;gap:24px;width:100%;min-width:0;padding:20px;border:1px solid rgba(22,55,45,.14);border-radius:16px;background:#f8f4eb;cursor:pointer;box-sizing:border-box}
-.az-promotion-switch__copy{display:grid;min-width:0;gap:5px}.az-promotion-switch__copy strong{color:#173d33;font-size:15px}.az-promotion-switch__copy small{color:#68736f;line-height:1.55}.az-promotion-switch__control{position:relative;flex:0 0 auto}.az-promotion-switch__control input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}.az-promotion-switch__control input:checked+.az-promotion-switch__control input:checked+.az-promotion-switch__control input:focus-visible+
-.az-promotion-current{margin-top:22px;padding:clamp(20px,3vw,30px);border:1px solid rgba(22,55,45,.13);border-radius:20px;background:#fff}.az-promotion-preview-list{display:grid;margin:18px 0 0;border:1px solid rgba(22,55,45,.11);border-radius:15px;overflow:hidden}.az-promotion-preview-list>div{display:grid;grid-template-columns:minmax(150px,.32fr) minmax(0,1fr);gap:18px;padding:15px 17px;border-bottom:1px solid rgba(22,55,45,.09)}.az-promotion-preview-list>div:last-child{border-bottom:0}.az-promotion-preview-list dt{color:#68736f;font-weight:700}.az-promotion-preview-list dd{min-width:0;margin:0;overflow-wrap:anywhere;color:#173d33;line-height:1.6}
+.az-promotion-switch{display:flex;align-items:center;justify-content:space-between;gap:24px;width:100%;min-width:0;padding:20px;border:1px solid rgba(5, 32, 88, .14);border-radius:16px;background:#052058;cursor:pointer;box-sizing:border-box}
+.az-promotion-switch__copy{display:grid;min-width:0;gap:5px}.az-promotion-switch__copy strong{color:#052058;font-size:15px}.az-promotion-switch__copy small{color:#052058;line-height:1.55}.az-promotion-switch__control{position:relative;flex:0 0 auto}.az-promotion-switch__control input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}.az-promotion-switch__control input:checked+.az-promotion-switch__control input:checked+.az-promotion-switch__control input:focus-visible+
+.az-promotion-current{margin-top:22px;padding:clamp(20px,3vw,30px);border:1px solid rgba(5, 32, 88, .13);border-radius:20px;background:#FFFFFF}.az-promotion-preview-list{display:grid;margin:18px 0 0;border:1px solid rgba(5, 32, 88, .11);border-radius:15px;overflow:hidden}.az-promotion-preview-list>div{display:grid;grid-template-columns:minmax(150px,.32fr) minmax(0,1fr);gap:18px;padding:15px 17px;border-bottom:1px solid rgba(5, 32, 88, .09)}.az-promotion-preview-list>div:last-child{border-bottom:0}.az-promotion-preview-list dt{color:#052058;font-weight:700}.az-promotion-preview-list dd{min-width:0;margin:0;overflow-wrap:anywhere;color:#052058;line-height:1.6}
 @media(max-width:680px){.az-promotion-switch{align-items:flex-start}.az-promotion-preview-list>div{grid-template-columns:1fr;gap:6px}}
 
 /* AZARI_CMS_PROMOTION_SWITCH_REPAIR */
