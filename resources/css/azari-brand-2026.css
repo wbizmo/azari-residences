@@ -1,66 +1,55 @@
-/* Reserva brand authority: one blue, white, one canonical logo. */
+/* RESAVAR brand authority. Source: RESAVAR Brand Identity. */
 :root {
-    --reserva-blue: #2596be;
-    --reserva-blue-hsl: 196 67% 45%;
-    --reserva-blue-dark: #176b89;
-    --reserva-blue-soft: #eaf7fb;
-    --reserva-white: #ffffff;
-    --reserva-ink: #123746;
-    --reserva-ink-soft: #1b5267;
-    --azari-ivory: #ffffff;
-    --azari-ivory-deep: #eaf7fb;
-    --azari-brass: #2596be;
-    --azari-brass-light: #65bad8;
-    --azari-wine: #176b89;
-    --azari-text: #173846;
-    --azari-muted: #607985;
-    --reserva-border: rgba(37,150,190,.22);
-    --reserva-success: #17845b;
-    --reserva-error: #b42318;
-    --az-user-green-950: #123746;
-    --az-user-green-900: #176b89;
-    --az-user-green-800: #1f7fa2;
-    --az-user-green-700: #2596be;
-    --az-user-green-100: #eaf7fb;
-    --az-user-brass: #2596be;
-    --az-user-brass-soft: #d9f0f8;
-    --az-user-wine: #176b89;
-    --az-user-ink: #173846;
-    --az-user-muted: #607985;
-    --az-user-paper: #ffffff;
-    --az-user-ivory: #f7fcfe;
-    --az-user-line: rgba(37,150,190,.18);
-}
-body,.az-user-body,.az-admin-body { background:#f7fcfe; color:var(--azari-text); }
-:focus-visible { outline-color:rgba(37,150,190,.72); }
-.button-brass,.button-primary,.az-user-button--primary,.az-user-button--dark {
-    background:var(--reserva-blue)!important; color:#fff!important; border-color:var(--reserva-blue)!important;
-}
-.button-brass:hover,.button-primary:hover,.az-user-button--primary:hover,.az-user-button--dark:hover {
-    background:var(--reserva-blue-dark)!important; border-color:var(--reserva-blue-dark)!important;
-}
-.button-secondary,.az-user-button--light,.az-user-button--ghost { border-color:var(--reserva-border)!important; color:var(--reserva-blue-dark)!important; }
-.site-header.is-scrolled,.search-results-page .site-header { background:rgba(255,255,255,.96); color:var(--reserva-ink); }
-.hero-section { background:linear-gradient(145deg,#176b89 0%,#2596be 56%,#65bad8 100%); }
-.hero-copy h1,.site-footer,.az-admin-sidebar,.az-user-sidebar,.az-user-mobile-drawer { color:#fff; }
-.site-footer,.az-admin-sidebar,.az-user-sidebar,.az-user-mobile-drawer { background:var(--reserva-blue-dark)!important; }
-.eyebrow,.material-symbols-outlined,.nav-popover-panel .material-symbols-outlined { color:var(--reserva-blue); }
-.azari-logo-mask {
-    display:block;
-    width:100%;
-    height:100%;
-    background:currentColor;
-    -webkit-mask:var(--azari-logo-url, url('/images/logo-dark.png')) center/contain no-repeat;
-    mask:var(--azari-logo-url, url('/images/logo-dark.png')) center/contain no-repeat;
-}
-.azari-logo-on-dark { color:#fff!important; }
-.azari-logo-on-light { color:var(--reserva-blue-dark)!important; }
-.azari-brand__logo-slot,.brand-logo-slot { overflow:hidden; }
-input:focus,select:focus,textarea:focus { border-color:var(--reserva-blue)!important; outline-color:rgba(37,150,190,.14)!important; }
-input[type="checkbox"]:checked + .az-toggle { border-color:var(--reserva-blue)!important; background:var(--reserva-blue)!important; }
-input[type="checkbox"]:focus-visible + .az-toggle { outline-color:var(--reserva-blue)!important; }
-.az-user-nav-link.is-active,.az-nav-link.is-active { background:rgba(255,255,255,.14)!important; color:#fff!important; }
-.az-user-summary-icon,.az-user-timezone-icon,.az-user-stat>.material-symbols-outlined { background:var(--reserva-blue-soft)!important; color:var(--reserva-blue-dark)!important; }
+    --resavar-navy:#052058;
+    --resavar-blue:#0577F5;
+    --resavar-orange:#F58F07;
+    --resavar-night:#000000;
+    --resavar-mist:#EEF2F8;
+    --resavar-white:#FFFFFF;
+    --resavar-ink:#052058;
+    --resavar-muted:#40547A;
+    --resavar-border:rgba(5,32,88,.16);
+    --resavar-success:#17845b;
+    --resavar-error:#b42318;
 
-.site-header:not(.is-scrolled) .azari-header-logo .azari-logo-mask{color:#fff!important}.site-header.is-scrolled .azari-header-logo .azari-logo-mask,.search-results-page .site-header .azari-header-logo .azari-logo-mask{color:var(--reserva-blue-dark)!important}.az-sidebar-brand__logo{display:block;width:148px;height:46px}.azari-brand__logo-slot{min-width:40px;min-height:40px}
-.az-user-sidebar .material-symbols-outlined,.az-user-mobile-drawer .material-symbols-outlined,.az-admin-sidebar .material-symbols-outlined{color:inherit}.az-user-welcome{background:linear-gradient(120deg,#176b89 0%,#2596be 72%,#65bad8 100%)!important}.az-user-topbar{background:rgba(247,252,254,.94)!important;border-color:var(--reserva-border)!important}.az-user-nav-link.is-active{background:rgba(255,255,255,.16)!important}.az-user-support-card a,.az-user-eyebrow{color:#fff!important}
+    /* Compatibility aliases while legacy selectors are migrated safely. */
+    --azari-ivory:#FFFFFF; --azari-ivory-deep:#EEF2F8;
+    --azari-brass:#0577F5; --azari-brass-light:#0577F5;
+    --azari-wine:#052058; --azari-text:#052058; --azari-muted:#40547A;
+    --azari-border:rgba(5,32,88,.16);
+    --az-user-green-950:#052058; --az-user-green-900:#052058;
+    --az-user-green-800:#052058; --az-user-green-700:#0577F5;
+    --az-user-green-100:#EEF2F8; --az-user-brass:#0577F5;
+    --az-user-brass-soft:#EEF2F8; --az-user-wine:#052058;
+    --az-user-ink:#052058; --az-user-muted:#40547A;
+    --az-user-paper:#FFFFFF; --az-user-ivory:#EEF2F8;
+    --az-user-line:rgba(5,32,88,.16);
+    --font-display:'Montserrat',Arial,sans-serif;
+    --font-body:'Montserrat',Arial,sans-serif;
+    --font-mono:'Montserrat',Arial,sans-serif;
+}
+body,.az-user-body,.az-admin-body{background:#fff;color:var(--resavar-navy);font-family:'Montserrat',Arial,sans-serif}
+:focus-visible{outline-color:var(--resavar-blue)}
+.button-brass,.button-primary,.az-user-button--primary,.az-user-button--dark{background:var(--resavar-navy)!important;color:#fff!important;border-color:var(--resavar-navy)!important}
+.button-brass:hover,.button-primary:hover,.az-user-button--primary:hover,.az-user-button--dark:hover{background:var(--resavar-blue)!important;border-color:var(--resavar-blue)!important}
+.availability-submit{background:var(--resavar-orange)!important;color:var(--resavar-navy)!important}
+.button-secondary,.az-user-button--light,.az-user-button--ghost{border-color:var(--resavar-navy)!important;color:var(--resavar-navy)!important;background:transparent!important}
+.site-header.is-scrolled,.search-results-page .site-header{background:rgba(255,255,255,.97);color:var(--resavar-navy)}
+.hero-section{background:var(--resavar-navy)}
+.site-footer,.az-admin-sidebar,.az-user-sidebar,.az-user-mobile-drawer{background:var(--resavar-navy)!important;color:#fff}
+.eyebrow,.material-symbols-outlined,.nav-popover-panel .material-symbols-outlined,.text-link{color:var(--resavar-blue)}
+.azari-logo-mask{display:block;width:100%;height:100%;background:currentColor;-webkit-mask:var(--azari-logo-url,url('/images/logo-dark.png')) center/contain no-repeat;mask:var(--azari-logo-url,url('/images/logo-dark.png')) center/contain no-repeat}
+.azari-logo-on-dark{color:#fff!important}.azari-logo-on-light{color:var(--resavar-navy)!important}
+.azari-brand__logo-slot,.brand-logo-slot{overflow:hidden}
+input:focus,select:focus,textarea:focus{border-color:var(--resavar-blue)!important;outline-color:rgba(5,119,245,.14)!important}
+input[type="checkbox"]:checked + .az-toggle{border-color:var(--resavar-blue)!important;background:var(--resavar-blue)!important}
+.az-user-nav-link.is-active,.az-nav-link.is-active{background:rgba(255,255,255,.14)!important;color:#fff!important}
+.az-user-summary-icon,.az-user-timezone-icon,.az-user-stat>.material-symbols-outlined{background:var(--resavar-mist)!important;color:var(--resavar-navy)!important}
+.site-header:not(.is-scrolled) .azari-header-logo .azari-logo-mask{color:#fff!important}
+.site-header.is-scrolled .azari-header-logo .azari-logo-mask,.search-results-page .site-header .azari-header-logo .azari-logo-mask{color:var(--resavar-navy)!important}
+.az-sidebar-brand__logo{display:block;width:148px;height:46px}
+.azari-brand__logo-slot{min-width:40px;min-height:40px}
+.az-user-sidebar .material-symbols-outlined,.az-user-mobile-drawer .material-symbols-outlined,.az-admin-sidebar .material-symbols-outlined{color:inherit}
+.az-user-welcome{background:var(--resavar-navy)!important}
+.az-user-topbar{background:rgba(255,255,255,.96)!important;border-color:var(--resavar-border)!important}
+.az-user-support-card a,.az-user-eyebrow{color:#fff!important}
