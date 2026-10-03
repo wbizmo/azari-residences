@@ -7,6 +7,7 @@ use App\Models\IdentityVerification;
 use App\Models\User;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class DojahService
@@ -157,28 +158,38 @@ class DojahService
             return null;
         }
 
-        $verification = IdentityVerification::query()
-            ->where('provider', IdentityVerification::PROVIDER_DOJAH)
-            ->where('reference', $reference)
-            ->first();
-
-        if (! $verification) {
-            return null;
-        }
-
         $payloadHash = hash('sha256', $rawBody);
-
-        if (
-            $verification->last_payload_hash
-            && hash_equals($verification->last_payload_hash, $payloadHash)
-        ) {
-            return $verification;
-        }
-
         $providerStatus = $this->extractStatus($payload);
         $outcome = $this->resolveOutcome($payload, $providerStatus);
 
-        $verification->fill([
+        $verification = DB::transaction(function () use ($reference, $payloadHash, $payload, $providerStatus, $outcome): ?IdentityVerification {
+            $verification = IdentityVerification::query()
+                ->where('provider', IdentityVerification::PROVIDER_DOJAH)
+                ->where('reference', $reference)
+                ->when(
+                    DB::connection()->getDriverName() !== 'sqlite',
+                    fn ($query) => $query->lockForUpdate()
+                )
+                ->first();
+
+            if (! $verification) {
+                return null;
+            }
+
+            if (
+                $verification->last_payload_hash
+                && hash_equals($verification->last_payload_hash, $payloadHash)
+            ) {
+                return $verification;
+            }
+
+            // A delayed/duplicate provider event must never downgrade a
+            // completed verification. Re-verification creates a newer record.
+            if ($verification->isVerified() && $outcome['status'] !== IdentityVerification::STATUS_VERIFIED) {
+                return $verification;
+            }
+
+            $verification->fill([
             'provider_event_id' => $this->stringValue(
                 Arr::get($payload, 'event_id')
                 ?? Arr::get($payload, 'id')
@@ -221,7 +232,14 @@ class DojahService
             }
         }
 
-        $verification->save();
+            $verification->save();
+
+            return $verification->refresh();
+        }, 5);
+
+        if (! $verification) {
+            return null;
+        }
 
         if ($verification->user_id && $verification->booking_guest_id === null) {
             $this->syncUserVerificationToLeadGuests($verification);
