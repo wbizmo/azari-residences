@@ -183,7 +183,7 @@
         <meta name="publisher" content="Resavar Luxury Properties Ltd">
         <meta name="application-name" content="Resavar">
         <meta name="apple-mobile-web-app-title" content="Resavar">
-        <meta name="theme-color" content="#153b34">
+        <meta name="theme-color" content="#052058">
         <meta name="color-scheme" content="light">
         <meta name="format-detection" content="telephone=yes">
         <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
