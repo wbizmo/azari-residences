@@ -8,7 +8,6 @@
         <label>Tagline<input name="site_tagline" value="{{ old('site_tagline', $settings['site_tagline'] ?? '') }}"></label>
         <label>Operating regions<input name="operating_regions" value="{{ old('operating_regions', $settings['operating_regions'] ?? 'Nigeria and Rwanda') }}"></label>
         <label>Main logo<input type="file" name="site_logo" accept="image/*"></label>
-        <label>Favicon<input type="file" name="favicon" accept=".png,.ico,.svg,image/*"></label>
         <button class="button button-primary" type="submit">Save branding</button>
     </form>
 @endsection
