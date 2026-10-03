@@ -8,11 +8,11 @@
         name="robots"
         content="noindex, noarchive"
     >
-<title>System Status | Azari Hotels & Residences</title>
+<title>System Status | Resavar</title>
 
     <link
         rel="icon"
-        href="/public/images/azari-favicon.png"
+        href="/public/images/logo-light.png"
     >
 
     <style>
@@ -656,7 +656,7 @@
     <div class="wrap topbar-inner">
         <a class="brand" href="/">
             <img
-                src="/public/images/azari-favicon.png"
+                src="/public/images/logo-light.png"
                 alt=""
                 aria-hidden="true"
             >
