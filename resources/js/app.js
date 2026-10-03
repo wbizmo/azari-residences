@@ -806,23 +806,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 ? 'home-top'
                 : 'solid';
 
-        /*
-         * Keep the existing single-logo implementation synchronized.
-         * This changes only the src of the one existing image node.
-         */
-        if (publicLogo) {
-            const requiredLogo =
-                isHomepageTop
-                    ? publicLogo.dataset.darkLogo
-                    : publicLogo.dataset.lightLogo;
-
-            if (
-                requiredLogo &&
-                publicLogo.getAttribute('src') !== requiredLogo
-            ) {
-                publicLogo.setAttribute('src', requiredLogo);
-            }
-        }
     };
 
     updateAzariPublicHeaderState();
