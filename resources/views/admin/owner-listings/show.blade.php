@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('admin.layouts.app')
 @section('title','Review owner listing')
 @section('content')
 <div class="az-admin-page-header">
