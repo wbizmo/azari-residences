@@ -662,7 +662,7 @@
             >
 
             <span class="brand-copy">
-                <strong>Azari Hotels &amp; Residences</strong>
+                <strong>Resavar</strong>
                 <span>System Status</span>
             </span>
         </a>
