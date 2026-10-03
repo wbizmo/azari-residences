@@ -13,6 +13,6 @@
 
     <p>This code expires in 10 minutes. Your booking details remain attached to your secure hold while you continue.</p>
 
-    <p>Azari Hotels & Residences</p>
+    <p>Resavar</p>
 </body>
 </html>
