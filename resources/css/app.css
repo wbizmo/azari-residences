@@ -18,22 +18,22 @@
 @tailwind utilities;
 
 :root {
-    --azari-ink: #12211b;
-    --azari-ink-soft: #1c332a;
-    --azari-ivory: #f3ecdd;
-    --azari-ivory-deep: #e8dec6;
-    --azari-brass: #bb8a3e;
-    --azari-brass-light: #d9b168;
-    --azari-wine: #6b2737;
+    --azari-ink: #052058;
+    --azari-ink-soft: #052058;
+    --azari-ivory: #FFFFFF;
+    --azari-ivory-deep: #FFFFFF;
+    --azari-brass: #052058;
+    --azari-brass-light: #052058;
+    --azari-wine: #052058;
     --azari-white: #ffffff;
-    --azari-text: #1c231f;
-    --azari-muted: #6e7268;
+    --azari-text: #052058;
+    --azari-muted: #052058;
     --azari-border: rgba(18, 33, 27, 0.16);
-    --azari-success: #277a52;
+    --azari-success: #052058;
     --azari-error: #b42318;
-    --font-display: 'Fraunces', Georgia, serif;
-    --font-body: 'Public Sans', ui-sans-serif, system-ui, sans-serif;
-    --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+    --font-display: 'Montserrat', Arial, sans-serif;
+    --font-body: 'Montserrat', Arial, sans-serif;
+    --font-mono: 'Montserrat', Arial, sans-serif;
     --shadow-card: 0 24px 50px -28px rgba(18, 33, 27, 0.42);
     --shadow-floating: 0 30px 80px -30px rgba(0, 0, 0, 0.6);
     --container: 1180px;
@@ -2812,8 +2812,7 @@ main .property-description {
             90deg,
             rgb(0 0 0 / 58%),
             rgb(0 0 0 / 18%)
-        ),
-        url("../images/azari-hero.png") center / cover no-repeat;
+        ), #052058;
 }
 
 .hero,
