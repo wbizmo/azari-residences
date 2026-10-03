@@ -13,7 +13,7 @@
     
     
     
-            <title>{{ $title ?? 'Azari Hotels & Residences' }}</title>
+            <title>{{ $title ?? 'Resavar' }}</title>
         
 
 
