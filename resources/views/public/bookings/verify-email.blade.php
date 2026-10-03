@@ -9,7 +9,7 @@
 <section class="az-panel">
     <div class="az-notice">
         <strong>We sent a six-digit code.</strong>
-        Enter it below. The booking hold stays attached to this Azari account while you complete email and Dojah verification.
+        Enter it below. The booking hold stays attached to this Resavar account while you complete email and Dojah verification.
     </div>
 
     <form method="POST" action="{{ route('azari.booking.onboarding.email.verify', $hold->token) }}" style="margin-top:18px">
