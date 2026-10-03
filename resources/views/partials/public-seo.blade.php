@@ -228,9 +228,6 @@ TEXT));
 <meta name="color-scheme" content="light">
 <link rel="canonical" href="{{ $azariSeoCanonical }}">
 
-<link rel="icon" type="image/png" href="{{ asset('images/logo-dark.png') }}">
-<link rel="shortcut icon" type="image/png" href="{{ asset('images/logo-dark.png') }}">
-<link rel="apple-touch-icon" href="{{ asset('images/logo-dark.png') }}">
 
 <meta property="og:title" content="{{ $azariSeoTitle }}">
 <meta property="og:description" content="{{ $azariSeoDescription }}">
