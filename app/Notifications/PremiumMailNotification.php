@@ -110,12 +110,12 @@ class PremiumMailNotification extends Notification implements ShouldQueue
             'details' => $this->details,
             'notice' => $this->notice,
             'tone' => $this->tone,
-            'eyebrow' => $this->eyebrow ?: 'The Azari Residences',
+            'eyebrow' => $this->eyebrow ?: 'Reserva',
             'logoUrl' => asset('images/logo-light.png'),
             'supportEmail' => $supportEmail,
             'footerText' => SiteSetting::valueFor(
                 'email_transactional_footer',
-                'This is a transactional message from The Azari Residences. Keep booking, payment and account links private.'
+                'This is a transactional message from Reserva. Keep booking, payment and account links private.'
             ),
         ]);
     }
