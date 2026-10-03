@@ -12,12 +12,12 @@
         *{box-sizing:border-box}
         html,body{margin:0;min-height:100%}
         body{font-family:Inter,system-ui,sans-serif;background:var(--paper);color:var(--ink)}
-        .auth{min-height:100dvh;display:grid;grid-template-columns:minmax(0,1.08fr) minmax(430px,.92fr);background:#fffdf9}
+        .auth{min-height:100dvh;display:grid;grid-template-columns:minmax(0,1.08fr) minmax(430px,.92fr);background:#FFFFFF}
         .visual{position:relative;overflow:hidden;background:#201b15}
         .visual img{width:100%;height:100%;object-fit:cover;display:block}
         .visual:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,6,4,.08),rgba(8,6,4,.48))}
         .brand{position:absolute;z-index:2;top:44px;left:54px;color:#fff;text-decoration:none;text-transform:uppercase;letter-spacing:.18em;font-size:13px;font-weight:700}
-        .panel{display:grid;place-items:center;padding:clamp(30px,5vw,76px);background:radial-gradient(circle at 100% 0%,rgba(168,121,60,.11),transparent 36%),#fffdf9}
+        .panel{display:grid;place-items:center;padding:clamp(30px,5vw,76px);background:radial-gradient(circle at 100% 0%,rgba(168,121,60,.11),transparent 36%),#FFFFFF}
         .wrap{width:min(100%,460px)}
         .kicker{margin:0 0 10px;color:var(--gold);font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
         h1{margin:0;font:500 clamp(36px,4vw,52px)/1 Georgia,serif;letter-spacing:-.035em}
@@ -39,8 +39,8 @@
 
         <!-- AZARI PWA HEAD START -->
         <link rel="manifest" href="/manifest.webmanifest">
-        <meta name="theme-color" content="#0c2b24">
-        <link rel="apple-touch-icon" href="/public/images/azari-favicon.png">
+        <meta name="theme-color" content="#052058">
+        <link rel="apple-touch-icon" href="/public/images/logo-light.png">
         <!-- AZARI PWA HEAD END -->
 
 </head>
