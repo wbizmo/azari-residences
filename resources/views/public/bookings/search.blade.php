@@ -1,6 +1,6 @@
 <x-public-site.layout
-    title="Book your stay | Azari Hotels & Residences"
-    description="Search live availability and book directly with Azari Residences."
+    title="Book your stay | Resavar"
+    description="Search live availability and book directly with Resavar."
 >
     <main class="az-book-page">
         <section
@@ -26,7 +26,7 @@
                     <figure class="az-book-media">
                         <img
                             src="{{ asset('images/azari-hero.png') }}"
-                            alt="Interior of an Azari Residence"
+                            alt="Interior of an Resavar"
                             width="1200"
                             height="1500"
                         >
@@ -37,7 +37,7 @@
                         ></span>
 
                         <figcaption class="az-book-media__copy">
-                            <span>Azari Hotels & Residences</span>
+                            <span>Resavar</span>
 
                             <strong>
                                 Thoughtfully managed stays across our locations.
@@ -254,7 +254,7 @@
 
                             <p>
                                 Live inventory, direct rates and secure booking
-                                through Azari Hotels & Residences.
+                                through Resavar.
                             </p>
                         </footer>
                     </section>
