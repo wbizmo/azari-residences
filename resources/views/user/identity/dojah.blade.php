@@ -10,7 +10,7 @@
     <header class="az-user-panel-header">
         <div>
             <h2 class="az-user-panel-title">Dojah verification · {{ $subjectName }}</h2>
-            <p class="az-user-panel-subtitle">Dojah is the only identity-verification authority for Azari customer accounts and adult booking guests.</p>
+            <p class="az-user-panel-subtitle">Dojah is the only identity-verification authority for Reserva customer accounts and adult booking guests.</p>
         </div>
 
         <span class="az-user-status {{ $verified ? '' : 'az-user-status--warning' }}" data-dojah-status>
@@ -27,7 +27,7 @@
 
             <div class="az-user-detail-row">
                 <dt>Status</dt>
-                <dd>{{ $verified ? 'Verified' : ucfirst(str_replace('_',' ',$verification->status)) }}</dd>
+                <dd data-dojah-status-text>{{ $verified ? 'Verified' : ucfirst(str_replace('_',' ',$verification->status)) }}</dd>
             </div>
 
             @if($verification->verified_at)
@@ -48,7 +48,7 @@
         @if($verified)
             <div class="az-user-alert" style="margin-top:18px">
                 <strong>Identity verified.</strong>
-                <p>Your Azari account is verified. Bookings, payments, property-owner actions and other KYC-gated features are available.</p>
+                <p>Your Reserva account is verified. Bookings, payments, property-owner actions and other KYC-gated features are available.</p>
             </div>
 
             <div class="az-user-actions" style="margin-top:18px">
@@ -57,14 +57,14 @@
         @elseif(!$widgetConfigured)
             <div class="az-user-alert az-user-alert--danger" style="margin-top:18px">
                 <strong>Identity verification is temporarily unavailable.</strong>
-                <p>The Dojah EasyOnboard flow is not currently available. Azari fails closed: protected actions stay locked until Dojah verification can be completed successfully.</p>
+                <p>The Dojah EasyOnboard flow is not currently available. Reserva fails closed: protected actions stay locked until Dojah verification can be completed successfully.</p>
             </div>
         @else
             <div class="az-user-alert" style="margin-top:18px">
                 <strong>Complete verification with Dojah.</strong>
                 <p>
-                    The secure Dojah flow opens in a new tab. Keep this Azari page open.
-                    As soon as Azari receives and validates Dojah's signed result, this page automatically returns you to the booking or action you were completing.
+                    The secure Dojah flow opens in a new tab. Keep this Reserva page open.
+                    As soon as Reserva receives and validates Dojah's signed result, this page automatically returns you to the booking or action you were completing.
                 </p>
             </div>
 
@@ -121,6 +121,16 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             const data = await response.json();
+
+            const badge = document.querySelector('[data-dojah-status]');
+            const statusText = document.querySelector('[data-dojah-status-text]');
+            const waiting = document.querySelector('[data-dojah-waiting]');
+            const label = String(data.status || 'pending').replaceAll('_', ' ');
+            const display = label.charAt(0).toUpperCase() + label.slice(1);
+
+            if (badge) badge.textContent = data.verified ? 'Verified' : display;
+            if (statusText) statusText.textContent = data.verified ? 'Verified' : display;
+            if (waiting && data.failure_reason) waiting.textContent = data.failure_reason;
 
             if (data.verified) {
                 stopped = true;
