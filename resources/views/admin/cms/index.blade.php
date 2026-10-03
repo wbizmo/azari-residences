@@ -30,7 +30,7 @@
 
             <label class="az-field">
                 <span>Website name</span>
-                <input type="text" name="site_name" value="{{ old('site_name', $settings['site_name'] ?? 'Azari Residences') }}" required>
+                <input type="text" name="site_name" value="{{ old('site_name', $settings['site_name'] ?? 'Resavar') }}" required>
             </label>
 
             <label class="az-field">
@@ -317,7 +317,7 @@
             @csrf
             @method('PUT')
             <div class="az-form-section-head"><span class="material-symbols-outlined">travel_explore</span><div><h2>SEO and social metadata</h2><p>Control search previews, indexing and social sharing.</p></div></div>
-            <label class="az-field az-span-2"><span>SEO title</span><input name="seo_title" maxlength="70" value="{{ old('seo_title', $settings['seo_title'] ?? 'Azari Residences') }}" required></label>
+            <label class="az-field az-span-2"><span>SEO title</span><input name="seo_title" maxlength="70" value="{{ old('seo_title', $settings['seo_title'] ?? 'Resavar') }}" required></label>
             <label class="az-field az-span-2"><span>Meta description</span><textarea name="seo_description" maxlength="180" rows="3" required>{{ old('seo_description', $settings['seo_description'] ?? '') }}</textarea></label>
             <label class="az-field az-span-2"><span>Canonical domain</span><input type="url" name="canonical_domain" value="{{ old('canonical_domain', $settings['canonical_domain'] ?? '') }}"></label>
             <label class="az-field"><span>Open Graph title</span><input name="og_title" value="{{ old('og_title', $settings['og_title'] ?? '') }}"></label>
