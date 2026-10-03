@@ -1,7 +1,4 @@
 {{-- Shared Resavar browser assets --}}
-<link rel="icon" type="image/png" href="{{ asset('images/logo-dark.png') }}">
-<link rel="shortcut icon" type="image/png" href="{{ asset('images/logo-dark.png') }}">
-<link rel="apple-touch-icon" href="{{ asset('images/logo-dark.png') }}">
 <meta name="theme-color" content="#052058">
 
 <style>
