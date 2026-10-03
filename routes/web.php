@@ -16,8 +16,6 @@ Route::get('/', HomeController::class)->name('home');
 // Availability routes are registered in azari-public-completion.php
 Route::get('/residences/{property}', [PropertyController::class, 'show'])->name('properties.show');
 
-Route::get('/favicon.svg', fn () => redirect('/images/logo-dark.png'))->name('public.favicon');
-
 Route::get('/account-deletion', [AccountDeletionRequestController::class, 'show'])
     ->name('account-deletion.show');
 Route::post('/account-deletion', [AccountDeletionRequestController::class, 'store'])
