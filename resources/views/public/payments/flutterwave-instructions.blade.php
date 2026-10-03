@@ -1,4 +1,4 @@
-<x-public-site.layout title="Complete Flutterwave payment | Azari Hotels & Residences">
+<x-public-site.layout title="Complete Flutterwave payment | Resavar">
 <main class="site-container az-checkout-page">
     <section class="az-checkout-shell">
         <div class="az-checkout-main">
@@ -42,7 +42,7 @@
         <aside class="az-checkout-summary">
             <div class="az-checkout-summary-card">
                 <span class="eyebrow">Payment summary</span>
-                <h2>{{ $booking->property?->name ?? 'Azari Residence' }}</h2>
+                <h2>{{ $booking->property?->name ?? 'Resavar' }}</h2>
                 <p class="az-checkout-reference">{{ $payment->reference }}</p>
                 <dl>
                     <div><dt>Provider</dt><dd>Flutterwave</dd></div>
