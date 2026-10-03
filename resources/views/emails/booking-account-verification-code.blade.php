@@ -1,18 +1,13 @@
 <!doctype html>
 <html>
-<body style="font-family:Arial,sans-serif;color:#17211d;line-height:1.6">
-    <h2>Continue your Azari booking</h2>
-
-    <p>Hello {{ $user->name }},</p>
-
-    <p>
-        Use this six-digit code to verify your email and continue the booking you already started:
-    </p>
-
-    <p style="font-size:28px;font-weight:700;letter-spacing:6px">{{ $code }}</p>
-
-    <p>This code expires in 10 minutes. Your booking details remain attached to your secure hold while you continue.</p>
-
-    <p>Resavar</p>
+<body style="margin:0;padding:32px;background:#EEF2F8;font-family:Montserrat,Arial,sans-serif;color:#052058;line-height:1.6">
+    <div style="max-width:600px;margin:0 auto;padding:32px;background:#FFFFFF;border-radius:16px;border-top:4px solid #0577F5">
+        <h2 style="margin-top:0;color:#052058">Continue your Resavar booking</h2>
+        <p>Hello {{ $user->name }},</p>
+        <p>Use this six-digit code to verify your email and continue the booking you already started:</p>
+        <p style="font-size:28px;font-weight:700;letter-spacing:6px;color:#0577F5">{{ $code }}</p>
+        <p>This code expires in 10 minutes. Your booking details remain attached to your secure hold while you continue.</p>
+        <p style="margin-bottom:0;font-weight:700;color:#052058">Resavar</p>
+    </div>
 </body>
 </html>
