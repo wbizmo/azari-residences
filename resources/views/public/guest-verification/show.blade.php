@@ -1,4 +1,4 @@
-<x-public-site.layout title="Guest verification | Azari Hotels & Residences">
+<x-public-site.layout title="Guest verification | Resavar">
 <main class="site-container az-s56-page">
 <header>
     <span class="eyebrow">Adult guest verification</span>
