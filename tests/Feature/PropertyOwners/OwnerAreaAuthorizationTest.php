@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\PropertyOwners;
 
+use App\Models\IdentityVerification;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -19,6 +20,7 @@ class OwnerAreaAuthorizationTest extends TestCase
     public function test_customer_can_open_property_centre(): void
     {
         $user = User::factory()->create(['email_verified_at' => now()]);
+        $this->verifyIdentity($user);
 
         $this->actingAs($user)
             ->get(route('user.owner.dashboard'))
@@ -29,6 +31,7 @@ class OwnerAreaAuthorizationTest extends TestCase
     {
         $owner = User::factory()->create(['email_verified_at' => now()]);
         $other = User::factory()->create(['email_verified_at' => now()]);
+        $this->verifyIdentity($other);
 
         $listing = $owner->propertyListings()->create([
             'reference' => 'LIST-TEST-001',
@@ -48,4 +51,15 @@ class OwnerAreaAuthorizationTest extends TestCase
             ->get(route('user.owner.listings.show', $listing))
             ->assertNotFound();
     }
+    private function verifyIdentity(User $user): void
+    {
+        IdentityVerification::query()->create([
+            'user_id' => $user->id,
+            'provider' => IdentityVerification::PROVIDER_DOJAH,
+            'reference' => 'owner-test-'.$user->id,
+            'status' => IdentityVerification::STATUS_VERIFIED,
+            'verified_at' => now(),
+        ]);
+    }
+
 }
