@@ -16,7 +16,7 @@
 
     <title>
         @yield('title', 'Guest area') |
-        {{ $siteSettings['site_name'] ?? 'Reserva' }}
+        {{ $siteSettings['site_name'] ?? 'Resavar' }}
     </title>
 
     @vite([
@@ -194,7 +194,7 @@
                     </div>
 
                     <h1 class="az-user-page-title">
-                        @yield('page_title', 'Your Reserva stay')
+                        @yield('page_title', 'Your Resavar stay')
                     </h1>
                 </div>
             </div>
