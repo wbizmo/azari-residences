@@ -11,7 +11,7 @@
     <link
         rel="icon"
         type="image/png"
-        href="{{ asset('images/azari-favicon.png') }}"
+        href="{{ asset('images/logo-light.png') }}"
     >
 
     <title>
