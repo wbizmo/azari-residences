@@ -1,17 +1,17 @@
 :root {
     --az-user-green-950: #0c2b24;
-    --az-user-green-900: #123a30;
-    --az-user-green-800: #1b4d40;
+    --az-user-green-900: #052058;
+    --az-user-green-800: #0577F5;
     --az-user-green-700: #286553;
     --az-user-green-100: #dce9e4;
     --az-user-ivory: #f8f5ef;
-    --az-user-paper: #fffdf9;
+    --az-user-paper: #FFFFFF;
     --az-user-brass: #b58a4a;
     --az-user-brass-soft: #e6d7bc;
     --az-user-wine: #6f263b;
     --az-user-ink: #18231f;
     --az-user-muted: #6e7a75;
-    --az-user-line: #e7e1d7;
+    --az-user-line: #EEF2F8;
     --az-user-success: #2d7a5f;
     --az-user-warning: #aa6a1d;
     --az-user-danger: #a43e44;
@@ -27,7 +27,7 @@
 .az-user-sidebar {
     position: fixed; inset: 0 auto 0 0; z-index: 50; width: var(--az-user-sidebar); height: 100dvh;
     display: flex; flex-direction: column; color: #fff;
-    background: radial-gradient(circle at top left, rgba(181,138,74,.18), transparent 30%), linear-gradient(180deg,#0c2b24,#123a30);
+    background: radial-gradient(circle at top left, rgba(181,138,74,.18), transparent 30%), linear-gradient(180deg,#0c2b24,#052058);
     border-right: 1px solid rgba(255,255,255,.06); box-shadow: 12px 0 36px rgba(7,28,23,.08);
 }
 .az-user-brand-area { flex: 0 0 auto; padding: 22px 18px 17px; border-bottom: 1px solid rgba(255,255,255,.10); }
@@ -152,7 +152,7 @@
 .az-user-detail-row dt { color: var(--az-user-muted); }
 .az-user-detail-row dd { margin: 0; color: var(--az-user-green-950); font-weight: 700; text-align: right; }
 .az-user-mobile-backdrop { position: fixed; inset: 0; z-index: 70; opacity: 0; pointer-events: none; background: rgba(6,22,18,.48); transition: opacity .2s ease; }
-.az-user-mobile-drawer { position: fixed; inset: 0 auto 0 0; z-index: 80; width: min(88vw,340px); height: 100dvh; padding: 22px 18px 28px; overflow-y: auto; color: #fff; background: radial-gradient(circle at top left,rgba(181,138,74,.18),transparent 30%),linear-gradient(180deg,#0c2b24,#123a30); transform: translateX(-105%); transition: transform .25s ease; }
+.az-user-mobile-drawer { position: fixed; inset: 0 auto 0 0; z-index: 80; width: min(88vw,340px); height: 100dvh; padding: 22px 18px 28px; overflow-y: auto; color: #fff; background: radial-gradient(circle at top left,rgba(181,138,74,.18),transparent 30%),linear-gradient(180deg,#0c2b24,#052058); transform: translateX(-105%); transition: transform .25s ease; }
 .az-user-drawer-open .az-user-mobile-backdrop { opacity: 1; pointer-events: auto; }
 .az-user-drawer-open .az-user-mobile-drawer { transform: translateX(0); }
 .az-user-drawer-header { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 22px; }
