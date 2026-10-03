@@ -114,7 +114,7 @@ TEXT));
     ]);
 
     $azariSeoCanonical = $seoCanonical ?? $canonical ?? url()->current();
-    $azariSeoImage = $seoImage ?? $image ?? asset('images/logo-dark.png');
+    $azariSeoImage = $seoImage ?? $image ?? asset('images/logo-light.png');
     $azariSeoType = $seoType ?? $type ?? 'website';
     $azariSeoLocale = str_replace('-', '_', app()->getLocale());
     $azariSeoSiteName = 'Resavar';
