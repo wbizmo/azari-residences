@@ -46,8 +46,8 @@ body,.az-user-body,.az-admin-body { background:#f7fcfe; color:var(--azari-text);
     width:100%;
     height:100%;
     background:currentColor;
-    -webkit-mask:url('/images/logo-dark.png') center/contain no-repeat;
-    mask:url('/images/logo-dark.png') center/contain no-repeat;
+    -webkit-mask:var(--azari-logo-url, url('/images/logo-dark.png')) center/contain no-repeat;
+    mask:var(--azari-logo-url, url('/images/logo-dark.png')) center/contain no-repeat;
 }
 .azari-logo-on-dark { color:#fff!important; }
 .azari-logo-on-light { color:var(--azari-blue-dark)!important; }
@@ -57,3 +57,5 @@ input[type="checkbox"]:checked + .az-toggle { border-color:var(--azari-blue)!imp
 input[type="checkbox"]:focus-visible + .az-toggle { outline-color:var(--azari-blue)!important; }
 .az-user-nav-link.is-active,.az-nav-link.is-active { background:rgba(255,255,255,.14)!important; color:#fff!important; }
 .az-user-summary-icon,.az-user-timezone-icon,.az-user-stat>.material-symbols-outlined { background:var(--azari-blue-soft)!important; color:var(--azari-blue-dark)!important; }
+
+.site-header:not(.is-scrolled) .azari-header-logo .azari-logo-mask{color:#fff!important}.site-header.is-scrolled .azari-header-logo .azari-logo-mask,.search-results-page .site-header .azari-header-logo .azari-logo-mask{color:var(--azari-blue-dark)!important}.az-sidebar-brand__logo{display:block;width:148px;height:46px}.azari-brand__logo-slot{min-width:40px;min-height:40px}
