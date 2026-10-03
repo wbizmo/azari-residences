@@ -299,7 +299,7 @@
     max-width:560px;
     margin:0 auto;
     color:#052058;
-    font-family:var(--font-heading,Georgia,serif);
+    font-family:var(--font-heading,'Montserrat',Arial,sans-serif);
     font-size:clamp(2.25rem,5vw,4rem);
     font-weight:500;
     line-height:1;
