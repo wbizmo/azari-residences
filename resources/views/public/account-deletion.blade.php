@@ -1,14 +1,14 @@
 @extends('layouts.public')
 
-@section('title', 'Account & Data Deletion | Azari Hotels & Residences')
-@section('description', 'Request deletion of your Azari Hotels & Residences account and associated personal data.')
+@section('title', 'Account & Data Deletion | Resavar')
+@section('description', 'Request deletion of your Resavar account and associated personal data.')
 
 @section('content')
 <section style="min-height:70vh;background:#f8f5ef;padding:148px 20px 72px;">
     <div style="max-width:760px;margin:0 auto;background:#fffdf9;border:1px solid #e7e1d7;border-radius:24px;padding:36px;box-shadow:0 18px 50px rgba(12,43,36,.08);">
         <p style="margin:0 0 10px;color:#b58a4a;font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:12px;">Privacy & account controls</p>
         <h1 style="margin:0;color:#0c2b24;font-size:38px;line-height:1.15;">Account & Data Deletion</h1>
-        <p style="margin:18px 0 0;color:#6e7a75;font-size:16px;line-height:1.75;">Use this page to request deletion of your Azari Hotels &amp; Residences account and associated personal data. You can submit this request without installing or signing in to the app.</p>
+        <p style="margin:18px 0 0;color:#6e7a75;font-size:16px;line-height:1.75;">Use this page to request deletion of your Resavar account and associated personal data. You can submit this request without installing or signing in to the app.</p>
 
         @if (session('account_deletion_reference'))
             <div style="margin-top:28px;padding:18px 20px;border-radius:16px;background:#dce9e4;color:#0c2b24;">
