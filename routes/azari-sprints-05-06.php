@@ -10,7 +10,7 @@ Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.st
 Route::get('/bookings/{reference}', [BookingController::class, 'show'])->name('bookings.show');
 Route::match(['get', 'post'], '/verify-booking', [BookingController::class, 'verify'])->name('bookings.verify');
 
-Route::prefix('azari-admin')->name('azari.admin.')->middleware('azari.staff')->group(function () {
+Route::prefix('azaridevadmin')->name('azari.admin.')->middleware('azari.staff')->group(function () {
     Route::get('/users', [UserManagementController::class, 'index'])->name('users.index');
     Route::get('/users/{user}', [UserManagementController::class, 'show'])->name('users.show');
     Route::put('/users/{user}/suspend', [UserManagementController::class, 'suspend'])->name('users.suspend');
