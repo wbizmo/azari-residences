@@ -44,7 +44,6 @@ class CmsController extends Controller
             'light_logo' => ['nullable', 'image', 'max:6144'],
             'dark_logo' => ['nullable', 'image', 'max:6144'],
             'footer_logo' => ['nullable', 'image', 'max:6144'],
-            'favicon' => ['nullable', 'file', 'mimes:png,ico,svg', 'max:2048'],
             'social_image' => ['nullable', 'image', 'max:6144'],
         ]);
 
@@ -55,7 +54,7 @@ class CmsController extends Controller
             SiteSetting::put($key, $data[$key] ?? null, 'text', 'branding');
         }
 
-        foreach (['site_logo', 'light_logo', 'dark_logo', 'footer_logo', 'favicon', 'social_image'] as $key) {
+        foreach (['site_logo', 'light_logo', 'dark_logo', 'footer_logo', 'social_image'] as $key) {
             if (! $request->hasFile($key)) {
                 continue;
             }
@@ -87,8 +86,8 @@ class CmsController extends Controller
             'surface' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'text' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'muted' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
-            'heading_font' => ['required', Rule::in(['Fraunces', 'Cormorant Garamond', 'Playfair Display'])],
-            'body_font' => ['required', Rule::in(['Public Sans', 'Inter', 'Manrope'])],
+            'heading_font' => ['required', Rule::in(['Montserrat'])],
+            'body_font' => ['required', Rule::in(['Montserrat'])],
             'radius' => ['required', 'integer', 'between:0,30'],
             'hero_overlay' => ['required', 'integer', 'between:0,95'],
             'status' => ['required', Rule::in(['draft', 'published'])],
