@@ -8,7 +8,7 @@
             $seoTitle = 'Resavar | Luxury Hotels & Residences, Apartments, Rooms and Hospitality';
             $seoDescription = 'Discover Resavar, a premium hospitality and accommodation platform owned by Azari Luxury Properties Ltd. Explore hotels & residences, apartments, rooms, concierge services, dining, housekeeping, airport transfers and secure online booking.';
             $seoUrl = url()->current();
-            $seoImage = asset('images/logo-light.png');
+            $seoImage = asset('images/logo-dark.png');
 
             $seoLongDescription = <<<'DESCRIPTION'
     Resavar is a premium hospitality and accommodation brand owned and operated by Azari Luxury Properties Ltd, providing thoughtfully managed residences, apartments, rooms, and guest services for business travellers, families, couples, groups, and leisure guests. The platform makes discovering suitable accommodation simple by presenting detailed property information, room features, photographs, locations, guest capacities, amenities, policies, pricing, and date-based availability in one accessible experience.
