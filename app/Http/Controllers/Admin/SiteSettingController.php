@@ -25,14 +25,13 @@ class SiteSettingController extends Controller
             'site_tagline' => ['nullable', 'string', 'max:180'],
             'operating_regions' => ['nullable', 'string', 'max:255'],
             'site_logo' => ['nullable', 'image', 'max:4096'],
-            'favicon' => ['nullable', 'file', 'mimes:png,ico,svg', 'max:1024'],
         ]);
 
         foreach (['site_name', 'site_tagline', 'operating_regions'] as $key) {
             SiteSetting::put($key, $data[$key] ?? null, 'text', 'branding');
         }
 
-        foreach (['site_logo', 'favicon'] as $key) {
+        foreach (['site_logo'] as $key) {
             if (! $request->hasFile($key)) {
                 continue;
             }
