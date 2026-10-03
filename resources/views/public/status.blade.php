@@ -13,25 +13,25 @@
     <style>
         :root {
             color-scheme: light;
-            --page: #f5f4ef;
-            --surface: #ffffff;
-            --surface-muted: #f8f8f5;
-            --ink: #171a18;
-            --muted: #68706b;
-            --line: #dedfd9;
-            --brand: #173d31;
-            --brand-soft: #e8efeb;
-            --green: #177447;
-            --green-soft: #e7f5ed;
-            --amber: #a66805;
-            --amber-soft: #fff3d8;
-            --orange: #b24f13;
-            --orange-soft: #fff0e6;
-            --red: #b42318;
-            --red-soft: #feeceb;
-            --grey: #65706a;
-            --grey-soft: #edf0ee;
-            --shadow: 0 15px 45px rgba(24, 32, 28, .07);
+            --page: #052058;
+            --surface: #FFFFFF;
+            --surface-muted: #FFFFFF;
+            --ink: #052058;
+            --muted: #052058;
+            --line: #052058;
+            --brand: #052058;
+            --brand-soft: #052058;
+            --green: #052058;
+            --green-soft: #052058;
+            --amber: #052058;
+            --amber-soft: #052058;
+            --orange: #052058;
+            --orange-soft: #052058;
+            --red: #052058;
+            --red-soft: #052058;
+            --grey: #052058;
+            --grey-soft: #052058;
+            --shadow: 0 15px 45px rgba(5, 32, 88, .07);
         }
 
         * {
@@ -47,7 +47,7 @@
             background:
                 radial-gradient(
                     circle at top right,
-                    rgba(23, 61, 49, .055),
+                    rgba(5, 32, 88, .055),
                     transparent 34rem
                 ),
                 var(--page);
@@ -214,38 +214,38 @@
         }
 
         .overall.status-operational {
-            border-color: #cce6d7;
+            border-color: #052058;
             background: linear-gradient(
                 135deg,
                 var(--green-soft),
-                #fff
+                #FFFFFF
             );
         }
 
         .overall.status-degraded {
-            border-color: #efd59c;
+            border-color: #052058;
             background: linear-gradient(
                 135deg,
                 var(--amber-soft),
-                #fff
+                #FFFFFF
             );
         }
 
         .overall.status-partial_outage {
-            border-color: #f1c6ad;
+            border-color: #052058;
             background: linear-gradient(
                 135deg,
                 var(--orange-soft),
-                #fff
+                #FFFFFF
             );
         }
 
         .overall.status-major_outage {
-            border-color: #efc1bd;
+            border-color: #052058;
             background: linear-gradient(
                 135deg,
                 var(--red-soft),
-                #fff
+                #FFFFFF
             );
         }
 
@@ -253,7 +253,7 @@
             background: linear-gradient(
                 135deg,
                 var(--grey-soft),
-                #fff
+                #FFFFFF
             );
         }
 
@@ -619,8 +619,8 @@
             position: sticky !important;
             top: 0 !important;
             z-index: 1000 !important;
-            background: rgba(245, 244, 239, .94) !important;
-            border-bottom: 1px solid rgba(222, 223, 217, .82);
+            background: rgba(5, 32, 88, .94) !important;
+            border-bottom: 1px solid rgba(5, 32, 88, .82);
             -webkit-backdrop-filter: blur(16px);
             backdrop-filter: blur(16px);
         }
@@ -676,7 +676,7 @@
             <h1>System status</h1>
 
             <p class="intro-copy">
-                Current operational health for Azari guest-facing
+                Current operational health for Resavar guest-facing
                 and transaction-processing services.
             </p>
         </section>
@@ -822,7 +822,7 @@
             <strong>About these checks.</strong>
             {{ $notice }}
 
-            Status reflects the Azari platform's own service
+            Status reflects the Resavar platform's own service
             availability and processing readiness. Upstream service
             incidents may take time to surface through application
             health checks.
