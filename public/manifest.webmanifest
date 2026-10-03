@@ -1,21 +1,14 @@
 {
     "id": "/",
-    "name": "Azari Hotels & Residences",
-    "short_name": "Azari",
-    "description": "Azari Hotels & Residences guest application",
+    "name": "Resavar",
+    "short_name": "Resavar",
+    "description": "Resavar guest application",
     "start_url": "/login",
     "scope": "/",
     "display": "standalone",
     "orientation": "portrait-primary",
-    "background_color": "#f8f5ef",
-    "theme_color": "#0c2b24",
+    "background_color": "#EEF2F8",
+    "theme_color": "#052058",
     "prefer_related_applications": false,
-    "icons": [
-        {
-            "src": "/public/images/azari-favicon.png",
-            "sizes": "any",
-            "type": "image/png",
-            "purpose": "any maskable"
-        }
-    ]
+    "icons": []
 }
