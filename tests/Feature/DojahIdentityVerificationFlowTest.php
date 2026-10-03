@@ -168,4 +168,52 @@ class DojahIdentityVerificationFlowTest extends TestCase
 
         app(PaymentEligibilityService::class)->assertCanInitiate($booking);
     }
+    public function test_verified_record_cannot_be_downgraded_by_a_late_failed_webhook(): void
+    {
+        $user = User::factory()->create();
+        $service = app(DojahService::class);
+        $verification = $service->verificationForUser($user);
+
+        $success = [
+            'event_id' => 'evt_success',
+            'reference_id' => $verification->reference,
+            'verification_status' => 'verified',
+            'data' => ['document' => ['status' => 'passed']],
+        ];
+        $service->processWebhook($success, json_encode($success, JSON_UNESCAPED_SLASHES));
+
+        $lateFailure = [
+            'event_id' => 'evt_late_failure',
+            'reference_id' => $verification->reference,
+            'verification_status' => 'failed',
+            'data' => ['document' => ['status' => 'failed']],
+        ];
+        $service->processWebhook($lateFailure, json_encode($lateFailure, JSON_UNESCAPED_SLASHES));
+
+        $this->assertTrue($verification->fresh()->isVerified());
+        $this->assertTrue($user->fresh()->hasVerifiedIdentity());
+    }
+
+    public function test_identity_status_endpoint_returns_current_persisted_state(): void
+    {
+        $user = User::factory()->create();
+        IdentityVerification::query()->create([
+            'user_id' => $user->id,
+            'provider' => IdentityVerification::PROVIDER_DOJAH,
+            'reference' => 'status-endpoint-reference',
+            'status' => IdentityVerification::STATUS_VERIFIED,
+            'verified_at' => now(),
+        ]);
+
+        $this->actingAs($user)
+            ->getJson(route('user.identity.status'))
+            ->assertOk()
+            ->assertHeader('Cache-Control', 'no-store, private')
+            ->assertJson([
+                'verified' => true,
+                'status' => IdentityVerification::STATUS_VERIFIED,
+            ]);
+    }
+
+
 }
