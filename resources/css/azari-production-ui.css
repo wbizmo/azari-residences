@@ -12,22 +12,22 @@ input:not([type="checkbox"]):not([type="radio"]),
 select,
 textarea {
     min-height: 2.85rem;
-    border: 1px solid rgba(23, 63, 52, .22);
+    border: 1px solid rgba(5, 32, 88, .22);
     border-radius: .75rem;
-    background: #fff;
+    background: #FFFFFF;
     box-shadow: none;
     font: inherit;
 }
 
 input:focus, select:focus, textarea:focus {
-    border-color: #173f34;
-    outline: 3px solid rgba(23, 63, 52, .10);
+    border-color: #052058;
+    outline: 3px solid rgba(5, 32, 88, .10);
     outline-offset: 0;
 }
 
 select {
     appearance: none;
-    background-image: linear-gradient(45deg, transparent 50%, #173f34 50%), linear-gradient(135deg, #173f34 50%, transparent 50%);
+    background-image: linear-gradient(45deg, transparent 50%, #052058 50%), linear-gradient(135deg, #052058 50%, transparent 50%);
     background-position: calc(100% - 18px) 50%, calc(100% - 13px) 50%;
     background-size: 5px 5px, 5px 5px;
     background-repeat: no-repeat;
@@ -52,9 +52,9 @@ input[type="checkbox"][data-az-toggle-ready="true"] {
     flex: 0 0 auto;
     inline-size: 2.75rem;
     block-size: 1.5rem;
-    border: 1px solid rgba(24, 35, 31, .24);
+    border: 1px solid rgba(5, 32, 88, .24);
     border-radius: 999px;
-    background: #e7e5df;
+    background: #052058;
     transition: .18s ease;
 }
 .az-toggle__thumb {
@@ -64,14 +64,14 @@ input[type="checkbox"][data-az-toggle-ready="true"] {
     inline-size: 1.05rem;
     block-size: 1.05rem;
     border-radius: 50%;
-    background: #fff;
+    background: #FFFFFF;
     box-shadow: 0 1px 4px rgba(0, 0, 0, .18);
     transform: translateY(-50%);
     transition: transform .18s ease;
 }
-input[type="checkbox"]:checked + .az-toggle { border-color: #173f34; background: #173f34; }
+input[type="checkbox"]:checked + .az-toggle { border-color: #052058; background: #052058; }
 input[type="checkbox"]:checked + .az-toggle .az-toggle__thumb { transform: translate(1.22rem, -50%); }
-input[type="checkbox"]:focus-visible + .az-toggle { outline: 2px solid #b58b4b; outline-offset: 3px; }
+input[type="checkbox"]:focus-visible + .az-toggle { outline: 2px solid #052058; outline-offset: 3px; }
 input[type="checkbox"]:disabled + .az-toggle { opacity: .48; cursor: not-allowed; }
 
 [data-az-working="true"], .is-working { cursor: wait !important; opacity: .76; pointer-events: none; }
@@ -86,7 +86,7 @@ input[type="checkbox"]:disabled + .az-toggle { opacity: .48; cursor: not-allowed
     vertical-align: -.12em;
     animation: az-action-spin .65s linear infinite;
 }
-.is-success { box-shadow: 0 0 0 2px rgba(40, 117, 82, .22); }
-.is-error { box-shadow: 0 0 0 2px rgba(163, 58, 53, .22); }
+.is-success { box-shadow: 0 0 0 2px rgba(5, 32, 88, .22); }
+.is-error { box-shadow: 0 0 0 2px rgba(5, 32, 88, .22); }
 @keyframes az-action-spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .az-action-spinner { animation-duration: 1.6s; } }
