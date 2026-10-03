@@ -14,7 +14,7 @@ class GeneratePublicSitemap extends Command
     protected $signature = 'azari:sitemap';
 
     protected $description =
-        'Generate the public Azari sitemap.xml and maintain robots.txt.';
+        'Generate the public Resavar sitemap.xml and maintain robots.txt.';
 
     public function handle(): int
     {
@@ -40,7 +40,7 @@ class GeneratePublicSitemap extends Command
 
         /*
         |--------------------------------------------------------------------------
-        | Actual public, indexable routes from the Azari application.
+        | Actual public, indexable routes from the Resavar application.
         |--------------------------------------------------------------------------
         |
         | Deliberately omitted:
