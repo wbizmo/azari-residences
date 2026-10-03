@@ -20,13 +20,28 @@
     </div>
 
     <section class="az-admin-panel is-active" data-tab-panel="branding">
+        <div class="az-form-section-head">
+            <span class="material-symbols-outlined">branding_watermark</span>
+            <div>
+                <h2>Resavar identity</h2>
+                <p>The approved production logos are bundled with the application and are not replaceable from the CMS.</p>
+            </div>
+        </div>
+
+        <div class="az-cms-brand-preview">
+            <div class="az-cms-brand-preview__light">
+                <img src="{{ asset('images/logo-light.png') }}" alt="Resavar">
+                <span>Primary logo on white</span>
+            </div>
+            <div class="az-cms-brand-preview__dark">
+                <img src="{{ asset('images/logo-dark.png') }}" alt="Resavar">
+                <span>White logo on deep navy</span>
+            </div>
+        </div>
+
         <form class="admin-form az-form-grid" method="POST" enctype="multipart/form-data" action="{{ route('azari.admin.cms.branding') }}">
             @csrf
             @method('PUT')
-            <div class="az-form-section-head">
-                <span class="material-symbols-outlined">branding_watermark</span>
-                <div><h2>Brand identity</h2><p>Uploaded assets replace all temporary logo placeholders.</p></div>
-            </div>
 
             <label class="az-field">
                 <span>Website name</span>
@@ -35,12 +50,12 @@
 
             <label class="az-field">
                 <span>Registered business name</span>
-                <input type="text" name="business_name" value="{{ old('business_name', $settings['business_name'] ?? 'Azari Luxury Properties LTD') }}">
+                <input type="text" name="business_name" value="{{ old('business_name', $settings['business_name'] ?? 'Resavar Luxury Properties LTD') }}">
             </label>
 
             <label class="az-field az-span-2">
                 <span>Tagline</span>
-                <input type="text" name="site_tagline" value="{{ old('site_tagline', $settings['site_tagline'] ?? '') }}">
+                <input type="text" name="site_tagline" value="{{ old('site_tagline', $settings['site_tagline'] ?? 'Exceptional Stays, Everywhere.') }}">
             </label>
 
             <label class="az-field">
@@ -53,85 +68,65 @@
                 <input type="tel" name="support_phone" value="{{ old('support_phone', $settings['support_phone'] ?? '') }}">
             </label>
 
-            @foreach([
-                'site_logo' => 'Primary logo',
-                'light_logo' => 'Light logo',
-                'dark_logo' => 'Dark logo',
-                'footer_logo' => 'Footer logo',
-                'favicon' => 'Favicon',
-                'social_image' => 'Social sharing image',
-            ] as $name => $label)
-                <label class="az-upload">
-                    <span class="material-symbols-outlined">upload_file</span>
-                    <strong>{{ $label }}</strong>
-                    <small data-file-label>Select a file</small>
-                    <input type="file" name="{{ $name }}" @if($name !== 'favicon') accept="image/*" @endif>
-                </label>
-            @endforeach
+            <label class="az-field az-span-2">
+                <span>Physical address</span>
+                <textarea name="physical_address" rows="3">{{ old('physical_address', $settings['physical_address'] ?? '') }}</textarea>
+            </label>
+
+            <label class="az-upload az-span-2">
+                <span class="material-symbols-outlined">share</span>
+                <strong>Social sharing image</strong>
+                <small data-file-label>Optional JPG, PNG, WEBP or SVG</small>
+                <input type="file" name="social_image" accept="image/*">
+            </label>
 
             <div class="az-form-actions az-span-2">
-                <button class="button button-primary" type="submit">Save branding</button>
+                <button class="button button-primary" type="submit">Save identity details</button>
             </div>
         </form>
     </section>
 
     <section class="az-admin-panel" data-tab-panel="theme">
+        <div class="az-form-section-head">
+            <span class="material-symbols-outlined">palette</span>
+            <div>
+                <h2>Resavar design system</h2>
+                <p>The live interface is locked to deep navy, black and white with Montserrat typography.</p>
+            </div>
+        </div>
+
+        <div class="az-cms-palette" aria-label="Approved interface palette">
+            <div class="az-cms-palette__navy"><span></span><strong>Deep navy</strong><code>#052058</code></div>
+            <div class="az-cms-palette__black"><span></span><strong>Black</strong><code>#000000</code></div>
+            <div class="az-cms-palette__white"><span></span><strong>White</strong><code>#FFFFFF</code></div>
+        </div>
+
         <form class="admin-form az-form-grid" method="POST" action="{{ route('azari.admin.cms.themes.store') }}">
             @csrf
-            <div class="az-form-section-head">
-                <span class="material-symbols-outlined">palette</span>
-                <div><h2>Theme editor</h2><p>Save drafts or publish a complete visual revision.</p></div>
-            </div>
 
             <label class="az-field az-span-2">
                 <span>Revision name</span>
-                <input type="text" name="name" value="{{ old('name', 'Azari premium theme') }}" required>
+                <input type="text" name="name" value="{{ old('name', 'Resavar navy system') }}" required>
             </label>
 
-            @foreach([
-                'primary' => ['Primary', '#052058'],
-                'secondary' => ['Secondary', '#052058'],
-                'accent' => ['Accent', '#052058'],
-                'background' => ['Background', '#052058'],
-                'surface' => ['Surface', '#FFFFFF'],
-                'text' => ['Text', '#052058'],
-                'muted' => ['Muted text', '#052058'],
-            ] as $name => [$label, $default])
-                <label class="az-color-field">
-                    <span>{{ $label }}</span>
-                    <span class="az-color-control">
-                        <input type="color" name="{{ $name }}" value="{{ old($name, $settings["theme_{$name}"] ?? $default) }}">
-                        <output>{{ old($name, $settings["theme_{$name}"] ?? $default) }}</output>
-                    </span>
-                </label>
-            @endforeach
+            <div class="az-field">
+                <span>Typography</span>
+                <div class="az-cms-readonly">Montserrat · headings and body</div>
+            </div>
 
-            <label class="az-field">
-                <span>Heading font</span>
-                <select name="heading_font">
-                    @foreach(['Montserrat', 'Cormorant Garamond', 'Playfair Display'] as $font)
-                        <option value="{{ $font }}">{{ $font }}</option>
-                    @endforeach
-                </select>
-            </label>
+            <div class="az-field">
+                <span>Interface palette</span>
+                <div class="az-cms-readonly">Deep navy · black · white</div>
+            </div>
 
-            <label class="az-field">
-                <span>Body font</span>
-                <select name="body_font">
-                    @foreach(['Montserrat', 'Inter', 'Manrope'] as $font)
-                        <option value="{{ $font }}">{{ $font }}</option>
-                    @endforeach
-                </select>
+            <label class="az-range-field">
+                <span>Border radius <output>10px</output></span>
+                <input type="range" name="radius" min="0" max="30" value="{{ old('radius', 10) }}">
             </label>
 
             <label class="az-range-field">
-                <span>Border radius <output>8px</output></span>
-                <input type="range" name="radius" min="0" max="30" value="8">
-            </label>
-
-            <label class="az-range-field">
-                <span>Hero overlay <output>68%</output></span>
-                <input type="range" name="hero_overlay" min="0" max="95" value="68">
+                <span>Hero overlay <output>26%</output></span>
+                <input type="range" name="hero_overlay" min="0" max="95" value="{{ old('hero_overlay', 26) }}">
             </label>
 
             <fieldset class="az-segmented az-span-2">
@@ -141,7 +136,7 @@
             </fieldset>
 
             <div class="az-form-actions az-span-2">
-                <button class="button button-primary" type="submit">Save theme revision</button>
+                <button class="button button-primary" type="submit">Save design revision</button>
             </div>
         </form>
 
@@ -155,12 +150,13 @@
             @empty
                 <div class="production-empty-state">No theme revisions yet.</div>
             @endforelse
-    </div>
-    </section>
+        </div>
 
         @if($themes->hasPages())
             <div class="az-pagination-block">{{ $themes->onEachSide(1)->links() }}</div>
         @endif
+    </section>
+
     <section class="az-admin-panel" data-tab-panel="navigation">
         <form class="admin-form az-form-grid" method="POST" action="{{ route('azari.admin.cms.navigation.store') }}">
             @csrf
@@ -365,35 +361,31 @@
 
 @push('head')
 <style>
-/* AZARI_CMS_PROMOTION_STYLES */
+.az-cms-brand-preview{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:0 0 24px}
+.az-cms-brand-preview>div{min-height:170px;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:20px;padding:22px;border:1px solid rgba(5,32,88,.16);border-radius:14px}
+.az-cms-brand-preview__light{background:#FFFFFF;color:#052058}
+.az-cms-brand-preview__dark{background:#052058;color:#FFFFFF}
+.az-cms-brand-preview img{display:block;width:min(210px,80%);height:auto;max-height:72px;object-fit:contain;object-position:left center}
+.az-cms-brand-preview span{font-size:10px;font-weight:800;letter-spacing:.10em;text-transform:uppercase}
+.az-cms-palette{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0 0 24px}
+.az-cms-palette>div{display:grid;grid-template-columns:42px 1fr;grid-template-areas:"swatch title" "swatch code";gap:2px 12px;align-items:center;padding:14px;border:1px solid rgba(5,32,88,.16);border-radius:12px;background:#FFFFFF;color:#052058}
+.az-cms-palette>div>span{grid-area:swatch;width:42px;height:42px;border-radius:9px;border:1px solid rgba(5,32,88,.18)}
+.az-cms-palette__navy>span{background:#052058}.az-cms-palette__black>span{background:#000000}.az-cms-palette__white>span{background:#FFFFFF}
+.az-cms-palette strong{grid-area:title;font-size:11px}.az-cms-palette code{grid-area:code;color:#052058;font-size:10px}
+.az-cms-readonly{min-height:44px;display:flex;align-items:center;padding:0 12px;border:1px solid rgba(5,32,88,.18);border-radius:9px;background:#FFFFFF;color:#052058;font-size:12px;font-weight:700}
 .az-cms-promotion-form,.az-promotion-current{max-width:100%;min-width:0}
-.az-promotion-switch{display:flex;align-items:center;justify-content:space-between;gap:24px;width:100%;min-width:0;padding:20px;border:1px solid rgba(5, 32, 88, .14);border-radius:16px;background:#052058;cursor:pointer;box-sizing:border-box}
-.az-promotion-switch__copy{display:grid;min-width:0;gap:5px}.az-promotion-switch__copy strong{color:#052058;font-size:15px}.az-promotion-switch__copy small{color:#052058;line-height:1.55}.az-promotion-switch__control{position:relative;flex:0 0 auto}.az-promotion-switch__control input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}.az-promotion-switch__control input:checked+.az-promotion-switch__control input:checked+.az-promotion-switch__control input:focus-visible+
-.az-promotion-current{margin-top:22px;padding:clamp(20px,3vw,30px);border:1px solid rgba(5, 32, 88, .13);border-radius:20px;background:#FFFFFF}.az-promotion-preview-list{display:grid;margin:18px 0 0;border:1px solid rgba(5, 32, 88, .11);border-radius:15px;overflow:hidden}.az-promotion-preview-list>div{display:grid;grid-template-columns:minmax(150px,.32fr) minmax(0,1fr);gap:18px;padding:15px 17px;border-bottom:1px solid rgba(5, 32, 88, .09)}.az-promotion-preview-list>div:last-child{border-bottom:0}.az-promotion-preview-list dt{color:#052058;font-weight:700}.az-promotion-preview-list dd{min-width:0;margin:0;overflow-wrap:anywhere;color:#052058;line-height:1.6}
-@media(max-width:680px){.az-promotion-switch{align-items:flex-start}.az-promotion-preview-list>div{grid-template-columns:1fr;gap:6px}}
-
-/* AZARI_CMS_PROMOTION_SWITCH_REPAIR */
-.az-promotion-switch{cursor:default!important}
-.az-promotion-switch__copy{cursor:default!important}
-.az-promotion-switch__control{position:relative!important;display:inline-flex!important;align-items:center!important;flex:0 0 auto!important;cursor:pointer!important}
-.az-promotion-switch__control input{
-    position:absolute!important;
-    width:1px!important;
-    height:1px!important;
-    min-width:0!important;
-    min-height:0!important;
-    margin:0!important;
-    padding:0!important;
-    border:0!important;
-    opacity:0!important;
-    appearance:none!important;
-    -webkit-appearance:none!important;
-    clip:rect(0 0 0 0)!important;
-    clip-path:inset(50%)!important;
-    overflow:hidden!important;
-    white-space:nowrap!important;
-    pointer-events:none!important;
-}
-
+.az-promotion-switch{display:flex;align-items:center;justify-content:space-between;gap:24px;width:100%;min-width:0;padding:20px;border:1px solid rgba(5,32,88,.16);border-radius:14px;background:#FFFFFF;color:#052058;box-sizing:border-box}
+.az-promotion-switch__copy{display:grid;min-width:0;gap:5px}.az-promotion-switch__copy strong,.az-promotion-switch__copy small{color:#052058}
+.az-promotion-switch__control{position:relative;display:inline-flex;align-items:center;flex:0 0 auto;cursor:pointer}
+.az-promotion-switch__control input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.az-promotion-switch__track{position:relative;display:block;width:48px;height:26px;border:1px solid #052058;border-radius:999px;background:#FFFFFF;transition:.18s ease}
+.az-promotion-switch__track span{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#052058;transition:.18s ease}
+.az-promotion-switch__control input:checked+.az-promotion-switch__track{background:#052058}
+.az-promotion-switch__control input:checked+.az-promotion-switch__track span{transform:translateX(22px);background:#FFFFFF}
+.az-promotion-current{margin-top:22px;padding:clamp(20px,3vw,30px);border:1px solid rgba(5,32,88,.16);border-radius:14px;background:#FFFFFF}
+.az-promotion-preview-list{display:grid;margin:18px 0 0;border:1px solid rgba(5,32,88,.14);border-radius:12px;overflow:hidden}
+.az-promotion-preview-list>div{display:grid;grid-template-columns:minmax(150px,.32fr) minmax(0,1fr);gap:18px;padding:15px 17px;border-bottom:1px solid rgba(5,32,88,.12)}
+.az-promotion-preview-list>div:last-child{border-bottom:0}.az-promotion-preview-list dt,.az-promotion-preview-list dd{color:#052058}.az-promotion-preview-list dd{min-width:0;margin:0;overflow-wrap:anywhere;line-height:1.6}
+@media(max-width:700px){.az-cms-brand-preview,.az-cms-palette{grid-template-columns:1fr}.az-promotion-switch{align-items:flex-start}.az-promotion-preview-list>div{grid-template-columns:1fr;gap:6px}}
 </style>
 @endpush
