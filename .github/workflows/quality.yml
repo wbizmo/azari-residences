@@ -38,6 +38,7 @@ jobs:
         with:
           node-version: '20'
           cache: npm
-      - run: npm install --global npm@10.9.4
-      - run: npm install --ignore-scripts --no-audit --no-fund
-      - run: npm run build
+      - run: corepack enable
+      - run: corepack prepare pnpm@10.17.1 --activate
+      - run: pnpm install --no-frozen-lockfile --ignore-scripts
+      - run: pnpm run build
