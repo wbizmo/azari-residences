@@ -1,7 +1,7 @@
 @php
     $siteName = class_exists(\App\Models\SiteSetting::class)
-        ? \App\Models\SiteSetting::valueFor('site_name', 'Azari Residences')
-        : 'Azari Residences';
+        ? \App\Models\SiteSetting::valueFor('site_name', 'Reserva')
+        : 'Reserva';
     $adminActor = auth()->user();
     $can = fn (string $permission): bool => (bool) ($adminActor?->isAdministrator() || $adminActor?->hasPermission($permission));
 
