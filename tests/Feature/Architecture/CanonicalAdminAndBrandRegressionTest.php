@@ -55,4 +55,28 @@ class CanonicalAdminAndBrandRegressionTest extends TestCase
     }
 
 
+    public function test_resavar_brand_authority_uses_documented_palette_and_typography(): void
+    {
+        $brand = file_get_contents(resource_path('css/azari-brand-2026.css'));
+
+        foreach (['#052058', '#0577F5', '#F58F07', '#EEF2F8', '#FFFFFF', 'Montserrat'] as $token) {
+            $this->assertStringContainsString($token, $brand);
+        }
+
+        foreach (['#2596be', '#176b89', '#eaf7fb'] as $obsolete) {
+            $this->assertStringNotContainsString($obsolete, $brand);
+        }
+    }
+
+    public function test_public_brand_positioning_uses_resavar_name_and_exact_tagline(): void
+    {
+        $layout = file_get_contents(resource_path('views/layouts/public.blade.php'));
+
+        $this->assertStringContainsString('RESAVAR | Exceptional Stays, Everywhere.', $layout);
+        $this->assertStringContainsString('global accommodation and travel marketplace', $layout);
+        $this->assertStringNotContainsString('Azari Hotels & Residences', $layout);
+        $this->assertStringNotContainsString('Reserva', $layout);
+    }
+
+
 }
