@@ -22,8 +22,8 @@
             align-items: center;
             justify-content: center;
             padding: 24px;
-            background: #f8f7f3;
-            color: #183028;
+            background: #052058;
+            color: #052058;
             font-family: Arial, Helvetica, sans-serif;
         }
 
@@ -35,7 +35,7 @@
 
         .error-code {
             margin: 0;
-            color: #b68a4a;
+            color: #052058;
             font-size: 15px;
             font-weight: 700;
             letter-spacing: 0.18em;
@@ -51,7 +51,7 @@
         .message {
             margin: 0 auto;
             max-width: 470px;
-            color: #64716c;
+            color: #052058;
             font-size: 14px;
             line-height: 1.7;
         }
@@ -62,14 +62,14 @@
         }
 
         .links a {
-            color: #183028;
+            color: #052058;
             text-decoration: underline;
             text-underline-offset: 3px;
         }
 
         .links span {
             margin: 0 8px;
-            color: #a8afac;
+            color: #052058;
         }
     </style>
 </head>
