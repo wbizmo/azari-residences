@@ -36,13 +36,13 @@
                             <tr>
                                 <td valign="middle">
                                     @if(!empty($logoUrl))
-                                        <img src="{{ $logoUrl }}" width="174" alt="The Azari Hotels & Residences" style="display:block;width:174px;max-width:100%;height:auto;border:0">
+                                        <img src="{{ $logoUrl }}" width="174" alt="Reserva" style="display:block;width:174px;max-width:100%;height:auto;border:0">
                                     @else
                                         <div style="color:#fff;font-family:Georgia,'Times New Roman',serif;font-size:22px;letter-spacing:1px">THE AZARI</div>
                                     @endif
                                 </td>
                                 <td align="right" valign="middle" style="color:#d9c295;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase">
-                                    {{ $eyebrow ?? 'The Azari Hotels & Residences' }}
+                                    {{ $eyebrow ?? 'Reserva' }}
                                 </td>
                             </tr>
                         </table>
@@ -118,8 +118,8 @@
 
                 <tr>
                     <td style="padding:22px 30px;background:#f7f1e6;border-top:1px solid #e1d7c7;color:#6f7874;font-size:11px;line-height:1.65">
-                        <div style="margin-bottom:7px;color:#173f35;font-weight:700">The Azari Hotels & Residences</div>
-                        <div>{{ $footerText ?? 'This is a transactional message from The Azari Hotels & Residences.' }}</div>
+                        <div style="margin-bottom:7px;color:#173f35;font-weight:700">Reserva</div>
+                        <div>{{ $footerText ?? 'This is a transactional message from Reserva.' }}</div>
                         @if(!empty($supportEmail))
                             <div style="margin-top:7px">Need assistance? Contact <a href="mailto:{{ $supportEmail }}" style="color:#8a612b">{{ $supportEmail }}</a>.</div>
                         @endif
