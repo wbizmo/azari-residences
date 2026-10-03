@@ -2,27 +2,18 @@
 
 <x-public-site.layout
     title="Resavar | Home"
-    :description="$content['hero_body'] ?? 'Luxury serviced apartments by Resavar.'"
+    :description="$content['hero_body'] ?? 'Exceptional stays, everywhere with Resavar.'"
 >
 
     @include('public.partials.promotion-popup')
 
     <section class="azari-home-hero" aria-labelledby="azari-home-hero-title">
-        <img
-            src="{{ asset('images/azari-hero.png') }}"
-            alt="Luxury Resavar serviced apartment interior"
-            class="azari-home-hero__image"
-            width="2048"
-            height="1152"
-            fetchpriority="high"
-        >
-
         <div class="azari-home-hero__overlay" aria-hidden="true"></div>
 
         <div class="site-container azari-home-hero__container">
             <div class="azari-home-hero__content">
                 <span class="azari-home-hero__eyebrow">
-                    {{ $content['hero_eyebrow'] ?? 'Premium serviced hotels & residences' }}
+                    {{ $content['hero_eyebrow'] ?? 'Exceptional stays, everywhere' }}
                 </span>
 
                 <h1 id="azari-home-hero-title">
