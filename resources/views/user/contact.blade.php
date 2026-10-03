@@ -3,7 +3,7 @@
 @section('content')
 <section class="az-user-detail-grid">
     <div class="az-user-panel">
-        <header class="az-user-panel-header"><div><h2 class="az-user-panel-title">{{ $title }}</h2><p class="az-user-panel-subtitle">Contact the Azari team</p></div></header>
+        <header class="az-user-panel-header"><div><h2 class="az-user-panel-title">{{ $title }}</h2><p class="az-user-panel-subtitle">Contact the Resavar team</p></div></header>
         <div class="az-user-panel-body az-user-list">
             @if($contactEmail)<a class="az-user-list-item" href="mailto:{{ $contactEmail }}"><div><h3>Email</h3><p>{{ $contactEmail }}</p></div><span class="material-symbols-outlined">mail</span></a>@endif
             @if($contactPhone)<a class="az-user-list-item" href="tel:{{ $contactPhone }}"><div><h3>Telephone</h3><p>{{ $contactPhone }}</p></div><span class="material-symbols-outlined">call</span></a>@endif
