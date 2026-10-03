@@ -10,7 +10,8 @@ use App\Models\PropertyListing;
 use App\Models\SiteSetting;
 use App\Models\WithdrawalRequest;
 use App\Services\Owners\OwnerWithdrawalService;
-use Barryvdh\DomPDF\Facade\Pdf;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -131,7 +132,13 @@ class OwnerMarketplaceController extends Controller
 
         if (! is_file($path)) {
             Storage::disk('local')->makeDirectory('private/agreements');
-            Pdf::loadView('user.owner.agreement-pdf', compact('agreement'))->setPaper('a4')->save($path);
+            $options = new Options();
+            $options->set('defaultFont', 'DejaVu Sans');
+            $pdf = new Dompdf($options);
+            $pdf->loadHtml(view('user.owner.agreement-pdf', compact('agreement'))->render());
+            $pdf->setPaper('A4');
+            $pdf->render();
+            file_put_contents($path, $pdf->output());
         }
 
         return response()->download($path, 'owner-agreement-'.$listing->reference.'.pdf');
