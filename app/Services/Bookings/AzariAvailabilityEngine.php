@@ -241,31 +241,63 @@ class AzariAvailabilityEngine
         CarbonInterface $from,
         int $days = 90
     ): array {
-        $start = CarbonImmutable::parse($from)
-            ->startOfDay();
+        $days = max(1, min($days, 366));
+        $start = CarbonImmutable::parse($from)->startOfDay();
+        $end = $start->addDays($days);
+        $blocked = [];
+
+        $markBlocked = static function ($fromDate, $toDate) use (&$blocked, $start, $end): void {
+            $cursor = CarbonImmutable::parse($fromDate)->startOfDay()->max($start);
+            $limit = CarbonImmutable::parse($toDate)->startOfDay()->min($end);
+
+            while ($cursor->lessThan($limit)) {
+                $blocked[$cursor->toDateString()] = true;
+                $cursor = $cursor->addDay();
+            }
+        };
+
+        Booking::query()
+            ->where('property_id', $propertyId)
+            ->whereIn('status', config('azari.booking.active_statuses', [
+                'hold', 'pending', 'pending_payment', 'approved', 'confirmed', 'paid', 'check_in', 'checked_in',
+            ]))
+            ->where(function (Builder $query): void {
+                $query->whereNotIn('status', ['pending', 'pending_payment'])
+                    ->orWhere(function (Builder $pending): void {
+                        $pending->whereIn('status', ['pending', 'pending_payment'])
+                            ->whereNotNull('expires_at')
+                            ->where('expires_at', '>', now());
+                    });
+            })
+            ->whereDate('check_in', '<', $end)
+            ->whereDate('check_out', '>', $start)
+            ->get(['check_in', 'check_out'])
+            ->each(fn (Booking $booking) => $markBlocked($booking->check_in, $booking->check_out));
+
+        BookingHold::query()
+            ->active()
+            ->where('property_id', $propertyId)
+            ->whereDate('check_in', '<', $end)
+            ->whereDate('check_out', '>', $start)
+            ->get(['check_in', 'check_out'])
+            ->each(fn (BookingHold $hold) => $markBlocked($hold->check_in, $hold->check_out));
+
+        MaintenancePeriod::query()
+            ->where('property_id', $propertyId)
+            ->where('blocks_booking', true)
+            ->whereDate('starts_on', '<', $end)
+            ->whereDate('ends_on', '>', $start)
+            ->get(['starts_on', 'ends_on'])
+            ->each(fn (MaintenancePeriod $period) => $markBlocked($period->starts_on, $period->ends_on));
 
         $calendar = [];
-
-        for (
-            $offset = 0;
-            $offset < $days;
-            $offset++
-        ) {
+        for ($offset = 0; $offset < $days; $offset++) {
             $date = $start->addDays($offset);
-            $next = $date->addDay();
-
-            $isAvailable = $this->available(
-                $propertyId,
-                $date,
-                $next
-            );
-
+            $isAvailable = ! isset($blocked[$date->toDateString()]);
             $calendar[] = [
                 'date' => $date,
                 'available' => $isAvailable,
-                'state' => $isAvailable
-                    ? 'available'
-                    : 'unavailable',
+                'state' => $isAvailable ? 'available' : 'unavailable',
             ];
         }
 
