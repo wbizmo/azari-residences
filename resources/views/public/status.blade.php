@@ -12,7 +12,7 @@
 
     <link
         rel="icon"
-        href="/public/images/logo-light.png"
+        href="/public/images/logo-dark.png"
     >
 
     <style>
