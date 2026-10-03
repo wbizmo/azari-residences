@@ -192,7 +192,7 @@
             <p>{{ $policy['summary'] }}</p>
             <dl>
                 <div><dt>Last updated</dt><dd>{{ $policy['updated'] }}</dd></div>
-                <div><dt>Applies to</dt><dd>Azari website, guest accounts and bookings</dd></div>
+                <div><dt>Applies to</dt><dd>Resavar website, guest accounts and bookings</dd></div>
             </dl>
             <a class="az-text-link" href="{{ route('public.contact') }}">Ask a policy question <span class="material-symbols-outlined">arrow_forward</span></a>
         </aside>
