@@ -10,14 +10,14 @@
             <div class="az-checkout-heading">
                 <span class="eyebrow">Flutterwave API v4</span>
                 <h1>Complete your payment</h1>
-                <p>Use the instruction below on the phone connected to your bank account. Azari will confirm the booking only after Flutterwave verifies the charge.</p>
+                <p>Use the instruction below on the phone connected to your bank account. Resavar will confirm the booking only after Flutterwave verifies the charge.</p>
             </div>
 
             <section class="az-checkout-panel">
                 <div class="az-checkout-panel-head">
                     <div>
                         <h2>Payment instruction</h2>
-                        <p>Do not share your PIN, OTP or banking password with Azari.</p>
+                        <p>Do not share your PIN, OTP or banking password with Resavar.</p>
                     </div>
                     <span class="material-symbols-outlined az-checkout-seal">dialpad</span>
                 </div>
