@@ -6,7 +6,7 @@
 @section('content')
 <section class="az-dashboard-hero">
     <div class="az-dashboard-hero__content">
-        <p class="az-eyebrow">Reserva Residence Operations</p>
+        <p class="az-eyebrow">Resavar Residence Operations</p>
         <h1>Welcome back, {{ auth()->user()->name ?: auth()->user()->username }}.</h1>
         <p>
             Manage the residence portfolio, content and operational foundation from one considered workspace.
