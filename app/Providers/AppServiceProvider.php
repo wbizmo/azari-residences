@@ -29,7 +29,6 @@ use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Pagination\Paginator;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -84,14 +83,8 @@ class AppServiceProvider extends ServiceProvider
             'components.public.layout', 'public.partials.navigation', 'public.partials.footer',
             'public.partials.drawer-root', 'layouts.user', 'user.*',
         ], function ($view): void {
-            $primary = SiteSetting::valueFor('site_logo');
-            $light = SiteSetting::valueFor('light_logo') ?: $primary;
-            $dark = SiteSetting::valueFor('dark_logo') ?: $primary;
             $view->with('siteSettings', [
                 'site_name' => SiteSetting::valueFor('site_name', 'Resavar'),
-                'logo_url' => $primary ? Storage::url($primary) : null,
-                'light_logo_url' => $light ? Storage::url($light) : null,
-                'dark_logo_url' => $dark ? Storage::url($dark) : null,
             ]);
         });
 
