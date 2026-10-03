@@ -23,6 +23,10 @@ jobs:
         run: |
           vendor/bin/pint app/Services/Identity/DojahService.php app/Services/Payments/PaymentWebhookProcessor.php app/Http/Controllers/UserArea/DojahVerificationController.php tests/Feature/DojahIdentityVerificationFlowTest.php tests/Feature/Architecture/CanonicalAdminAndBrandRegressionTest.php
           vendor/bin/pint --test app/Services/Identity/DojahService.php app/Services/Payments/PaymentWebhookProcessor.php app/Http/Controllers/UserArea/DojahVerificationController.php tests/Feature/DojahIdentityVerificationFlowTest.php tests/Feature/Architecture/CanonicalAdminAndBrandRegressionTest.php
+      - name: PHPStan
+        run: |
+          composer require --dev phpstan/phpstan:^2.1 --no-interaction --no-progress
+          vendor/bin/phpstan analyse app --level=0 --no-progress
       - name: Test
         run: |
           cp .env.example .env
