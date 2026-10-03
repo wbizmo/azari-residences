@@ -13,7 +13,7 @@
     <div data-azari-address-results hidden></div>
 
     <div style="margin:8px 0 12px">
-        <button type="button" data-azari-use-location style="border:1px solid #d7d7d7;background:#fff;border-radius:8px;padding:9px 12px;cursor:pointer">Use current location</button>
+        <button type="button" data-azari-use-location style="border:1px solid #052058;background:#FFFFFF;border-radius:8px;padding:9px 12px;cursor:pointer">Use current location</button>
     </div>
 
     <label class="{{ $labelClass }}">
@@ -103,11 +103,11 @@
         }
 
         box.hidden = false;
-        box.style.border = '1px solid #ddd';
+        box.style.border = '1px solid #052058';
         box.style.borderRadius = '8px';
         box.style.overflow = 'hidden';
         box.style.marginBottom = '12px';
-        box.style.background = '#fff';
+        box.style.background = '#FFFFFF';
 
         features.slice(0, 5).forEach((feature) => {
             const values = normaliseFeature(feature);
@@ -119,8 +119,8 @@
             button.style.padding = '10px 12px';
             button.style.textAlign = 'left';
             button.style.border = '0';
-            button.style.borderBottom = '1px solid #eee';
-            button.style.background = '#fff';
+            button.style.borderBottom = '1px solid #052058';
+            button.style.background = '#FFFFFF';
             button.style.cursor = 'pointer';
             button.addEventListener('click', () => {
                 applyFeature(root, feature);
