@@ -30,7 +30,7 @@
                 </div>
 
                 <div>
-                    <label for="email" style="display:block;margin-bottom:7px;color:#052058;font-weight:700;">Email address used for your Azari account</label>
+                    <label for="email" style="display:block;margin-bottom:7px;color:#052058;font-weight:700;">Email address used for your Resavar account</label>
                     <input id="email" name="email" type="email" maxlength="254" required value="{{ old('email', $accountEmail) }}" autocomplete="email" style="width:100%;box-sizing:border-box;border:1px solid #052058;border-radius:14px;padding:14px 16px;background:#FFFFFF;color:#052058;">
                 </div>
 
@@ -41,7 +41,7 @@
 
                 <label style="display:flex;gap:12px;align-items:flex-start;color:#052058;line-height:1.55;">
                     <input type="checkbox" name="confirm" value="1" required style="margin-top:4px;">
-                    <span>I confirm that I am requesting deletion of my Azari account and associated personal data.</span>
+                    <span>I confirm that I am requesting deletion of my Resavar account and associated personal data.</span>
                 </label>
 
                 <button type="submit" style="border:0;border-radius:14px;padding:15px 20px;background:#052058;color:#FFFFFF;font-weight:800;cursor:pointer;">Submit deletion request</button>
@@ -50,8 +50,8 @@
 
         <div style="margin-top:34px;padding-top:28px;border-top:1px solid #052058;">
             <h2 style="margin:0 0 12px;color:#052058;font-size:21px;">What happens after you submit</h2>
-            <p style="margin:0 0 12px;color:#052058;line-height:1.7;">Azari will verify ownership of the account before processing deletion. Account and personal data that is not required for legitimate business, accounting, fraud-prevention, legal, or regulatory purposes will be deleted or anonymized.</p>
-            <p style="margin:0;color:#052058;line-height:1.7;">Some booking, payment, tax, security, or compliance records may need to be retained for a legally required period. Identity verification services may be provided by third-party processors such as Dojah; applicable deletion requests will be handled in line with Azari's instructions and retention obligations.</p>
+            <p style="margin:0 0 12px;color:#052058;line-height:1.7;">Resavar will verify ownership of the account before processing deletion. Account and personal data that is not required for legitimate business, accounting, fraud-prevention, legal, or regulatory purposes will be deleted or anonymized.</p>
+            <p style="margin:0;color:#052058;line-height:1.7;">Some booking, payment, tax, security, or compliance records may need to be retained for a legally required period. Identity verification services may be provided by third-party processors such as Dojah; applicable deletion requests will be handled in line with Resavar's instructions and retention obligations.</p>
         </div>
 
         @auth
