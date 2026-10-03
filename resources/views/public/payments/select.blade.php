@@ -1,4 +1,4 @@
-<x-public-site.layout title="Complete payment | Reserva">
+<x-public-site.layout title="Complete payment | Resavar">
 <main class="site-container az-checkout-page">
     <section class="az-checkout-shell">
         <div class="az-checkout-main">
@@ -26,7 +26,7 @@
                 </div>
 
                 @if(empty($providers))
-                    <div class="az-empty-state"><span class="material-symbols-outlined">credit_card_off</span><h3>Online payment is unavailable</h3><p>Please contact Reserva and quote {{ $booking->reference }}.</p></div>
+                    <div class="az-empty-state"><span class="material-symbols-outlined">credit_card_off</span><h3>Online payment is unavailable</h3><p>Please contact Resavar and quote {{ $booking->reference }}.</p></div>
                 @else
                     <div class="az-checkout-provider-list">
                         @foreach($providers as $key => $provider)
@@ -91,7 +91,7 @@
             <div class="az-checkout-summary-card">
                 <span class="eyebrow">Payment summary</span>
                 @if($fullAccess)
-                    <h2>{{ $booking->property?->name ?? 'Reserva Residence' }}</h2>
+                    <h2>{{ $booking->property?->name ?? 'Resavar Residence' }}</h2>
                 @else
                     <h2>Booking payment</h2>
                 @endif
