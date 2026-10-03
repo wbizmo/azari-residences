@@ -56,9 +56,9 @@ class AppServiceProvider extends ServiceProvider
         GuestIdentityDocument::observe(GuestIdentityDocumentObserver::class);
 
         VerifyEmail::toMailUsing(function (object $notifiable, string $url): MailMessage {
-            return (new MailMessage)->subject('Verify your Azari email address')->view('emails.premium', [
+            return (new MailMessage)->subject('Verify your Resavar email address')->view('emails.premium', [
                 'title' => 'Verify your email address',
-                'preheader' => 'Complete your Azari account verification.',
+                'preheader' => 'Complete your Resavar account verification.',
                 'lines' => ['Welcome to Resavar.', 'Confirm this email address to secure your account and access your bookings.'],
                 'actionLabel' => 'Verify email address',
                 'actionUrl' => $url,
@@ -68,9 +68,9 @@ class AppServiceProvider extends ServiceProvider
         ResetPassword::toMailUsing(function (object $notifiable, string $token): MailMessage {
             $url = url(route('password.reset', ['token' => $token, 'email' => $notifiable->getEmailForPasswordReset()], false));
 
-            return (new MailMessage)->subject('Reset your Azari password')->view('emails.premium', [
+            return (new MailMessage)->subject('Reset your Resavar password')->view('emails.premium', [
                 'title' => 'Reset your password',
-                'preheader' => 'A password reset was requested for your Azari account.',
+                'preheader' => 'A password reset was requested for your Resavar account.',
                 'lines' => ['We received a request to reset your password.', 'Use the secure button below. If you did not request this, no action is required.'],
                 'actionLabel' => 'Reset password',
                 'actionUrl' => $url,
@@ -87,13 +87,11 @@ class AppServiceProvider extends ServiceProvider
             $primary = SiteSetting::valueFor('site_logo');
             $light = SiteSetting::valueFor('light_logo') ?: $primary;
             $dark = SiteSetting::valueFor('dark_logo') ?: $primary;
-            $favicon = SiteSetting::valueFor('favicon');
             $view->with('siteSettings', [
                 'site_name' => SiteSetting::valueFor('site_name', 'Resavar'),
                 'logo_url' => $primary ? Storage::url($primary) : null,
                 'light_logo_url' => $light ? Storage::url($light) : null,
                 'dark_logo_url' => $dark ? Storage::url($dark) : null,
-                'favicon_url' => $favicon ? Storage::url($favicon) : null,
             ]);
         });
 
