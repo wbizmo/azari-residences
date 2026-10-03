@@ -1,5 +1,5 @@
 <style>
-/* Compact classic Toastify presentation with Azari theme colours. */
+/* Compact classic Toastify presentation with Resavar theme colours. */
 .az-toast-region{position:fixed;z-index:2147483000;top:16px;right:16px;display:flex;flex-direction:column;align-items:flex-end;gap:8px;width:min(360px,calc(100vw - 32px));pointer-events:none;font-family:inherit}
 .az-toast{--az-toast-tone:#052058;position:relative;display:flex!important;align-items:center!important;gap:9px!important;width:auto!important;max-width:100%!important;min-height:44px!important;margin:0!important;padding:10px 11px 10px 13px!important;overflow:hidden!important;box-sizing:border-box!important;color:#FFFFFF!important;background:var(--az-toast-tone)!important;border:0!important;border-radius:7px!important;box-shadow:0 8px 24px rgba(5, 32, 88, .22)!important;pointer-events:auto!important;animation:azToastIn .2s ease-out both}
 .az-toast--success{--az-toast-tone:#052058}.az-toast--error{--az-toast-tone:#052058}.az-toast--warning{--az-toast-tone:#052058}.az-toast--info{--az-toast-tone:#052058}
