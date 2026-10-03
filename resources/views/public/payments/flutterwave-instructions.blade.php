@@ -61,14 +61,14 @@
         gap: 1rem;
         margin: 1.25rem;
         padding: 1.25rem;
-        color: var(--green-950, #0c2b24);
-        background: var(--ivory, #f8f5ef);
-        border: 1px solid var(--line, #e7e1d7);
+        color: var(--green-950, #052058);
+        background: var(--ivory, #052058);
+        border: 1px solid var(--line, #052058);
         border-radius: 1rem;
     }
 
     .az-flw-instruction .material-symbols-outlined {
-        color: var(--brass, #b58a4a);
+        color: var(--brass, #052058);
         font-size: 2rem;
     }
 
