@@ -40,10 +40,6 @@ class CmsController extends Controller
             'support_email' => ['nullable', 'email:rfc', 'max:190'],
             'support_phone' => ['nullable', 'string', 'max:40'],
             'physical_address' => ['nullable', 'string', 'max:500'],
-            'site_logo' => ['nullable', 'image', 'max:6144'],
-            'light_logo' => ['nullable', 'image', 'max:6144'],
-            'dark_logo' => ['nullable', 'image', 'max:6144'],
-            'footer_logo' => ['nullable', 'image', 'max:6144'],
             'social_image' => ['nullable', 'image', 'max:6144'],
         ]);
 
@@ -54,7 +50,7 @@ class CmsController extends Controller
             SiteSetting::put($key, $data[$key] ?? null, 'text', 'branding');
         }
 
-        foreach (['site_logo', 'light_logo', 'dark_logo', 'footer_logo', 'social_image'] as $key) {
+        foreach (['social_image'] as $key) {
             if (! $request->hasFile($key)) {
                 continue;
             }
@@ -77,28 +73,33 @@ class CmsController extends Controller
 
     public function theme(Request $request): RedirectResponse
     {
-        $settings = $request->validate([
+        $data = $request->validate([
             'name' => ['required', 'string', 'max:100'],
-            'primary' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
-            'secondary' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
-            'accent' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
-            'background' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
-            'surface' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
-            'text' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
-            'muted' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
-            'heading_font' => ['required', Rule::in(['Montserrat'])],
-            'body_font' => ['required', Rule::in(['Montserrat'])],
             'radius' => ['required', 'integer', 'between:0,30'],
             'hero_overlay' => ['required', 'integer', 'between:0,95'],
             'status' => ['required', Rule::in(['draft', 'published'])],
         ]);
 
+        $settings = [
+            'primary' => '#052058',
+            'secondary' => '#FFFFFF',
+            'accent' => '#052058',
+            'background' => '#FFFFFF',
+            'surface' => '#FFFFFF',
+            'text' => '#052058',
+            'muted' => '#052058',
+            'heading_font' => 'Montserrat',
+            'body_font' => 'Montserrat',
+            'radius' => $data['radius'],
+            'hero_overlay' => $data['hero_overlay'],
+        ];
+
         $revision = ThemeRevision::query()->create([
-            'name' => $settings['name'],
-            'settings' => collect($settings)->except(['name', 'status'])->all(),
-            'status' => $settings['status'],
+            'name' => $data['name'],
+            'settings' => $settings,
+            'status' => $data['status'],
             'created_by' => $request->user()->id,
-            'published_at' => $settings['status'] === 'published' ? now() : null,
+            'published_at' => $data['status'] === 'published' ? now() : null,
         ]);
 
         if ($revision->status === 'published') {
@@ -114,7 +115,7 @@ class CmsController extends Controller
             });
         }
 
-        return back()->with('status', 'Theme revision saved.');
+        return back()->with('status', 'Resavar theme revision saved.');
     }
 
     public function navigationStore(Request $request): RedirectResponse
