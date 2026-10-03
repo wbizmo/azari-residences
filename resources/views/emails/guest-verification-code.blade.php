@@ -9,6 +9,6 @@
 
     <p>This code expires in 10 minutes. Do not share it with anyone.</p>
 
-    <p>Azari Hotels & Residences</p>
+    <p>Resavar</p>
 </body>
 </html>
