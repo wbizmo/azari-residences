@@ -193,12 +193,7 @@
         <link rel="canonical" href="{{ $seoUrl }}">
         <link rel="alternate" hreflang="en" href="{{ $seoUrl }}">
         <link rel="alternate" hreflang="x-default" href="{{ $seoUrl }}">
-
-        <link rel="icon" type="image/png" href="{{ $seoImage }}">
-        <link rel="shortcut icon" type="image/png" href="{{ $seoImage }}">
-        <link rel="apple-touch-icon" href="{{ $seoImage }}">
-
-        <meta property="og:type" content="website">
+<meta property="og:type" content="website">
         <meta property="og:site_name" content="Resavar">
         <meta property="og:title" content="{{ $seoTitle }}">
         <meta property="og:description" content="{{ $seoDescription }}">
