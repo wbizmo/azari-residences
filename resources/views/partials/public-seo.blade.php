@@ -110,11 +110,11 @@ TEXT));
         'Resavar private getaway',
         'Resavar family getaway',
         'Resavar business travel',
-        'Resavar Africa finest address',
+        'Resavar exceptional stays everywhere',
     ]);
 
     $azariSeoCanonical = $seoCanonical ?? $canonical ?? url()->current();
-    $azariSeoImage = $seoImage ?? $image ?? asset('images/azari-favicon.png');
+    $azariSeoImage = $seoImage ?? $image ?? asset('images/logo-light.png');
     $azariSeoType = $seoType ?? $type ?? 'website';
     $azariSeoLocale = str_replace('-', '_', app()->getLocale());
     $azariSeoSiteName = 'Resavar';
@@ -131,7 +131,7 @@ TEXT));
         'description' => $azariSeoDescription,
         'logo' => $azariSeoImage,
         'image' => $azariSeoImage,
-        'slogan' => "Africa's finest address",
+        'slogan' => 'Exceptional Stays, Everywhere.',
         'priceRange' => '$$',
         'currenciesAccepted' => 'USD',
         'paymentAccepted' => ['Credit Card', 'Debit Card', 'Online Payment'],
@@ -153,7 +153,7 @@ TEXT));
                     'https://schema.org/MobileWebPlatform',
                 ],
             ],
-            'result' => ['@type' => 'LodgingResavartion', 'name' => 'Resavar booking'],
+            'result' => ['@type' => 'LodgingReservation', 'name' => 'Resavar booking'],
         ],
     ];
 
@@ -166,7 +166,7 @@ TEXT));
         'url' => $azariSeoHome,
         'logo' => ['@type' => 'ImageObject', 'url' => $azariSeoImage],
         'description' => $azariSeoDescription,
-        'slogan' => "Africa's finest address",
+        'slogan' => 'Exceptional Stays, Everywhere.',
     ];
 
     $azariWebsiteSchema = [
@@ -224,13 +224,13 @@ TEXT));
 <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
 <meta name="bingbot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<meta name="theme-color" content="#173f35">
+<meta name="theme-color" content="#052058">
 <meta name="color-scheme" content="light">
 <link rel="canonical" href="{{ $azariSeoCanonical }}">
 
-<link rel="icon" type="image/png" href="{{ asset('images/azari-favicon.png') }}">
-<link rel="shortcut icon" type="image/png" href="{{ asset('images/azari-favicon.png') }}">
-<link rel="apple-touch-icon" href="{{ asset('images/azari-favicon.png') }}">
+<link rel="icon" type="image/png" href="{{ asset('images/logo-light.png') }}">
+<link rel="shortcut icon" type="image/png" href="{{ asset('images/logo-light.png') }}">
+<link rel="apple-touch-icon" href="{{ asset('images/logo-light.png') }}">
 
 <meta property="og:title" content="{{ $azariSeoTitle }}">
 <meta property="og:description" content="{{ $azariSeoDescription }}">
