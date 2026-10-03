@@ -33,7 +33,7 @@
         overflow-y: auto;
         overscroll-behavior: contain;
         scrollbar-width: thin;
-        scrollbar-color: rgba(20, 57, 45, 0.38) transparent;
+        scrollbar-color: rgba(5, 32, 88, 0.38) transparent;
         -webkit-overflow-scrolling: touch;
     }
 
@@ -47,7 +47,7 @@
 
     .az-public-drawer-scroll::-webkit-scrollbar-thumb {
         border-radius: 999px;
-        background: rgba(20, 57, 45, 0.38);
+        background: rgba(5, 32, 88, 0.38);
     }
 
     .az-public-drawer-scroll .mobile-navigation {
@@ -69,15 +69,15 @@
         z-index: 3;
         flex: 0 0 auto;
         padding: 16px 20px;
-        border-top: 1px solid rgba(20, 57, 45, 0.12);
-        background: #ffffff;
+        border-top: 1px solid rgba(5, 32, 88, 0.12);
+        background: #FFFFFF;
     }
 
     .az-public-drawer-account__action {
         display: inline-flex;
         align-items: center;
         gap: 7px;
-        color: #14392d;
+        color: #052058;
         font-size: 13px;
         font-weight: 700;
         text-decoration: none;
@@ -112,8 +112,8 @@
         z-index: 3;
         flex: 0 0 auto;
         padding: 16px 20px calc(16px + env(safe-area-inset-bottom));
-        border-top: 1px solid rgba(20, 57, 45, 0.12);
-        background: #f6f3eb;
+        border-top: 1px solid rgba(5, 32, 88, 0.12);
+        background: #052058;
     }
 
     .az-public-drawer-assistance__label {
@@ -121,7 +121,7 @@
         align-items: center;
         gap: 8px;
         margin-bottom: 6px;
-        color: #14392d;
+        color: #052058;
         font-size: 13px;
         font-weight: 700;
     }
@@ -133,7 +133,7 @@
 
     .az-public-drawer-assistance p {
         margin: 0 0 8px;
-        color: rgba(20, 57, 45, 0.72);
+        color: rgba(5, 32, 88, 0.72);
         font-size: 12px;
         line-height: 1.5;
     }
@@ -143,7 +143,7 @@
         max-width: 100%;
         align-items: center;
         gap: 7px;
-        color: #14392d;
+        color: #052058;
         font-size: 13px;
         font-weight: 700;
         overflow-wrap: anywhere;
