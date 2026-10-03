@@ -134,8 +134,8 @@
     border:0;
     border-radius:0;
     background:
-        radial-gradient(circle at 50% 15%,rgba(185,149,90,.16),transparent 34rem),
-        rgba(3,14,10,.84);
+        radial-gradient(circle at 50% 15%,rgba(5, 32, 88, .16),transparent 34rem),
+        rgba(0, 0, 0, .84);
     -webkit-backdrop-filter:blur(14px) saturate(.8);
     backdrop-filter:blur(14px) saturate(.8);
     cursor:default;
@@ -149,14 +149,14 @@
     width:min(100%,680px);
     max-height:calc(100dvh - 56px);
     overflow:hidden;
-    color:#18231f;
-    background:#fffdf8;
-    border:1px solid rgba(255,255,255,.25);
+    color:#052058;
+    background:#FFFFFF;
+    border:1px solid rgba(255, 255, 255, .25);
     border-radius:0;
     outline:none;
     box-shadow:
-        0 42px 120px rgba(0,0,0,.5),
-        0 0 0 1px rgba(185,149,90,.12);
+        0 42px 120px rgba(0, 0, 0, .5),
+        0 0 0 1px rgba(5, 32, 88, .12);
     transform:translateY(18px) scale(.985);
     transition:transform .22s cubic-bezier(.2,.8,.2,1);
 }
@@ -175,7 +175,7 @@
     max-height:none;
     aspect-ratio:auto;
     overflow:hidden;
-    background:#10281f;
+    background:#052058;
 }
 
 .az-offer-card__visual img{
@@ -192,8 +192,8 @@
     inset:0;
     pointer-events:none;
     background:
-        linear-gradient(180deg,rgba(3,15,11,.08),rgba(3,15,11,.08) 42%,rgba(3,15,11,.68) 100%),
-        linear-gradient(90deg,rgba(3,15,11,.26),transparent 58%);
+        linear-gradient(180deg,rgba(0, 0, 0, .08),rgba(0, 0, 0, .08) 42%,rgba(0, 0, 0, .68) 100%),
+        linear-gradient(90deg,rgba(0, 0, 0, .26),transparent 58%);
 }
 
 .az-offer-card__badge{
@@ -206,19 +206,19 @@
     gap:8px;
     min-height:36px;
     padding:8px 12px;
-    color:#173d33;
-    background:#f7e5bf;
-    border:1px solid rgba(255,255,255,.7);
+    color:#052058;
+    background:#052058;
+    border:1px solid rgba(255, 255, 255, .7);
     border-radius:0;
     letter-spacing:.14em;
     text-transform:uppercase;
     font-size:.66rem;
     font-weight:850;
-    box-shadow:0 12px 26px rgba(0,0,0,.2);
+    box-shadow:0 12px 26px rgba(0, 0, 0, .2);
 }
 
 .az-offer-card__badge .material-symbols-outlined{
-    color:#7c5822;
+    color:#052058;
     font-size:18px;
 }
 
@@ -232,16 +232,16 @@
     width:44px;
     height:44px;
     padding:0;
-    color:#fff;
-    background:#173d33;
-    border:1px solid rgba(255,255,255,.55);
+    color:#FFFFFF;
+    background:#052058;
+    border:1px solid rgba(255, 255, 255, .55);
     border-radius:0;
     cursor:pointer;
     transition:background .16s ease,transform .16s ease;
 }
 
 .az-offer-card__close:hover{
-    background:#255c4b;
+    background:#052058;
     transform:translateY(-1px);
 }
 
@@ -266,7 +266,7 @@
     overflow-y:auto;
     overscroll-behavior:contain;
     scrollbar-width:thin;
-    scrollbar-color:#b9955a #eee8dd;
+    scrollbar-color:#052058 #052058;
 }
 
 .az-offer-card.is-scrollable .az-offer-card__content::-webkit-scrollbar{
@@ -274,21 +274,21 @@
 }
 
 .az-offer-card.is-scrollable .az-offer-card__content::-webkit-scrollbar-track{
-    background:#eee8dd;
+    background:#052058;
 }
 
 .az-offer-card.is-scrollable .az-offer-card__content::-webkit-scrollbar-thumb{
-    background:#b9955a;
-    border:2px solid #eee8dd;
+    background:#052058;
+    border:2px solid #052058;
 }
 
 .az-offer-card.is-scrollable .az-offer-card__content::-webkit-scrollbar-thumb:hover{
-    background:#8f6c38;
+    background:#052058;
 }
 
 .az-offer-card__eyebrow{
     margin:0 0 12px;
-    color:#8f6c38;
+    color:#052058;
     letter-spacing:.17em;
     text-transform:uppercase;
     font-size:.68rem;
@@ -298,7 +298,7 @@
 .az-offer-card__content h2{
     max-width:560px;
     margin:0 auto;
-    color:#113329;
+    color:#052058;
     font-family:var(--font-heading,Georgia,serif);
     font-size:clamp(2.25rem,5vw,4rem);
     font-weight:500;
@@ -311,7 +311,7 @@
 .az-offer-card__summary{
     max-width:560px;
     margin:20px auto 0;
-    color:#52615b;
+    color:#052058;
     font-size:clamp(.98rem,1.45vw,1.08rem);
     line-height:1.7;
     text-wrap:pretty;
@@ -320,7 +320,7 @@
 .az-offer-card__copy{
     max-width:560px;
     margin:16px auto 0;
-    color:#69756f;
+    color:#052058;
     font-size:.94rem;
     line-height:1.75;
     text-align:center;
@@ -333,7 +333,7 @@
     justify-items:center;
     gap:15px;
     padding:6px clamp(24px,6vw,52px) clamp(24px,4vw,32px);
-    background:#fffdf8;
+    background:#FFFFFF;
 }
 
 .az-offer-card__cta{
@@ -344,9 +344,9 @@
     width:min(100%,420px);
     min-height:54px;
     padding:14px 24px;
-    color:#fff;
-    background:#173d33;
-    border:1px solid #173d33;
+    color:#FFFFFF;
+    background:#052058;
+    border:1px solid #052058;
     border-radius:0;
     font-size:.84rem;
     font-weight:850;
@@ -356,10 +356,10 @@
 }
 
 .az-offer-card__cta:hover{
-    color:#fff;
-    background:#255c4b;
+    color:#FFFFFF;
+    background:#052058;
     transform:translateY(-2px);
-    box-shadow:0 14px 30px rgba(23,61,51,.2);
+    box-shadow:0 14px 30px rgba(5, 32, 88, .2);
 }
 
 .az-offer-card__cta .material-symbols-outlined{
@@ -377,7 +377,7 @@
     min-height:auto;
     margin:0;
     padding:2px 0 4px;
-    color:#6c7872;
+    color:#052058;
     background:transparent;
     border:0;
     border-bottom:1px solid currentColor;
@@ -388,13 +388,13 @@
 }
 
 .az-offer-card__later:hover{
-    color:#173d33;
+    color:#052058;
 }
 
 .az-offer-card__close:focus-visible,
 .az-offer-card__cta:focus-visible,
 .az-offer-card__later:focus-visible{
-    outline:2px solid #d8b87a;
+    outline:2px solid #052058;
     outline-offset:3px;
 }
 
