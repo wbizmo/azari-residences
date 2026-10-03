@@ -36,7 +36,7 @@
 
     <link rel="manifest" href="/manifest.webmanifest">
     <meta name="theme-color" content="#052058">
-    <link rel="apple-touch-icon" href="{{ asset('images/logo-light.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/logo-dark.png') }}">
 </head>
 <body class="public-site {{ request()->routeIs('home') ? 'home-page azari-home-page' : 'inner-page azari-inner-page azari-solid-header' }} {{ $bodyClass ?? '' }}">
     <div class="azari-preloader" data-public-preloader role="status" aria-label="Loading Resavar">
