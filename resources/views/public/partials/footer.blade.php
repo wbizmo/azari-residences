@@ -48,7 +48,7 @@
         }
 
         .azari-footer-play-badge:focus-visible {
-            outline: 2px solid #d8bd8b;
+            outline: 2px solid #FFFFFF;
             outline-offset: 5px;
         }
 
@@ -72,7 +72,7 @@
             }
         }
 
-        /* AZARI PLAY BADGE CLICK FIX */
+        /* Footer store badge interaction */
         .site-footer .azari-footer-store-row {
             position: relative;
             z-index: 20;
@@ -103,8 +103,7 @@
                 <x-brand-logo variant="footer" />
 
                 <p>
-                    Private, fully serviced hotels & residences managed with
-                    dedicated support from booking through checkout.
+                    Exceptional stays, everywhere, with dependable support from booking through checkout.
                 </p>
             </div>
 
