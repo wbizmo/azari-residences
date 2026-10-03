@@ -1,5 +1,5 @@
 <x-public-site.layout
-    title="Available hotels & residences | Azari Hotels & Residences"
+    title="Available hotels & residences | Resavar"
     description="Review live Azari inventory and refine your stay request."
 >
     @php
