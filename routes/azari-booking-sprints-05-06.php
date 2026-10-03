@@ -125,7 +125,7 @@ Route::middleware('web')->group(function (): void {
     Route::get('/booking/{reference}/summary', [AzariBookingFlowController::class, 'summary'])
         ->name('azari.booking.summary');
 
-    Route::prefix('azari-admin')
+    Route::prefix('azaridevadmin')
         ->name('azari.admin.s56.')
         ->middleware(['auth', 'auth.session', 'azari.staff'])
         ->group(function (): void {
