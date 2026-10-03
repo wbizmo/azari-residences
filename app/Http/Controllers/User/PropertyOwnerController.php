@@ -13,7 +13,8 @@ use App\Models\RoomType;
 use App\Models\SiteSetting;
 use App\Services\Owners\OwnerBalanceService;
 use App\Services\Owners\OwnerWithdrawalService;
-use Barryvdh\DomPDF\Facade\Pdf;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -96,7 +97,13 @@ class PropertyOwnerController extends Controller
 
         if (! is_file($path)) {
             Storage::disk('local')->makeDirectory('private/agreements');
-            Pdf::loadView('user.owner.agreement-pdf', compact('agreement'))->setPaper('a4')->save($path);
+            $options = new Options();
+            $options->set('defaultFont', 'DejaVu Sans');
+            $pdf = new Dompdf($options);
+            $pdf->loadHtml(view('user.owner.agreement-pdf', compact('agreement'))->render());
+            $pdf->setPaper('A4');
+            $pdf->render();
+            file_put_contents($path, $pdf->output());
         }
 
         return response()->download($path, 'azari-listing-agreement-'.$agreement->version.'.pdf');
