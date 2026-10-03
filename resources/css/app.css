@@ -9262,3 +9262,25 @@ table{border-color:rgba(5,32,88,.16)}
     .resavar-auth-back{margin-bottom:30px}
 }
 @media(max-width:560px){.resavar-auth-grid{grid-template-columns:1fr}.resavar-auth-row{align-items:flex-start;flex-direction:column;gap:10px}}
+
+
+/* Shared recovery / verification forms inside the new authentication shell */
+.resavar-auth-card .az-standalone-auth-form{display:grid;gap:16px}
+.resavar-auth-card .az-standalone-auth-form label{display:grid;gap:8px;color:#052058;font-size:11px;font-weight:800}
+.resavar-auth-card .az-standalone-auth-form input{
+    width:100%;min-height:50px;padding:0 14px;border:1px solid rgba(5,32,88,.24);border-radius:9px;background:#FFFFFF;color:#052058;font:inherit;outline:0
+}
+.resavar-auth-card .az-standalone-auth-form input:focus{border-color:#052058;box-shadow:0 0 0 3px rgba(5,32,88,.10)}
+.resavar-auth-card .az-standalone-auth-form small{color:#052058;font-size:10px}
+.resavar-auth-card .az-standalone-auth-form>button,
+.resavar-auth-card .az-standalone-auth-actions button{
+    min-height:48px;border:1px solid #052058;border-radius:9px;background:#052058;color:#FFFFFF;padding:0 16px;font:inherit;font-size:12px;font-weight:800;cursor:pointer
+}
+.resavar-auth-card .az-standalone-auth-form>button:hover,
+.resavar-auth-card .az-standalone-auth-actions button:hover{background:#000000;border-color:#000000}
+.resavar-auth-card .az-standalone-auth-form>a{color:#052058;font-size:11px;font-weight:800;text-align:center;text-decoration:underline;text-underline-offset:3px}
+.resavar-auth-card .az-standalone-auth-actions{display:grid;gap:10px}
+.resavar-auth-card .az-standalone-auth-actions form{margin:0}
+.resavar-auth-card .az-standalone-auth-actions button{width:100%}
+.resavar-auth-card .az-standalone-auth-actions .secondary{background:#FFFFFF;color:#052058}
+.resavar-auth-card .az-standalone-auth-actions .secondary:hover{background:#052058;color:#FFFFFF}
