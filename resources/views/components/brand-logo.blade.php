@@ -1,7 +1,7 @@
 @props(['variant' => 'header','dark' => false])
 @php
     $settings = isset($siteSettings) && is_array($siteSettings) ? $siteSettings : [];
-    $siteName = trim((string) ($settings['site_name'] ?? 'Azari Hotels & Residences'));
+    $siteName = trim((string) ($settings['site_name'] ?? 'Resavar'));
     $isFooter = $variant === 'footer';
     $isGuestSidebar = in_array($variant, ['guest-sidebar', 'guest-drawer'], true);
     $onDark = $dark || $isFooter || $isGuestSidebar;
