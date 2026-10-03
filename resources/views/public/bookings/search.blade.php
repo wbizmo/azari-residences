@@ -25,8 +25,8 @@
                 <div class="az-book-grid">
                     <figure class="az-book-media">
                         <img
-                            src="{{ asset('images/azari-hero.png') }}"
-                            alt="Interior of an Resavar"
+                            src="{{ asset('images/azari-hospitality-welcome.png') }}"
+                            alt="Resavar hospitality interior"
                             width="1200"
                             height="1500"
                         >
