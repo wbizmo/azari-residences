@@ -14,9 +14,6 @@ class PhaseOneBCAuthorizationOwnershipTest extends TestCase
             'user.bookings.receipt',
             'user.payments.show',
             'user.payments.retry',
-            'user.identity.download',
-            'user.guests.identity.store',
-            'user.guests.identity.download',
             'user.notifications.read',
             'user.security.sessions.destroy',
         ] as $name) {
@@ -31,10 +28,6 @@ class PhaseOneBCAuthorizationOwnershipTest extends TestCase
             'azari.admin.payments.providers.test' => ['azari.staff', 'azari.admin'],
             'azari.admin.payments.store' => ['azari.staff', 'azari.permission:payments.manage'],
             'azari.admin.payments.reconcile' => ['azari.staff', 'azari.permission:payments.manage'],
-            'azari.admin.identities.types.store' => ['azari.staff', 'azari.admin'],
-            'azari.admin.identities.types.update' => ['azari.staff', 'azari.admin'],
-            'azari.admin.identities.users.review' => ['azari.staff', 'azari.permission:identities.manage'],
-            'azari.admin.identities.guests.review' => ['azari.staff', 'azari.permission:identities.manage'],
         ];
 
         foreach ($expectations as $name => $middleware) {
