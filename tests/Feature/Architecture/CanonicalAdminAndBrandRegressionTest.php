@@ -33,13 +33,14 @@ class CanonicalAdminAndBrandRegressionTest extends TestCase
         $this->assertStringNotContainsString("route('user.owner.listings.create')", $footer);
     }
 
-    public function test_brand_component_uses_one_logo_source_and_masking(): void
+    public function test_brand_component_uses_original_light_and_dark_logo_assets_without_masking(): void
     {
         $brand = file_get_contents(resource_path('views/components/brand-logo.blade.php'));
 
-        $this->assertStringContainsString('azari-logo-mask', $brand);
-        $this->assertStringNotContainsString('light_logo_url', $brand);
-        $this->assertStringNotContainsString('logo-light.png', $brand);
+        $this->assertStringContainsString('light_logo_url', $brand);
+        $this->assertStringContainsString('logo-light.png', $brand);
+        $this->assertStringContainsString('logo-dark.png', $brand);
+        $this->assertStringNotContainsString('azari-logo-mask', $brand);
     }
     public function test_primary_brand_matches_resavar_identity_guide(): void
     {
