@@ -16,7 +16,7 @@
 
     <title>
         @yield('title', 'Guest area') |
-        {{ $siteSettings['site_name'] ?? 'Azari Hotels & Residences' }}
+        {{ $siteSettings['site_name'] ?? 'Reserva' }}
     </title>
 
     @vite([
@@ -194,7 +194,7 @@
                     </div>
 
                     <h1 class="az-user-page-title">
-                        @yield('page_title', 'Your Azari stay')
+                        @yield('page_title', 'Your Reserva stay')
                     </h1>
                 </div>
             </div>
@@ -495,7 +495,7 @@
 
     /* =========================================================
        LIVE USER MOBILE DRAWER FIX
-       Uses the actual Azari Blade markup and body state.
+       Uses the actual Reserva Blade markup and body state.
        ========================================================= */
 
     @media (max-width: 980px) {
