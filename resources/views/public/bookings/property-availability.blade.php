@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'Availability — '.$property->name.' | Azari Hotels & Residences')
+@section('title', 'Availability — '.$property->name.' | Resavar')
 
 @section('content')
 @php
@@ -15,7 +15,7 @@
             <a href="{{ route('properties.show', $property) }}">← Back to residence</a>
             <span class="eyebrow">Live 90-day inventory</span>
             <h1>{{ $property->name }}</h1>
-            <p>{{ $property->locationRecord?->name ?? 'Azari Hotels & Residences' }} · {{ $property->roomType?->name ?? 'Private residence' }}</p>
+            <p>{{ $property->locationRecord?->name ?? 'Resavar' }} · {{ $property->roomType?->name ?? 'Private residence' }}</p>
         </div>
     </section>
 
