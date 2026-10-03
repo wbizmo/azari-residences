@@ -293,7 +293,7 @@
                 </div>
 
                 <p>
-                    Contact the Azari Hotels & Residences guest-support team.
+                    Contact the Resavar guest-support team.
                 </p>
 
                 <a href="mailto:{{ $contactEmail }}">
