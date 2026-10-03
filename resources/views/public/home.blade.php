@@ -1,8 +1,8 @@
 
 
 <x-public-site.layout
-    title="Reserva | Home"
-    :description="$content['hero_body'] ?? 'Luxury serviced apartments by Reserva.'"
+    title="Resavar | Home"
+    :description="$content['hero_body'] ?? 'Luxury serviced apartments by Resavar.'"
 >
 
     @include('public.partials.promotion-popup')
@@ -10,7 +10,7 @@
     <section class="azari-home-hero" aria-labelledby="azari-home-hero-title">
         <img
             src="{{ asset('images/azari-hero.png') }}"
-            alt="Luxury Reserva serviced apartment interior"
+            alt="Luxury Resavar serviced apartment interior"
             class="azari-home-hero__image"
             width="2048"
             height="1152"
@@ -298,7 +298,7 @@
                 </p>
 
                 <p>
-                    Each Reserva residence combines the privacy and comfort of a
+                    Each Resavar residence combines the privacy and comfort of a
                     personal home with the thoughtful service expected from
                     premium hospitality. From carefully furnished interiors and
                     reliable housekeeping to responsive guest support, every
@@ -778,20 +778,20 @@
             <div class="azari-app-card">
                 <div class="azari-app-copy">
                     <span class="azari-app-kicker">
-                        The Reserva App
+                        The Resavar App
                     </span>
 
                     <h2
                         class="azari-app-title"
                         id="azari-app-title"
                     >
-                        Your Reserva experience, wherever you are.
+                        Your Resavar experience, wherever you are.
                     </h2>
 
                     <p class="azari-app-description">
-                        Download the Reserva app on Google Play
+                        Download the Resavar app on Google Play
                         for convenient access to your bookings, guest account
-                        and Reserva experience on Android.
+                        and Resavar experience on Android.
                     </p>
 
                     <div
@@ -813,7 +813,7 @@
                             class="azari-google-play-link"
                             target="_blank"
                             rel="noopener noreferrer"
-                            aria-label="Get Reserva on Google Play"
+                            aria-label="Get Resavar on Google Play"
                         >
                             <img
                                 src="{{ asset('images/google-play-badge.png') }}"
@@ -834,7 +834,7 @@
                 <div class="azari-app-visual">
                     <img
                         src="{{ asset('images/azari-hospitality-welcome.png') }}"
-                        alt="Reserva Hotels and Residences hospitality experience"
+                        alt="Resavar Hotels and Residences hospitality experience"
                         loading="lazy"
                         decoding="async"
                     >
@@ -846,7 +846,7 @@
                         >devices</span>
 
                         <div>
-                            <strong>Reserva on Android.</strong>
+                            <strong>Resavar on Android.</strong>
                             <span>Available on Google Play</span>
                         </div>
                     </div>
