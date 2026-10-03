@@ -10,11 +10,6 @@
     >
 <title>System Status | Resavar</title>
 
-    <link
-        rel="icon"
-        href="/public/images/logo-dark.png"
-    >
-
     <style>
         :root {
             color-scheme: light;
