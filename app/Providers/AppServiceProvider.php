@@ -59,7 +59,7 @@ class AppServiceProvider extends ServiceProvider
             return (new MailMessage)->subject('Verify your Azari email address')->view('emails.premium', [
                 'title' => 'Verify your email address',
                 'preheader' => 'Complete your Azari account verification.',
-                'lines' => ['Welcome to The Azari Residences.', 'Confirm this email address to secure your account and access your bookings.'],
+                'lines' => ['Welcome to Resavar.', 'Confirm this email address to secure your account and access your bookings.'],
                 'actionLabel' => 'Verify email address',
                 'actionUrl' => $url,
             ]);
@@ -89,7 +89,7 @@ class AppServiceProvider extends ServiceProvider
             $dark = SiteSetting::valueFor('dark_logo') ?: $primary;
             $favicon = SiteSetting::valueFor('favicon');
             $view->with('siteSettings', [
-                'site_name' => SiteSetting::valueFor('site_name', 'Azari Residences'),
+                'site_name' => SiteSetting::valueFor('site_name', 'Resavar'),
                 'logo_url' => $primary ? Storage::url($primary) : null,
                 'light_logo_url' => $light ? Storage::url($light) : null,
                 'dark_logo_url' => $dark ? Storage::url($dark) : null,
