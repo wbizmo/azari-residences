@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('admin.layouts.app')
 @section('title','Property owner settings')
 @section('content')
 <div class="az-admin-page-header"><div><h1>Property owner marketplace</h1><p>Control agreements, withdrawal days and payout gateways. Azari platform commission on owner-property room sales is disabled. Platform currency is locked to USD.</p></div></div>
