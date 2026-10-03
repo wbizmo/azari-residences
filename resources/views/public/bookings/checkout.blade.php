@@ -1,4 +1,4 @@
-<x-public-site.layout title="Guest details | Azari Hotels & Residences">
+<x-public-site.layout title="Guest details | Resavar">
 <main class="site-container az-s56-page">
 <header>
     <span class="eyebrow">Step 1 of 3</span>
