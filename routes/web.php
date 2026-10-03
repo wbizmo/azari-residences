@@ -120,16 +120,3 @@ require __DIR__.'/azari-property-owner-extension.php';
         'data',
     ]
 )->name('public.status.data');
-
-
-/*
-|--------------------------------------------------------------------------
-| AZARI_ADMIN_ROOT_COMPAT_V1
-|--------------------------------------------------------------------------
-| Compatibility entry points for the historical split admin prefixes.
-*/
-Route::get('/azari-admin/login', fn () => redirect()->route('azari.admin.login'))
-    ->name('azari.admin.compat.login');
-
-Route::get('/azari-admin', fn () => redirect()->route('azari.admin.dashboard'))
-    ->name('azari.admin.compat.dashboard');

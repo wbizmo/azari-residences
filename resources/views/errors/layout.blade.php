@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>@yield('code') | {{ config('app.name', 'The Azari Hotels & Residences') }}</title>
+    <title>@yield('code') | {{ config('app.name', 'Reserva') }}</title>
 
     <style>
         * {

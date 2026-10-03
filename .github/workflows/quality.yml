@@ -1,0 +1,48 @@
+name: Quality
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, audit/battle-ready-blue-ui]
+
+jobs:
+  php:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          coverage: none
+      - run: composer validate --strict
+      - run: composer install --no-interaction --prefer-dist --no-progress
+      - name: PHP syntax
+        run: find app bootstrap config database routes tests -name '*.php' -print0 | xargs -0 -n1 php -l
+      - name: Pint changed hardening PHP
+        run: |
+          vendor/bin/pint app/Services/Identity/DojahService.php app/Services/Payments/PaymentWebhookProcessor.php app/Http/Controllers/UserArea/DojahVerificationController.php tests/Feature/DojahIdentityVerificationFlowTest.php tests/Feature/Architecture/CanonicalAdminAndBrandRegressionTest.php
+          vendor/bin/pint --test app/Services/Identity/DojahService.php app/Services/Payments/PaymentWebhookProcessor.php app/Http/Controllers/UserArea/DojahVerificationController.php tests/Feature/DojahIdentityVerificationFlowTest.php tests/Feature/Architecture/CanonicalAdminAndBrandRegressionTest.php
+      - name: PHPStan
+        run: |
+          composer require --dev phpstan/phpstan:^2.1 --no-interaction --no-progress
+          vendor/bin/phpstan analyse app --level=0 --no-progress
+      - name: Test
+        run: |
+          cp .env.example .env
+          touch database/database.sqlite
+          php artisan key:generate
+          php artisan test
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - run: corepack enable
+      - run: corepack prepare pnpm@10.17.1 --activate
+      - run: pnpm install --no-frozen-lockfile --ignore-scripts
+      - run: pnpm run build

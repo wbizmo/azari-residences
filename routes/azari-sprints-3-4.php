@@ -5,7 +5,7 @@ use App\Http\Controllers\Admin\Inventory\InventoryController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth.session', 'azari.staff'])
-    ->prefix('azari-admin')
+    ->prefix('azaridevadmin')
     ->name('azari.admin.')
     ->group(function (): void {
         Route::get('/cms', [CmsController::class, 'index'])->name('cms.index');

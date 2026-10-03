@@ -1,21 +1,6 @@
 <header class="site-header" data-site-header>
     <div class="site-container nav-shell">
-        <a href="{{ route('home') }}" class="brand azari-brand azari-brand--header azari-header-logo" aria-label="{{ config('app.name', 'The Azari Hotels & Residences') }} home">
-
-        <span class="brand-logo-slot azari-brand__logo-slot azari-header-logo__slot">
-                <img
-                    src="{{ asset('images/logo-dark.png') }}"
-                    data-azari-public-logo
-                    data-dark-logo="{{ asset('images/logo-dark.png') }}"
-                    data-light-logo="{{ asset('images/logo-light.png') }}"
-                    alt="{{ config('app.name', 'The Azari Hotels & Residences') }}"
-                    class="brand-image azari-brand__image azari-header-logo__image"
-                    loading="eager"
-                    decoding="async"
-                >
-            </span>
-
-        </a>
+        <x-brand-logo variant="header" class="azari-header-logo" />
 
         <nav class="desktop-navigation" aria-label="Primary navigation">
             <a href="{{ route('public.apartments') }}">Apartments</a>

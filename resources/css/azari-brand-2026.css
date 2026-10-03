@@ -1,0 +1,51 @@
+/* RESAVAR brand authority. Source: RESAVAR Brand Identity. */
+:root {
+    --resavar-navy:#052058;
+    --resavar-blue:#0577F5;
+    --resavar-orange:#F58F07;
+    --resavar-night:#000000;
+    --resavar-mist:#EEF2F8;
+    --resavar-white:#FFFFFF;
+    --resavar-ink:#052058;
+    --resavar-muted:#40547A;
+    --resavar-border:rgba(5,32,88,.16);
+    --resavar-success:#17845b;
+    --resavar-error:#b42318;
+
+    /* Compatibility aliases while legacy selectors are migrated safely. */
+    --azari-ivory:#FFFFFF; --azari-ivory-deep:#EEF2F8;
+    --azari-brass:#0577F5; --azari-brass-light:#0577F5;
+    --azari-wine:#052058; --azari-text:#052058; --azari-muted:#40547A;
+    --azari-border:rgba(5,32,88,.16);
+    --az-user-green-950:#052058; --az-user-green-900:#052058;
+    --az-user-green-800:#052058; --az-user-green-700:#0577F5;
+    --az-user-green-100:#EEF2F8; --az-user-brass:#0577F5;
+    --az-user-brass-soft:#EEF2F8; --az-user-wine:#052058;
+    --az-user-ink:#052058; --az-user-muted:#40547A;
+    --az-user-paper:#FFFFFF; --az-user-ivory:#EEF2F8;
+    --az-user-line:rgba(5,32,88,.16);
+    --font-display:'Montserrat',Arial,sans-serif;
+    --font-body:'Montserrat',Arial,sans-serif;
+    --font-mono:'Montserrat',Arial,sans-serif;
+}
+body,.az-user-body,.az-admin-body{background:#fff;color:var(--resavar-navy);font-family:'Montserrat',Arial,sans-serif}
+:focus-visible{outline-color:var(--resavar-blue)}
+.button-brass,.button-primary,.az-user-button--primary,.az-user-button--dark{background:var(--resavar-navy)!important;color:#fff!important;border-color:var(--resavar-navy)!important}
+.button-brass:hover,.button-primary:hover,.az-user-button--primary:hover,.az-user-button--dark:hover{background:var(--resavar-blue)!important;border-color:var(--resavar-blue)!important}
+.availability-submit{background:var(--resavar-orange)!important;color:var(--resavar-navy)!important}
+.button-secondary,.az-user-button--light,.az-user-button--ghost{border-color:var(--resavar-navy)!important;color:var(--resavar-navy)!important;background:transparent!important}
+.site-header.is-scrolled,.search-results-page .site-header{background:rgba(255,255,255,.97);color:var(--resavar-navy)}
+.hero-section{background:var(--resavar-navy)}
+.site-footer,.az-admin-sidebar,.az-user-sidebar,.az-user-mobile-drawer{background:var(--resavar-navy)!important;color:#fff}
+.eyebrow,.material-symbols-outlined,.nav-popover-panel .material-symbols-outlined,.text-link{color:var(--resavar-blue)}
+.azari-brand__logo-image{display:block;width:100%;height:100%;object-fit:contain}\n.azari-brand__logo-slot,.brand-logo-slot{overflow:hidden}
+input:focus,select:focus,textarea:focus{border-color:var(--resavar-blue)!important;outline-color:rgba(5,119,245,.14)!important}
+input[type="checkbox"]:checked + .az-toggle{border-color:var(--resavar-blue)!important;background:var(--resavar-blue)!important}
+.az-user-nav-link.is-active,.az-nav-link.is-active{background:rgba(255,255,255,.14)!important;color:#fff!important}
+.az-user-summary-icon,.az-user-timezone-icon,.az-user-stat>.material-symbols-outlined{background:var(--resavar-mist)!important;color:var(--resavar-navy)!important}
+.az-sidebar-brand__logo{display:block;width:148px;height:46px}
+.azari-brand__logo-slot{min-width:40px;min-height:40px}
+.az-user-sidebar .material-symbols-outlined,.az-user-mobile-drawer .material-symbols-outlined,.az-admin-sidebar .material-symbols-outlined{color:inherit}
+.az-user-welcome{background:var(--resavar-navy)!important}
+.az-user-topbar{background:rgba(255,255,255,.96)!important;border-color:var(--resavar-border)!important}
+.az-user-support-card a,.az-user-eyebrow{color:#fff!important}

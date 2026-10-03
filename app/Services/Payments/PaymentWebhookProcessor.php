@@ -9,6 +9,7 @@ use App\Models\PaymentProviderStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class PaymentWebhookProcessor
 {
@@ -31,18 +32,28 @@ class PaymentWebhookProcessor
         $signatureValid = $provider->webhookSignatureIsValid($raw, $request->headers->all());
         $eventId = (string) ($references['event_id'] ?? hash('sha256', $raw));
 
-        $event = PaymentEvent::query()->firstOrCreate(
-            ['provider' => $providerName, 'event_id' => $eventId],
-            [
-                'event_type' => $references['event_type'] ?? null,
-                'source' => 'webhook',
-                'signature_valid' => $signatureValid,
-                'processed' => false,
-                'received_at' => now(),
-                'safe_payload' => $this->safePayload($payload),
-                'attempt_count' => 0,
-            ],
-        );
+        $event = DB::transaction(function () use ($providerName, $eventId, $references, $signatureValid, $payload): PaymentEvent {
+            $event = PaymentEvent::query()->firstOrCreate(
+                ['provider' => $providerName, 'event_id' => $eventId],
+                [
+                    'event_type' => $references['event_type'] ?? null,
+                    'source' => 'webhook',
+                    'signature_valid' => $signatureValid,
+                    'processed' => false,
+                    'received_at' => now(),
+                    'safe_payload' => $this->safePayload($payload),
+                    'attempt_count' => 0,
+                ],
+            );
+
+            return PaymentEvent::query()
+                ->whereKey($event->id)
+                ->when(
+                    DB::connection()->getDriverName() !== 'sqlite',
+                    fn ($query) => $query->lockForUpdate()
+                )
+                ->firstOrFail();
+        }, 3);
 
         PaymentProviderStatus::query()->updateOrCreate(
             ['provider' => $providerName],

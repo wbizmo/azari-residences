@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="/public/images/logo-light.png" alt="The Azari Residences" width="320">
+  <img src="/public/images/logo-light.png" alt="Reserva" width="320">
 </p>
 
 <p align="center">

@@ -39,12 +39,17 @@ class DojahVerificationController extends Controller
         ]);
     }
 
-    public function status(Request $request): JsonResponse
+    public function status(Request $request, DojahService $dojah): JsonResponse
     {
+        $latest = $dojah->latestForUser($request->user());
+
         return response()->json([
-            'verified' => IdentityVerification::userIsVerified((int) $request->user()->id),
+            'verified' => $latest?->isVerified() ?? false,
+            'status' => $latest?->status ?? IdentityVerification::STATUS_PENDING,
+            'failure_reason' => $latest?->failure_reason,
+            'verified_at' => $latest?->verified_at?->toIso8601String(),
             'continue_url' => $request->session()->get('url.intended', route('user.dashboard')),
-        ]);
+        ])->header('Cache-Control', 'no-store, private');
     }
 
 }

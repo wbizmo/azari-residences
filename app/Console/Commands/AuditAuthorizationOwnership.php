@@ -21,19 +21,12 @@ class AuditAuthorizationOwnership extends Command
             'user.bookings.receipt' => ['azari.customer', 'azari.owns-route'],
             'user.payments.show' => ['azari.customer', 'azari.owns-route'],
             'user.payments.retry' => ['azari.customer', 'azari.owns-route'],
-            'user.identity.download' => ['azari.customer', 'azari.owns-route'],
-            'user.guests.identity.store' => ['azari.customer', 'azari.owns-route'],
-            'user.guests.identity.download' => ['azari.customer', 'azari.owns-route'],
             'user.notifications.read' => ['azari.customer', 'azari.owns-route'],
             'user.security.sessions.destroy' => ['azari.customer', 'azari.owns-route'],
             'azari.admin.settings.integrations.update' => ['azari.staff', 'azari.admin'],
             'azari.admin.payments.providers.test' => ['azari.staff', 'azari.admin'],
             'azari.admin.payments.store' => ['azari.staff', 'azari.permission:payments.manage'],
             'azari.admin.payments.reconcile' => ['azari.staff', 'azari.permission:payments.manage'],
-            'azari.admin.identities.types.store' => ['azari.staff', 'azari.admin'],
-            'azari.admin.identities.types.update' => ['azari.staff', 'azari.admin'],
-            'azari.admin.identities.users.review' => ['azari.staff', 'azari.permission:identities.manage'],
-            'azari.admin.identities.guests.review' => ['azari.staff', 'azari.permission:identities.manage'],
         ];
 
         foreach ($requiredMiddleware as $name => $expected) {

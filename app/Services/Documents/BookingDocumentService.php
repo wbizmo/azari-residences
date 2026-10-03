@@ -61,12 +61,12 @@ class BookingDocumentService
     private function qrPayload(string $url, Booking $booking, string $type): array
     {
         try {
-            $result = Builder::create()
-                ->writer(new PngWriter())
-                ->data($url)
-                ->size(420)
-                ->margin(18)
-                ->build();
+            $result = (new Builder(
+                writer: new PngWriter(),
+                data: $url,
+                size: 420,
+                margin: 18,
+            ))->build();
 
             $png = $result->getString();
             if ($png !== '') {

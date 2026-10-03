@@ -323,12 +323,12 @@
             <img
                 class="logo"
                 src="{{ $logoDataUri }}"
-                alt="{{ config('app.name', 'The Azari Hotels & Residences') }}"
+                alt="{{ config('app.name', 'Resavar') }}"
             >
         @endif
 
         <p class="brand-name">
-            {{ config('app.name', 'The Azari Hotels & Residences') }}
+            {{ config('app.name', 'Resavar') }}
         </p>
     </div>
 
@@ -531,7 +531,7 @@
         'receipt' => [
             'eyebrow' => 'Payment authenticated',
             'title' => 'This receipt is digitally verifiable',
-            'note' => 'This receipt confirms that payment has been recorded successfully against the booking shown above. Scan the code to verify the booking reference and confirm its current status directly from The Azari Hotels & Residences.',
+            'note' => 'This receipt confirms that payment has been recorded successfully against the booking shown above. Scan the code to verify the booking reference and confirm its current status directly from Resavar.',
             'security' => 'For your protection, validate this receipt before relying on printed or forwarded copies.',
         ],
 
@@ -552,7 +552,7 @@
         default => [
             'eyebrow' => 'Document verification',
             'title' => 'Verify this booking document',
-            'note' => 'Scan the code to open the official booking verification page and confirm the reference and current status shown in The Azari Hotels & Residences records.',
+            'note' => 'Scan the code to open the official booking verification page and confirm the reference and current status shown in Resavar records.',
             'security' => 'The live booking record remains the authoritative source for this document.',
         ],
     };
@@ -622,7 +622,7 @@
 
 <div class="foot">
     Times use {{ config('azari.timezone', 'Africa/Lagos') }}.
-    This document was generated from Azari's current authoritative booking record.
+    This document was generated from Resavar's current authoritative booking record.
 </div>
 
 </body>

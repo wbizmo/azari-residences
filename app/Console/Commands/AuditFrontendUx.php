@@ -9,7 +9,7 @@ class AuditFrontendUx extends Command
 {
     protected $signature = 'azari:frontend-audit {--strict : Fail when required Phase 2 integration is missing}';
 
-    protected $description = 'Audit Azari frontend forms, controls and Phase 2 UX integration.';
+    protected $description = 'Audit Reserva frontend forms, controls and Phase 2 UX integration.';
 
     public function handle(): int
     {

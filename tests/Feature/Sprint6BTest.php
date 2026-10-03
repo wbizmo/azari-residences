@@ -32,7 +32,7 @@ class Sprint6BTest extends TestCase
     public function test_authorised_admin_can_open_paginated_booking_list(): void
     {
         $admin = User::factory()->create(['is_admin' => true, 'is_active' => true]);
-        $this->actingAs($admin)->get('/azari-admin/bookings')->assertOk();
+        $this->actingAs($admin)->get('/azaridevadmin/bookings')->assertOk();
     }
 
     public function test_admin_login_form_uses_the_login_field_expected_by_controller(): void

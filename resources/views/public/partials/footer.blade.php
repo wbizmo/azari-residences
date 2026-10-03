@@ -111,21 +111,21 @@
             <div class="footer-column">
                 <h2>Explore</h2>
 
-                <a href="{{ route('user.owner.listings.create') }}">Apartments</a>
-                <a href="{{ route('user.owner.listings.create') }}">Rooms</a>
-                <a href="{{ route('user.owner.listings.create') }}">Availability</a>
-                <a href="{{ route('user.owner.listings.create') }}">Services</a>
-                <a href="{{ route('user.owner.listings.create') }}">Local guide</a>
+                <a href="{{ route('public.apartments') }}">Apartments</a>
+                <a href="{{ route('public.rooms') }}">Rooms</a>
+                <a href="{{ route('availability.index') }}">Availability</a>
+                <a href="{{ route('public.services') }}">Services</a>
+                <a href="{{ route('public.local-guide') }}">Local guide</a>
             </div>
 
             <div class="footer-column">
                 <h2>Guest support</h2>
 
-                <a href="{{ route('user.owner.listings.create') }}">Verify booking</a>
-                <a href="{{ route('user.owner.listings.create') }}">Guest login</a>
-                <a href="{{ route('user.owner.listings.create') }}">Create account</a>
-                <a href="{{ route('user.owner.listings.create') }}">List my property</a>
-                <a href="{{ route('public.contact') }}">Contact Azari</a>
+                <a href="{{ route('bookings.verify') }}">Verify booking</a>
+                <a href="{{ route('login') }}">Guest login</a>
+                <a href="{{ route('register') }}">Create account</a>
+                <a href="{{ route('public.list-property') }}">List my property</a>
+                <a href="{{ route('public.contact') }}">Contact Resavar</a>
             </div>
 
             <div class="footer-column">
@@ -140,14 +140,14 @@
 
         <div
             class="azari-footer-store-row"
-            aria-label="Azari Residences on Google Play"
+            aria-label="Resavar on Google Play"
         >
             <a
                 href="https://play.google.com/store/apps/details?id=com.azariresidences.app"
                 class="azari-footer-play-badge"
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="Get Azari Residences on Google Play"
+                aria-label="Get Resavar on Google Play"
             >
                 <img
                     src="{{ asset('images/google-play-badge.png') }}"
@@ -161,8 +161,8 @@
         </div>
 
         <div class="footer-legal">
-            <span>&copy; {{ now()->year }} Azari Hotels & Residences.</span>
-            <span>Azari Luxury Properties LTD.</span>
+            <span>&copy; {{ now()->year }} Resavar.</span>
+            <span>Resavar Luxury Properties LTD.</span>
             <a href="{{ route('home') }}">Back home</a>
         </div>
     </div>

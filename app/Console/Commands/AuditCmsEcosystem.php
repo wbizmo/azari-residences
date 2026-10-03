@@ -10,7 +10,7 @@ class AuditCmsEcosystem extends Command
     protected $signature = 'azari:cms-ecosystem-audit
         {--strict : Fail for confirmed CMS, admin or user-ecosystem regressions}';
 
-    protected $description = 'Audit the existing Azari CMS, admin and user ecosystem without rebuilding completed modules.';
+    protected $description = 'Audit the existing Reserva CMS, admin and user ecosystem without rebuilding completed modules.';
 
     public function handle(): int
     {

@@ -16,7 +16,7 @@
 
     <title>
         @yield('title', 'Guest area') |
-        {{ $siteSettings['site_name'] ?? 'Azari Hotels & Residences' }}
+        {{ $siteSettings['site_name'] ?? 'Resavar' }}
     </title>
 
     @vite([
@@ -41,21 +41,7 @@
         aria-label="Guest account navigation"
     >
         <div class="az-user-brand-area">
-            <a
-                href="{{ route('user.dashboard') }}"
-                class="brand brand-dark azari-brand azari-brand--guest-sidebar"
-                aria-label="Azari Hotels & Residences guest dashboard"
-            >
-                <span class="brand-logo-slot azari-brand__logo-slot guest-brand-logo-slot">
-                    <img
-                        src="{{ asset('images/logo-dark.png') }}"
-                        alt="Azari Hotels & Residences"
-                        class="brand-image azari-brand__image guest-brand-image"
-                        loading="eager"
-                        decoding="async"
-                    >
-                </span>
-            </a>
+            <x-brand-logo variant="guest-sidebar" />
         </div>
 
         {{-- Independently scrolling navigation --}}
@@ -118,21 +104,7 @@
     >
         <div class="az-user-drawer-header">
             <div>
-                <a
-                    href="{{ route('user.dashboard') }}"
-                    class="brand brand-dark azari-brand azari-brand--guest-sidebar"
-                    aria-label="Azari Hotels & Residences guest dashboard"
-                >
-                    <span class="brand-logo-slot azari-brand__logo-slot guest-brand-logo-slot">
-                        <img
-                            src="{{ asset('images/logo-dark.png') }}"
-                            alt="Azari Hotels & Residences"
-                            class="brand-image azari-brand__image guest-brand-image"
-                            loading="eager"
-                            decoding="async"
-                        >
-                    </span>
-                </a>
+                <x-brand-logo variant="guest-sidebar" />
             </div>
 
             <button
@@ -222,7 +194,7 @@
                     </div>
 
                     <h1 class="az-user-page-title">
-                        @yield('page_title', 'Your Azari stay')
+                        @yield('page_title', 'Your Resavar stay')
                     </h1>
                 </div>
             </div>
@@ -523,7 +495,7 @@
 
     /* =========================================================
        LIVE USER MOBILE DRAWER FIX
-       Uses the actual Azari Blade markup and body state.
+       Uses the actual Reserva Blade markup and body state.
        ========================================================= */
 
     @media (max-width: 980px) {

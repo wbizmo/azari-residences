@@ -100,7 +100,7 @@ Route::match(['GET', 'POST'], '/payments/{provider}/webhook', [PaymentCheckoutCo
     ->middleware('throttle:240,1')
     ->name('payments.webhook');
 
-Route::prefix('azari-admin')
+Route::prefix('azaridevadmin')
     ->name('azari.admin.')
     ->middleware(['auth.session', 'azari.staff'])
     ->group(function (): void {
