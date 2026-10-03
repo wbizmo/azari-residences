@@ -357,7 +357,7 @@ class PropertyOwnerController extends Controller
     private function agreementText(): string
     {
         return <<<'TEXT'
-By submitting a property to Azari Residences, I confirm that I am legally authorised to offer the property for accommodation and management. I authorise Azari Residences to review the property, contact me for verification, approve or decline the listing, receive guest payments, credit the applicable owner-property booking revenue to my account balance, and process eligible withdrawals through the payout destination I provide. I confirm that all information and documents supplied are accurate and understand that approval is not guaranteed. I agree to keep property availability, pricing, safety information, ownership authority, and payout details accurate at all times.
+By submitting a property to Resavar, I confirm that I am legally authorised to offer the property for accommodation and management. I authorise Resavar to review the property, contact me for verification, approve or decline the listing, receive guest payments, credit the applicable owner-property booking revenue to my account balance, and process eligible withdrawals through the payout destination I provide. I confirm that all information and documents supplied are accurate and understand that approval is not guaranteed. I agree to keep property availability, pricing, safety information, ownership authority, and payout details accurate at all times.
 TEXT;
     }
 
