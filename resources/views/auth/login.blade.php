@@ -2,126 +2,80 @@
 <html lang="en">
 <head>
     @include('partials.material-symbols-preload')
+    @include('partials.azari-head-assets')
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="theme-color" content="#052058">
     <title>Sign in | Resavar</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css','resources/js/app.js'])
-
-    <style>
-        :root{--ink:#052058;--muted:#052058;--line:rgba(5, 32, 88, .14);--paper:#052058;--gold:#052058}
-        *{box-sizing:border-box}
-        html,body{margin:0;min-height:100%}
-        body{font-family:Montserrat,Arial,sans-serif;background:var(--paper);color:var(--ink)}
-        .auth{min-height:100dvh;display:grid;grid-template-columns:minmax(0,1.08fr) minmax(430px,.92fr);background:#FFFFFF}
-        .visual{position:relative;overflow:hidden;background:#052058}
-        .visual img{width:100%;height:100%;object-fit:cover;display:block}
-        .visual:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(5, 32, 88, .08),rgba(5, 32, 88, .48))}
-        .brand{position:absolute;z-index:2;top:44px;left:54px;color:#FFFFFF;text-decoration:none;text-transform:uppercase;letter-spacing:.18em;font-size:13px;font-weight:700}
-        .panel{display:grid;place-items:center;padding:clamp(30px,5vw,76px);background:radial-gradient(circle at 100% 0%,rgba(5, 32, 88, .11),transparent 36%),#FFFFFF}
-        .wrap{width:min(100%,460px)}
-        .kicker{margin:0 0 10px;color:var(--gold);font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
-        h1{margin:0;font:700 clamp(36px,4vw,52px)/1 Montserrat,Arial,sans-serif;letter-spacing:-.035em}
-        .sub{margin:15px 0 28px;color:var(--muted);line-height:1.6}
-        .field{margin-bottom:17px}
-        .field label{display:block;margin-bottom:8px;font-size:13px;font-weight:700}
-        .field input{width:100%;height:52px;border:1px solid var(--line);border-radius:14px;padding:0 16px;background:#FFFFFF;font:inherit;outline:none}
-        .field input:focus{border-color:#052058;box-shadow:0 0 0 4px rgba(5, 32, 88, .12)}
-        .err{margin:7px 0 0;color:#052058;font-size:12px}
-        .row{display:flex;justify-content:space-between;align-items:center;gap:16px;margin:3px 0 21px;font-size:13px}
-        .check{display:flex;align-items:center;gap:8px;color:var(--muted)}
-        .link{color:var(--gold);text-decoration:none;font-weight:700}
-        .submit{width:100%;height:54px;border:0;border-radius:14px;background:var(--ink);color:#FFFFFF;font-weight:800;cursor:pointer}
-        .switch{margin:22px 0 0;text-align:center;color:var(--muted);font-size:13px}
-        @media(min-width:768px){html,body{height:100%;overflow:hidden}.auth{height:100dvh;overflow:hidden}}
-        @media(max-width:767px){.auth{display:block}.visual{display:none}.panel{min-height:100dvh;padding:25px 21px}h1{font-size:44px}}
-        @media(max-height:700px) and (min-width:768px){.panel{padding-block:20px}.sub{margin-bottom:18px}.field{margin-bottom:12px}.field input{height:45px}.submit{height:47px}}
-    </style>
-
-        <!-- AZARI PWA HEAD START -->
-        <link rel="manifest" href="/manifest.webmanifest">
-        <meta name="theme-color" content="#052058">
-<!-- AZARI PWA HEAD END -->
-
 </head>
+<body class="resavar-auth-body">
+<main class="resavar-auth-layout">
+    <section class="resavar-auth-brand-panel" aria-label="Resavar">
+        <a href="{{ url('/') }}" class="resavar-auth-logo-link" aria-label="Resavar home">
+            <img src="{{ asset('images/logo-dark.png') }}" alt="Resavar" class="resavar-auth-logo">
+        </a>
 
-<body>
-<main class="auth">
-    <section class="visual">
-        <img src="{{ asset('images/azari-guest-auth-suite.png') }}" alt="Luxury Resavar suite">
-        <a class="brand" href="{{ url('/') }}">Resavar</a>
+        <div class="resavar-auth-brand-copy">
+            <span>Exceptional stays, everywhere.</span>
+            <h1>Welcome back.</h1>
+            <p>Access your bookings, guest details and stay information securely.</p>
+        </div>
     </section>
 
-    <section class="panel">
-        <div class="wrap">
-            <a class="az-auth-home-link" href="{{ url('/') }}">
-                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                    <path d="M19 12H5"/>
-                    <path d="m11 18-6-6 6-6"/>
-                </svg>
+    <section class="resavar-auth-form-panel">
+        <div class="resavar-auth-card">
+            <a class="resavar-auth-back" href="{{ url('/') }}">
+                <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
                 <span>Back to homepage</span>
             </a>
 
-            <p class="kicker">Guest access</p>
-            <h1>Welcome back.</h1>
-            <p class="sub">Sign in to manage your reservations and stay details.</p>
+            <div class="resavar-auth-heading">
+                <span>Guest access</span>
+                <h2>Sign in</h2>
+                <p>Use the email and password linked to your Resavar account.</p>
+            </div>
 
-            <form method="POST" action="{{ route('login') }}">
+            <form method="POST" action="{{ route('login') }}" class="resavar-auth-form">
                 @csrf
 
-                <div class="field">
-                    <label for="email">Email address</label>
-                    <input
-                        id="email"
-                        name="email"
-                        type="email"
-                        value="{{ old('email') }}"
-                        autocomplete="username"
-                        autofocus
-                        required
-                    >
-                    @error('email')
-                        <p class="err">{{ $message }}</p>
-                    @enderror
-                </div>
+                <label for="email">
+                    <span>Email address</span>
+                    <input id="email" name="email" type="email" value="{{ old('email') }}" autocomplete="username" autofocus required>
+                    @error('email')<small>{{ $message }}</small>@enderror
+                </label>
 
-                <div class="field">
-                    <label for="password">Password</label>
-                    <x-azari-password-input
-                        id="password"
-                        name="password"
-                        autocomplete="current-password"
-                        label="password"
-                    />
-                    @error('password')
-                        <p class="err">{{ $message }}</p>
-                    @enderror
-                </div>
+                <label for="password">
+                    <span>Password</span>
+                    <x-azari-password-input id="password" name="password" autocomplete="current-password" label="password" />
+                    @error('password')<small>{{ $message }}</small>@enderror
+                </label>
 
-                <div class="row">
-                    <label class="check">
+                <div class="resavar-auth-row">
+                    <label class="resavar-auth-check">
                         <input name="remember" type="checkbox">
-                        Remember me
+                        <span>Remember me</span>
                     </label>
 
                     @if(Route::has('password.request'))
-                        <a class="link" href="{{ route('password.request') }}">Forgot password?</a>
+                        <a href="{{ route('password.request') }}">Forgot password?</a>
                     @endif
                 </div>
 
-                <button class="submit" type="submit">Sign in</button>
+                <button type="submit" class="resavar-auth-submit">Sign in</button>
             </form>
 
-            <p class="switch">
+            <p class="resavar-auth-switch">
                 New to Resavar?
-                <a class="link" href="{{ route('register') }}">Create an account</a>
+                <a href="{{ route('register') }}">Create an account</a>
             </p>
         </div>
     </section>
 </main>
-
-    <!-- AZARI PWA RUNTIME START -->
-    <script src="/pwa-install.js" defer></script>
-    <!-- AZARI PWA RUNTIME END -->
-
+<x-azari-toasts />
 </body>
 </html>
