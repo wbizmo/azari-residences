@@ -1,5 +1,5 @@
 @props([
-    'title' => 'Azari Hotels & Residences | Premium Serviced Hotels & Residences',
+    'title' => 'RESAVAR | Exceptional Stays, Everywhere.',
     'description' => null,
     'keywords' => null,
     'canonical' => null,
@@ -29,50 +29,35 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,400&family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('head')
 
-        <!-- AZARI PWA HEAD START -->
-        <link rel="manifest" href="/manifest.webmanifest">
-        <meta name="theme-color" content="#0c2b24">
-        <link rel="apple-touch-icon" href="/public/images/azari-favicon.png">
-        <!-- AZARI PWA HEAD END -->
-
+    <link rel="manifest" href="/manifest.webmanifest">
+    <meta name="theme-color" content="#052058">
+    <link rel="apple-touch-icon" href="{{ asset('images/logo-light.png') }}">
 </head>
 <body class="public-site {{ request()->routeIs('home') ? 'home-page azari-home-page' : 'inner-page azari-inner-page azari-solid-header' }} {{ $bodyClass ?? '' }}">
-    <div class="azari-preloader" data-public-preloader role="status" aria-label="Loading Azari Hotels & Residences">
+    <div class="azari-preloader" data-public-preloader role="status" aria-label="Loading Resavar">
         <span class="azari-preloader__mark" aria-hidden="true">
             <span class="azari-preloader__spinner"></span>
-            <img src="{{ asset('images/azari-favicon.png') }}" alt="" width="42" height="42" loading="eager" decoding="sync">
+            <img src="{{ asset('images/logo-light.png') }}" alt="" width="42" height="42" loading="eager" decoding="sync">
         </span>
     </div>
 
     <a class="skip-link" href="#main-content">Skip to main content</a>
-
     @include('public.partials.navigation')
-
     <main id="main-content">
-        @isset($slot)
-            {{ $slot }}
-        @else
-            @yield('content')
-        @endisset
+        @isset($slot) {{ $slot }} @else @yield('content') @endisset
     </main>
-
     @include('public.partials.footer')
-
     <button type="button" class="back-to-top" data-back-to-top aria-label="Back to top" title="Back to top">
         <span class="material-symbols-outlined" aria-hidden="true">arrow_upward</span>
     </button>
-@include('public.partials.drawer-root')
-
+    @include('public.partials.drawer-root')
     @stack('scripts')
     <x-azari-feedback />
-
-    <!-- AZARI PWA RUNTIME START -->
     <script src="{{ asset('pwa-install.js') }}?v=20260810-9" defer></script>
-    <!-- AZARI PWA RUNTIME END -->
 </body>
 </html>
