@@ -12,12 +12,12 @@
         *{box-sizing:border-box}
         html,body{margin:0;min-height:100%}
         body{font-family:Inter,system-ui,sans-serif;background:var(--paper);color:var(--ink)}
-        .auth{min-height:100dvh;display:grid;grid-template-columns:minmax(0,1.08fr) minmax(450px,.92fr);background:#fffdf9}
+        .auth{min-height:100dvh;display:grid;grid-template-columns:minmax(0,1.08fr) minmax(450px,.92fr);background:#FFFFFF}
         .visual{position:relative;overflow:hidden;background:#201b15}
         .visual img{width:100%;height:100%;object-fit:cover;display:block}
         .visual:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,6,4,.08),rgba(8,6,4,.48))}
         .brand{position:absolute;z-index:2;top:44px;left:54px;color:#fff;text-decoration:none;text-transform:uppercase;letter-spacing:.18em;font-size:13px;font-weight:700}
-        .panel{display:grid;place-items:center;padding:clamp(24px,4vw,66px);background:radial-gradient(circle at 100% 0%,rgba(168,121,60,.11),transparent 36%),#fffdf9}
+        .panel{display:grid;place-items:center;padding:clamp(24px,4vw,66px);background:radial-gradient(circle at 100% 0%,rgba(168,121,60,.11),transparent 36%),#FFFFFF}
         .wrap{width:min(100%,480px)}
         .kicker{margin:0 0 9px;color:var(--gold);font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
         h1{margin:0;font:500 clamp(34px,4vw,50px)/1 Georgia,serif;letter-spacing:-.035em}
