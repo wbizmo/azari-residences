@@ -134,7 +134,7 @@
     }
 
     .az-flw-v4-fields label {
-        color: var(--muted, #6e7a75);
+        color: var(--muted, #052058);
         font-size: .72rem;
         font-weight: 700;
         letter-spacing: .08em;
@@ -145,16 +145,16 @@
         min-height: 2.85rem;
         width: 100%;
         padding: 0 .9rem;
-        color: var(--ink, #18231f);
-        background: var(--paper, #fffdf9);
-        border: 1px solid var(--line, #e7e1d7);
+        color: var(--ink, #052058);
+        background: var(--paper, #FFFFFF);
+        border: 1px solid var(--line, #052058);
         border-radius: .8rem;
         outline: 0;
     }
 
     .az-flw-v4-fields select:focus-visible {
-        border-color: var(--brass, #b58a4a);
-        box-shadow: 0 0 0 3px rgba(181, 138, 74, .18);
+        border-color: var(--brass, #052058);
+        box-shadow: 0 0 0 3px rgba(5, 32, 88, .18);
     }
 
     #flutterwaveBankField {
