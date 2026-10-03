@@ -1,7 +1,7 @@
 @extends('layouts.user')
 @section('title','Dashboard')
 @section('kicker','Guest dashboard')
-@section('page_title','Your Azari stay')
+@section('page_title','Your Reserva stay')
 @section('content')
 @php
     $featured = $currentStay ?: $nextBooking;
@@ -26,7 +26,7 @@
 <section class="az-user-hero-grid">
     <article class="az-user-welcome">
         <div class="az-user-eyebrow"><span class="material-symbols-outlined">{{ $identityVerified ? 'verified' : 'shield' }}</span> Welcome back</div>
-        <h2>{{ $currentStay ? 'Your stay is now underway.' : ($nextBooking ? 'Your next stay is beautifully arranged.' : 'Your next Azari stay begins here.') }}</h2>
+        <h2>{{ $currentStay ? 'Your stay is now underway.' : ($nextBooking ? 'Your next stay is beautifully arranged.' : 'Your next Reserva stay begins here.') }}</h2>
         <p>{{ $featured ? 'Review your reservation, payment status, identities and documents from one private guest area.' : 'Browse hotels & residences, choose your dates and complete a new booking whenever you are ready.' }}</p>
         <div class="az-user-actions">
             @if($featured)<a class="az-user-button az-user-button--primary" href="{{ route('user.bookings.show',$featured->reference) }}"><span class="material-symbols-outlined">calendar_month</span>View booking</a>@endif
@@ -34,7 +34,7 @@
         </div>
     </article>
     <aside class="az-user-timezone-card">
-        <div><div class="az-user-timezone-icon"><span class="material-symbols-outlined">schedule</span></div><h3>Your local time</h3><p>Dates and times are converted for clarity. Azari's official operational timezone remains {{ config('azari.timezone','Africa/Lagos') }}.</p></div>
+        <div><div class="az-user-timezone-icon"><span class="material-symbols-outlined">schedule</span></div><h3>Your local time</h3><p>Dates and times are converted for clarity. Reserva's official operational timezone remains {{ config('azari.timezone','Africa/Lagos') }}.</p></div>
         <div class="az-user-timezone-value"><span>Showing times in</span><strong data-user-timezone>{{ auth()->user()->timezone ?: config('azari.timezone','Africa/Lagos') }}</strong></div>
     </aside>
 </section>
@@ -50,7 +50,7 @@
         <header class="az-user-panel-header"><div><h2 class="az-user-panel-title">{{ $currentStay ? 'Current stay' : 'Next booking' }}</h2><p class="az-user-panel-subtitle">Live reservation and payment status</p></div><a class="az-user-button az-user-button--light" href="{{ route('user.bookings.index') }}">All bookings</a></header>
         @if($featured)
         <article class="az-user-booking-card">
-            <div class="az-user-booking-image" style="--az-booking-image:url('{{ $image }}')"><span class="az-user-booking-status"><span class="material-symbols-outlined">check_circle</span>{{ str_replace('_',' ',$featured->status) }}</span><span class="az-user-booking-reference">{{ $featured->reference }}</span><div class="az-user-booking-image-copy"><h3>{{ $featured->property?->name ?? 'Azari Residence' }}</h3><p>{{ $featured->property?->location ?? $featured->property?->locationRecord?->name ?? 'Azari Hotels & Residences' }}</p></div></div>
+            <div class="az-user-booking-image" style="--az-booking-image:url('{{ $image }}')"><span class="az-user-booking-status"><span class="material-symbols-outlined">check_circle</span>{{ str_replace('_',' ',$featured->status) }}</span><span class="az-user-booking-reference">{{ $featured->reference }}</span><div class="az-user-booking-image-copy"><h3>{{ $featured->property?->name ?? 'Reserva Residence' }}</h3><p>{{ $featured->property?->location ?? $featured->property?->locationRecord?->name ?? 'Reserva' }}</p></div></div>
             <div class="az-user-booking-body"><div class="az-user-date-grid"><div><div class="az-user-data-label">{{ $featured->checked_in_at ? 'Checked in at' : 'Scheduled arrival' }}</div><div class="az-user-data-value">@if($featured->checked_in_at)<x-user-local-time :value="$featured->checked_in_at" />@else{{ $featured->check_in?->format('j F Y') }}@endif</div></div><span class="material-symbols-outlined">east</span><div><div class="az-user-data-label">Departure</div><div class="az-user-data-value">{{ $featured->check_out?->format('j F Y') }}</div></div></div>
             <div class="az-user-meta-grid"><div class="az-user-meta-item"><span>Guests</span><strong>{{ $featured->adults }} adults · {{ $featured->children }} children</strong></div><div class="az-user-meta-item"><span>Payment</span><strong>{{ $payment ? ucfirst($payment->status).' · '.ucfirst($payment->provider) : 'No payment yet' }}</strong></div><div class="az-user-meta-item"><span>Total</span><strong>{{ $featured->currency }} {{ number_format((float)$featured->total,2) }}</strong></div></div>
             <div class="az-user-actions"><a class="az-user-button az-user-button--dark" href="{{ route('user.bookings.show',$featured->reference) }}"><span class="material-symbols-outlined">visibility</span>View details</a>@if($featured->balanceDue()>0)<a class="az-user-button az-user-button--primary" href="{{ route('public.payment.select',$featured->reference) }}"><span class="material-symbols-outlined">account_balance_wallet</span>Pay balance</a>@endif</div></div>
@@ -61,9 +61,9 @@
     </div>
 
     <aside class="az-user-panel"><header class="az-user-panel-header"><div><h2 class="az-user-panel-title">Guest essentials</h2><p class="az-user-panel-subtitle">Complete the items needed for a smooth stay</p></div></header><div class="az-user-panel-body az-user-list">
-        <a class="az-user-list-item" href="{{ route('user.identity.index') }}"><div><h3>My identity</h3><p>{{ $identityVerified ? 'Your Azari account is verified by Dojah.' : 'Dojah verification is required.' }}</p></div><span class="material-symbols-outlined">chevron_right</span></a>
+        <a class="az-user-list-item" href="{{ route('user.identity.index') }}"><div><h3>My identity</h3><p>{{ $identityVerified ? 'Your Reserva account is verified by Dojah.' : 'Dojah verification is required.' }}</p></div><span class="material-symbols-outlined">chevron_right</span></a>
         <a class="az-user-list-item" href="{{ route('user.guests.index') }}"><div><h3>Additional adult guests</h3><p>Every additional adult completes their own Dojah verification.</p></div><span class="material-symbols-outlined">chevron_right</span></a>
-        <a class="az-user-list-item" href="{{ route('user.contact') }}"><div><h3>Contact Azari</h3><p>See the dynamically configured phone, email and support hours.</p></div><span class="material-symbols-outlined">chevron_right</span></a>
+        <a class="az-user-list-item" href="{{ route('user.contact') }}"><div><h3>Contact Reserva</h3><p>See the dynamically configured phone, email and support hours.</p></div><span class="material-symbols-outlined">chevron_right</span></a>
     </div></aside>
 </section>
 
