@@ -9207,3 +9207,58 @@ table{border-color:rgba(5,32,88,.16)}
 .public-site :where(h1,h2,h3,h4,h5,h6,strong,label,dt),.az-admin-body :where(h1,h2,h3,h4,h5,h6,strong,label,dt),.az-user-body :where(h1,h2,h3,h4,h5,h6,strong,label,dt){color:inherit}
 .public-site :where(.muted,small,.help,.description),.az-admin-body :where(.muted,small,.help,.description),.az-user-body :where(.muted,small,.help,.description){color:rgba(5,32,88,.64)}
 
+
+
+/* RESAVAR NEW AUTHENTICATION SURFACE */
+.resavar-auth-body{margin:0;min-height:100dvh;background:#FFFFFF;color:#052058;font-family:'Montserrat',Arial,sans-serif}
+.resavar-auth-layout{display:grid;grid-template-columns:minmax(340px,.92fr) minmax(460px,1.08fr);min-height:100dvh;background:#FFFFFF}
+.resavar-auth-brand-panel{
+    position:relative;display:flex;min-height:100%;flex-direction:column;justify-content:space-between;
+    overflow:hidden;padding:clamp(34px,5vw,72px);background:#052058;color:#FFFFFF
+}
+.resavar-auth-brand-panel::before{content:"";position:absolute;right:-18%;top:-18%;width:55%;aspect-ratio:1;border:1px solid rgba(255,255,255,.12);border-radius:50%}
+.resavar-auth-brand-panel::after{content:"";position:absolute;left:-28%;bottom:-32%;width:70%;aspect-ratio:1;border:1px solid rgba(255,255,255,.10);border-radius:50%}
+.resavar-auth-logo-link{position:relative;z-index:2;display:inline-flex;width:196px;max-width:70%}
+.resavar-auth-logo{display:block;width:196px;max-width:100%;height:auto;object-fit:contain}
+.resavar-auth-brand-copy{position:relative;z-index:2;max-width:590px}
+.resavar-auth-brand-copy>span{display:inline-block;color:#FFFFFF;font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
+.resavar-auth-brand-copy h1{max-width:620px;margin:18px 0 14px;color:#FFFFFF;font-family:'Montserrat',Arial,sans-serif;font-size:clamp(3rem,6.5vw,6.3rem);font-weight:800;line-height:.94;letter-spacing:-.06em}
+.resavar-auth-brand-copy p{max-width:500px;margin:0;color:rgba(255,255,255,.72);font-size:14px;line-height:1.7}
+.resavar-auth-form-panel{display:grid;place-items:center;padding:clamp(26px,5vw,72px);background:#FFFFFF}
+.resavar-auth-card{width:min(100%,560px);color:#052058}
+.resavar-auth-back{display:inline-flex;align-items:center;gap:8px;margin-bottom:44px;color:#052058;font-size:12px;font-weight:700;text-decoration:none}
+.resavar-auth-back .material-symbols-outlined{font-size:18px}
+.resavar-auth-heading>span{display:block;margin-bottom:9px;color:#052058;font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
+.resavar-auth-heading h2{margin:0;color:#052058;font-family:'Montserrat',Arial,sans-serif;font-size:clamp(2.5rem,5vw,4.3rem);font-weight:800;line-height:.98;letter-spacing:-.045em}
+.resavar-auth-heading p{max-width:470px;margin:15px 0 30px;color:rgba(5,32,88,.65);font-size:13px;line-height:1.65}
+.resavar-auth-form{display:grid;gap:17px}
+.resavar-auth-form>label,.resavar-auth-grid>label{display:grid;gap:8px;color:#052058;font-size:11px;font-weight:800}
+.resavar-auth-form input:not([type=checkbox]),.resavar-auth-grid input:not([type=checkbox]){
+    width:100%;min-height:50px;padding:0 14px;border:1px solid rgba(5,32,88,.24);border-radius:9px;background:#FFFFFF;color:#052058;font:inherit;outline:0
+}
+.resavar-auth-form input:not([type=checkbox]):focus,.resavar-auth-grid input:not([type=checkbox]):focus{border-color:#052058;box-shadow:0 0 0 3px rgba(5,32,88,.10)}
+.resavar-auth-form small,.resavar-auth-grid small{color:#052058;font-size:10px;font-weight:600}
+.resavar-auth-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.resavar-auth-row{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.resavar-auth-row>a,.resavar-auth-switch a{color:#052058;font-size:11px;font-weight:800;text-decoration:underline;text-underline-offset:3px}
+.resavar-auth-check{display:inline-flex!important;grid-auto-flow:column!important;justify-content:flex-start!important;align-items:center!important;gap:8px!important;color:#052058!important;font-size:11px!important;font-weight:700!important}
+.resavar-auth-check input{width:17px!important;height:17px!important;min-height:0!important;margin:0!important;accent-color:#052058}
+.resavar-auth-submit{width:100%;min-height:50px;border:1px solid #052058;border-radius:9px;background:#052058;color:#FFFFFF;font:inherit;font-size:12px;font-weight:800;cursor:pointer}
+.resavar-auth-submit:hover{background:#000000;border-color:#000000}
+.resavar-auth-switch{margin:22px 0 0;color:rgba(5,32,88,.66);font-size:11px;text-align:center}
+.resavar-auth-card .az-password-control{position:relative;width:100%}
+.resavar-auth-card .az-password-control__input{padding-right:50px!important}
+.resavar-auth-card .az-password-control__toggle{
+    position:absolute;top:50%;right:5px;display:grid;width:40px;height:40px;place-items:center;transform:translateY(-50%);
+    border:0;border-radius:7px;background:#FFFFFF;color:#052058;cursor:pointer
+}
+.resavar-auth-card .az-password-control__toggle:hover{background:#052058;color:#FFFFFF}
+.resavar-auth-card .az-password-control__icon{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+@media(max-width:860px){
+    .resavar-auth-layout{grid-template-columns:1fr}
+    .resavar-auth-brand-panel{min-height:280px;padding:28px 24px}
+    .resavar-auth-brand-copy h1{font-size:clamp(2.6rem,11vw,4.5rem)}
+    .resavar-auth-form-panel{padding:36px 20px 52px}
+    .resavar-auth-back{margin-bottom:30px}
+}
+@media(max-width:560px){.resavar-auth-grid{grid-template-columns:1fr}.resavar-auth-row{align-items:flex-start;flex-direction:column;gap:10px}}
