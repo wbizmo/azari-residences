@@ -41,14 +41,16 @@ class CanonicalAdminAndBrandRegressionTest extends TestCase
         $this->assertStringNotContainsString('light_logo_url', $brand);
         $this->assertStringNotContainsString('logo-light.png', $brand);
     }
-    public function test_primary_brand_is_reserva_and_email_palette_is_blue_white(): void
+    public function test_primary_brand_matches_resavar_identity_guide(): void
     {
-        $this->assertSame('Reserva', config('app.name'));
+        $this->assertSame('Resavar', config('app.name'));
 
         $email = file_get_contents(resource_path('views/emails/premium.blade.php'));
-        $this->assertStringContainsString('#2596be', $email);
-        $this->assertStringContainsString('Reserva', $email);
-        $this->assertStringNotContainsString('#103d33', $email);
+        $this->assertStringContainsString('#0577F5', $email);
+        $this->assertStringContainsString('Resavar', $email);
+        $this->assertStringContainsString('#052058', $email);
+        $this->assertStringContainsString('#F58F07', $email);
+        $this->assertStringContainsString('Exceptional Stays, Everywhere.', $email);
         $this->assertStringNotContainsString('#eee6d7', $email);
     }
 
