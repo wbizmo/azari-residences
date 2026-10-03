@@ -9284,3 +9284,25 @@ table{border-color:rgba(5,32,88,.16)}
 .resavar-auth-card .az-standalone-auth-actions button{width:100%}
 .resavar-auth-card .az-standalone-auth-actions .secondary{background:#FFFFFF;color:#052058}
 .resavar-auth-card .az-standalone-auth-actions .secondary:hover{background:#052058;color:#FFFFFF}
+
+
+/* RESAVAR FRAMEWORK FALLBACK PAGE */
+.resavar-welcome-body{margin:0;min-height:100dvh;background:#FFFFFF;color:#052058;font-family:'Montserrat',Arial,sans-serif}
+.resavar-welcome{display:grid;grid-template-columns:minmax(340px,1.05fr) minmax(420px,.95fr);min-height:100dvh}
+.resavar-welcome__brand{
+    position:relative;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;
+    padding:clamp(34px,5vw,72px);background:#052058;color:#FFFFFF
+}
+.resavar-welcome__brand::after{content:"";position:absolute;right:-22%;bottom:-28%;width:70%;aspect-ratio:1;border:1px solid rgba(255,255,255,.12);border-radius:50%}
+.resavar-welcome__brand>a{position:relative;z-index:1;display:inline-flex;width:200px}
+.resavar-welcome__brand img{display:block;width:200px;height:auto}
+.resavar-welcome__brand>div{position:relative;z-index:1;max-width:650px}
+.resavar-welcome__brand span,.resavar-welcome__actions span{display:block;font-size:10px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
+.resavar-welcome__brand h1{margin:18px 0 14px;color:#FFFFFF;font-size:clamp(3rem,7vw,6.4rem);font-weight:800;line-height:.94;letter-spacing:-.06em}
+.resavar-welcome__brand p{max-width:520px;margin:0;color:rgba(255,255,255,.72);font-size:14px;line-height:1.7}
+.resavar-welcome__actions{display:grid;place-items:center;padding:clamp(30px,6vw,78px);background:#FFFFFF}
+.resavar-welcome__actions>div{width:min(100%,560px)}
+.resavar-welcome__actions h2{margin:14px 0 12px;color:#052058;font-size:clamp(2.6rem,5vw,4.8rem);font-weight:800;line-height:.98;letter-spacing:-.05em}
+.resavar-welcome__actions p{margin:0;color:rgba(5,32,88,.66);font-size:14px;line-height:1.7}
+.resavar-welcome__buttons{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+@media(max-width:820px){.resavar-welcome{grid-template-columns:1fr}.resavar-welcome__brand{min-height:340px}.resavar-welcome__actions{padding:42px 20px 64px}}
