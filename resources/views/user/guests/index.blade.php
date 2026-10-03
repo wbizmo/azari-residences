@@ -5,7 +5,7 @@
 
 @section('content')
 <div class="az-user-restricted-note">
-    Every additional adult verifies themselves. Azari sends each person a private path-based link and requires an email code before their details or Dojah flow can be opened.
+    Every additional adult verifies themselves. Resavar sends each person a private path-based link and requires an email code before their details or Dojah flow can be opened.
 </div>
 
 <section class="az-user-panel" style="margin-top:18px">
@@ -37,7 +37,7 @@
                     {{ $guest->booking?->property?->name }}
                     · {{ $guest->email }}
                     · {{ $verified ? 'Dojah verified' : 'Verification required' }}
-                    @if($guest->user_id) · Azari account linked @endif
+                    @if($guest->user_id) · Resavar account linked @endif
                 </p>
 
                 <div style="margin-top:8px;word-break:break-all">
