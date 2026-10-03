@@ -4,7 +4,7 @@
   if (window.__AZARI_CANONICAL_PWA_INSTALL_V9__) return;
   window.__AZARI_CANONICAL_PWA_INSTALL_V9__ = true;
 
-  const APP_NAME = 'Azari Residences';
+  const APP_NAME = 'Resavar';
   const MODAL_ID = 'azari-pwa-install-modal';
   const STORAGE_KEY = `azari:pwa-installed:v9:${location.hostname}`;
   const INSTALL_SELECTOR = '[data-azari-pwa-install]';
@@ -107,7 +107,7 @@
         button.setAttribute('aria-disabled', 'true');
 
         if (label) {
-          label.textContent = 'Azari App Installed';
+          label.textContent = 'Resavar App Installed';
         }
 
         const icon = button.querySelector(
@@ -123,11 +123,11 @@
         button.removeAttribute('aria-disabled');
         button.setAttribute(
           'aria-label',
-          'Download the Azari App'
+          'Download the Resavar App'
         );
 
         if (label) {
-          label.textContent = 'Download the Azari App';
+          label.textContent = 'Download the Resavar App';
         }
 
         const icon = button.querySelector(
@@ -209,9 +209,9 @@
       if (browser === 'Chrome') {
         return {
           eyebrow: 'Chrome on iPhone / iPad',
-          title: 'Install Azari Residences',
+          title: 'Install Resavar',
           description:
-            'Add Azari to your Home Screen for quick access and an app-style experience.',
+            'Add Resavar to your Home Screen for quick access and an app-style experience.',
           steps: [
             [
               'share',
@@ -236,9 +236,9 @@
 
       return {
         eyebrow: `${browser} on iPhone / iPad`,
-        title: 'Install Azari Residences',
+        title: 'Install Resavar',
         description:
-          'Add Azari to your Home Screen for quick access and an app-style full-screen experience.',
+          'Add Resavar to your Home Screen for quick access and an app-style full-screen experience.',
         steps: [
           [
             'share',
@@ -268,9 +268,9 @@
     if (isMac && browser === 'Safari') {
       return {
         eyebrow: 'Safari on Mac',
-        title: 'Add Azari Residences to your Mac',
+        title: 'Add Resavar to your Mac',
         description:
-          'Save Azari as a standalone web app in your Dock and Applications.',
+          'Save Resavar as a standalone web app in your Dock and Applications.',
         steps: [
           [
             'share',
@@ -280,12 +280,12 @@
           [
             'dock',
             'Choose “Add to Dock”',
-            'Safari will prepare Azari as a web app.'
+            'Safari will prepare Resavar as a web app.'
           ],
           [
             'check',
             'Confirm the name and click “Add”',
-            'Azari will be available from the Dock, Applications and Spotlight.'
+            'Resavar will be available from the Dock, Applications and Spotlight.'
           ]
         ],
         note:
@@ -296,9 +296,9 @@
     if (isMac) {
       return {
         eyebrow: `${browser} on Mac`,
-        title: 'Install Azari Residences',
+        title: 'Install Resavar',
         description:
-          'Install Azari as a standalone app on your Mac.',
+          'Install Resavar as a standalone app on your Mac.',
         steps: [
           [
             'dock',
@@ -308,29 +308,29 @@
           [
             'menu',
             'Or open the browser menu',
-            'Choose the option to install Azari Residences as an app.'
+            'Choose the option to install Resavar as an app.'
           ],
           [
             'check',
             'Confirm installation',
-            'Azari will open separately from ordinary browser tabs.'
+            'Resavar will open separately from ordinary browser tabs.'
           ]
         ],
         note:
-          'When a native browser install prompt is available, Azari opens it automatically.'
+          'When a native browser install prompt is available, Resavar opens it automatically.'
       };
     }
 
     return {
       eyebrow: `${browserName()} on this device`,
-      title: 'Install Azari Residences',
+      title: 'Install Resavar',
       description:
-        'Install Azari from your browser for quicker access.',
+        'Install Resavar from your browser for quicker access.',
       steps: [
         [
           'menu',
           'Open your browser menu',
-          'Look for Install app, Install Azari Residences, or Add to Home Screen.'
+          'Look for Install app, Install Resavar, or Add to Home Screen.'
         ],
         [
           'dock',
@@ -340,7 +340,7 @@
         [
           'check',
           'Confirm installation',
-          'Azari will then be available like an app on your device.'
+          'Resavar will then be available like an app on your device.'
         ]
       ],
       note:
@@ -405,13 +405,13 @@
   function styles() {
     return `
       #${MODAL_ID} {
-        --az-pwa-green: #0c2b24;
-        --az-pwa-green-2: #143d34;
-        --az-pwa-paper: #fffdf9;
-        --az-pwa-ivory: #f8f5ef;
-        --az-pwa-line: #e7e1d7;
-        --az-pwa-brass: #b58a4a;
-        --az-pwa-muted: #6e7a75;
+        --az-pwa-green: #052058;
+        --az-pwa-green-2: #0577F5;
+        --az-pwa-paper: #FFFFFF;
+        --az-pwa-ivory: #EEF2F8;
+        --az-pwa-line: #EEF2F8;
+        --az-pwa-brass: #F58F07;
+        --az-pwa-muted: #052058;
         position: fixed;
         inset: 0;
         z-index: 2147483000;
@@ -437,7 +437,7 @@
         position: absolute;
         inset: 0;
         opacity: 0;
-        background: rgba(4, 18, 14, .68);
+        background: rgba(5, 32, 88, .68);
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
         transition: opacity .2s ease;
@@ -455,14 +455,14 @@
         background:
           radial-gradient(
             circle at 100% 0,
-            rgba(181, 138, 74, .12),
+            rgba(245, 143, 7, .12),
             transparent 30%
           ),
           var(--az-pwa-paper);
-        color: #18231f;
+        color: #052058;
         border: 1px solid rgba(255, 255, 255, .75);
         border-radius: 26px;
-        box-shadow: 0 34px 110px rgba(4, 25, 19, .40);
+        box-shadow: 0 34px 110px rgba(5, 32, 88, .40);
         transition:
           opacity .2s ease,
           transform .22s ease;
@@ -494,8 +494,8 @@
         padding: 7px 10px;
         border-radius: 999px;
         color: var(--az-pwa-green-2);
-        background: #edf3f0;
-        border: 1px solid #dfeae5;
+        background: #EEF2F8;
+        border: 1px solid #EEF2F8;
         font-size: 10px;
         font-weight: 800;
         line-height: 1;
@@ -598,8 +598,8 @@
         align-items: center;
         padding: 18px;
         color: var(--az-pwa-green-2);
-        background: #edf5f1;
-        border: 1px solid #d8e9e1;
+        background: #EEF2F8;
+        border: 1px solid #EEF2F8;
         border-radius: 20px;
       }
 
@@ -609,7 +609,7 @@
         display: grid;
         place-items: center;
         background: var(--az-pwa-paper);
-        border: 1px solid #d8e9e1;
+        border: 1px solid #EEF2F8;
         border-radius: 18px;
       }
 
@@ -629,9 +629,9 @@
       #${MODAL_ID} .az-pwa-note {
         margin-top: 12px;
         padding: 12px 14px;
-        color: #665f4d;
-        background: #fbf5e9;
-        border: 1px solid #eadbbd;
+        color: #052058;
+        background: #FFFFFF;
+        border: 1px solid #F58F07;
         border-radius: 15px;
         font-size: 11px;
         line-height: 1.5;
@@ -675,7 +675,7 @@
       }
 
       #${MODAL_ID} button:focus-visible {
-        outline: 3px solid rgba(181, 138, 74, .45);
+        outline: 3px solid rgba(245, 143, 7, .45);
         outline-offset: 2px;
       }
 
@@ -789,9 +789,9 @@
 
     const content = installed
       ? {
-          eyebrow: 'Azari App',
+          eyebrow: 'Resavar App',
           title:
-            'Azari Residences is already installed',
+            'Resavar is already installed',
           description:
             'There is no need to install another copy.'
         }
@@ -814,7 +814,7 @@
             </strong>
 
             <p>
-              Open Azari from your Home Screen,
+              Open Resavar from your Home Screen,
               Dock, Applications, or installed-app list.
             </p>
           </div>
@@ -895,7 +895,7 @@
                   type="button"
                   data-az-pwa-confirm
                 >
-                  I’ve installed Azari
+                  I’ve installed Resavar
                 </button>
               `
               : `
