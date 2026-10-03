@@ -23,6 +23,6 @@
         You may verify only for this booking, or optionally create/link your own Azari account during the process for future bookings.
     </p>
 
-    <p>Azari Hotels & Residences</p>
+    <p>Resavar</p>
 </body>
 </html>
