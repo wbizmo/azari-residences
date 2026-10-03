@@ -1,43 +1,39 @@
-/* RESAVAR brand authority. Visual reskin only: do not alter logo rendering. */
-:root {
- --resavar-navy:#052058; --resavar-blue:#0577F5; --resavar-orange:#F58F07;
- --resavar-night:#000000; --resavar-mist:#EEF2F8; --resavar-white:#FFFFFF;
- --resavar-ink:#052058; --resavar-muted:#40547A; --resavar-border:rgba(5,32,88,.16);
- --resavar-success:#17845b; --resavar-error:#b42318;
- --azari-ivory:#FFFFFF; --azari-ivory-deep:#EEF2F8; --azari-brass:#0577F5;
- --azari-brass-light:#0577F5; --azari-wine:#052058; --azari-text:#052058;
- --azari-muted:#40547A; --azari-border:rgba(5,32,88,.16);
- --az-user-green-950:#052058; --az-user-green-900:#052058; --az-user-green-800:#052058;
- --az-user-green-700:#0577F5; --az-user-green-100:#EEF2F8; --az-user-brass:#0577F5;
- --az-user-brass-soft:#EEF2F8; --az-user-wine:#052058; --az-user-ink:#052058;
- --az-user-muted:#40547A; --az-user-paper:#FFFFFF; --az-user-ivory:#EEF2F8;
- --az-user-line:rgba(5,32,88,.16); --az-ui-primary:#052058; --az-ui-text:#052058;
- --az-ui-muted:#40547A; --az-ui-border:rgba(5,32,88,.16);
- --az-admin-green-900:#052058; --az-admin-green-800:#052058; --az-admin-green-700:#0577F5;
- --az-admin-paper:#FFFFFF; --az-admin-line:rgba(5,32,88,.16);
- --font-display:'Montserrat',Arial,sans-serif; --font-heading:'Montserrat',Arial,sans-serif;
- --font-body:'Montserrat',Arial,sans-serif; --font-mono:'Montserrat',Arial,sans-serif;
+/* RESAVAR visual authority. Public-facing palette: navy, black and white only. */
+:root{
+ --resavar-navy:#052058;--resavar-black:#000000;--resavar-white:#FFFFFF;
+ --resavar-mist:#FFFFFF;--resavar-ink:#052058;--resavar-muted:#052058;--resavar-border:rgba(5,32,88,.16);
+ --azari-ink:#052058;--azari-ink-soft:#052058;--azari-ivory:#FFFFFF;--azari-ivory-deep:#FFFFFF;
+ --azari-brass:#052058;--azari-brass-light:#052058;--azari-wine:#052058;--azari-white:#FFFFFF;
+ --azari-text:#052058;--azari-muted:#052058;--azari-border:rgba(5,32,88,.16);
+ --az-user-green-950:#052058;--az-user-green-900:#052058;--az-user-green-800:#052058;--az-user-green-700:#052058;
+ --az-user-green-100:#FFFFFF;--az-user-brass:#052058;--az-user-brass-soft:#FFFFFF;--az-user-wine:#052058;
+ --az-user-ink:#052058;--az-user-muted:#052058;--az-user-paper:#FFFFFF;--az-user-ivory:#FFFFFF;--az-user-line:rgba(5,32,88,.16);
+ --az-ui-primary:#052058;--az-ui-text:#052058;--az-ui-muted:#052058;--az-ui-border:rgba(5,32,88,.16);
+ --az-admin-green-900:#052058;--az-admin-green-800:#052058;--az-admin-green-700:#052058;--az-admin-paper:#FFFFFF;--az-admin-line:rgba(5,32,88,.16);
+ --font-display:'Montserrat',Arial,sans-serif;--font-heading:'Montserrat',Arial,sans-serif;--font-body:'Montserrat',Arial,sans-serif;--font-mono:'Montserrat',Arial,sans-serif;
 }
-html,body,.public-site,.az-user-body,.az-admin-body{font-family:'Montserrat',Arial,sans-serif;color:var(--resavar-navy)}
-body,.public-site,.az-user-body,.az-admin-body{background:var(--resavar-white)}
-:focus-visible{outline-color:var(--resavar-blue)}
-.button-brass,.button-primary,.az-user-button--primary,.az-user-button--dark,.az-premium-button{background:var(--resavar-navy)!important;color:#fff!important;border-color:var(--resavar-navy)!important}
-.button-brass:hover,.button-primary:hover,.az-user-button--primary:hover,.az-user-button--dark:hover,.az-premium-button:hover{background:var(--resavar-blue)!important;border-color:var(--resavar-blue)!important}
-.availability-submit{background:var(--resavar-orange)!important;color:var(--resavar-navy)!important}
-.button-secondary,.az-user-button--light,.az-user-button--ghost{border-color:var(--resavar-navy)!important;color:var(--resavar-navy)!important;background:transparent!important}
-.site-header.is-scrolled,.search-results-page .site-header,.azari-inner-page .site-header,.azari-solid-header .site-header{background:rgba(255,255,255,.97)!important;color:var(--resavar-navy)!important;border-color:var(--resavar-border)!important}
-.hero-section,.az-user-welcome,.az-premium-page-head,.az-service-hero__main,.az-promo-popup__media{background:var(--resavar-navy)!important}
-.site-footer,.az-admin-sidebar,.az-user-sidebar,.az-user-mobile-drawer{background:var(--resavar-navy)!important;color:#fff}
-.eyebrow,.text-link,.nav-popover-panel .material-symbols-outlined{color:var(--resavar-blue)!important}
-input:focus,select:focus,textarea:focus{border-color:var(--resavar-blue)!important;outline-color:rgba(5,119,245,.14)!important}
-input[type="checkbox"]{accent-color:var(--resavar-blue)}
-.az-user-nav-link.is-active,.az-nav-link.is-active{background:rgba(255,255,255,.14)!important;color:#fff!important}
-.az-user-summary-icon,.az-user-timezone-icon,.az-user-stat>.material-symbols-outlined,.az-service-hero__side .material-symbols-outlined{background:var(--resavar-mist)!important;color:var(--resavar-navy)!important}
-.az-user-topbar{background:rgba(255,255,255,.96)!important;border-color:var(--resavar-border)!important}
-.az-user-support-card a,.az-user-eyebrow{color:#fff!important}
-.az-results-search,.az-results-card,.az-results-empty,.az-promo-popup__dialog{background:var(--resavar-white)!important;border-color:var(--resavar-border)!important}
-.az-results-card h2,.az-results-card h3,.az-results-price strong,.az-results-empty h2,.az-premium-card-head h2,.az-service-hero__side strong,.az-service-history-card h3{color:var(--resavar-navy)!important;font-family:'Montserrat',Arial,sans-serif!important}
-.az-results-meta>span{background:var(--resavar-mist)!important;color:var(--resavar-navy)!important}
-.az-results-empty__icon{background:var(--resavar-mist)!important;color:var(--resavar-blue)!important}
-.azari-preloader{background:var(--resavar-navy)!important}
-.azari-preloader__spinner{border-color:rgba(255,255,255,.24)!important;border-top-color:var(--resavar-orange)!important}
+html,body,.public-site,.az-user-body,.az-admin-body{font-family:'Montserrat',Arial,sans-serif!important;color:#052058}
+body,.public-site,.az-user-body,.az-admin-body{background:#FFFFFF!important}
+.site-header{background:#FFFFFF!important;color:#052058!important;border-bottom:1px solid rgba(5,32,88,.14)!important}
+.site-header .nav-shell{min-height:76px!important;height:76px!important;display:flex!important;align-items:center!important}
+.azari-brand--header,.azari-header-logo{display:flex!important;align-items:center!important;flex:0 0 auto!important;max-width:170px!important;height:52px!important;overflow:hidden!important}
+.azari-brand--header .azari-brand__logo-slot,.azari-header-logo .azari-brand__logo-slot,.azari-header-logo__slot{display:flex!important;align-items:center!important;width:170px!important;height:52px!important;max-width:170px!important;overflow:hidden!important}
+.azari-brand--header .azari-brand__logo-image,.azari-header-logo img,.azari-header-logo__image{display:block!important;width:auto!important;height:auto!important;max-width:160px!important;max-height:46px!important;object-fit:contain!important;object-position:left center!important}
+.desktop-navigation,.nav-actions{align-items:center!important}
+.desktop-navigation a,.nav-popover-trigger,.nav-text-action{color:#052058!important}
+.button-brass,.button-primary,.availability-submit,.az-user-button--primary,.az-user-button--dark,.az-premium-button{background:#052058!important;color:#FFFFFF!important;border-color:#052058!important}
+.button-brass:hover,.button-primary:hover,.availability-submit:hover,.az-user-button--primary:hover,.az-user-button--dark:hover,.az-premium-button:hover{background:#000000!important;border-color:#000000!important}
+.button-secondary,.az-user-button--light,.az-user-button--ghost{border-color:#052058!important;color:#052058!important;background:#FFFFFF!important}
+.site-header.is-scrolled,.search-results-page .site-header,.azari-inner-page .site-header,.azari-solid-header .site-header{background:#FFFFFF!important;color:#052058!important;border-color:rgba(5,32,88,.16)!important}
+.hero-section,.az-user-welcome,.az-premium-page-head,.az-service-hero__main,.az-promo-popup__media{background:#052058!important}
+.site-footer,.az-admin-sidebar,.az-user-sidebar,.az-user-mobile-drawer{background:#052058!important;color:#FFFFFF!important}
+.eyebrow,.text-link,.nav-popover-panel .material-symbols-outlined{color:#052058!important}
+input:focus,select:focus,textarea:focus{border-color:#052058!important;outline-color:rgba(5,32,88,.14)!important}input[type="checkbox"]{accent-color:#052058}
+.az-user-nav-link.is-active,.az-nav-link.is-active{background:rgba(255,255,255,.14)!important;color:#FFFFFF!important}
+.az-user-summary-icon,.az-user-timezone-icon,.az-user-stat>.material-symbols-outlined,.az-service-hero__side .material-symbols-outlined,.az-results-meta>span,.az-results-empty__icon{background:#FFFFFF!important;color:#052058!important}
+.az-user-topbar{background:#FFFFFF!important;border-color:rgba(5,32,88,.16)!important}.az-user-support-card a,.az-user-eyebrow{color:#FFFFFF!important}
+.az-results-search,.az-results-card,.az-results-empty,.az-promo-popup__dialog{background:#FFFFFF!important;border-color:rgba(5,32,88,.16)!important}
+.az-results-card h2,.az-results-card h3,.az-results-price strong,.az-results-empty h2,.az-premium-card-head h2,.az-service-hero__side strong,.az-service-history-card h3{color:#052058!important;font-family:'Montserrat',Arial,sans-serif!important}
+.azari-preloader{background:#052058!important}.azari-preloader__spinner{border-color:rgba(255,255,255,.24)!important;border-top-color:#FFFFFF!important}
+.nav-popover-panel,.availability-card,.residence-card,.az-book-panel,.az-user-panel,.az-admin-card{background:#FFFFFF!important;border-color:rgba(5,32,88,.16)!important}
+@media(max-width:1100px){.desktop-navigation{display:none!important}.site-header .nav-shell{height:70px!important;min-height:70px!important}.azari-brand--header,.azari-header-logo{height:46px!important;max-width:150px!important}.azari-brand--header .azari-brand__logo-image,.azari-header-logo img{max-height:40px!important;max-width:145px!important}}
