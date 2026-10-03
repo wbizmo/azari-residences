@@ -10,9 +10,9 @@
     <div class="az-notice">
         <strong>Your place is being held while you finish.</strong>
         @if($creatingAccount)
-            Enter the booking details first. Azari will create your account as part of this booking, verify your email, then send you through secure Dojah identity verification without making you restart.
+            Enter the booking details first. Resavar will create your account as part of this booking, verify your email, then send you through secure Dojah identity verification without making you restart.
         @else
-            Your signed-in account will stay attached to this hold. If identity verification is needed, Azari will return you to this same booking afterward.
+            Your signed-in account will stay attached to this hold. If identity verification is needed, Resavar will return you to this same booking afterward.
         @endif
     </div>
 </section>
@@ -52,7 +52,7 @@
                 required
             >
             @if(auth()->check())
-                <small>The booking uses the email on your signed-in Azari account.</small>
+                <small>The booking uses the email on your signed-in Resavar account.</small>
             @endif
         </label>
 
@@ -99,10 +99,10 @@
 
 @if($creatingAccount)
 <section class="az-panel">
-    <h2>Secure your Azari access</h2>
+    <h2>Secure your Resavar access</h2>
     <p>
-        If this email is new to Azari, choose a password and the account is created inside this booking.
-        If the email already belongs to an Azari account, leave the password fields blank if you prefer; Azari will preserve the booking and ask you to sign in instead of creating a duplicate.
+        If this email is new to Resavar, choose a password and the account is created inside this booking.
+        If the email already belongs to an Resavar account, leave the password fields blank if you prefer; Resavar will preserve the booking and ask you to sign in instead of creating a duplicate.
     </p>
 
     <div class="az-form-grid">
@@ -118,7 +118,7 @@
     </div>
 
     <p class="az-user-panel-subtitle">
-        If this email already has an Azari account, your details will remain saved and you will be asked to sign in instead of creating a duplicate.
+        If this email already has an Resavar account, your details will remain saved and you will be asked to sign in instead of creating a duplicate.
     </p>
 </section>
 @endif
@@ -129,7 +129,7 @@
     @if($hold->adults > 1)
         <div class="az-notice">
             <strong>Each additional adult verifies themselves.</strong>
-            Add a separate email address for every additional adult. After the booking is created, Azari emails each person their own private verification link. You can also resend or copy those links from your account.
+            Add a separate email address for every additional adult. After the booking is created, Resavar emails each person their own private verification link. You can also resend or copy those links from your account.
         </div>
     @endif
 
@@ -176,7 +176,7 @@
 @if($hold->children>0)
 <section class="az-panel">
     <h2>Children</h2>
-    <p>Children do not require identity verification under the current Azari rules.</p>
+    <p>Children do not require identity verification under the current Resavar rules.</p>
 
     @for($i=0;$i<$hold->children;$i++)
         <article class="az-guest-card">
