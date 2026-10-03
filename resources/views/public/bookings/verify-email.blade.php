@@ -1,4 +1,4 @@
-<x-public-site.layout title="Verify email | Azari Hotels & Residences">
+<x-public-site.layout title="Verify email | Resavar">
 <main class="site-container az-s56-page">
 <header>
     <span class="eyebrow">Secure account setup</span>
