@@ -1,0 +1,59 @@
+/* Azari 2026 brand authority: one blue, white, one canonical logo. */
+:root {
+    --azari-blue: #2596be;
+    --azari-blue-hsl: 196 67% 45%;
+    --azari-blue-dark: #176b89;
+    --azari-blue-soft: #eaf7fb;
+    --azari-white: #ffffff;
+    --azari-ink: #123746;
+    --azari-ink-soft: #1b5267;
+    --azari-ivory: #ffffff;
+    --azari-ivory-deep: #eaf7fb;
+    --azari-brass: #2596be;
+    --azari-brass-light: #65bad8;
+    --azari-wine: #176b89;
+    --azari-text: #173846;
+    --azari-muted: #607985;
+    --azari-border: rgba(37,150,190,.22);
+    --azari-success: #17845b;
+    --azari-error: #b42318;
+    --az-user-sidebar: #176b89;
+    --az-user-green-950: #123746;
+    --az-user-green-900: #176b89;
+    --az-user-green-800: #1f7fa2;
+    --az-user-green-100: #eaf7fb;
+    --az-user-brass: #2596be;
+    --az-user-paper: #ffffff;
+    --az-user-ivory: #f7fcfe;
+    --az-user-line: rgba(37,150,190,.18);
+}
+body,.az-user-body,.az-admin-body { background:#f7fcfe; color:var(--azari-text); }
+:focus-visible { outline-color:rgba(37,150,190,.72); }
+.button-brass,.button-primary,.az-user-button--primary,.az-user-button--dark {
+    background:var(--azari-blue)!important; color:#fff!important; border-color:var(--azari-blue)!important;
+}
+.button-brass:hover,.button-primary:hover,.az-user-button--primary:hover,.az-user-button--dark:hover {
+    background:var(--azari-blue-dark)!important; border-color:var(--azari-blue-dark)!important;
+}
+.button-secondary,.az-user-button--light,.az-user-button--ghost { border-color:var(--azari-border)!important; color:var(--azari-blue-dark)!important; }
+.site-header.is-scrolled,.search-results-page .site-header { background:rgba(255,255,255,.96); color:var(--azari-ink); }
+.hero-section { background:linear-gradient(145deg,#176b89 0%,#2596be 56%,#65bad8 100%); }
+.hero-copy h1,.site-footer,.az-admin-sidebar,.az-user-sidebar,.az-user-mobile-drawer { color:#fff; }
+.site-footer,.az-admin-sidebar,.az-user-sidebar,.az-user-mobile-drawer { background:var(--azari-blue-dark)!important; }
+.eyebrow,.material-symbols-outlined,.nav-popover-panel .material-symbols-outlined { color:var(--azari-blue); }
+.azari-logo-mask {
+    display:block;
+    width:100%;
+    height:100%;
+    background:currentColor;
+    -webkit-mask:url('/images/logo-dark.png') center/contain no-repeat;
+    mask:url('/images/logo-dark.png') center/contain no-repeat;
+}
+.azari-logo-on-dark { color:#fff!important; }
+.azari-logo-on-light { color:var(--azari-blue-dark)!important; }
+.azari-brand__logo-slot,.brand-logo-slot { overflow:hidden; }
+input:focus,select:focus,textarea:focus { border-color:var(--azari-blue)!important; outline-color:rgba(37,150,190,.14)!important; }
+input[type="checkbox"]:checked + .az-toggle { border-color:var(--azari-blue)!important; background:var(--azari-blue)!important; }
+input[type="checkbox"]:focus-visible + .az-toggle { outline-color:var(--azari-blue)!important; }
+.az-user-nav-link.is-active,.az-nav-link.is-active { background:rgba(255,255,255,.14)!important; color:#fff!important; }
+.az-user-summary-icon,.az-user-timezone-icon,.az-user-stat>.material-symbols-outlined { background:var(--azari-blue-soft)!important; color:var(--azari-blue-dark)!important; }
