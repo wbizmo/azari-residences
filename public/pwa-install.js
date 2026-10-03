@@ -406,11 +406,11 @@
     return `
       #${MODAL_ID} {
         --az-pwa-green: #052058;
-        --az-pwa-green-2: #0577F5;
+        --az-pwa-green-2: #052058;
         --az-pwa-paper: #FFFFFF;
-        --az-pwa-ivory: #EEF2F8;
-        --az-pwa-line: #EEF2F8;
-        --az-pwa-brass: #F58F07;
+        --az-pwa-ivory: #FFFFFF;
+        --az-pwa-line: #FFFFFF;
+        --az-pwa-brass: #052058;
         --az-pwa-muted: #052058;
         position: fixed;
         inset: 0;
@@ -455,7 +455,7 @@
         background:
           radial-gradient(
             circle at 100% 0,
-            rgba(245, 143, 7, .12),
+            rgba(5,32,88,.12),
             transparent 30%
           ),
           var(--az-pwa-paper);
@@ -494,8 +494,8 @@
         padding: 7px 10px;
         border-radius: 999px;
         color: var(--az-pwa-green-2);
-        background: #EEF2F8;
-        border: 1px solid #EEF2F8;
+        background: #FFFFFF;
+        border: 1px solid #FFFFFF;
         font-size: 10px;
         font-weight: 800;
         line-height: 1;
@@ -598,8 +598,8 @@
         align-items: center;
         padding: 18px;
         color: var(--az-pwa-green-2);
-        background: #EEF2F8;
-        border: 1px solid #EEF2F8;
+        background: #FFFFFF;
+        border: 1px solid #FFFFFF;
         border-radius: 20px;
       }
 
@@ -609,7 +609,7 @@
         display: grid;
         place-items: center;
         background: var(--az-pwa-paper);
-        border: 1px solid #EEF2F8;
+        border: 1px solid #FFFFFF;
         border-radius: 18px;
       }
 
@@ -631,7 +631,7 @@
         padding: 12px 14px;
         color: #052058;
         background: #FFFFFF;
-        border: 1px solid #F58F07;
+        border: 1px solid #052058;
         border-radius: 15px;
         font-size: 11px;
         line-height: 1.5;
@@ -675,7 +675,7 @@
       }
 
       #${MODAL_ID} button:focus-visible {
-        outline: 3px solid rgba(245, 143, 7, .45);
+        outline: 3px solid rgba(5,32,88,.45);
         outline-offset: 2px;
       }
 
