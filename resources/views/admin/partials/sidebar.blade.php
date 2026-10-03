@@ -32,7 +32,7 @@
 
 @endphp
 <aside class="az-admin-sidebar" id="az-admin-sidebar" data-admin-sidebar aria-label="Administration navigation">
-    <div class="az-sidebar-brand"><a href="{{ route('azari.admin.dashboard') }}" class="az-sidebar-brand__link" aria-label="{{ $siteName }} dashboard"><img src="{{ asset('images/logo-dark.png') }}" alt="{{ $siteName }}" class="az-sidebar-brand__logo" loading="eager" decoding="async"></a><button type="button" class="az-icon-button az-sidebar-close" data-sidebar-close aria-label="Close navigation"><span class="material-symbols-outlined" aria-hidden="true">close</span></button></div>
+    <div class="az-sidebar-brand"><a href="{{ route('azari.admin.dashboard') }}" class="az-sidebar-brand__link" aria-label="{{ $siteName }} dashboard"><span class="az-sidebar-brand__logo azari-logo-mask azari-logo-on-dark" style="--azari-logo-url:url('{{ asset('images/logo-dark.png') }}')" aria-hidden="true"></span></a><button type="button" class="az-icon-button az-sidebar-close" data-sidebar-close aria-label="Close navigation"><span class="material-symbols-outlined" aria-hidden="true">close</span></button></div>
     <div class="az-sidebar-context"><span class="az-sidebar-context__eyebrow">Administration</span><strong>Residence operations</strong></div>
     <nav class="az-sidebar-nav">
         <section class="az-nav-section"><h2>Overview</h2><a href="{{ route('azari.admin.dashboard') }}" class="az-nav-link {{ request()->routeIs('azari.admin.dashboard') ? 'is-active' : '' }}"><span class="material-symbols-outlined">space_dashboard</span><span>Dashboard</span></a></section>
