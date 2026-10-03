@@ -35,4 +35,3 @@
     @yield('content')
 </x-public.layout>
 
-<script src="/pwa-install.js" defer></script>
