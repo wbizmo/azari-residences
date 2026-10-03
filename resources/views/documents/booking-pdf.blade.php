@@ -11,7 +11,7 @@
 
     body {
         font-family: DejaVu Sans, sans-serif;
-        color: #17231e;
+        color: #052058;
         font-size: 11px;
         line-height: 1.5;
     }
@@ -19,7 +19,7 @@
     .head {
         display: table;
         width: 100%;
-        border-bottom: 2px solid #b68a4a;
+        border-bottom: 2px solid #052058;
         padding-bottom: 14px;
     }
 
@@ -63,7 +63,7 @@
     h2 {
         margin-top: 24px;
         margin-bottom: 8px;
-        color: #17231e;
+        color: #052058;
         font-size: 14px;
     }
 
@@ -75,14 +75,14 @@
 
     .grid td {
         padding: 8px;
-        border-bottom: 1px solid #ddd;
+        border-bottom: 1px solid #052058;
         vertical-align: top;
     }
 
     .grid td:first-child {
         width: 42%;
         font-weight: bold;
-        color: #44524c;
+        color: #052058;
     }
 
     .money {
@@ -90,7 +90,7 @@
     }
 
     .total td {
-        border-top: 2px solid #17231e;
+        border-top: 2px solid #052058;
         font-size: 16px;
         font-weight: bold;
     }
@@ -98,9 +98,9 @@
     .payment-status {
         display: inline-block;
         padding: 3px 8px;
-        border: 1px solid #2f6f52;
+        border: 1px solid #052058;
         border-radius: 10px;
-        color: #2f6f52;
+        color: #052058;
         font-size: 9px;
         font-weight: bold;
         text-transform: uppercase;
@@ -116,33 +116,33 @@
         width: 135px;
         height: 135px;
         padding: 8px;
-        border: 1px solid #d8c39e;
-        background: #fff;
+        border: 1px solid #052058;
+        background: #FFFFFF;
     }
 
     .qr-fallback {
         width: 135px;
         min-height: 105px;
         padding: 15px 10px;
-        border: 2px dashed #b68a4a;
-        background: #f7f4ee;
-        color: #44524c;
+        border: 2px dashed #052058;
+        background: #052058;
+        color: #052058;
         text-align: center;
         font-size: 9px;
     }
 
     .qr p {
         margin-top: 5px;
-        color: #667;
+        color: #052058;
         font-size: 9px;
     }
 
     .notice {
         margin-top: 18px;
         padding: 10px 12px;
-        border-left: 3px solid #b68a4a;
-        background: #f7f4ee;
-        color: #44524c;
+        border-left: 3px solid #052058;
+        background: #052058;
+        color: #052058;
     }
 
     .foot {
@@ -152,7 +152,7 @@
         right: 0;
         text-align: center;
         font-size: 9px;
-        color: #667;
+        color: #052058;
     }
 
 
@@ -160,8 +160,8 @@
 .verification-panel {
     width: 100%;
     margin-top: 24px;
-    border: 1px solid #d8c39e;
-    background: #f8f6f1;
+    border: 1px solid #052058;
+    background: #052058;
     border-collapse: collapse;
     page-break-inside: avoid;
 }
@@ -173,13 +173,13 @@
 .verification-copy {
     width: 68%;
     padding: 22px 24px;
-    border-right: 1px solid #e3d6bd;
-    background: #f8f6f1;
+    border-right: 1px solid #052058;
+    background: #052058;
 }
 
 .verification-eyebrow {
     margin: 0 0 7px;
-    color: #a77b3f;
+    color: #052058;
     font-size: 8px;
     font-weight: 700;
     letter-spacing: 1.5px;
@@ -188,14 +188,14 @@
 
 .verification-title {
     margin: 0 0 8px;
-    color: #173b31;
+    color: #052058;
     font-size: 16px;
     font-weight: 700;
 }
 
 .verification-note {
     margin: 0 0 12px;
-    color: #53615c;
+    color: #052058;
     font-size: 9.5px;
     line-height: 1.55;
 }
@@ -204,9 +204,9 @@
     display: inline-block;
     margin-top: 2px;
     padding: 6px 10px;
-    border: 1px solid #d6c29d;
-    background: #ffffff;
-    color: #173b31;
+    border: 1px solid #052058;
+    background: #FFFFFF;
+    color: #052058;
     font-size: 9px;
     font-weight: 700;
     letter-spacing: .65px;
@@ -214,14 +214,14 @@
 
 .verification-security {
     margin: 11px 0 0;
-    color: #7c6748;
+    color: #052058;
     font-size: 8px;
     line-height: 1.45;
 }
 
 .verification-url {
     margin: 10px 0 0;
-    color: #7b817e;
+    color: #052058;
     font-size: 6.8px;
     line-height: 1.35;
     word-break: break-all;
@@ -231,15 +231,15 @@
     width: 32%;
     padding: 18px;
     text-align: right;
-    background: #ffffff;
+    background: #FFFFFF;
 }
 
 .verification-qr-card {
     display: inline-block;
     width: 146px;
     padding: 9px;
-    border: 1px solid #c9a96e;
-    background: #ffffff;
+    border: 1px solid #052058;
+    background: #FFFFFF;
     text-align: center;
 }
 
@@ -250,7 +250,7 @@
     margin: 0 auto;
     padding: 0;
     border: 0;
-    background: #ffffff;
+    background: #FFFFFF;
 }
 
 .verification-qr-card .qr-fallback {
@@ -258,9 +258,9 @@
     min-height: 88px;
     margin: 0 auto;
     padding: 18px 8px;
-    border: 2px dashed #b68a4a;
-    background: #f7f4ee;
-    color: #44524c;
+    border: 2px dashed #052058;
+    background: #052058;
+    color: #052058;
     text-align: center;
     font-size: 8px;
     line-height: 1.45;
@@ -268,7 +268,7 @@
 
 .verification-scan-label {
     margin: 8px 0 2px;
-    color: #173b31;
+    color: #052058;
     font-size: 8px;
     font-weight: 700;
     letter-spacing: .7px;
@@ -277,7 +277,7 @@
 
 .verification-scan-help {
     margin: 0;
-    color: #7b817e;
+    color: #052058;
     font-size: 7px;
     line-height: 1.35;
 }
