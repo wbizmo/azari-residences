@@ -40,7 +40,7 @@
         <!-- AZARI PWA HEAD START -->
         <link rel="manifest" href="/manifest.webmanifest">
         <meta name="theme-color" content="#052058">
-        <link rel="apple-touch-icon" href="/public/images/logo-light.png">
+        <link rel="apple-touch-icon" href="/public/images/logo-dark.png">
         <!-- AZARI PWA HEAD END -->
 
 </head>
