@@ -7,42 +7,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-
-    <link
-        rel="icon"
-        type="image/png"
-        href="{{ asset('images/logo-dark.png') }}"
-    >
-
-    <title>
-        @yield('title', 'Guest area') |
-        {{ $siteSettings['site_name'] ?? 'Resavar' }}
-    </title>
-
-    @vite([
-        'resources/css/app.css',
-        'resources/js/app.js'
-    ])
-
-    @stack('head')
-
-    @include("partials.azari-shell-layout")
-
-</head>
-
-<body class="az-user-body">
-<div class="az-user-shell">
-
-    {{-- =====================================================
-         DESKTOP SIDEBAR
-         ===================================================== --}}
-    <aside
-        class="az-user-sidebar"
-        aria-label="Guest account navigation"
-    >
-        <div class="az-user-brand-area">
-            <x-brand-logo variant="guest-sidebar" />
-        </div>
+</div>
 
         {{-- Independently scrolling navigation --}}
         <div class="az-user-sidebar-scroll">
