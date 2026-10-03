@@ -111,20 +111,20 @@
             <div class="footer-column">
                 <h2>Explore</h2>
 
-                <a href="{{ route('user.owner.listings.create') }}">Apartments</a>
-                <a href="{{ route('user.owner.listings.create') }}">Rooms</a>
-                <a href="{{ route('user.owner.listings.create') }}">Availability</a>
-                <a href="{{ route('user.owner.listings.create') }}">Services</a>
-                <a href="{{ route('user.owner.listings.create') }}">Local guide</a>
+                <a href="{{ route('public.apartments') }}">Apartments</a>
+                <a href="{{ route('public.rooms') }}">Rooms</a>
+                <a href="{{ route('availability.index') }}">Availability</a>
+                <a href="{{ route('public.services') }}">Services</a>
+                <a href="{{ route('public.local-guide') }}">Local guide</a>
             </div>
 
             <div class="footer-column">
                 <h2>Guest support</h2>
 
-                <a href="{{ route('user.owner.listings.create') }}">Verify booking</a>
-                <a href="{{ route('user.owner.listings.create') }}">Guest login</a>
-                <a href="{{ route('user.owner.listings.create') }}">Create account</a>
-                <a href="{{ route('user.owner.listings.create') }}">List my property</a>
+                <a href="{{ route('bookings.verify') }}">Verify booking</a>
+                <a href="{{ route('login') }}">Guest login</a>
+                <a href="{{ route('register') }}">Create account</a>
+                <a href="{{ route('public.list-property') }}">List my property</a>
                 <a href="{{ route('public.contact') }}">Contact Azari</a>
             </div>
 
