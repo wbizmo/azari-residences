@@ -5,32 +5,32 @@
         @include('partials.azari-head-assets')
 
         @php
-            $seoTitle = 'Azari Hotels & Residences | Luxury Hotels & Residences, Apartments, Rooms and Hospitality';
-            $seoDescription = 'Discover Azari Hotels & Residences, a premium hospitality and accommodation platform owned by Azari Luxury Properties Ltd. Explore hotels & residences, apartments, rooms, concierge services, dining, housekeeping, airport transfers and secure online booking.';
+            $seoTitle = 'Resavar | Luxury Hotels & Residences, Apartments, Rooms and Hospitality';
+            $seoDescription = 'Discover Resavar, a premium hospitality and accommodation platform owned by Azari Luxury Properties Ltd. Explore hotels & residences, apartments, rooms, concierge services, dining, housekeeping, airport transfers and secure online booking.';
             $seoUrl = url()->current();
-            $seoImage = asset('images/azari-favicon.png');
+            $seoImage = asset('images/logo-light.png');
 
             $seoLongDescription = <<<'DESCRIPTION'
-    Azari Residences is a premium hospitality and accommodation brand owned and operated by Azari Luxury Properties Ltd, providing thoughtfully managed residences, apartments, rooms, and guest services for business travellers, families, couples, groups, and leisure guests. The platform makes discovering suitable accommodation simple by presenting detailed property information, room features, photographs, locations, guest capacities, amenities, policies, pricing, and date-based availability in one accessible experience.
+    Resavar is a premium hospitality and accommodation brand owned and operated by Azari Luxury Properties Ltd, providing thoughtfully managed residences, apartments, rooms, and guest services for business travellers, families, couples, groups, and leisure guests. The platform makes discovering suitable accommodation simple by presenting detailed property information, room features, photographs, locations, guest capacities, amenities, policies, pricing, and date-based availability in one accessible experience.
 
-    Guests can explore Azari Residences properties, compare accommodation options, check available dates, select their preferred stay period, provide guest information, submit required identification, review booking details, and proceed securely to payment. The booking system is designed to reduce uncertainty by checking existing reservations, active booking holds, maintenance periods, property capacity, and applicable stay requirements before confirming availability.
+    Guests can explore Resavar properties, compare accommodation options, check available dates, select their preferred stay period, provide guest information, submit required identification, review booking details, and proceed securely to payment. The booking system is designed to reduce uncertainty by checking existing reservations, active booking holds, maintenance periods, property capacity, and applicable stay requirements before confirming availability.
 
-    Beyond accommodation, Azari Residences supports a complete hospitality experience through concierge assistance, housekeeping requests, airport transfer arrangements, restaurant and dining information, local guides, service requests, customer support, booking verification, notifications, invoices, receipts, and guest account management. Registered guests can manage bookings, payments, identity documents, additional guests, service requests, support tickets, notifications, profiles, and account security from a dedicated customer area.
+    Beyond accommodation, Resavar supports a complete hospitality experience through concierge assistance, housekeeping requests, airport transfer arrangements, restaurant and dining information, local guides, service requests, customer support, booking verification, notifications, invoices, receipts, and guest account management. Registered guests can manage bookings, payments, identity documents, additional guests, service requests, support tickets, notifications, profiles, and account security from a dedicated customer area.
 
-    Azari Residences also enables eligible property owners to submit properties for professional review and possible listing within the platform. Approved properties can be managed through structured booking, revenue, balance, and withdrawal processes while remaining subject to Azari standards and administrative oversight.
+    Resavar also enables eligible property owners to submit properties for professional review and possible listing within the platform. Approved properties can be managed through structured booking, revenue, balance, and withdrawal processes while remaining subject to Azari standards and administrative oversight.
 
-    Azari Luxury Properties Ltd maintains the platform as part of the wider Azari ecosystem associated with Azari Group and Azari Holdings. Its objective is to combine dependable property management, refined hospitality, secure digital booking, responsive guest support, and carefully selected accommodation. Whether a guest requires a short stay, an extended residence, a private apartment, a comfortable room, or coordinated hospitality services, Azari Residences provides a convenient starting point for planning and managing the complete stay.
+    Azari Luxury Properties Ltd maintains the platform as part of the wider Azari ecosystem associated with Azari Group and Azari Holdings. Its objective is to combine dependable property management, refined hospitality, secure digital booking, responsive guest support, and carefully selected accommodation. Whether a guest requires a short stay, an extended residence, a private apartment, a comfortable room, or coordinated hospitality services, Resavar provides a convenient starting point for planning and managing the complete stay.
     DESCRIPTION;
 
             $nameKeywords = [
-                'Azari', 'Azari Hotels & Residences', 'The Azari', 'The Azari Hotels & Residences',
+                'Azari', 'Resavar', 'The Azari', 'The Resavar',
                 'Azari Residence', 'Azari Luxury Hotels & Residences', 'Azari Luxury Properties',
                 'Azari Luxury Properties Ltd', 'Azari Luxury Properties Limited',
                 'Azari Group', 'The Azari Group', 'Azari Holdings', 'Azari Holdings Ltd',
                 'Azari Holdings Limited', 'Azari Hospitality', 'Azari Hospitality Group',
                 'Azari Hospitality Services', 'Azari Accommodation', 'Azari Apartments',
                 'Azari Rooms', 'Azari Properties', 'Azari Property', 'Azari Property Booking',
-                'Azari Residence Booking', 'Azari Hotels & Residences Booking', 'Azari Hotel',
+                'Azari Residence Booking', 'Resavar Booking', 'Azari Hotel',
                 'Azari Hotels', 'Azari Guest House', 'Azari Guest Accommodation',
                 'Azari Serviced Apartments', 'Azari Short Stay', 'Azari Extended Stay',
                 'Azari Holiday Hotels & Residences', 'Azari Vacation Hotels & Residences',
@@ -43,17 +43,17 @@
                 'Azari Restaurant', 'Azari Local Guide', 'Azari Booking Platform',
                 'Azari Reservation Platform', 'Azari Online Booking',
                 'Azari Secure Booking', 'Azari Availability', 'Azari Property Owners',
-                'Azari Property Listings', 'Azari Guest Portal', 'Azari Hotels & Residences Website',
+                'Azari Property Listings', 'Azari Guest Portal', 'Resavar Website',
                 'Azari Luxury Properties Website',
             ];
 
             $searchKeywords = [
-                'Azari website', 'Azari Hotels & Residences website', 'Azari booking',
-                'Azari Hotels & Residences booking', 'book Azari Hotels & Residences',
-                'how to book Azari Hotels & Residences', 'where is Azari Hotels & Residences',
-                'what is Azari Hotels & Residences', 'who owns Azari Hotels & Residences',
-                'Azari Hotels & Residences availability', 'check Azari availability',
-                'check Azari Hotels & Residences availability', 'Azari available rooms',
+                'Azari website', 'Resavar website', 'Azari booking',
+                'Resavar booking', 'book Resavar',
+                'how to book Resavar', 'where is Resavar',
+                'what is Resavar', 'who owns Resavar',
+                'Resavar availability', 'check Azari availability',
+                'check Resavar availability', 'Azari available rooms',
                 'Azari available apartments', 'Azari room booking',
                 'Azari apartment booking', 'Azari residence prices',
                 'Azari accommodation prices', 'Azari booking confirmation',
@@ -62,7 +62,7 @@
                 'Azari property owner registration', 'list property with Azari',
                 'Azari concierge booking', 'Azari airport pickup',
                 'Azari housekeeping request', 'Azari contact information',
-                'contact Azari Hotels & Residences','Azari','Azari luxury','Azari group',
+                'contact Resavar','Azari','Azari luxury','Azari group',
             ];
 
             $generalKeywords = [
@@ -127,9 +127,9 @@
                     [
                         '@type' => ['WebSite', 'LodgingBusiness'],
                         '@id' => url('/').'#azari-residences',
-                        'name' => 'Azari Hotels & Residences',
+                        'name' => 'Resavar',
                         'alternateName' => [
-                            'The Azari Hotels & Residences',
+                            'The Resavar',
                             'Azari Luxury Hotels & Residences',
                         ],
                         'url' => url('/'),
@@ -181,8 +181,8 @@
         <meta name="keywords" content="{{ $seoKeywords }}">
         <meta name="author" content="Azari Luxury Properties Ltd">
         <meta name="publisher" content="Azari Luxury Properties Ltd">
-        <meta name="application-name" content="Azari Residences">
-        <meta name="apple-mobile-web-app-title" content="Azari Residences">
+        <meta name="application-name" content="Resavar">
+        <meta name="apple-mobile-web-app-title" content="Resavar">
         <meta name="theme-color" content="#153b34">
         <meta name="color-scheme" content="light">
         <meta name="format-detection" content="telephone=yes">
@@ -199,21 +199,21 @@
         <link rel="apple-touch-icon" href="{{ $seoImage }}">
 
         <meta property="og:type" content="website">
-        <meta property="og:site_name" content="Azari Residences">
+        <meta property="og:site_name" content="Resavar">
         <meta property="og:title" content="{{ $seoTitle }}">
         <meta property="og:description" content="{{ $seoDescription }}">
         <meta property="og:url" content="{{ $seoUrl }}">
         <meta property="og:image" content="{{ $seoImage }}">
         <meta property="og:image:secure_url" content="{{ $seoImage }}">
         <meta property="og:image:type" content="image/png">
-        <meta property="og:image:alt" content="Azari Residences">
+        <meta property="og:image:alt" content="Resavar">
         <meta property="og:locale" content="en_US">
 
         <meta name="twitter:card" content="summary">
         <meta name="twitter:title" content="{{ $seoTitle }}">
         <meta name="twitter:description" content="{{ $seoDescription }}">
         <meta name="twitter:image" content="{{ $seoImage }}">
-        <meta name="twitter:image:alt" content="Azari Residences">
+        <meta name="twitter:image:alt" content="Resavar">
 
         <script type="application/ld+json">
             {!! json_encode(
