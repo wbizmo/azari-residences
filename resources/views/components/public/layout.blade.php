@@ -38,7 +38,7 @@
     <div class="azari-preloader" data-public-preloader role="status" aria-label="Loading Resavar">
         <span class="azari-preloader__mark" aria-hidden="true">
             <span class="azari-preloader__spinner"></span>
-            <img src="{{ asset('images/resavar-logo-light.png') }}" alt="" width="42" height="42" loading="eager" decoding="sync">
+            <img src="{{ asset('images/resavar-logo-light.png') }}?v=20261004-4" alt="" width="42" height="42" loading="eager" decoding="sync">
         </span>
     </div>
 
