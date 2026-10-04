@@ -2,18 +2,27 @@
 
 <x-public-site.layout
     title="Resavar | Home"
-    :description="$content['hero_body'] ?? 'Exceptional stays, everywhere with Resavar.'"
+    :description="$content['hero_body'] ?? 'Luxury serviced apartments by Resavar.'"
 >
 
     @include('public.partials.promotion-popup')
 
     <section class="azari-home-hero" aria-labelledby="azari-home-hero-title">
+        <img
+            src="{{ asset('images/resavar-hero.png') }}"
+            alt="Luxury Resavar serviced apartment interior"
+            class="azari-home-hero__image"
+            width="2048"
+            height="1152"
+            fetchpriority="high"
+        >
+
         <div class="azari-home-hero__overlay" aria-hidden="true"></div>
 
         <div class="site-container azari-home-hero__container">
             <div class="azari-home-hero__content">
                 <span class="azari-home-hero__eyebrow">
-                    {{ $content['hero_eyebrow'] ?? 'Exceptional stays, everywhere' }}
+                    {{ $content['hero_eyebrow'] ?? 'Premium serviced hotels & residences' }}
                 </span>
 
                 <h1 id="azari-home-hero-title">
@@ -30,11 +39,6 @@
                         class="button azari-home-hero__primary"
                     >
                         <span>Check availability</span>
-
-                        <span
-                            class="material-symbols-outlined"
-                            aria-hidden="true"
-                        >arrow_forward</span>
                     </a>
 
                     <a
@@ -140,7 +144,7 @@
                             >group</span>
 
                             <span data-guest-summary>
-                                1 adult · 0 children
+                                1 adult 路 0 children
                             </span>
 
                             <span
@@ -496,11 +500,274 @@
         </div>
     </section>
 
-    <!-- Resavar app download -->
+    <!-- RESAVAR APP DOWNLOAD START -->
     <section
         class="azari-app-section"
         aria-labelledby="azari-app-title"
     >
+        <style>
+            .azari-app-section {
+                position: relative;
+                overflow: hidden;
+                padding: clamp(64px, 8vw, 112px) 0;
+                background:
+                    radial-gradient(
+                        circle at 12% 18%,
+                        rgba(184, 147, 92, .13),
+                        transparent 34%
+                    ),
+                    radial-gradient(
+                        circle at 92% 82%,
+                        rgba(12, 43, 36, .12),
+                        transparent 36%
+                    ),
+                    #f7f4ee;
+            }
+
+            .azari-app-card {
+                position: relative;
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) minmax(320px, .9fr);
+                align-items: center;
+                min-height: 510px;
+                overflow: hidden;
+                border: 1px solid rgba(12, 43, 36, .12);
+                border-radius: clamp(24px, 3vw, 38px);
+                background: #fff;
+                box-shadow:
+                    0 30px 80px rgba(20, 27, 24, .10),
+                    0 8px 24px rgba(20, 27, 24, .05);
+            }
+
+            .azari-app-copy {
+                position: relative;
+                z-index: 2;
+                padding: clamp(36px, 6vw, 76px);
+            }
+
+            .azari-app-kicker {
+                display: inline-flex;
+                align-items: center;
+                gap: 9px;
+                margin-bottom: 20px;
+                color: #816641;
+                font-size: 12px;
+                font-weight: 700;
+                letter-spacing: .16em;
+                text-transform: uppercase;
+            }
+
+            .azari-app-kicker::before {
+                content: "";
+                width: 28px;
+                height: 1px;
+                background: currentColor;
+            }
+
+            .azari-app-title {
+                max-width: 720px;
+                margin: 0;
+                color: #10251f;
+                font-size: clamp(34px, 4.7vw, 62px);
+                line-height: 1.03;
+                letter-spacing: -.035em;
+            }
+
+            .azari-app-description {
+                max-width: 620px;
+                margin: 24px 0 0;
+                color: #5f6764;
+                font-size: clamp(16px, 1.5vw, 19px);
+                line-height: 1.75;
+            }
+
+            .azari-app-devices {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                margin: 28px 0 30px;
+            }
+
+            .azari-app-device {
+                display: inline-flex;
+                align-items: center;
+                gap: 7px;
+                padding: 9px 13px;
+                border: 1px solid rgba(12, 43, 36, .12);
+                border-radius: 999px;
+                background: rgba(248, 245, 239, .72);
+                color: #33443f;
+                font-size: 13px;
+                font-weight: 600;
+            }
+
+            .azari-app-device .material-symbols-outlined {
+                font-size: 18px;
+            }
+
+            .azari-app-actions {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 14px;
+            }
+
+            .azari-google-play-link {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                flex: 0 0 auto;
+                border-radius: 10px;
+                text-decoration: none;
+                transition:
+                    transform .2s ease,
+                    opacity .2s ease;
+            }
+
+            .azari-google-play-link:hover {
+                transform: translateY(-2px);
+            }
+
+            .azari-google-play-link:focus-visible {
+                outline: 3px solid rgba(181, 138, 74, .42);
+                outline-offset: 4px;
+            }
+
+            .azari-google-play-link img {
+                display: block;
+                width: auto;
+                height: 58px;
+                object-fit: contain;
+            }
+
+            .azari-app-note {
+                display: block;
+                margin-top: 14px;
+                color: #7c8581;
+                font-size: 12px;
+                line-height: 1.55;
+            }
+
+            .azari-app-visual {
+                position: relative;
+                align-self: stretch;
+                min-height: 510px;
+                overflow: hidden;
+            }
+
+            .azari-app-visual::before {
+                content: "";
+                position: absolute;
+                z-index: 1;
+                inset: 0;
+                background:
+                    linear-gradient(
+                        90deg,
+                        #fff 0%,
+                        rgba(255, 255, 255, .75) 13%,
+                        rgba(255, 255, 255, 0) 38%
+                    );
+                pointer-events: none;
+            }
+
+            .azari-app-visual img {
+                width: 100%;
+                height: 100%;
+                min-height: 510px;
+                object-fit: cover;
+                object-position: center;
+                display: block;
+            }
+
+            .azari-app-floating {
+                position: absolute;
+                z-index: 2;
+                right: 24px;
+                bottom: 24px;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                max-width: calc(100% - 48px);
+                padding: 14px 16px;
+                border: 1px solid rgba(255, 255, 255, .44);
+                border-radius: 18px;
+                background: rgba(15, 35, 30, .78);
+                color: #fff;
+                box-shadow: 0 15px 45px rgba(0, 0, 0, .22);
+                backdrop-filter: blur(15px);
+                -webkit-backdrop-filter: blur(15px);
+            }
+
+            .azari-app-floating .material-symbols-outlined {
+                font-size: 25px;
+            }
+
+            .azari-app-floating strong {
+                display: block;
+                font-size: 13px;
+                line-height: 1.2;
+            }
+
+            .azari-app-floating span:last-child {
+                display: block;
+                margin-top: 3px;
+                color: rgba(255,255,255,.73);
+                font-size: 11px;
+            }
+
+            @media (max-width: 900px) {
+                .azari-app-card {
+                    grid-template-columns: 1fr;
+                }
+
+                .azari-app-visual {
+                    min-height: 390px;
+                    order: -1;
+                }
+
+                .azari-app-visual img {
+                    min-height: 390px;
+                }
+
+                .azari-app-visual::before {
+                    background:
+                        linear-gradient(
+                            0deg,
+                            #fff 0%,
+                            rgba(255,255,255,.82) 10%,
+                            rgba(255,255,255,0) 36%
+                        );
+                }
+            }
+
+            @media (max-width: 600px) {
+                .azari-app-section {
+                    padding: 48px 0;
+                }
+
+                .azari-app-card {
+                    border-radius: 24px;
+                }
+
+                .azari-app-copy {
+                    padding: 30px 24px 34px;
+                }
+
+                .azari-app-visual,
+                .azari-app-visual img {
+                    min-height: 320px;
+                }
+
+                .azari-app-actions {
+                    align-items: flex-start;
+                    flex-direction: column;
+                }
+
+                .azari-google-play-link img {
+                    height: 56px;
+                }
+            }
+        </style>
 
         <div class="site-container">
             <div class="azari-app-card">
@@ -562,7 +829,7 @@
                 <div class="azari-app-visual">
                     <img
                         src="{{ asset('images/azari-hospitality-welcome.png') }}"
-                        alt="Resavar Hotels and Residences hospitality experience"
+                        alt="Azari Hotels and Residences hospitality experience"
                         loading="lazy"
                         decoding="async"
                     >
@@ -582,6 +849,6 @@
             </div>
         </div>
     </section>
-    
+    <!-- RESAVAR APP DOWNLOAD END -->
 
 </x-public-site.layout>
