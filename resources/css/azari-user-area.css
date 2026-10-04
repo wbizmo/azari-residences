@@ -80,7 +80,11 @@
 .az-user-actions { display: flex; flex-wrap: wrap; gap: 10px; }
 .az-user-button { min-height: 44px; padding: 0 17px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid transparent; border-radius: 13px; font-size: 13px; font-weight: 700; transition: .2s ease; }
 .az-user-button:hover { transform: translateY(-1px); }
-.az-user-button--primary { background: #052058; color: #FFFFFF; }
+.az-user-button--primary {
+    background: #052058;
+    color: #FFFFFF;
+    border-color: #052058;
+}
 .az-user-button--dark { background: var(--az-user-green-900); color: #FFFFFF; }
 .az-user-button--light { background: var(--az-user-paper); color: var(--az-user-green-900); border-color: var(--az-user-line); }
 .az-user-button--ghost { background: rgba(255, 255, 255, .06); color: #FFFFFF; border-color: rgba(255, 255, 255, .25); }
@@ -126,7 +130,10 @@
 .az-user-list-item p { margin: 0; color: var(--az-user-muted); font-size: 12px; line-height: 1.55; }
 .az-user-status { display: inline-flex; align-items: center; gap: 5px; padding: 6px 9px; border-radius: 999px; background: var(--az-user-green-100); color: var(--az-user-green-800); font-size: 11px; font-weight: 700; text-transform: capitalize; }
 .az-user-status--warning { background: #FFFFFF; color: #052058; }
-.az-user-status--danger { background: #052058; color: #FFFFFF; }
+.az-user-status--danger {
+    background: #052058;
+    color: #FFFFFF;
+}
 .az-user-tabs { margin-bottom: 18px; display: flex; gap: 8px; flex-wrap: wrap; }
 .az-user-tab { padding: 9px 12px; border: 1px solid var(--az-user-line); border-radius: 12px; background: var(--az-user-paper); color: var(--az-user-muted); font-size: 12px; }
 .az-user-tab.is-active { background: var(--az-user-green-900); color: #FFFFFF; border-color: var(--az-user-green-900); }
