@@ -9050,12 +9050,14 @@ body.inner-page .site-header :is(.desktop-navigation>a,.nav-popover-trigger,.nav
 /* Status, badge and panel contrast. */
 .az-status--maintenance,
 .az-status--archived,
+.az-status--draft,
 .az-status--published,
 .az-status--available,
 .az-status--active,
 .az-premium-status.is-danger,
 .az-s78-badge.is-danger,
-.az-user-status--danger{
+.az-user-status--danger,
+.az-results-meta>span{
     background:#052058!important;
     color:#FFFFFF!important;
     -webkit-text-fill-color:#FFFFFF!important;
