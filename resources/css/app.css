@@ -9902,3 +9902,187 @@ button[data-back-to-top],
     border-color: #052058 !important;
 }
 /* RESAVAR_HEADER_HAMBURGER_STATE_SYNC_END */
+
+
+/* RESAVAR_PUBLIC_EDITORIAL_CONTRAST_LAYOUT_REPAIR_START
+   Shared public-page repair:
+   - editorial copy never crosses into the media column
+   - long headings wrap inside their own column
+   - white surfaces use navy foreground
+   - navy surfaces use white foreground
+*/
+.az-editorial-hero__grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+    gap: clamp(2rem, 4vw, 4.5rem) !important;
+    align-items: center !important;
+}
+
+.az-editorial-hero__copy,
+.az-editorial-hero__media {
+    min-width: 0 !important;
+    max-width: 100% !important;
+}
+
+.az-editorial-hero__copy {
+    position: relative;
+    z-index: 1;
+}
+
+.az-editorial-hero__media {
+    position: relative;
+    z-index: 0;
+}
+
+.az-editorial-hero__copy h1,
+.az-editorial-title {
+    max-width: 100% !important;
+    margin-top: 0 !important;
+    font-size: clamp(3.4rem, 5.8vw, 6.5rem) !important;
+    line-height: .92 !important;
+    overflow-wrap: break-word;
+    word-break: normal;
+    white-space: normal;
+}
+
+.az-editorial-title--apartments {
+    max-width: 6.8ch !important;
+}
+
+/* Public service dropdown: no navy-on-navy hover or active state. */
+.nav-popover-panel {
+    background: #FFFFFF !important;
+    color: #052058 !important;
+}
+
+.nav-popover-panel a {
+    background: #FFFFFF !important;
+    color: #052058 !important;
+    -webkit-text-fill-color: #052058 !important;
+}
+
+.nav-popover-panel a > :is(span, strong, .material-symbols-outlined) {
+    color: #052058 !important;
+    -webkit-text-fill-color: #052058 !important;
+}
+
+.nav-popover-panel a:hover,
+.nav-popover-panel a:focus-visible,
+.nav-popover-panel a.is-active {
+    background: #052058 !important;
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+
+.nav-popover-panel a:hover > :is(span, strong, .material-symbols-outlined),
+.nav-popover-panel a:focus-visible > :is(span, strong, .material-symbols-outlined),
+.nav-popover-panel a.is-active > :is(span, strong, .material-symbols-outlined) {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+
+/* Legacy public verification modal inherited the collapsed navy ivory token. */
+.modal-dialog {
+    background: #FFFFFF !important;
+    color: #052058 !important;
+}
+
+.modal-dialog h2,
+.modal-dialog > p,
+.modal-close,
+.verification-form label {
+    color: #052058 !important;
+    -webkit-text-fill-color: #052058 !important;
+}
+
+/* Dark public hero surfaces must carry light text. */
+.search-results-hero,
+.property-detail-hero {
+    background: #052058 !important;
+    color: #FFFFFF !important;
+}
+
+.search-results-hero :is(h1, h2, h3, .eyebrow),
+.property-detail-hero :is(h1, h2, h3, .eyebrow) {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+
+.search-results-hero p,
+.property-detail-hero p {
+    color: rgba(255, 255, 255, .82) !important;
+    -webkit-text-fill-color: rgba(255, 255, 255, .82) !important;
+}
+
+/* Toasts use the same navy/white contrast contract. */
+.toast {
+    background: #052058 !important;
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+
+.toast :is(span, strong, p, button, .material-symbols-outlined) {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+
+/* Checkout summary is a navy surface; every informational label stays readable. */
+.az-checkout-summary-card {
+    background: #052058 !important;
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+
+.az-checkout-summary-card :is(
+    .eyebrow,
+    h1,
+    h2,
+    h3,
+    p,
+    span,
+    strong,
+    small,
+    dt,
+    dd,
+    .az-checkout-reference
+) {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+
+.az-checkout-summary-card :is(.az-checkout-reference, dt, .az-checkout-balance span) {
+    color: rgba(255, 255, 255, .82) !important;
+    -webkit-text-fill-color: rgba(255, 255, 255, .82) !important;
+}
+
+/* Admin property-media placeholder also follows dark-surface contrast. */
+.az-property-admin-media {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+
+@media (max-width: 1180px) {
+    .az-editorial-hero__grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .az-editorial-hero__copy h1,
+    .az-editorial-title {
+        max-width: min(100%, 11ch) !important;
+    }
+
+    .az-editorial-title--apartments {
+        max-width: 6.8ch !important;
+    }
+
+    .az-editorial-hero__media {
+        height: clamp(380px, 65vw, 620px) !important;
+    }
+}
+
+@media (max-width: 640px) {
+    .az-editorial-hero__copy h1,
+    .az-editorial-title {
+        font-size: clamp(3rem, 16vw, 4.8rem) !important;
+    }
+}
+/* RESAVAR_PUBLIC_EDITORIAL_CONTRAST_LAYOUT_REPAIR_END */
