@@ -651,7 +651,7 @@
     <div class="wrap topbar-inner">
         <a class="brand" href="/">
             <img
-                src="/public/images/logo-light.png"
+                src="{{ asset('images/resavar-logo-light.png') }}?v=20261004-4"
                 alt=""
                 aria-hidden="true"
             >
