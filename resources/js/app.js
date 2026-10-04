@@ -843,7 +843,7 @@ document.addEventListener('DOMContentLoaded', () => {
 | home-top:
 |   - URL path is /
 |   - scroll position is 24px or less
-|   - hamburger is #eee5d2
+|   - hamburger is #FFFFFF
 |
 | solid:
 |   - homepage has been scrolled
