@@ -9,52 +9,34 @@
 <html lang="en">
 <head>
     @include('partials.material-symbols-preload')
-    @include('partials.azari-head-assets')
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="theme-color" content="#052058">
     <title>{{ $title }} | Resavar</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="resavar-auth-body">
-<main class="resavar-auth-layout">
-    <section class="resavar-auth-brand-panel" aria-label="Resavar">
-        <a href="{{ url('/') }}" class="resavar-auth-logo-link" aria-label="Resavar home">
-            <img src="{{ asset('images/logo-dark.png') }}" alt="Resavar" class="resavar-auth-logo">
-        </a>
-
-        <div class="resavar-auth-brand-copy">
-            <span>Exceptional stays, everywhere.</span>
-            <h1>{{ $heading }}</h1>
-            @if($description)
-                <p>{{ $description }}</p>
-            @endif
-        </div>
-    </section>
-
-    <section class="resavar-auth-form-panel">
-        <div class="resavar-auth-card">
-            <a class="resavar-auth-back" href="{{ url('/') }}">
-                <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+<body class="az-standalone-auth-body az-auth-page">
+    <main class="az-standalone-auth-shell az-auth-shell az-auth-main">
+        <section class="az-standalone-auth-card az-auth-card" aria-labelledby="az-auth-heading">
+            <a class="az-auth-home-link" href="{{ url('/') }}">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M19 12H5"/>
+                    <path d="m11 18-6-6 6-6"/>
+                </svg>
                 <span>Back to homepage</span>
             </a>
 
-            <div class="resavar-auth-heading">
-                <span>{{ $eyebrow }}</span>
-                <h2>{{ $title }}</h2>
-                @if($description)
-                    <p>{{ $description }}</p>
-                @endif
-            </div>
+            <span class="eyebrow">{{ $eyebrow }}</span>
+            <h1 id="az-auth-heading">{{ $heading }}</h1>
+
+            @if($description)
+                <p class="az-standalone-auth-description">{{ $description }}</p>
+            @endif
 
             <x-azari-toasts />
+
             {{ $slot }}
-        </div>
-    </section>
-</main>
+        </section>
+    </main>
 </body>
 </html>
