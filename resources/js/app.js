@@ -358,7 +358,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-/* AZARI_BACK_TO_TOP_REPAIR */
+/* RESAVAR_BACK_TO_TOP_REPAIR */
 document.addEventListener('DOMContentLoaded', () => {
     const buttons = document.querySelectorAll(
         '[data-back-to-top], .back-to-top, #back-to-top'
@@ -670,7 +670,7 @@ document.querySelectorAll('[data-server-toast]').forEach((toast) => {
 });
 
 /*
- * Permanent Azari public-header state.
+ * Permanent Resavar public-header state.
  * Non-hero pages always use the readable solid dark-green treatment.
  * Hero pages may use their intentional overlay state only while the hero
  * physically remains beneath the header.
@@ -721,7 +721,7 @@ if (document.readyState === 'loading') {
     initialiseAzariPublicHeader();
 }
 
-// AZARI HOTFIX: icons must be visible immediately; font loading may enhance later.
+// RESAVAR HOTFIX: icons must be visible immediately; font loading may enhance later.
 document.documentElement.classList.add('az-icons-ready');
 document.body?.classList.toggle(
     'azari-home-page',
@@ -730,7 +730,70 @@ document.body?.classList.toggle(
 
 /*
 |--------------------------------------------------------------------------
-| Azari public hamburger colour controller
+| Resavar public-header single-logo controller
+|--------------------------------------------------------------------------
+|
+| There is only one physical <img> element in the public header.
+| This script changes only its src, so the logo position and navigation
+| layout never move.
+|
+*/
+
+document.addEventListener('DOMContentLoaded', () => {
+    const logo = document.querySelector('[data-azari-public-logo]');
+
+    if (!logo) {
+        return;
+    }
+
+    const darkLogo = logo.dataset.darkLogo;
+    const lightLogo = logo.dataset.lightLogo;
+
+    const normalizedPath = window.location.pathname.replace(/\/+$/, '');
+    const isHomepage = normalizedPath === '';
+
+    const updateAzariPublicLogo = () => {
+        const hasScrolled = window.scrollY > 24;
+
+        /*
+         * Homepage:
+         *   top       -> logo-dark.png
+         *   scrolled  -> logo-light.png
+         *
+         * Other public pages:
+         *   always    -> logo-light.png
+         */
+        const requiredLogo =
+            isHomepage && !hasScrolled
+                ? darkLogo
+                : lightLogo;
+
+        if (
+            requiredLogo &&
+            logo.getAttribute('src') !== requiredLogo
+        ) {
+            logo.setAttribute('src', requiredLogo);
+        }
+
+        logo.dataset.logoVariant =
+            isHomepage && !hasScrolled
+                ? 'dark'
+                : 'light';
+    };
+
+    updateAzariPublicLogo();
+
+    window.addEventListener(
+        'scroll',
+        updateAzariPublicLogo,
+        { passive: true }
+    );
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| Resavar public hamburger colour controller
 |--------------------------------------------------------------------------
 |
 | Homepage:
@@ -772,7 +835,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 /*
 |--------------------------------------------------------------------------
-| Azari public header visual state
+| Resavar public header visual state
 |--------------------------------------------------------------------------
 |
 | One shared state controls the public logo and hamburger.
@@ -791,6 +854,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 document.addEventListener('DOMContentLoaded', () => {
     const menuToggle = document.querySelector('[data-azari-menu-toggle]');
+    const publicLogo = document.querySelector('[data-azari-public-logo]');
+
     const normalizedPath =
         window.location.pathname.replace(/\/+$/, '');
 
@@ -806,6 +871,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 ? 'home-top'
                 : 'solid';
 
+        /*
+         * Keep the existing single-logo implementation synchronized.
+         * This changes only the src of the one existing image node.
+         */
+        if (publicLogo) {
+            const requiredLogo =
+                isHomepageTop
+                    ? publicLogo.dataset.darkLogo
+                    : publicLogo.dataset.lightLogo;
+
+            if (
+                requiredLogo &&
+                publicLogo.getAttribute('src') !== requiredLogo
+            ) {
+                publicLogo.setAttribute('src', requiredLogo);
+            }
+        }
     };
 
     updateAzariPublicHeaderState();
