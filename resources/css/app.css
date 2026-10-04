@@ -10086,3 +10086,20 @@ button[data-back-to-top],
     }
 }
 /* RESAVAR_PUBLIC_EDITORIAL_CONTRAST_LAYOUT_REPAIR_END */
+
+
+/* RESAVAR_SERVICE_SUBMENU_LABEL_CONTRAST_FIX_START */
+.nav-popover-panel .nav-popover-label {
+    display: inline-block !important;
+    min-width: 0;
+    color: #052058 !important;
+    -webkit-text-fill-color: #052058 !important;
+}
+
+.nav-popover-panel a:hover .nav-popover-label,
+.nav-popover-panel a:focus-visible .nav-popover-label,
+.nav-popover-panel a.is-active .nav-popover-label {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+/* RESAVAR_SERVICE_SUBMENU_LABEL_CONTRAST_FIX_END */
