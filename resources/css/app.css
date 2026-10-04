@@ -9306,3 +9306,190 @@ table{border-color:rgba(5,32,88,.16)}
 .resavar-welcome__actions p{margin:0;color:rgba(5,32,88,.66);font-size:14px;line-height:1.7}
 .resavar-welcome__buttons{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
 @media(max-width:820px){.resavar-welcome{grid-template-columns:1fr}.resavar-welcome__brand{min-height:340px}.resavar-welcome__actions{padding:42px 20px 64px}}
+
+/* RESAVAR FINAL UI HOTFIXES */
+:root{
+    --resavar-blue:#052058;
+    --resavar-black:#000000;
+    --resavar-white:#FFFFFF;
+}
+
+/* Keep strong contrast on header */
+.site-header,
+.azari-inner-page .site-header,
+.azari-solid-header .site-header{
+    background:rgba(255,255,255,.98)!important;
+    border-bottom:1px solid rgba(5,32,88,.08)!important;
+    backdrop-filter:saturate(140%) blur(14px);
+    box-shadow:0 12px 30px rgba(5,32,88,.06);
+    color:var(--resavar-blue)!important;
+}
+
+.site-header :is(a,button,.material-symbols-outlined),
+.azari-inner-page .site-header :is(a,button,.material-symbols-outlined),
+.azari-solid-header .site-header :is(a,button,.material-symbols-outlined){
+    color:var(--resavar-blue)!important;
+    -webkit-text-fill-color:var(--resavar-blue)!important;
+}
+
+/* Fix logo sizing and make sure header/footer use the bundled logo files cleanly */
+.site-header .brand-logo-slot,
+.site-header .azari-brand__logo-slot{
+    width:auto!important;
+    min-width:unset!important;
+    min-height:unset!important;
+    height:auto!important;
+    max-width:220px!important;
+    overflow:visible!important;
+}
+
+.site-header .brand-image,
+.site-header .azari-brand__image,
+.site-header .azari-brand__logo-image{
+    display:block!important;
+    width:clamp(140px,16vw,180px)!important;
+    max-width:100%!important;
+    height:auto!important;
+    max-height:60px!important;
+    object-fit:contain!important;
+    object-position:left center!important;
+}
+
+.site-footer .brand-logo-slot,
+.site-footer .azari-brand__logo-slot{
+    width:auto!important;
+    min-width:unset!important;
+    min-height:unset!important;
+    height:auto!important;
+}
+
+.site-footer .brand-image,
+.site-footer .azari-brand__image,
+.site-footer .azari-brand__logo-image{
+    display:block!important;
+    width:min(220px,72vw)!important;
+    max-width:100%!important;
+    height:auto!important;
+    max-height:72px!important;
+    object-fit:contain!important;
+    object-position:left center!important;
+}
+
+/* Restore the hero image without forcing a transparent header */
+.hero,
+.hero-section,
+[data-hero]{
+    position:relative!important;
+}
+
+.hero .azari-hero-media,
+.hero-section .azari-hero-media,
+[data-hero] .azari-hero-media{
+    display:block!important;
+    position:relative!important;
+    min-height:clamp(420px,56vw,700px)!important;
+    margin-top:24px!important;
+    border-radius:28px!important;
+    overflow:hidden!important;
+    background:
+        linear-gradient(180deg, rgba(5,32,88,.16), rgba(5,32,88,.38)),
+        url('/images/azari-hospitality-welcome.png') center center / cover no-repeat !important;
+}
+
+.hero .azari-hero-media img,
+.hero-section .azari-hero-media img,
+[data-hero] .azari-hero-media img{
+    width:100%!important;
+    height:100%!important;
+    object-fit:cover!important;
+    opacity:0!important;
+}
+
+/* Hero text/button spacing and contrast */
+.hero .button,
+.hero-section .button,
+[data-hero] .button{
+    border-radius:12px!important;
+}
+
+/* Remove the arrow icon from availability CTA */
+a[href*="availability"]::after,
+.hero a[href*="availability"]::after,
+.hero-section a[href*="availability"]::after,
+[data-hero] a[href*="availability"]::after{
+    content:none!important;
+    display:none!important;
+}
+
+a[href*="availability"] .material-symbols-outlined,
+.hero a[href*="availability"] .material-symbols-outlined,
+.hero-section a[href*="availability"] .material-symbols-outlined,
+[data-hero] a[href*="availability"] .material-symbols-outlined{
+    display:none!important;
+}
+
+/* Fix back-to-top contrast */
+.back-to-top,
+.scroll-top,
+[data-back-to-top],
+[aria-label="Back to top"]{
+    background:var(--resavar-white)!important;
+    color:var(--resavar-blue)!important;
+    border:1px solid rgba(5,32,88,.18)!important;
+    box-shadow:0 12px 30px rgba(5,32,88,.14)!important;
+}
+
+.back-to-top svg,
+.scroll-top svg,
+[data-back-to-top] svg,
+[aria-label="Back to top"] svg{
+    fill:none!important;
+    stroke:var(--resavar-blue)!important;
+}
+
+.back-to-top .material-symbols-outlined,
+.scroll-top .material-symbols-outlined,
+[data-back-to-top] .material-symbols-outlined,
+[aria-label="Back to top"] .material-symbols-outlined{
+    color:var(--resavar-blue)!important;
+}
+
+/* Strong default button contrast */
+.button,
+button,
+input[type="submit"],
+input[type="button"]{
+    transition:all .18s ease!important;
+}
+
+.button-primary,
+.btn-primary,
+button.button-primary{
+    background:var(--resavar-blue)!important;
+    color:var(--resavar-white)!important;
+    border-color:var(--resavar-blue)!important;
+}
+
+.button-primary:hover,
+.btn-primary:hover,
+button.button-primary:hover{
+    background:var(--resavar-black)!important;
+    color:var(--resavar-white)!important;
+    border-color:var(--resavar-black)!important;
+}
+
+.button-secondary,
+.btn-secondary,
+button.button-secondary{
+    background:var(--resavar-white)!important;
+    color:var(--resavar-blue)!important;
+    border:1px solid rgba(5,32,88,.18)!important;
+}
+
+.button-secondary:hover,
+.btn-secondary:hover,
+button.button-secondary:hover{
+    background:var(--resavar-blue)!important;
+    color:var(--resavar-white)!important;
+    border-color:var(--resavar-blue)!important;
+}
