@@ -1,2 +1,13 @@
 User-agent: *
-Disallow:
+Allow: /
+Disallow: /azaridevadmin
+Disallow: /account/
+Disallow: /booking/
+Disallow: /bookings/
+Disallow: /payments/
+Disallow: /webhooks/
+Disallow: /location/
+Disallow: /guest-verification/
+Disallow: /account-deletion
+
+Sitemap: https://resavar.com/sitemap.xml
