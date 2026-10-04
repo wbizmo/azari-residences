@@ -9,6 +9,7 @@ Schedule::command('azari:send-unpaid-booking-reminders')->everyFiveMinutes()->wi
 Schedule::command('azari:provision-successful-booking-accounts')->hourly()->withoutOverlapping();
 Schedule::command('model:prune')->daily();
 Schedule::command('azari:expire-unpaid-bookings')->everyFiveMinutes()->name('expire-unpaid-bookings')->withoutOverlapping();
+Schedule::command('azari:sitemap')->dailyAt('04:15')->name('public-sitemap')->withoutOverlapping();
 
 require __DIR__.'/azari-final-schedule.php';
 
