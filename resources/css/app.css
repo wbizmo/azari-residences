@@ -9801,3 +9801,60 @@ input[type="checkbox"][data-az-switch-ready="true"]:checked + .az-switch__track 
     background: #FFFFFF !important;
 }
 /* RESAVAR_DASHBOARD_CONTRAST_AND_TOGGLE_REPAIR_END */
+
+
+/* RESAVAR_HEADER_HAMBURGER_STATE_SYNC_START
+   The hamburger uses the exact same public-header state as the logo/header:
+   home-top = white over hero; solid = navy on white header. */
+html[data-azari-public-header-state="home-top"]
+body.home-page
+.site-header
+.mobile-menu-button.azari-menu-toggle {
+    --azari-menu-current-color: #FFFFFF !important;
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    border-color: rgba(255, 255, 255, .68) !important;
+}
+
+html[data-azari-public-header-state="home-top"]
+body.home-page
+.site-header
+.mobile-menu-button.azari-menu-toggle
+.azari-menu-toggle__line {
+    color: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+    border-color: #FFFFFF !important;
+}
+
+html[data-azari-public-header-state="solid"]
+.site-header
+.mobile-menu-button.azari-menu-toggle,
+body.inner-page
+.site-header
+.mobile-menu-button.azari-menu-toggle,
+body.azari-solid-header
+.site-header
+.mobile-menu-button.azari-menu-toggle {
+    --azari-menu-current-color: #052058 !important;
+    color: #052058 !important;
+    -webkit-text-fill-color: #052058 !important;
+    border-color: rgba(5, 32, 88, .42) !important;
+}
+
+html[data-azari-public-header-state="solid"]
+.site-header
+.mobile-menu-button.azari-menu-toggle
+.azari-menu-toggle__line,
+body.inner-page
+.site-header
+.mobile-menu-button.azari-menu-toggle
+.azari-menu-toggle__line,
+body.azari-solid-header
+.site-header
+.mobile-menu-button.azari-menu-toggle
+.azari-menu-toggle__line {
+    color: #052058 !important;
+    background-color: #052058 !important;
+    border-color: #052058 !important;
+}
+/* RESAVAR_HEADER_HAMBURGER_STATE_SYNC_END */
