@@ -60,7 +60,7 @@ html,body{max-width:100%;overflow-x:hidden}
 .az-service-hero__main h2{margin:12px 0 12px;font-family:var(--font-heading,'Montserrat', Arial, sans-serif);font-size:clamp(2rem,4vw,3.2rem);font-weight:500;line-height:1.05}
 .az-service-hero__main p{max-width:650px;margin:0;color:rgba(255, 255, 255, .74);line-height:1.7}
 .az-service-hero__side{display:grid;align-content:center;padding:26px;border:1px solid rgba(5, 32, 88, .22);border-radius:26px;background:#FFFFFF}
-.az-service-hero__side .material-symbols-outlined{width:50px;height:50px;display:grid;place-items:center;border-radius:15px;background:#052058;color:#052058;font-size:27px}
+.az-service-hero__side .material-symbols-outlined{width:50px;height:50px;display:grid;place-items:center;border-radius:15px;background:#052058;color:#FFFFFF;font-size:27px}
 .az-service-hero__side strong{display:block;margin-top:16px;color:#052058;font-family:var(--font-heading,'Montserrat', Arial, sans-serif);font-size:1.25rem}
 .az-service-hero__side p{margin:7px 0 0;color:#052058;line-height:1.55;font-size:.88rem}
 .az-service-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(330px,.72fr);gap:20px;align-items:start}
