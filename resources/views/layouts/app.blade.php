@@ -8,18 +8,18 @@
             $seoTitle = 'Resavar | Luxury Hotels & Residences, Apartments, Rooms and Hospitality';
             $seoDescription = 'Discover Resavar, a premium hospitality and accommodation platform owned by Resavar Luxury Properties Ltd. Explore hotels & residences, apartments, rooms, concierge services, dining, housekeeping, airport transfers and secure online booking.';
             $seoUrl = url()->current();
-            $seoImage = asset('images/logo-light.png');
+            $seoImage = asset('images/azari-favicon.png');
 
             $seoLongDescription = <<<'DESCRIPTION'
-    Resavar is a premium hospitality and accommodation brand owned and operated by Resavar Luxury Properties Ltd, providing thoughtfully managed residences, apartments, rooms, and guest services for business travellers, families, couples, groups, and leisure guests. The platform makes discovering suitable accommodation simple by presenting detailed property information, room features, photographs, locations, guest capacities, amenities, policies, pricing, and date-based availability in one accessible experience.
+    Resavar Residences is a premium hospitality and accommodation brand owned and operated by Resavar Luxury Properties Ltd, providing thoughtfully managed residences, apartments, rooms, and guest services for business travellers, families, couples, groups, and leisure guests. The platform makes discovering suitable accommodation simple by presenting detailed property information, room features, photographs, locations, guest capacities, amenities, policies, pricing, and date-based availability in one accessible experience.
 
-    Guests can explore Resavar properties, compare accommodation options, check available dates, select their preferred stay period, provide guest information, submit required identification, review booking details, and proceed securely to payment. The booking system is designed to reduce uncertainty by checking existing reservations, active booking holds, maintenance periods, property capacity, and applicable stay requirements before confirming availability.
+    Guests can explore Resavar Residences properties, compare accommodation options, check available dates, select their preferred stay period, provide guest information, submit required identification, review booking details, and proceed securely to payment. The booking system is designed to reduce uncertainty by checking existing reservations, active booking holds, maintenance periods, property capacity, and applicable stay requirements before confirming availability.
 
-    Beyond accommodation, Resavar supports a complete hospitality experience through concierge assistance, housekeeping requests, airport transfer arrangements, restaurant and dining information, local guides, service requests, customer support, booking verification, notifications, invoices, receipts, and guest account management. Registered guests can manage bookings, payments, identity documents, additional guests, service requests, support tickets, notifications, profiles, and account security from a dedicated customer area.
+    Beyond accommodation, Resavar Residences supports a complete hospitality experience through concierge assistance, housekeeping requests, airport transfer arrangements, restaurant and dining information, local guides, service requests, customer support, booking verification, notifications, invoices, receipts, and guest account management. Registered guests can manage bookings, payments, identity documents, additional guests, service requests, support tickets, notifications, profiles, and account security from a dedicated customer area.
 
-    Resavar also enables eligible property owners to submit properties for professional review and possible listing within the platform. Approved properties can be managed through structured booking, revenue, balance, and withdrawal processes while remaining subject to Resavar standards and administrative oversight.
+    Resavar Residences also enables eligible property owners to submit properties for professional review and possible listing within the platform. Approved properties can be managed through structured booking, revenue, balance, and withdrawal processes while remaining subject to Resavar standards and administrative oversight.
 
-    Resavar Luxury Properties Ltd maintains the platform as part of the wider Resavar ecosystem associated with Resavar Group and Resavar Holdings. Its objective is to combine dependable property management, refined hospitality, secure digital booking, responsive guest support, and carefully selected accommodation. Whether a guest requires a short stay, an extended residence, a private apartment, a comfortable room, or coordinated hospitality services, Resavar provides a convenient starting point for planning and managing the complete stay.
+    Resavar Luxury Properties Ltd maintains the platform as part of the wider Resavar ecosystem associated with Resavar Group and Resavar Holdings. Its objective is to combine dependable property management, refined hospitality, secure digital booking, responsive guest support, and carefully selected accommodation. Whether a guest requires a short stay, an extended residence, a private apartment, a comfortable room, or coordinated hospitality services, Resavar Residences provides a convenient starting point for planning and managing the complete stay.
     DESCRIPTION;
 
             $nameKeywords = [
@@ -181,9 +181,9 @@
         <meta name="keywords" content="{{ $seoKeywords }}">
         <meta name="author" content="Resavar Luxury Properties Ltd">
         <meta name="publisher" content="Resavar Luxury Properties Ltd">
-        <meta name="application-name" content="Resavar">
-        <meta name="apple-mobile-web-app-title" content="Resavar">
-        <meta name="theme-color" content="#052058">
+        <meta name="application-name" content="Resavar Residences">
+        <meta name="apple-mobile-web-app-title" content="Resavar Residences">
+        <meta name="theme-color" content="#153b34">
         <meta name="color-scheme" content="light">
         <meta name="format-detection" content="telephone=yes">
         <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
@@ -193,22 +193,25 @@
         <link rel="canonical" href="{{ $seoUrl }}">
         <link rel="alternate" hreflang="en" href="{{ $seoUrl }}">
         <link rel="alternate" hreflang="x-default" href="{{ $seoUrl }}">
-<meta property="og:type" content="website">
-        <meta property="og:site_name" content="Resavar">
+
+
+
+        <meta property="og:type" content="website">
+        <meta property="og:site_name" content="Resavar Residences">
         <meta property="og:title" content="{{ $seoTitle }}">
         <meta property="og:description" content="{{ $seoDescription }}">
         <meta property="og:url" content="{{ $seoUrl }}">
         <meta property="og:image" content="{{ $seoImage }}">
         <meta property="og:image:secure_url" content="{{ $seoImage }}">
         <meta property="og:image:type" content="image/png">
-        <meta property="og:image:alt" content="Resavar">
+        <meta property="og:image:alt" content="Resavar Residences">
         <meta property="og:locale" content="en_US">
 
         <meta name="twitter:card" content="summary">
         <meta name="twitter:title" content="{{ $seoTitle }}">
         <meta name="twitter:description" content="{{ $seoDescription }}">
         <meta name="twitter:image" content="{{ $seoImage }}">
-        <meta name="twitter:image:alt" content="Resavar">
+        <meta name="twitter:image:alt" content="Resavar Residences">
 
         <script type="application/ld+json">
             {!! json_encode(
@@ -229,14 +232,14 @@
         @include('layouts.navigation')
 
         @isset($header)
-            <header class="resavar-account-header">
-                <div class="resavar-account-container">
+            <header class="bg-white shadow">
+                <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                     {{ $header }}
                 </div>
             </header>
         @endisset
 
-        <main class="resavar-account-main">
+        <main>
             {{ $slot }}
         </main>
     </div>
