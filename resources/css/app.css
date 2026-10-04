@@ -7352,7 +7352,7 @@ body.az-auth-page {
     text-shadow: none !important;
 }
 
-/* Larger preloader with a stationary favicon contained inside a rotating ring. */
+/* Larger preloader with a stationary brand mark contained inside a rotating ring. */
 .azari-preloader > .azari-preloader__mark {
     position: relative;
     display: grid !important;
