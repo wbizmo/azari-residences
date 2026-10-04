@@ -4,10 +4,10 @@
 
         <span class="brand-logo-slot azari-brand__logo-slot azari-header-logo__slot">
                 <img
-                    src="{{ asset('images/resavar-logo-dark.png') }}"
+                    src="{{ asset('images/resavar-logo-dark.png') }}?v=20261004-4"
                     data-azari-public-logo
-                    data-dark-logo="{{ asset('images/resavar-logo-dark.png') }}"
-                    data-light-logo="{{ asset('images/resavar-logo-light.png') }}"
+                    data-dark-logo="{{ asset('images/resavar-logo-dark.png') }}?v=20261004-4"
+                    data-light-logo="{{ asset('images/resavar-logo-light.png') }}?v=20261004-4"
                     alt="{{ config('app.name', 'Resavar') }}"
                     class="brand-image azari-brand__image azari-header-logo__image"
                     loading="eager"
