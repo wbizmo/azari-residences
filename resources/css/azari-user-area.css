@@ -3,15 +3,15 @@
     --az-user-green-900: #052058;
     --az-user-green-800: #052058;
     --az-user-green-700: #052058;
-    --az-user-green-100: #052058;
+    --az-user-green-100: #FFFFFF;
     --az-user-ivory: #FFFFFF;
     --az-user-paper: #FFFFFF;
     --az-user-brass: #052058;
-    --az-user-brass-soft: #052058;
+    --az-user-brass-soft: #FFFFFF;
     --az-user-wine: #052058;
-    --az-user-ink: #000000;
+    --az-user-ink: #052058;
     --az-user-muted: #052058;
-    --az-user-line: #052058;
+    --az-user-line: rgba(5, 32, 88, .16);
     --az-user-success: #052058;
     --az-user-warning: #052058;
     --az-user-danger: #052058;
@@ -51,7 +51,7 @@
 .az-user-support-card { margin-top: 22px; padding: 16px; border: 1px solid rgba(255, 255, 255, .12); background: rgba(255, 255, 255, .06); border-radius: 18px; }
 .az-user-support-card strong { display: block; margin-bottom: 6px; font-size: 14px; }
 .az-user-support-card p { margin: 0 0 12px; color: rgba(255, 255, 255, .62); font-size: 12px; line-height: 1.5; }
-.az-user-support-card a { color: #052058; font-size: 12px; overflow-wrap: anywhere; }
+.az-user-support-card a { color: #FFFFFF; font-size: 12px; overflow-wrap: anywhere; }
 .az-user-main { min-width: 0; margin-left: var(--az-user-sidebar); padding: 0 34px 48px; }
 .az-user-topbar { position: sticky; top: 0; z-index: 30; min-height: var(--az-user-topbar); display: flex; align-items: center; justify-content: space-between; gap: 18px; background: rgba(255, 255, 255, .91); backdrop-filter: blur(18px); border-bottom: 1px solid rgba(5, 32, 88, .82); }
 .az-user-topbar-left { min-width: 0; display: flex; align-items: center; gap: 12px; }
@@ -59,7 +59,7 @@
 .az-user-kicker { margin-bottom: 3px; color: var(--az-user-green-700); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .15em; }
 .az-user-page-title { margin: 0; color: var(--az-user-green-950); font-family: var(--font-display); font-size: 28px; line-height: 1.15; }
 .az-user-profile-chip { display: flex; align-items: center; gap: 10px; padding: 5px 9px 5px 5px; background: var(--az-user-paper); border: 1px solid var(--az-user-line); border-radius: 15px; }
-.az-user-avatar { width: 38px; height: 38px; display: grid; place-items: center; overflow: hidden; border-radius: 11px; background: linear-gradient(145deg,#052058,#052058); color: var(--az-user-green-900); font-size: 12px; font-weight: 700; }
+.az-user-avatar { width: 38px; height: 38px; display: grid; place-items: center; overflow: hidden; border-radius: 11px; background: #052058; color: #FFFFFF; font-size: 12px; font-weight: 700; }
 .az-user-avatar img { width: 100%; height: 100%; object-fit: cover; }
 .az-user-profile-meta strong,.az-user-profile-meta span { display: block; }
 .az-user-profile-meta strong { color: var(--az-user-green-950); font-size: 13px; }
@@ -74,7 +74,7 @@
 .az-user-welcome { position: relative; min-height: 330px; padding: 36px; overflow: hidden; color: #FFFFFF; border-radius: 28px; background: linear-gradient(110deg,rgba(5, 32, 88, .98) 5%,rgba(5, 32, 88, .88) 56%,rgba(5, 32, 88, .48)), radial-gradient(circle at 80% 30%,rgba(5, 32, 88, .42),transparent 32%),linear-gradient(140deg,#052058,#052058); box-shadow: var(--az-user-shadow); }
 .az-user-welcome::after { content:""; position:absolute; inset:0; pointer-events:none; background: radial-gradient(circle at 90% 90%,rgba(255, 255, 255, .12),transparent 22%); }
 .az-user-welcome > * { position: relative; z-index: 1; }
-.az-user-eyebrow { display: inline-flex; align-items: center; gap: 7px; color: #052058; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .16em; }
+.az-user-eyebrow { display: inline-flex; align-items: center; gap: 7px; color: #FFFFFF; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .16em; }
 .az-user-welcome h2 { max-width: 690px; margin: 17px 0 13px; font-family: var(--font-display); font-size: clamp(34px,4vw,56px); line-height: 1.04; }
 .az-user-welcome p { max-width: 620px; margin: 0 0 25px; color: rgba(255, 255, 255, .76); font-size: 14px; line-height: 1.7; }
 .az-user-actions { display: flex; flex-wrap: wrap; gap: 10px; }
