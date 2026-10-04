@@ -48,7 +48,7 @@ html,body{max-width:100%;overflow-x:hidden}
 .az-premium-status{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px;background:#FFFFFF;color:#052058;font-size:.75rem;font-weight:800;text-transform:capitalize;white-space:nowrap}
 .az-premium-status.is-muted{background:#FFFFFF;color:#052058}
 .az-premium-status.is-warning{background:#FFFFFF;color:#052058}
-.az-premium-status.is-danger{background:#052058;color:#052058}
+.az-premium-status.is-danger{background:#052058;color:#FFFFFF}
 .az-premium-empty{padding:38px 20px;text-align:center;color:#052058}
 .az-premium-empty .material-symbols-outlined{display:block;margin:0 auto 10px;color:#052058;font-size:38px}
 .az-premium-link{color:#052058;font-weight:800;text-decoration:none}
