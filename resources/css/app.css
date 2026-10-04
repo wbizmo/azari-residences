@@ -502,7 +502,7 @@ svg {
 .availability-card {
     overflow: visible;
     border-radius: 16px;
-    background: var(--azari-ivory);
+    background: #FFFFFF;
     box-shadow: var(--shadow-floating);
 }
 
@@ -778,7 +778,7 @@ svg {
 }
 
 .residences-section {
-    background: #052058;
+    background: #FFFFFF;
 }
 
 .section-heading {
@@ -8880,16 +8880,15 @@ html,body,.public-site,#main-content{
     object-position:left center!important;
 }
 
-/* Public top state: image over hero, solid readable header after scroll. */
-html[data-azari-public-header-state="home-top"] body.home-page .site-header,
-body.home-page.azari-header-over-hero .site-header{
+/* Public top state follows the same shared state that controls the logo.
+   When the logo switches to the light version, the header becomes white immediately. */
+html[data-azari-public-header-state="home-top"] body.home-page .site-header{
     background:linear-gradient(180deg,rgba(0,0,0,.46),rgba(0,0,0,0))!important;
     border-bottom-color:transparent!important;
     box-shadow:none!important;
     color:#FFFFFF!important;
 }
-html[data-azari-public-header-state="home-top"] body.home-page .site-header :is(.desktop-navigation>a,.nav-popover-trigger,.nav-text-action),
-body.home-page.azari-header-over-hero .site-header :is(.desktop-navigation>a,.nav-popover-trigger,.nav-text-action){
+html[data-azari-public-header-state="home-top"] body.home-page .site-header :is(.desktop-navigation>a,.nav-popover-trigger,.nav-text-action){
     color:#FFFFFF!important;
     -webkit-text-fill-color:#FFFFFF!important;
 }
