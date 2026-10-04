@@ -37,16 +37,16 @@
                             <span>List my property</span>
                         </a>
                     @endif
-                    <a href="{{ route('public.concierge') }}">
+                    <a href="{{ route('public.concierge') }}" class="{{ request()->routeIs('public.concierge') ? 'is-active' : '' }}">
                         <span class="material-symbols-outlined">concierge</span>Concierge
                     </a>
-                    <a href="{{ route('public.housekeeping') }}">
+                    <a href="{{ route('public.housekeeping') }}" class="{{ request()->routeIs('public.housekeeping') ? 'is-active' : '' }}">
                         <span class="material-symbols-outlined">cleaning_services</span>Housekeeping
                     </a>
-                    <a href="{{ route('public.restaurant') }}">
+                    <a href="{{ route('public.restaurant') }}" class="{{ request()->routeIs('public.restaurant') ? 'is-active' : '' }}">
                         <span class="material-symbols-outlined">restaurant</span>Restaurant
                     </a>
-                    <a href="{{ route('public.airport-transfers') }}">
+                    <a href="{{ route('public.airport-transfers') }}" class="{{ request()->routeIs('public.airport-transfers') ? 'is-active' : '' }}">
                         <span class="material-symbols-outlined">airport_shuttle</span>Airport transfers
                     </a>
                 </div>
