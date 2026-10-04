@@ -4,7 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>@yield('code') | {{ config('app.name', 'Reserva') }}</title>
+    <title>@yield('title', 'Error') | {{ config('app.name', 'Resavar') }}</title>
+    <meta name="robots" content="noindex, nofollow, noarchive">
 
     <style>
         * {
@@ -23,7 +24,7 @@
             justify-content: center;
             padding: 24px;
             background: #052058;
-            color: #052058;
+            color: #FFFFFF;
             font-family: Arial, Helvetica, sans-serif;
         }
 
@@ -35,7 +36,7 @@
 
         .error-code {
             margin: 0;
-            color: #052058;
+            color: #FFFFFF;
             font-size: 15px;
             font-weight: 700;
             letter-spacing: 0.18em;
@@ -51,7 +52,7 @@
         .message {
             margin: 0 auto;
             max-width: 470px;
-            color: #052058;
+            color: rgba(255, 255, 255, 0.86);
             font-size: 14px;
             line-height: 1.7;
         }
@@ -62,20 +63,26 @@
         }
 
         .links a {
-            color: #052058;
+            color: #FFFFFF;
             text-decoration: underline;
             text-underline-offset: 3px;
         }
 
         .links span {
             margin: 0 8px;
-            color: #052058;
+            color: rgba(255, 255, 255, 0.62);
+        }
+
+        h1 {
+            color: #FFFFFF;
         }
     </style>
 </head>
 <body>
     <main class="error">
         <p class="error-code">@yield('code')</p>
+
+        <h1>@yield('title', 'Something went wrong')</h1>
 
         <p class="message">
             @yield('message')
