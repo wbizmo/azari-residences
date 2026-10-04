@@ -70,7 +70,7 @@
         flex: 0 0 auto;
         padding: 16px 20px;
         border-top: 1px solid rgba(5, 32, 88, 0.12);
-        background: #FFFFFF;
+        background: #ffffff;
     }
 
     .az-public-drawer-account__action {
@@ -113,7 +113,7 @@
         flex: 0 0 auto;
         padding: 16px 20px calc(16px + env(safe-area-inset-bottom));
         border-top: 1px solid rgba(5, 32, 88, 0.12);
-        background: #052058;
+        background: #FFFFFF;
     }
 
     .az-public-drawer-assistance__label {
@@ -194,7 +194,7 @@
         aria-label="Mobile navigation"
     >
         <div class="drawer-header">
-            <x-brand-logo :dark="true" />
+            <x-brand-logo variant="header" />
 
             <button
                 type="button"
@@ -310,3 +310,21 @@
         @endif
     </aside>
 </div>
+<style>
+.az-public-mobile-drawer .drawer-header .modal-close{
+    display:grid!important;
+    flex:0 0 40px!important;
+    place-items:center!important;
+    width:40px!important;
+    height:40px!important;
+    border:1px solid rgba(5,32,88,.22)!important;
+    background:#FFFFFF!important;
+    color:#052058!important;
+    opacity:1!important;
+    visibility:visible!important;
+}
+.az-public-drawer-assistance{background:#052058!important;}
+.az-public-drawer-assistance__label,
+.az-public-drawer-assistance p,
+.az-public-drawer-assistance a{color:#FFFFFF!important;}
+</style>
