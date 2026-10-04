@@ -1,8 +1,7 @@
-const CACHE_NAME = 'azari-pwa-v1';
+const CACHE_NAME = 'resavar-pwa-v2';
 
 const STATIC_ASSETS = [
-    '/manifest.webmanifest',
-    '/public/images/azari-favicon.png'
+    '/manifest.webmanifest'
 ];
 
 self.addEventListener('install', event => {
@@ -18,7 +17,10 @@ self.addEventListener('activate', event => {
         caches.keys()
             .then(keys => Promise.all(
                 keys
-                    .filter(key => key.startsWith('azari-pwa-') && key !== CACHE_NAME)
+                    .filter(key =>
+                        (key.startsWith('azari-pwa-') || key.startsWith('resavar-pwa-')) &&
+                        key !== CACHE_NAME
+                    )
                     .map(key => caches.delete(key))
             ))
             .then(() => self.clients.claim())
@@ -34,13 +36,12 @@ self.addEventListener('fetch', event => {
 
     if (url.origin !== self.location.origin) return;
 
-    // Never cache Laravel page navigation/auth/payment responses.
+    // Never cache Laravel page navigation, authentication, or payment responses.
     if (request.mode === 'navigate') return;
 
     const isStatic =
         url.pathname === '/manifest.webmanifest' ||
-        url.pathname === '/public/images/azari-favicon.png' ||
-        url.pathname.startsWith('/public/build/');
+        url.pathname.startsWith('/build/');
 
     if (!isStatic) return;
 
