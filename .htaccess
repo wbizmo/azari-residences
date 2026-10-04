@@ -1,12 +1,13 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
-    # Resavar intentionally has no favicon.
-    RewriteRule ^favicon\.ico$ - [G,L,NC]
+    # Resavar intentionally has no favicon. Do not rewrite browser favicon
+    # probes into Laravel or another image.
+    RewriteRule ^favicon\.(?:ico|png|svg)$ - [R=404,L,NC]
 
     # Hostinger points resavar.com at public_html while Laravel's web root
-    # is public_html/public. Forward every public request into Laravel's
-    # public directory without exposing or moving the application itself.
+    # is public_html/public. Forward public requests into Laravel's public
+    # directory without exposing or moving the application itself.
     RewriteCond %{REQUEST_URI} !^/public(?:/|$)
     RewriteRule ^(.*)$ public/$1 [L]
 </IfModule>
