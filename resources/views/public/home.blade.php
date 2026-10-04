@@ -144,7 +144,7 @@
                             >group</span>
 
                             <span data-guest-summary>
-                                1 adult 路 0 children
+                                1 adult · 0 children
                             </span>
 
                             <span
