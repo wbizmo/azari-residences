@@ -24,14 +24,14 @@ html,body{max-width:100%;overflow-x:hidden}
 
 /* Shared premium admin page patterns. */
 .az-premium-page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:24px;padding:clamp(22px,4vw,38px);border:1px solid rgba(5, 32, 88, .24);border-radius:24px;background:radial-gradient(circle at 90% 0%,rgba(5, 32, 88, .19),transparent 34%),linear-gradient(135deg,#052058,#052058);color:#FFFFFF;box-shadow:0 22px 58px rgba(5, 32, 88, .14)}
-.az-premium-page-head h1{margin:6px 0 8px;font-family:var(--font-heading,'Montserrat',Arial,sans-serif);font-size:clamp(2rem,4vw,3.25rem);line-height:1.02;font-weight:500}
+.az-premium-page-head h1{margin:6px 0 8px;font-family:var(--font-heading,Georgia,serif);font-size:clamp(2rem,4vw,3.25rem);line-height:1.02;font-weight:500}
 .az-premium-page-head p{max-width:720px;margin:0;color:rgba(255, 255, 255, .72);line-height:1.65}
 .az-premium-kicker{display:inline-flex;align-items:center;gap:8px;color:#052058;font-size:.72rem;font-weight:800;letter-spacing:.15em;text-transform:uppercase}
 .az-premium-kicker .material-symbols-outlined{font-size:18px}
 .az-premium-card{min-width:0;padding:clamp(18px,3vw,28px);border:1px solid rgba(5, 32, 88, .13);border-radius:22px;background:#FFFFFF;box-shadow:0 14px 38px rgba(5, 32, 88, .07)}
 .az-premium-card+.az-premium-card{margin-top:18px}
 .az-premium-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px}
-.az-premium-card-head h2{margin:0;color:#052058;font-family:var(--font-heading,'Montserrat',Arial,sans-serif);font-size:1.4rem;font-weight:500}
+.az-premium-card-head h2{margin:0;color:#052058;font-family:var(--font-heading,Georgia,serif);font-size:1.4rem;font-weight:500}
 .az-premium-card-head p{margin:6px 0 0;color:#052058;font-size:.9rem}
 .az-premium-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
 .az-premium-field{display:grid;gap:7px;min-width:0}
@@ -45,9 +45,9 @@ html,body{max-width:100%;overflow-x:hidden}
 .az-premium-toggle-row{display:flex;flex-wrap:wrap;gap:18px;align-items:center;grid-column:1/-1;padding:13px 15px;border:1px solid rgba(5, 32, 88, .11);border-radius:14px;background:#FFFFFF}
 .az-premium-toggle-row label{display:inline-flex;align-items:center;gap:9px;font-size:.84rem;font-weight:700}
 .az-premium-toggle-row input[type="checkbox"]{width:18px;height:18px;accent-color:#052058}
-.az-premium-status{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px;background:#052058;color:#052058;font-size:.75rem;font-weight:800;text-transform:capitalize;white-space:nowrap}
-.az-premium-status.is-muted{background:#052058;color:#052058}
-.az-premium-status.is-warning{background:#052058;color:#052058}
+.az-premium-status{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:999px;background:#FFFFFF;color:#052058;font-size:.75rem;font-weight:800;text-transform:capitalize;white-space:nowrap}
+.az-premium-status.is-muted{background:#FFFFFF;color:#052058}
+.az-premium-status.is-warning{background:#FFFFFF;color:#052058}
 .az-premium-status.is-danger{background:#052058;color:#052058}
 .az-premium-empty{padding:38px 20px;text-align:center;color:#052058}
 .az-premium-empty .material-symbols-outlined{display:block;margin:0 auto 10px;color:#052058;font-size:38px}
@@ -57,32 +57,32 @@ html,body{max-width:100%;overflow-x:hidden}
 /* Service-request user page. */
 .az-service-hero{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(250px,.6fr);gap:18px;margin-bottom:20px}
 .az-service-hero__main{padding:clamp(25px,5vw,48px);border-radius:26px;background:radial-gradient(circle at 88% 12%,rgba(5, 32, 88, .28),transparent 30%),linear-gradient(135deg,#052058,#052058);color:#FFFFFF;box-shadow:0 22px 60px rgba(5, 32, 88, .16)}
-.az-service-hero__main h2{margin:12px 0 12px;font-family:var(--font-heading,'Montserrat',Arial,sans-serif);font-size:clamp(2rem,4vw,3.2rem);font-weight:500;line-height:1.05}
+.az-service-hero__main h2{margin:12px 0 12px;font-family:var(--font-heading,Georgia,serif);font-size:clamp(2rem,4vw,3.2rem);font-weight:500;line-height:1.05}
 .az-service-hero__main p{max-width:650px;margin:0;color:rgba(255, 255, 255, .74);line-height:1.7}
 .az-service-hero__side{display:grid;align-content:center;padding:26px;border:1px solid rgba(5, 32, 88, .22);border-radius:26px;background:#FFFFFF}
-.az-service-hero__side .material-symbols-outlined{width:50px;height:50px;display:grid;place-items:center;border-radius:15px;background:#052058;color:#052058;font-size:27px}
-.az-service-hero__side strong{display:block;margin-top:16px;color:#052058;font-family:var(--font-heading,'Montserrat',Arial,sans-serif);font-size:1.25rem}
+.az-service-hero__side .material-symbols-outlined{width:50px;height:50px;display:grid;place-items:center;border-radius:15px;background:#FFFFFF;color:#052058;font-size:27px}
+.az-service-hero__side strong{display:block;margin-top:16px;color:#052058;font-family:var(--font-heading,Georgia,serif);font-size:1.25rem}
 .az-service-hero__side p{margin:7px 0 0;color:#052058;line-height:1.55;font-size:.88rem}
 .az-service-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(330px,.72fr);gap:20px;align-items:start}
 .az-service-history{display:grid;gap:12px}
 .az-service-history-card{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:13px;align-items:center;padding:14px;border:1px solid rgba(5, 32, 88, .12);border-radius:16px;background:#FFFFFF;text-decoration:none;transition:.18s ease}
 .az-service-history-card:hover{transform:translateY(-1px);border-color:rgba(5, 32, 88, .5);box-shadow:0 10px 28px rgba(5, 32, 88, .07)}
-.az-service-history-icon{width:44px;height:44px;display:grid;place-items:center;border-radius:13px;background:#052058;color:#052058}
+.az-service-history-icon{width:44px;height:44px;display:grid;place-items:center;border-radius:13px;background:#FFFFFF;color:#052058}
 .az-service-history-card h3{margin:0;color:#052058;font-size:.92rem}
 .az-service-history-card p{margin:4px 0 0;color:#052058;font-size:.78rem}
 
 /* Homepage promotion popup. Lower than the preloader (99999), above all ordinary UI. */
-.az-promo-popup{position:fixed;z-index:9000;inset:0;display:grid;place-items:center;padding:20px;background:rgba(5, 32, 88, .60);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .24s ease,visibility .24s ease}
+.az-promo-popup{position:fixed;z-index:9000;inset:0;display:grid;place-items:center;padding:20px;background:rgba(0, 0, 0, .60);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .24s ease,visibility .24s ease}
 .az-promo-popup.is-visible{opacity:1;visibility:visible;pointer-events:auto}
 .az-promo-popup__dialog{position:relative;width:min(100%,720px);max-height:min(86vh,760px);overflow:auto;border:1px solid rgba(255, 255, 255, .14);border-radius:28px;background:#FFFFFF;box-shadow:0 40px 110px rgba(0, 0, 0, .38);transform:translateY(14px) scale(.985);transition:transform .24s ease}
 .az-promo-popup.is-visible .az-promo-popup__dialog{transform:none}
 .az-promo-popup__media{position:relative;min-height:210px;overflow:hidden;background:radial-gradient(circle at 80% 20%,rgba(5, 32, 88, .42),transparent 28%),linear-gradient(135deg,#052058,#052058)}
 .az-promo-popup__media img{width:100%;height:100%;min-height:210px;max-height:340px;object-fit:cover}
-.az-promo-popup__media:after{position:absolute;inset:0;background:linear-gradient(180deg,transparent 25%,rgba(5, 32, 88, .62));content:""}
+.az-promo-popup__media:after{position:absolute;inset:0;background:linear-gradient(180deg,transparent 25%,rgba(0, 0, 0, .62));content:""}
 .az-promo-popup__badge{position:absolute;z-index:2;left:24px;bottom:20px;display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:rgba(255, 255, 255, .92);color:#052058;font-size:.72rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase}
-.az-promo-popup__close{position:absolute;z-index:4;top:16px;right:16px;width:42px;height:42px;display:grid;place-items:center;border:1px solid rgba(255, 255, 255, .28);border-radius:50%;background:rgba(5, 32, 88, .64);color:#FFFFFF;backdrop-filter:blur(10px)}
+.az-promo-popup__close{position:absolute;z-index:4;top:16px;right:16px;width:42px;height:42px;display:grid;place-items:center;border:1px solid rgba(255, 255, 255, .28);border-radius:50%;background:rgba(0, 0, 0, .64);color:#FFFFFF;backdrop-filter:blur(10px)}
 .az-promo-popup__body{padding:clamp(24px,5vw,42px)}
-.az-promo-popup__body h2{margin:0 0 12px;color:#052058;font-family:var(--font-heading,'Montserrat',Arial,sans-serif);font-size:clamp(2rem,5vw,3.35rem);font-weight:500;line-height:1.02}
+.az-promo-popup__body h2{margin:0 0 12px;color:#052058;font-family:var(--font-heading,Georgia,serif);font-size:clamp(2rem,5vw,3.35rem);font-weight:500;line-height:1.02}
 .az-promo-popup__summary{margin:0;color:#052058;font-size:1rem;line-height:1.7}
 .az-promo-popup__copy{margin-top:16px;color:#052058;line-height:1.7}
 .az-promo-popup__actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px}
