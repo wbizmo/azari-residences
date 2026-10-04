@@ -52,7 +52,7 @@ input[type="checkbox"][data-az-toggle-ready="true"] {
     flex: 0 0 auto;
     inline-size: 2.75rem;
     block-size: 1.5rem;
-    border: 1px solid rgba(5, 32, 88, .24);
+    border: 1px solid rgba(0, 0, 0, .24);
     border-radius: 999px;
     background: #052058;
     transition: .18s ease;
