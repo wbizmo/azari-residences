@@ -17,7 +17,7 @@
 <main class="resavar-auth-layout">
     <section class="resavar-auth-brand-panel" aria-label="Resavar administration">
         <a href="{{ url('/') }}" class="resavar-auth-logo-link" aria-label="Resavar home">
-            <img src="{{ asset('images/logo-dark.png') }}" alt="Resavar" class="resavar-auth-logo">
+            <img src="{{ asset('images/resavar-logo-dark.png') }}?v=20261004-4" alt="Resavar" class="resavar-auth-logo">
         </a>
 
         <div class="resavar-auth-brand-copy">
