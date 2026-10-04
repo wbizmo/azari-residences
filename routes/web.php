@@ -12,10 +12,6 @@ use App\Http\Controllers\PublicSite\HomeController;
 use App\Http\Controllers\PublicSite\PropertyController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/favicon.ico', fn () => response('', 204, [
-    'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
-]))->name('no-favicon');
-
 Route::get('/', HomeController::class)->name('home');
 // Availability routes are registered in azari-public-completion.php
 Route::get('/residences/{property}', [PropertyController::class, 'show'])->name('properties.show');
