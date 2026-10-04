@@ -12,7 +12,7 @@ form.is-submitting::after {
     inset: 0;
     z-index: 20;
     border-radius: inherit;
-    background: rgba(5, 32, 88, 0.44);
+    background: rgba(255, 255, 255, 0.44);
     cursor: progress;
 }
 
@@ -46,7 +46,7 @@ form.is-submitting input[type='submit'] {
     justify-items: center;
     gap: 0.75rem;
     padding: clamp(1.5rem, 4vw, 3rem);
-    border: 1px dashed var(--azari-border, rgba(5, 32, 88, 0.16));
+    border: 1px dashed var(--azari-border, rgba(0, 0, 0, 0.16));
     border-radius: 1rem;
     text-align: center;
 }
@@ -98,7 +98,7 @@ form.is-submitting input[type='submit'] {
 .azari-confirmation-backdrop {
     position: absolute;
     inset: 0;
-    background: rgba(5, 32, 88, 0.72);
+    background: rgba(0, 0, 0, 0.72);
     backdrop-filter: blur(8px);
 }
 
@@ -110,7 +110,7 @@ form.is-submitting input[type='submit'] {
     overflow-y: auto;
     padding: clamp(1.5rem, 4vw, 2.25rem);
     background: var(--azari-ivory, #FFFFFF);
-    border: 1px solid var(--azari-border, rgba(5, 32, 88, 0.16));
+    border: 1px solid var(--azari-border, rgba(0, 0, 0, 0.16));
     border-radius: 1.25rem;
     box-shadow: 0 2rem 5rem rgba(0, 0, 0, 0.35);
     text-align: center;
@@ -125,9 +125,9 @@ form.is-submitting input[type='submit'] {
     height: 2.5rem;
     display: grid;
     place-items: center;
-    color: var(--azari-ink, #052058);
+    color: var(--azari-ink, #000000);
     background: transparent;
-    border: 1px solid var(--azari-border, rgba(5, 32, 88, 0.16));
+    border: 1px solid var(--azari-border, rgba(0, 0, 0, 0.16));
     border-radius: 999px;
 }
 
@@ -137,15 +137,15 @@ form.is-submitting input[type='submit'] {
     margin: 0 auto 1rem;
     display: grid;
     place-items: center;
-    color: var(--azari-ink, #052058);
-    background: var(--azari-ivory-deep, #FFFFFF);
+    color: var(--azari-ink, #000000);
+    background: var(--azari-ivory-deep, #052058);
     border-radius: 1rem;
 }
 
 .azari-confirmation-card h2 {
     margin: 0;
-    color: var(--azari-ink, #052058);
-    font-family: var(--font-display,'Montserrat',Arial,sans-serif);
+    color: var(--azari-ink, #000000);
+    font-family: var(--font-display, Georgia, serif);
     font-size: clamp(1.5rem, 4vw, 2rem);
 }
 
@@ -174,8 +174,8 @@ form.is-submitting input[type='submit'] {
 
 .azari-confirmation-primary {
     color: #FFFFFF;
-    background: var(--azari-ink, #052058);
-    border: 1px solid var(--azari-ink, #052058);
+    background: var(--azari-ink, #000000);
+    border: 1px solid var(--azari-ink, #000000);
 }
 
 .azari-confirmation-primary.is-destructive {
@@ -184,9 +184,9 @@ form.is-submitting input[type='submit'] {
 }
 
 .azari-confirmation-secondary {
-    color: var(--azari-ink, #052058);
+    color: var(--azari-ink, #000000);
     background: transparent;
-    border: 1px solid var(--azari-border, rgba(5, 32, 88, 0.16));
+    border: 1px solid var(--azari-border, rgba(0, 0, 0, 0.16));
 }
 
 @media (max-width: 520px) {
