@@ -328,12 +328,7 @@
                     class="azari-view-all-residences"
                 >
                     <span>View all hotels & residences</span>
-
-                    <span
-                        class="material-symbols-outlined"
-                        aria-hidden="true"
-                    >arrow_forward</span>
-                </a>
+</a>
             </div>
 
             <div class="residence-grid">
