@@ -9804,8 +9804,27 @@ input[type="checkbox"][data-az-switch-ready="true"]:checked + .az-switch__track 
 
 
 /* RESAVAR_HEADER_HAMBURGER_STATE_SYNC_START
-   The hamburger uses the exact same public-header state as the logo/header:
-   home-top = white over hero; solid = navy on white header. */
+   One shared public-header state controls the homepage header, logo and hamburger.
+   Homepage at absolute top: header overlays the hero; hamburger/lines are white.
+   The instant scrolling begins: header is white, logo swaps, hamburger/lines are navy.
+   All non-homepage public surfaces keep the white header and navy hamburger. */
+html[data-azari-public-header-state="home-top"]
+body.home-page
+.site-header {
+    background: linear-gradient(180deg, rgba(0, 0, 0, .46), rgba(0, 0, 0, 0)) !important;
+    color: #FFFFFF !important;
+    border-bottom-color: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+}
+
+html[data-azari-public-header-state="home-top"]
+body.home-page
+.site-header :is(.desktop-navigation > a, .nav-popover-trigger, .nav-text-action) {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+
 html[data-azari-public-header-state="home-top"]
 body.home-page
 .site-header
@@ -9813,7 +9832,7 @@ body.home-page
     --azari-menu-current-color: #FFFFFF !important;
     color: #FFFFFF !important;
     -webkit-text-fill-color: #FFFFFF !important;
-    border-color: rgba(255, 255, 255, .68) !important;
+    border: 1px solid #FFFFFF !important;
 }
 
 html[data-azari-public-header-state="home-top"]
@@ -9824,6 +9843,18 @@ body.home-page
     color: #FFFFFF !important;
     background-color: #FFFFFF !important;
     border-color: #FFFFFF !important;
+}
+
+html[data-azari-public-header-state="solid"]
+.site-header,
+body.inner-page
+.site-header,
+body.azari-solid-header
+.site-header {
+    background: #FFFFFF !important;
+    color: #052058 !important;
+    border-bottom: 1px solid rgba(5, 32, 88, .14) !important;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, .06) !important;
 }
 
 html[data-azari-public-header-state="solid"]
@@ -9838,7 +9869,7 @@ body.azari-solid-header
     --azari-menu-current-color: #052058 !important;
     color: #052058 !important;
     -webkit-text-fill-color: #052058 !important;
-    border-color: rgba(5, 32, 88, .42) !important;
+    border: 1px solid #052058 !important;
 }
 
 html[data-azari-public-header-state="solid"]
@@ -9856,5 +9887,13 @@ body.azari-solid-header
     color: #052058 !important;
     background-color: #052058 !important;
     border-color: #052058 !important;
+}
+
+/* Back-to-top: white surface, navy arrow, exact 1px navy outer border. */
+.back-to-top,
+.scroll-to-top,
+[data-back-to-top],
+#back-to-top {
+    border: 1px solid #052058 !important;
 }
 /* RESAVAR_HEADER_HAMBURGER_STATE_SYNC_END */
