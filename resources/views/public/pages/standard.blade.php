@@ -7,6 +7,7 @@
     <section class="az-editorial-hero">
         <div class="site-container az-editorial-hero__grid">
             <div class="az-editorial-hero__copy">
+                <span class="eyebrow">Resavar</span>
                 <h1 class="az-editorial-title">{{ $title }}</h1>
                 <p>{{ $intro }}</p>
 
