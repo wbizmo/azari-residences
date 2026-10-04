@@ -34,20 +34,20 @@
                         <a href="{{ route('public.list-property') }}"
                            class="{{ request()->routeIs('public.list-property') ? 'is-active' : '' }}">
                             <span class="material-symbols-outlined" aria-hidden="true">add_home_work</span>
-                            <span>List my property</span>
+                            <span class="nav-popover-label">List my property</span>
                         </a>
                     @endif
                     <a href="{{ route('public.concierge') }}" class="{{ request()->routeIs('public.concierge') ? 'is-active' : '' }}">
-                        <span class="material-symbols-outlined">concierge</span>Concierge
+                        <span class="material-symbols-outlined">concierge</span><span class="nav-popover-label">Concierge</span>
                     </a>
                     <a href="{{ route('public.housekeeping') }}" class="{{ request()->routeIs('public.housekeeping') ? 'is-active' : '' }}">
-                        <span class="material-symbols-outlined">cleaning_services</span>Housekeeping
+                        <span class="material-symbols-outlined">cleaning_services</span><span class="nav-popover-label">Housekeeping</span>
                     </a>
                     <a href="{{ route('public.restaurant') }}" class="{{ request()->routeIs('public.restaurant') ? 'is-active' : '' }}">
-                        <span class="material-symbols-outlined">restaurant</span>Restaurant
+                        <span class="material-symbols-outlined">restaurant</span><span class="nav-popover-label">Restaurant</span>
                     </a>
                     <a href="{{ route('public.airport-transfers') }}" class="{{ request()->routeIs('public.airport-transfers') ? 'is-active' : '' }}">
-                        <span class="material-symbols-outlined">airport_shuttle</span>Airport transfers
+                        <span class="material-symbols-outlined">airport_shuttle</span><span class="nav-popover-label">Airport transfers</span>
                     </a>
                 </div>
             </div>
