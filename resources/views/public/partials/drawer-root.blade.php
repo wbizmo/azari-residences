@@ -232,7 +232,7 @@
 
                 <a href="{{ route('public.contact') }}">Contact</a>
                 @if(Route::has('public.list-property'))
-                    <a href="{{ route('user.owner.listings.create') }}">List your property</a>
+                    <a href="{{ route('public.list-property') }}">List your property</a>
                 @endif
 
                 <a href="{{ route('bookings.verify') }}">Verify booking</a>
