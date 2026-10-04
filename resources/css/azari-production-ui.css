@@ -52,7 +52,7 @@ input[type="checkbox"][data-az-toggle-ready="true"] {
     flex: 0 0 auto;
     inline-size: 2.75rem;
     block-size: 1.5rem;
-    border: 1px solid rgba(0, 0, 0, .24);
+    border: 1px solid rgba(5, 32, 88, .24);
     border-radius: 999px;
     background: #052058;
     transition: .18s ease;
@@ -87,6 +87,6 @@ input[type="checkbox"]:disabled + .az-toggle { opacity: .48; cursor: not-allowed
     animation: az-action-spin .65s linear infinite;
 }
 .is-success { box-shadow: 0 0 0 2px rgba(5, 32, 88, .22); }
-.is-error { box-shadow: 0 0 0 2px rgba(5, 32, 88, .22); }
+.is-error { box-shadow: 0 0 0 2px rgba(0, 0, 0, .22); }
 @keyframes az-action-spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .az-action-spinner { animation-duration: 1.6s; } }
