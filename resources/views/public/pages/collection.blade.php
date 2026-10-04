@@ -7,6 +7,7 @@
     <section class="az-editorial-hero">
         <div class="site-container az-editorial-hero__grid">
             <div class="az-editorial-hero__copy">
+                <span class="eyebrow">The Resavar collection</span>
                 <h1 class="az-editorial-title{{ strtolower($title) === 'apartments' ? ' az-editorial-title--apartments' : '' }}">
                     @if(strtolower($title) === 'apartments')
                         Apartm<br>ents
