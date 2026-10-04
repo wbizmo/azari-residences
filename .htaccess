@@ -1,0 +1,9 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Hostinger points resavar.com at public_html while Laravel's web root
+    # is public_html/public. Forward every public request into Laravel's
+    # public directory without exposing or moving the application itself.
+    RewriteCond %{REQUEST_URI} !^/public(?:/|$)
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
