@@ -79,6 +79,7 @@ class GeneratePublicSitemap extends Command
             ['public.cancellation-policy',   'monthly', '0.5'],
             ['public.privacy-policy',        'monthly', '0.5'],
             ['public.terms',                 'monthly', '0.5'],
+            ['public.status',                'hourly',  '0.3'],
         ];
 
         $entries = [];
@@ -233,11 +234,13 @@ class GeneratePublicSitemap extends Command
 
         /*
         |--------------------------------------------------------------------------
-        | This Hostinger deployment serves base_path() as the domain web root.
+        | Hostinger forwards the domain root into Laravel's public directory.
+        | The sitemap must therefore live in public/ so /sitemap.xml is served
+        | as a real static XML file instead of being rewritten into Laravel.
         |--------------------------------------------------------------------------
         */
 
-        $target = base_path('sitemap.xml');
+        $target = public_path('sitemap.xml');
         $temporary = $target.'.tmp';
 
         if (file_put_contents($temporary, $xml) === false) {
@@ -262,7 +265,7 @@ class GeneratePublicSitemap extends Command
         |--------------------------------------------------------------------------
         */
 
-        $robotsPath = base_path('robots.txt');
+        $robotsPath = public_path('robots.txt');
 
         $robots = is_file($robotsPath)
             ? (string) file_get_contents($robotsPath)
