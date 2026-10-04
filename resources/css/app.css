@@ -9692,3 +9692,112 @@ body.inner-page .site-header :is(.desktop-navigation>a,.nav-popover-trigger,.nav
     .azari-home-hero{padding-top:66px!important}
     .azari-home-hero__image{object-position:60% center!important}
 }
+
+
+/* RESAVAR_DASHBOARD_CONTRAST_AND_TOGGLE_REPAIR_START
+   Dashboard contrast contract:
+   - white surface => navy foreground
+   - navy surface  => white foreground
+   Toggle contract:
+   - unchecked => white track with navy thumb
+   - checked   => navy track with white thumb
+*/
+.az-admin-sidebar .az-nav-link:not(.is-active),
+.az-user-sidebar .az-user-nav-link:not(.is-active),
+.az-user-mobile-drawer .az-user-nav-link:not(.is-active) {
+    color: #FFFFFF !important;
+}
+
+.az-admin-sidebar .az-nav-link:not(.is-active) > :is(span, strong, .material-symbols-outlined),
+.az-user-sidebar .az-user-nav-link:not(.is-active) > :is(span, strong, .material-symbols-outlined),
+.az-user-mobile-drawer .az-user-nav-link:not(.is-active) > :is(span, strong, .material-symbols-outlined) {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+
+.az-admin-sidebar .az-nav-link.is-active,
+.az-user-sidebar .az-user-nav-link.is-active,
+.az-user-mobile-drawer .az-user-nav-link.is-active {
+    border-color: rgba(5, 32, 88, .16) !important;
+    background: #FFFFFF !important;
+    color: #052058 !important;
+    -webkit-text-fill-color: #052058 !important;
+}
+
+.az-admin-sidebar .az-nav-link.is-active > :is(span, strong, .material-symbols-outlined),
+.az-user-sidebar .az-user-nav-link.is-active > :is(span, strong, .material-symbols-outlined):not(.az-user-nav-badge),
+.az-user-mobile-drawer .az-user-nav-link.is-active > :is(span, strong, .material-symbols-outlined):not(.az-user-nav-badge) {
+    color: #052058 !important;
+    -webkit-text-fill-color: #052058 !important;
+}
+
+.az-user-sidebar .az-user-nav-link.is-active > .az-user-nav-badge,
+.az-user-mobile-drawer .az-user-nav-link.is-active > .az-user-nav-badge {
+    background: #052058 !important;
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+
+/* User dashboard elements that previously collapsed to navy-on-navy. */
+.az-user-welcome .az-user-eyebrow {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+
+.az-user-avatar,
+.az-user-timezone-icon,
+.az-user-summary-icon,
+.az-user-mini-icon,
+.az-user-stat > .material-symbols-outlined,
+.az-user-status,
+.az-user-mobile-bottom a.is-active {
+    background: #052058 !important;
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+
+.az-user-mobile-bottom a.is-active :is(span, .material-symbols-outlined) {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+
+/* Legacy toggle component: clear visual difference between off and on. */
+.az-toggle-track {
+    border: 1px solid #052058 !important;
+    background: #FFFFFF !important;
+}
+
+.az-toggle-track::after {
+    background: #052058 !important;
+}
+
+.az-toggle input:checked + .az-toggle-track {
+    border-color: #052058 !important;
+    background: #052058 !important;
+}
+
+.az-toggle input:checked + .az-toggle-track::after {
+    background: #FFFFFF !important;
+}
+
+/* Enhanced switch component used by dynamically upgraded checkboxes. */
+.az-switch__track {
+    border-color: #052058 !important;
+    background: #FFFFFF !important;
+}
+
+.az-switch__thumb {
+    background: #052058 !important;
+}
+
+.az-switch > input:checked + .az-switch__track,
+input[type="checkbox"][data-az-switch-ready="true"]:checked + .az-switch__track {
+    border-color: #052058 !important;
+    background: #052058 !important;
+}
+
+.az-switch > input:checked + .az-switch__track .az-switch__thumb,
+input[type="checkbox"][data-az-switch-ready="true"]:checked + .az-switch__track .az-switch__thumb {
+    background: #FFFFFF !important;
+}
+/* RESAVAR_DASHBOARD_CONTRAST_AND_TOGGLE_REPAIR_END */
