@@ -11,7 +11,7 @@
         :root{--ink:#052058;--muted:#052058;--line:rgba(5,32,88,.14);--paper:#FFFFFF;--gold:#052058}
         *{box-sizing:border-box}
         html,body{margin:0;min-height:100%}
-        body{font-family:Inter,system-ui,sans-serif;background:var(--paper);color:var(--ink)}
+        body{font-family:Montserrat,Arial,sans-serif;background:var(--paper);color:var(--ink)}
         .auth{min-height:100dvh;display:grid;grid-template-columns:minmax(0,1.08fr) minmax(430px,.92fr);background:#FFFFFF}
         .visual{position:relative;overflow:hidden;background:#052058}
         .visual img{width:100%;height:100%;object-fit:cover;display:block}
@@ -20,7 +20,7 @@
         .panel{display:grid;place-items:center;padding:clamp(30px,5vw,76px);background:radial-gradient(circle at 100% 0%,rgba(5,32,88,.08),transparent 36%),#FFFFFF}
         .wrap{width:min(100%,460px)}
         .kicker{margin:0 0 10px;color:var(--gold);font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
-        h1{margin:0;font:500 clamp(36px,4vw,52px)/1 Georgia,serif;letter-spacing:-.035em}
+        h1{margin:0;font:500 clamp(36px,4vw,52px)/1 Montserrat,Arial,sans-serif;letter-spacing:-.035em}
         .sub{margin:15px 0 28px;color:var(--muted);line-height:1.6}
         .field{margin-bottom:17px}
         .field label{display:block;margin-bottom:8px;font-size:13px;font-weight:700}
@@ -48,7 +48,7 @@
 <body>
 <main class="auth">
     <section class="visual">
-        <img src="{{ asset('images/azari-guest-auth-suite.png') }}" alt="Luxury Azari suite">
+        <img src="{{ asset('images/azari-guest-auth-suite.png') }}" alt="Luxury Resavar suite">
         <a class="brand" href="{{ url('/') }}">Resavar</a>
     </section>
 
@@ -113,7 +113,7 @@
             </form>
 
             <p class="switch">
-                New to Azari?
+                New to Resavar?
                 <a class="link" href="{{ route('register') }}">Create an account</a>
             </p>
         </div>
