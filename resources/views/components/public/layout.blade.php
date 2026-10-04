@@ -33,30 +33,35 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('head')
-
-    <link rel="manifest" href="/manifest.webmanifest">
-    <meta name="theme-color" content="#052058">
 </head>
 <body class="public-site {{ request()->routeIs('home') ? 'home-page azari-home-page' : 'inner-page azari-inner-page azari-solid-header' }} {{ $bodyClass ?? '' }}">
     <div class="azari-preloader" data-public-preloader role="status" aria-label="Loading Resavar">
         <span class="azari-preloader__mark" aria-hidden="true">
             <span class="azari-preloader__spinner"></span>
-            <img src="{{ asset('images/logo-light.png') }}" alt="" width="42" height="42" loading="eager" decoding="sync">
+            <img src="{{ asset('images/resavar-logo-light.png') }}" alt="" width="42" height="42" loading="eager" decoding="sync">
         </span>
     </div>
 
     <a class="skip-link" href="#main-content">Skip to main content</a>
+
     @include('public.partials.navigation')
+
     <main id="main-content">
-        @isset($slot) {{ $slot }} @else @yield('content') @endisset
+        @isset($slot)
+            {{ $slot }}
+        @else
+            @yield('content')
+        @endisset
     </main>
+
     @include('public.partials.footer')
+
     <button type="button" class="back-to-top" data-back-to-top aria-label="Back to top" title="Back to top">
         <span class="material-symbols-outlined" aria-hidden="true">arrow_upward</span>
     </button>
-    @include('public.partials.drawer-root')
+@include('public.partials.drawer-root')
+
     @stack('scripts')
     <x-azari-feedback />
-    <script src="{{ asset('pwa-install.js') }}?v=20260810-9" defer></script>
 </body>
 </html>
