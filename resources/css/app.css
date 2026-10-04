@@ -4799,9 +4799,9 @@ button.back-to-top:focus-visible,
     --az-admin-brass: #052058;
     --az-admin-brass-deep: #052058;
     --az-admin-wine: #052058;
-    --az-admin-ink: #000000;
+    --az-admin-ink: #052058;
     --az-admin-muted: #052058;
-    --az-admin-line: #052058;
+    --az-admin-line: rgba(5, 32, 88, .16);
     --az-admin-success: #052058;
     --az-admin-danger: #052058;
     --az-admin-shadow: 0 20px 55px rgb(8 27 22 / 10%);
