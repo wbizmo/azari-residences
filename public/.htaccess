@@ -73,6 +73,8 @@
     </IfModule>
 
     RewriteEngine On
+    # Resavar intentionally has no favicon.
+    RewriteRule ^favicon\.ico$ - [G,L,NC]
 
     # Force HTTPS
     RewriteCond %{HTTPS} !=on
