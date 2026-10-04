@@ -16,7 +16,7 @@
     <main class="resavar-welcome">
         <section class="resavar-welcome__brand">
             <a href="{{ url('/') }}" aria-label="Resavar home">
-                <img src="{{ asset('images/logo-dark.png') }}" alt="Resavar">
+                <img src="{{ asset('images/resavar-logo-dark.png') . '?v=20261004-4' }}" alt="Resavar">
             </a>
             <div>
                 <span>Exceptional Stays, Everywhere.</span>
