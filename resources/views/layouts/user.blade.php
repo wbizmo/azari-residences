@@ -420,7 +420,7 @@
         flex: 0 0 auto;
         padding: 13px 18px;
         border-top: 1px solid rgba(255, 255, 255, 0.12);
-        background: var(--az-user-sidebar, #0b2a22);
+        background: var(--az-user-sidebar, #052058);
     }
 
     .az-user-logout-form {
@@ -441,7 +441,7 @@
         border: 0;
         border-radius: 9px;
         background: transparent;
-        color: #ef4444 !important;
+        color: #FFFFFF !important;
 
         font: inherit;
         font-size: 13px;
@@ -461,14 +461,14 @@
     .az-user-logout-button .az-user-logout-icon,
     .az-user-logout-button .az-user-logout-text,
     .az-user-logout-button .az-user-logout-arrow {
-        color: #ef4444 !important;
+        color: #FFFFFF !important;
     }
 
     .az-user-logout-button:hover,
     .az-user-logout-button:focus-visible {
         gap: 12px;
-        background: rgba(239, 68, 68, 0.12);
-        color: #f87171 !important;
+        background: rgba(5, 32, 88, 0.12);
+        color: #FFFFFF !important;
         outline: none;
     }
 
@@ -478,16 +478,16 @@
     .az-user-logout-button:focus-visible .az-user-logout-icon,
     .az-user-logout-button:focus-visible .az-user-logout-text,
     .az-user-logout-button:focus-visible .az-user-logout-arrow {
-        color: #f87171 !important;
+        color: #FFFFFF !important;
     }
 
     .az-user-logout-button:focus-visible {
-        box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.38);
+        box-shadow: 0 0 0 2px rgba(5, 32, 88, 0.38);
     }
 
     .az-user-logout-icon {
         flex: 0 0 auto;
-        color: #ef4444 !important;
+        color: #FFFFFF !important;
         font-size: 20px;
         line-height: 1;
     }
@@ -495,21 +495,21 @@
     .az-user-logout-text {
         min-width: 0;
         flex: 1 1 auto;
-        color: #ef4444 !important;
+        color: #FFFFFF !important;
         text-decoration: underline;
-        text-decoration-color: #ef4444 !important;
+        text-decoration-color: #FFFFFF !important;
         text-decoration-thickness: 1px;
         text-underline-offset: 4px;
     }
 
     .az-user-logout-button:hover .az-user-logout-text,
     .az-user-logout-button:focus-visible .az-user-logout-text {
-        text-decoration-color: #f87171 !important;
+        text-decoration-color: #FFFFFF !important;
     }
 
     .az-user-logout-arrow {
         flex: 0 0 auto;
-        color: #ef4444 !important;
+        color: #FFFFFF !important;
         font-size: 18px;
         line-height: 1;
         text-decoration: none !important;
@@ -576,7 +576,7 @@
 
             display: block !important;
             border: 0 !important;
-            background: rgba(5, 20, 15, 0.68) !important;
+            background: rgba(0, 0, 0, 0.68) !important;
 
             opacity: 0 !important;
             visibility: hidden !important;
@@ -627,7 +627,7 @@
 
             padding: 16px 18px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-            background: var(--az-user-sidebar, #0b2a22);
+            background: var(--az-user-sidebar, #052058);
         }
 
         .az-user-drawer-close {
@@ -641,7 +641,7 @@
             border: 1px solid rgba(255, 255, 255, 0.18) !important;
             border-radius: 10px !important;
             background: rgba(255, 255, 255, 0.08) !important;
-            color: #ffffff !important;
+            color: #FFFFFF !important;
 
             cursor: pointer;
             -webkit-tap-highlight-color: transparent;
@@ -655,7 +655,7 @@
 
         .az-user-drawer-close .material-symbols-outlined {
             display: inline-block !important;
-            color: #ffffff !important;
+            color: #FFFFFF !important;
             font-size: 25px !important;
             line-height: 1 !important;
             visibility: visible !important;
@@ -683,7 +683,7 @@
             flex: 0 0 auto;
             padding: 10px 12px;
             border-top: 1px solid rgba(255, 255, 255, 0.12);
-            background: var(--az-user-sidebar, #0b2a22);
+            background: var(--az-user-sidebar, #052058);
         }
 
         /*
@@ -695,7 +695,7 @@
             flex: 0 0 auto;
             padding: 12px;
             border-top: 1px solid rgba(255, 255, 255, 0.12);
-            background: var(--az-user-sidebar, #0b2a22);
+            background: var(--az-user-sidebar, #052058);
         }
     }
 
