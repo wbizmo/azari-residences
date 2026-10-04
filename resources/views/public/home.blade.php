@@ -513,15 +513,15 @@
                 background:
                     radial-gradient(
                         circle at 12% 18%,
-                        rgba(184, 147, 92, .13),
+                        rgba(5, 32, 88, .13),
                         transparent 34%
                     ),
                     radial-gradient(
                         circle at 92% 82%,
-                        rgba(12, 43, 36, .12),
+                        rgba(5, 32, 88, .12),
                         transparent 36%
                     ),
-                    #f7f4ee;
+                    #FFFFFF;
             }
 
             .azari-app-card {
@@ -531,12 +531,12 @@
                 align-items: center;
                 min-height: 510px;
                 overflow: hidden;
-                border: 1px solid rgba(12, 43, 36, .12);
+                border: 1px solid rgba(5, 32, 88, .12);
                 border-radius: clamp(24px, 3vw, 38px);
-                background: #fff;
+                background: #FFFFFF;
                 box-shadow:
-                    0 30px 80px rgba(20, 27, 24, .10),
-                    0 8px 24px rgba(20, 27, 24, .05);
+                    0 30px 80px rgba(0, 0, 0, .10),
+                    0 8px 24px rgba(0, 0, 0, .05);
             }
 
             .azari-app-copy {
@@ -550,7 +550,7 @@
                 align-items: center;
                 gap: 9px;
                 margin-bottom: 20px;
-                color: #816641;
+                color: #052058;
                 font-size: 12px;
                 font-weight: 700;
                 letter-spacing: .16em;
@@ -567,7 +567,7 @@
             .azari-app-title {
                 max-width: 720px;
                 margin: 0;
-                color: #10251f;
+                color: #000000;
                 font-size: clamp(34px, 4.7vw, 62px);
                 line-height: 1.03;
                 letter-spacing: -.035em;
@@ -576,7 +576,7 @@
             .azari-app-description {
                 max-width: 620px;
                 margin: 24px 0 0;
-                color: #5f6764;
+                color: #052058;
                 font-size: clamp(16px, 1.5vw, 19px);
                 line-height: 1.75;
             }
@@ -593,10 +593,10 @@
                 align-items: center;
                 gap: 7px;
                 padding: 9px 13px;
-                border: 1px solid rgba(12, 43, 36, .12);
+                border: 1px solid rgba(5, 32, 88, .12);
                 border-radius: 999px;
-                background: rgba(248, 245, 239, .72);
-                color: #33443f;
+                background: rgba(255, 255, 255, .72);
+                color: #052058;
                 font-size: 13px;
                 font-weight: 600;
             }
@@ -629,7 +629,7 @@
             }
 
             .azari-google-play-link:focus-visible {
-                outline: 3px solid rgba(181, 138, 74, .42);
+                outline: 3px solid rgba(5, 32, 88, .42);
                 outline-offset: 4px;
             }
 
@@ -643,7 +643,7 @@
             .azari-app-note {
                 display: block;
                 margin-top: 14px;
-                color: #7c8581;
+                color: #052058;
                 font-size: 12px;
                 line-height: 1.55;
             }
@@ -663,7 +663,7 @@
                 background:
                     linear-gradient(
                         90deg,
-                        #fff 0%,
+                        #FFFFFF 0%,
                         rgba(255, 255, 255, .75) 13%,
                         rgba(255, 255, 255, 0) 38%
                     );
@@ -691,8 +691,8 @@
                 padding: 14px 16px;
                 border: 1px solid rgba(255, 255, 255, .44);
                 border-radius: 18px;
-                background: rgba(15, 35, 30, .78);
-                color: #fff;
+                background: rgba(0, 0, 0, .78);
+                color: #FFFFFF;
                 box-shadow: 0 15px 45px rgba(0, 0, 0, .22);
                 backdrop-filter: blur(15px);
                 -webkit-backdrop-filter: blur(15px);
@@ -711,7 +711,7 @@
             .azari-app-floating span:last-child {
                 display: block;
                 margin-top: 3px;
-                color: rgba(255,255,255,.73);
+                color: rgba(255, 255, 255, .73);
                 font-size: 11px;
             }
 
@@ -733,9 +733,9 @@
                     background:
                         linear-gradient(
                             0deg,
-                            #fff 0%,
-                            rgba(255,255,255,.82) 10%,
-                            rgba(255,255,255,0) 36%
+                            #FFFFFF 0%,
+                            rgba(255, 255, 255, .82) 10%,
+                            rgba(255, 255, 255, 0) 36%
                         );
                 }
             }
@@ -829,7 +829,7 @@
                 <div class="azari-app-visual">
                     <img
                         src="{{ asset('images/azari-hospitality-welcome.png') }}"
-                        alt="Azari Hotels and Residences hospitality experience"
+                        alt="Resavar hospitality experience"
                         loading="lazy"
                         decoding="async"
                     >
