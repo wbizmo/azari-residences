@@ -8,7 +8,7 @@
     $isFooter = $variant === 'footer';
     $isGuestSidebar = in_array($variant, ['guest-sidebar', 'guest-drawer'], true);
     $onDark = $dark || $isFooter || $isGuestSidebar || in_array($variant, ['drawer', 'hero', 'mobile'], true);
-    $logoUrl = asset($onDark ? 'images/resavar-logo-dark.png' : 'images/resavar-logo-light.png');
+    $logoUrl = asset($onDark ? 'images/resavar-logo-dark.png' : 'images/resavar-logo-light.png') . '?v=20261004-4';
 @endphp
 
 <a
