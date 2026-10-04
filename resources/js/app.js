@@ -31,7 +31,7 @@ const header = document.querySelector('[data-site-header]');
 const backToTop = document.querySelector('[data-back-to-top]');
 
 function updateScrollState() {
-    const hasScrolled = window.scrollY > 24;
+    const hasScrolled = window.scrollY > 0;
     header?.classList.toggle('is-scrolled', hasScrolled);
     backToTop?.classList.toggle('is-visible', window.scrollY > 500);
 }
@@ -753,7 +753,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const isHomepage = normalizedPath === '';
 
     const updateAzariPublicLogo = () => {
-        const hasScrolled = window.scrollY > 24;
+        const hasScrolled = window.scrollY > 0;
 
         /*
          * Homepage:
@@ -813,7 +813,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const isHomepage = normalizedPath === '';
 
     const updateAzariHamburgerColour = () => {
-        const hasScrolled = window.scrollY > 24;
+        const hasScrolled = window.scrollY > 0;
 
         const variant =
             isHomepage && !hasScrolled
@@ -842,7 +842,7 @@ document.addEventListener('DOMContentLoaded', () => {
 |
 | home-top:
 |   - URL path is /
-|   - scroll position is 24px or less
+|   - scroll position is at the top of the page
 |   - hamburger is #FFFFFF
 |
 | solid:
@@ -864,7 +864,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const updateAzariPublicHeaderState = () => {
         const isHomepageTop =
             isHomepage &&
-            window.scrollY <= 24;
+            window.scrollY <= 0;
 
         document.documentElement.dataset.azariPublicHeaderState =
             isHomepageTop
