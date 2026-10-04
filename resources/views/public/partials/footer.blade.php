@@ -114,7 +114,7 @@
                 <a href="{{ route('public.apartments') }}">Apartments</a>
                 <a href="{{ route('public.rooms') }}">Rooms</a>
                 <a href="{{ route('availability.index') }}">Availability</a>
-                <a href="{{ route('public.services') }}">Services</a>
+                <a href="{{ route('public.concierge') }}">Services</a>
                 <a href="{{ route('public.local-guide') }}">Local guide</a>
             </div>
 
