@@ -9890,10 +9890,15 @@ body.azari-solid-header
 }
 
 /* Back-to-top: white surface, navy arrow, exact 1px navy outer border. */
+button.back-to-top,
 .back-to-top,
 .scroll-to-top,
+button[data-back-to-top],
 [data-back-to-top],
 #back-to-top {
-    border: 1px solid #052058 !important;
+    box-sizing: border-box !important;
+    border-width: 1px !important;
+    border-style: solid !important;
+    border-color: #052058 !important;
 }
 /* RESAVAR_HEADER_HAMBURGER_STATE_SYNC_END */
