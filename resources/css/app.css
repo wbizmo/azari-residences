@@ -9015,3 +9015,35 @@ html[data-azari-public-header-state="solid"] .site-header .button-brass{
   .azari-home-hero__container{padding-left:16px!important;padding-right:16px!important}
 }
 
+
+
+/* RESAVAR CONTRAST + MOBILE STATE FINAL */
+.az-status--maintenance,.az-status--archived,
+.az-premium-status.is-danger,.az-s78-badge.is-danger{
+  background:#052058!important;color:#FFFFFF!important;border-color:#052058!important;
+}
+.az-property-admin-media{background:#052058!important;color:#FFFFFF!important}
+.az-button--brass{background:#052058!important;color:#FFFFFF!important;border-color:#052058!important}
+.az-button--brass:hover{background:#000000!important;color:#FFFFFF!important;border-color:#000000!important}
+html[data-azari-public-header-state="home-top"] .azari-menu-toggle,
+.home-page.azari-header-over-hero .azari-menu-toggle{
+  color:#FFFFFF!important;border-color:#FFFFFF!important;background:transparent!important;
+}
+html[data-azari-public-header-state="home-top"] .azari-menu-toggle__line,
+.home-page.azari-header-over-hero .azari-menu-toggle__line{
+  background:#FFFFFF!important;border-color:#FFFFFF!important;color:#FFFFFF!important;
+}
+html[data-azari-public-header-state="solid"] .azari-menu-toggle,
+.azari-solid-header .azari-menu-toggle,.inner-page .azari-menu-toggle{
+  color:#052058!important;border-color:#052058!important;background:#FFFFFF!important;
+}
+html[data-azari-public-header-state="solid"] .azari-menu-toggle__line,
+.azari-solid-header .azari-menu-toggle__line,.inner-page .azari-menu-toggle__line{
+  background:#052058!important;border-color:#052058!important;color:#052058!important;
+}
+@media(max-width:800px){
+  html,body,.public-site,#main-content{width:100%!important;max-width:100%!important;overflow-x:hidden!important}
+  .azari-home-hero,.azari-home-hero__image,.azari-home-hero__overlay{max-width:100vw!important}
+  .azari-home-hero__image{left:0!important;right:0!important}
+  .drawer-layer,.drawer-backdrop{width:100vw!important;max-width:100vw!important}
+}
