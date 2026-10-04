@@ -3,7 +3,7 @@
         'Resavar | Luxury Hotels, Residences, Apartments, Rooms and Hospitality';
 
     $defaultSeoDescription =
-        'Discover Resavar, a premium hospitality and accommodation platform owned by Azari Luxury Properties Ltd. Explore hotels, residences, serviced apartments, rooms, concierge services, housekeeping, dining, airport transfers, guest services and secure online booking across Azari locations.';
+        'Discover Resavar, a premium hospitality and accommodation platform owned by Resavar Luxury Properties Ltd. Explore hotels, residences, serviced apartments, rooms, concierge services, housekeeping, dining, airport transfers, guest services and secure online booking across Resavar locations.';
 
     $defaultSeoKeywords = implode(', ', [
         /*
@@ -11,74 +11,74 @@
         | Brand searches
         |--------------------------------------------------------------------------
         */
-        'Azari',
+        'Resavar',
         'Resavar',
         'Resavar',
         'The Resavar',
-        'Azari Residence',
+        'Resavar Residence',
         'Resavar',
-        'Azari Hotel',
-        'Azari Hotels',
-        'Azari Luxury Hotels & Residences',
-        'Azari Luxury Properties',
-        'Azari Luxury Properties Ltd',
-        'Azari Luxury Properties Limited',
-        'Azari Group',
+        'Resavar Hotel',
+        'Resavar Hotels',
+        'Resavar Luxury Hotels & Residences',
+        'Resavar Luxury Properties',
+        'Resavar Luxury Properties Ltd',
+        'Resavar Luxury Properties Limited',
         'Resavar Group',
-        'Azari Holdings',
-        'Azari Holdings Ltd',
-        'Azari Holdings Limited',
-        'Azari Hospitality',
-        'Azari Hospitality Group',
-        'Azari Hospitality Services',
+        'Resavar Group',
+        'Resavar Holdings',
+        'Resavar Holdings Ltd',
+        'Resavar Holdings Limited',
+        'Resavar Hospitality',
+        'Resavar Hospitality Group',
+        'Resavar Hospitality Services',
 
         /*
         |--------------------------------------------------------------------------
         | Accommodation
         |--------------------------------------------------------------------------
         */
-        'Azari Accommodation',
-        'Azari Luxury Accommodation',
-        'Azari Apartments',
-        'Azari Serviced Apartments',
-        'Azari Rooms',
+        'Resavar Accommodation',
+        'Resavar Luxury Accommodation',
+        'Resavar Apartments',
+        'Resavar Serviced Apartments',
+        'Resavar Rooms',
         'Resavar Guest House',
         'Resavar Guest Accommodation',
-        'Azari Short Stay',
-        'Azari Extended Stay',
-        'Azari Holiday Residences',
-        'Azari Vacation Residences',
-        'Azari Premium Residences',
-        'Azari Private Residences',
-        'Azari Executive Residences',
-        'Azari Corporate Accommodation',
-        'Azari Family Accommodation',
+        'Resavar Short Stay',
+        'Resavar Extended Stay',
+        'Resavar Holiday Residences',
+        'Resavar Vacation Residences',
+        'Resavar Premium Residences',
+        'Resavar Private Residences',
+        'Resavar Executive Residences',
+        'Resavar Corporate Accommodation',
+        'Resavar Family Accommodation',
 
         /*
         |--------------------------------------------------------------------------
         | Booking and availability
         |--------------------------------------------------------------------------
         */
-        'Azari booking',
+        'Resavar booking',
         'Resavar booking',
         'book Resavar',
-        'Azari online booking',
-        'Azari secure booking',
-        'Azari reservation platform',
-        'Azari booking platform',
-        'Azari availability',
+        'Resavar online booking',
+        'Resavar secure booking',
+        'Resavar reservation platform',
+        'Resavar booking platform',
         'Resavar availability',
-        'check Azari availability',
-        'Azari available rooms',
-        'Azari available apartments',
-        'Azari room booking',
-        'Azari apartment booking',
-        'Azari residence booking',
-        'Azari accommodation prices',
-        'Azari residence prices',
-        'Azari booking confirmation',
-        'verify Azari booking',
-        'Azari booking payment',
+        'Resavar availability',
+        'check Resavar availability',
+        'Resavar available rooms',
+        'Resavar available apartments',
+        'Resavar room booking',
+        'Resavar apartment booking',
+        'Resavar residence booking',
+        'Resavar accommodation prices',
+        'Resavar residence prices',
+        'Resavar booking confirmation',
+        'verify Resavar booking',
+        'Resavar booking payment',
 
         /*
         |--------------------------------------------------------------------------
@@ -86,15 +86,15 @@
         |--------------------------------------------------------------------------
         */
         'Resavar Guest Services',
-        'Azari Concierge',
-        'Azari Housekeeping',
-        'Azari Airport Transfers',
-        'Azari airport pickup',
-        'Azari Dining',
-        'Azari Restaurant',
-        'Azari Local Guide',
+        'Resavar Concierge',
+        'Resavar Housekeeping',
+        'Resavar Airport Transfers',
+        'Resavar airport pickup',
+        'Resavar Dining',
+        'Resavar Restaurant',
+        'Resavar Local Guide',
         'Resavar guest login',
-        'Azari customer portal',
+        'Resavar customer portal',
         'Resavar Guest Portal',
 
         /*
@@ -102,15 +102,15 @@
         | Property and owner searches
         |--------------------------------------------------------------------------
         */
-        'Azari Properties',
-        'Azari Property',
-        'Azari Property Booking',
-        'Azari Property Management',
-        'Azari Residence Management',
-        'Azari Property Owners',
-        'Azari Property Listings',
-        'Azari property owner registration',
-        'list property with Azari',
+        'Resavar Properties',
+        'Resavar Property',
+        'Resavar Property Booking',
+        'Resavar Property Management',
+        'Resavar Residence Management',
+        'Resavar Property Owners',
+        'Resavar Property Listings',
+        'Resavar property owner registration',
+        'list property with Resavar',
 
         /*
         |--------------------------------------------------------------------------
@@ -138,14 +138,14 @@
         | Informational searches
         |--------------------------------------------------------------------------
         */
-        'Azari website',
+        'Resavar website',
         'Resavar website',
         'what is Resavar',
         'who owns Resavar',
         'where is Resavar',
         'how to book Resavar',
         'contact Resavar',
-        'Azari contact information',
+        'Resavar contact information',
     ]);
 
     $resolvedTitle =
@@ -176,6 +176,6 @@
     @yield('content')
 </x-public.layout>
 
-<!-- AZARI PWA RUNTIME START -->
+<!-- RESAVAR PWA RUNTIME START -->
 <script src="/pwa-install.js" defer></script>
-<!-- AZARI PWA RUNTIME END -->
+<!-- RESAVAR PWA RUNTIME END -->
