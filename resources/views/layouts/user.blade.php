@@ -467,7 +467,7 @@
     .az-user-logout-button:hover,
     .az-user-logout-button:focus-visible {
         gap: 12px;
-        background: rgba(5, 32, 88, 0.12);
+        background: rgba(255, 255, 255, 0.10);
         color: #FFFFFF !important;
         outline: none;
     }
@@ -482,7 +482,7 @@
     }
 
     .az-user-logout-button:focus-visible {
-        box-shadow: 0 0 0 2px rgba(5, 32, 88, 0.38);
+        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.26);
     }
 
     .az-user-logout-icon {
@@ -641,7 +641,7 @@
             border: 1px solid rgba(255, 255, 255, 0.18) !important;
             border-radius: 10px !important;
             background: rgba(255, 255, 255, 0.08) !important;
-            color: #FFFFFF !important;
+            color: #ffffff !important;
 
             cursor: pointer;
             -webkit-tap-highlight-color: transparent;
@@ -655,7 +655,7 @@
 
         .az-user-drawer-close .material-symbols-outlined {
             display: inline-block !important;
-            color: #FFFFFF !important;
+            color: #ffffff !important;
             font-size: 25px !important;
             line-height: 1 !important;
             visibility: visible !important;
