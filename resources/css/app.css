@@ -10103,3 +10103,45 @@ button[data-back-to-top],
     -webkit-text-fill-color: #FFFFFF !important;
 }
 /* RESAVAR_SERVICE_SUBMENU_LABEL_CONTRAST_FIX_END */
+
+
+/* RESAVAR_SERVICE_SUBMENU_FINAL_CONTRAST_AUTHORITY_START
+   Final specificity authority for Services submenu labels.
+   White row = navy icon/text. Navy hover/active row = white icon/text.
+*/
+html body .site-header .desktop-navigation .nav-popover .nav-popover-panel a {
+    color: #052058 !important;
+    -webkit-text-fill-color: #052058 !important;
+}
+
+html body .site-header .desktop-navigation .nav-popover .nav-popover-panel a .nav-popover-label,
+html body .site-header .desktop-navigation .nav-popover .nav-popover-panel a .material-symbols-outlined {
+    display: inline-flex !important;
+    align-items: center !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    color: #052058 !important;
+    -webkit-text-fill-color: #052058 !important;
+    text-shadow: none !important;
+}
+
+html body .site-header .desktop-navigation .nav-popover .nav-popover-panel a:hover,
+html body .site-header .desktop-navigation .nav-popover .nav-popover-panel a:focus-visible,
+html body .site-header .desktop-navigation .nav-popover .nav-popover-panel a.is-active {
+    background: #052058 !important;
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+
+html body .site-header .desktop-navigation .nav-popover .nav-popover-panel a:hover .nav-popover-label,
+html body .site-header .desktop-navigation .nav-popover .nav-popover-panel a:hover .material-symbols-outlined,
+html body .site-header .desktop-navigation .nav-popover .nav-popover-panel a:focus-visible .nav-popover-label,
+html body .site-header .desktop-navigation .nav-popover .nav-popover-panel a:focus-visible .material-symbols-outlined,
+html body .site-header .desktop-navigation .nav-popover .nav-popover-panel a.is-active .nav-popover-label,
+html body .site-header .desktop-navigation .nav-popover .nav-popover-panel a.is-active .material-symbols-outlined {
+    opacity: 1 !important;
+    visibility: visible !important;
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+/* RESAVAR_SERVICE_SUBMENU_FINAL_CONTRAST_AUTHORITY_END */
