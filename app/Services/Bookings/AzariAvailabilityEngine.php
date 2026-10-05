@@ -533,14 +533,15 @@ class AzariAvailabilityEngine
     public function calendar(
         int $propertyId,
         CarbonInterface $from,
-        int $days = 90
+        int $days = 90,
+        ?int $accommodationTypeId = null
     ): array {
         $days = max(1, min($days, 366));
         $start = CarbonImmutable::parse($from)->startOfDay();
         $end = $start->addDays($days);
         $property = Property::query()->find($propertyId);
 
-        if ($property && ($type = $this->resolveAccommodationType($property))) {
+        if ($property && ($type = $this->resolveAccommodationType($property, $accommodationTypeId))) {
             $remaining = $this->remainingByDate($type, $start, $end);
 
             return $remaining->map(
