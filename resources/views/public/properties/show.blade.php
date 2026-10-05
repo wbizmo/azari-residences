@@ -1,3 +1,10 @@
+@php
+    $searchState = array_filter(
+        (array) session('azari_stay_search', []),
+        fn ($value) => $value !== null && $value !== ''
+    );
+@endphp
+
 <x-public-site.layout :title="$property->name" :description="$property->short_description">
     <section class="property-detail-hero">
         <div class="site-container">
@@ -20,7 +27,7 @@
 
             <div class="property-detail-grid">
                 <article>
-                    <h2>About this residence</h2>
+                    <h2>About this stay</h2>
                     <p>{{ $property->description }}</p>
                     <ul class="property-facts">
                         <li>{{ $property->bedrooms }} bedrooms</li>
@@ -35,20 +42,96 @@
                 </article>
                 <aside>
                     <span>From</span>
-                    <strong>{{ $property->currency }} {{ number_format($property->nightly_rate) }}</strong>
+                    <strong>{{ $property->currency }} {{ number_format((float) $property->nightly_rate, 2) }}</strong>
                     <small>per night</small>
                     <a href="{{ route(
                         'availability.property',
-                        array_merge(
-                            ['property' => $property],
-                            array_filter(
-                                (array) session('azari_stay_search', []),
-                                fn ($value) => $value !== null && $value !== ''
-                            )
-                        )
+                        array_merge(['property' => $property], $searchState)
                     ) }}" class="button button-primary button-block">Check availability</a>
                 </aside>
             </div>
         </div>
     </section>
+
+    @if($property->publicAccommodationTypes->isNotEmpty())
+        <section class="reserva-rate-section" aria-labelledby="reserva-rate-heading">
+            <div class="site-container">
+                <div class="section-heading">
+                    <div>
+                        <span class="eyebrow">Choose your stay</span>
+                        <h2 id="reserva-rate-heading">Accommodation and rate options</h2>
+                    </div>
+                    <p>Choose the accommodation type and booking terms that fit your trip. Final totals are recalculated for your dates before checkout.</p>
+                </div>
+
+                <div class="reserva-rate-grid">
+                    @foreach($property->publicAccommodationTypes as $type)
+                        @php($publicPlans = $type->ratePlans->where('is_active', true)->where('is_public', true))
+
+                        @foreach($publicPlans as $plan)
+                            @php
+                                $baseRate = (float) $type->base_rate;
+                                $adjustment = (float) $plan->pricing_adjustment;
+                                $fromRate = match ($plan->pricing_adjustment_type) {
+                                    'percentage' => $baseRate + ($baseRate * ($adjustment / 100)),
+                                    'fixed' => $baseRate + $adjustment,
+                                    default => $baseRate,
+                                };
+                                $fromRate = max(0, $fromRate);
+                            @endphp
+
+                            <article class="reserva-rate-card">
+                                <div class="reserva-rate-card__heading">
+                                    <div>
+                                        <span>{{ $type->name }}</span>
+                                        <h3>{{ $plan->publicLabel() }}</h3>
+                                    </div>
+                                    <strong>{{ $type->currency }} {{ number_format($fromRate, 2) }}</strong>
+                                </div>
+
+                                <div class="reserva-rate-card__facts">
+                                    <span>Up to {{ $type->max_guests }} guests</span>
+                                    <span>{{ $type->bedrooms }} {{ IlluminateSupportStr::plural('bedroom', $type->bedrooms) }}</span>
+                                    @if($type->bed_configuration)
+                                        <span>{{ $type->bed_configuration }}</span>
+                                    @endif
+                                    @if($plan->meal_plan)
+                                        <span>{{ $plan->meal_plan }}</span>
+                                    @endif
+                                </div>
+
+                                <ul class="reserva-rate-card__terms">
+                                    <li>
+                                        {{ $plan->is_refundable
+                                            ? ($plan->cancellationPolicy?->name ?? 'Refundable rate')
+                                            : 'Non-refundable rate' }}
+                                    </li>
+                                    @if($plan->paymentPolicy)
+                                        <li>{{ $plan->paymentPolicy->name }}</li>
+                                    @endif
+                                    @foreach(array_slice($plan->inclusions ?? [], 0, 3) as $inclusion)
+                                        <li>{{ $inclusion }}</li>
+                                    @endforeach
+                                </ul>
+
+                                <a
+                                    class="button button-secondary button-block"
+                                    href="{{ route('availability.property', array_merge(
+                                        [
+                                            'property' => $property,
+                                            'accommodation_type_id' => $type->id,
+                                            'rate_plan_id' => $plan->id,
+                                        ],
+                                        $searchState
+                                    )) }}"
+                                >
+                                    Check this rate
+                                </a>
+                            </article>
+                        @endforeach
+                    @endforeach
+                </div>
+            </div>
+        </section>
+    @endif
 </x-public-site.layout>
