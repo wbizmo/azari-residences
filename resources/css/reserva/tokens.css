@@ -1,0 +1,78 @@
+:root {
+    --reserva-navy: #052058;
+    --reserva-black: #000000;
+    --reserva-white: #FFFFFF;
+    --reserva-surface: #FFFFFF;
+    --reserva-surface-soft: rgba(5, 32, 88, .055);
+    --reserva-surface-inverse: #052058;
+    --reserva-text: #052058;
+    --reserva-text-strong: #000000;
+    --reserva-text-inverse: #FFFFFF;
+    --reserva-text-muted: rgba(5, 32, 88, .68);
+    --reserva-border: rgba(5, 32, 88, .18);
+    --reserva-border-strong: rgba(5, 32, 88, .34);
+    --reserva-action: #052058;
+    --reserva-action-hover: #000000;
+    --reserva-on-action: #FFFFFF;
+    --reserva-focus: rgba(5, 32, 88, .24);
+    --reserva-success: #1f6f4a;
+    --reserva-warning: #7a4b00;
+    --reserva-danger: #8f1d1d;
+
+    /* Safe compatibility mappings while legacy Azari selectors are retired. */
+    --azari-ink: var(--reserva-navy);
+    --azari-ink-soft: var(--reserva-navy);
+    --azari-ivory: var(--reserva-white);
+    --azari-ivory-deep: var(--reserva-surface-soft);
+    --azari-brass: var(--reserva-navy);
+    --azari-brass-light: var(--reserva-navy);
+    --azari-wine: var(--reserva-black);
+    --azari-white: var(--reserva-white);
+    --azari-text: var(--reserva-text);
+    --azari-muted: var(--reserva-text-muted);
+    --azari-border: var(--reserva-border);
+    --azari-success: var(--reserva-success);
+    --azari-error: var(--reserva-danger);
+
+    --az-admin-green-950: var(--reserva-navy);
+    --az-admin-green-900: var(--reserva-navy);
+    --az-admin-green-800: var(--reserva-navy);
+    --az-admin-green-700: var(--reserva-navy);
+    --az-admin-ivory: var(--reserva-white);
+    --az-admin-paper: var(--reserva-white);
+    --az-admin-brass: var(--reserva-navy);
+    --az-admin-brass-deep: var(--reserva-navy);
+    --az-admin-wine: var(--reserva-black);
+    --az-admin-ink: var(--reserva-navy);
+    --az-admin-muted: var(--reserva-text-muted);
+    --az-admin-line: var(--reserva-border);
+    --az-admin-success: var(--reserva-success);
+    --az-admin-danger: var(--reserva-danger);
+
+    --az-user-green-950: var(--reserva-navy);
+    --az-user-green-900: var(--reserva-navy);
+    --az-user-green-800: var(--reserva-navy);
+    --az-user-green-700: var(--reserva-navy);
+    --az-user-green-100: var(--reserva-surface-soft);
+    --az-user-ivory: var(--reserva-white);
+    --az-user-paper: var(--reserva-white);
+    --az-user-brass: var(--reserva-navy);
+    --az-user-brass-soft: var(--reserva-surface-soft);
+    --az-user-wine: var(--reserva-black);
+    --az-user-ink: var(--reserva-navy);
+    --az-user-muted: var(--reserva-text-muted);
+    --az-user-line: var(--reserva-border);
+    --az-user-success: var(--reserva-success);
+    --az-user-warning: var(--reserva-warning);
+    --az-user-danger: var(--reserva-danger);
+}
+
+html[data-admin-theme="dark"] {
+    --az-admin-ivory: #000000;
+    --az-admin-paper: #0b1730;
+    --az-admin-ink: #FFFFFF;
+    --az-admin-muted: rgba(255, 255, 255, .72);
+    --az-admin-line: rgba(255, 255, 255, .18);
+    --az-admin-brass: #FFFFFF;
+    --az-admin-brass-deep: #FFFFFF;
+}
