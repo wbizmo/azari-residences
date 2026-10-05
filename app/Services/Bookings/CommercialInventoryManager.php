@@ -18,16 +18,21 @@ class CommercialInventoryManager
         array $data,
         ?AccommodationType $type = null
     ): AccommodationType {
-        if ($type && (int) $type->property_id !== (int) $property->getKey()) {
+        if ($type && (int) $type->property_id !== (int) $lockedProperty->getKey()) {
             abort(404);
         }
 
         return DB::transaction(function () use ($property, $data, $type): AccommodationType {
+            $lockedProperty = Property::query()
+                ->whereKey($lockedProperty->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
+
             $type = $type
                 ? AccommodationType::query()->lockForUpdate()->findOrFail($type->getKey())
-                : new AccommodationType(['property_id' => $property->getKey()]);
+                : new AccommodationType(['property_id' => $lockedProperty->getKey()]);
 
-            if ((int) ($type->property_id ?: $property->getKey()) !== (int) $property->getKey()) {
+            if ((int) ($type->property_id ?: $lockedProperty->getKey()) !== (int) $lockedProperty->getKey()) {
                 abort(404);
             }
 
@@ -37,7 +42,7 @@ class CommercialInventoryManager
             }
 
             $duplicate = AccommodationType::query()
-                ->where('property_id', $property->getKey())
+                ->where('property_id', $lockedProperty->getKey())
                 ->where('slug', $slug)
                 ->when($type->exists, fn ($query) => $query->whereKeyNot($type->getKey()))
                 ->exists();
@@ -49,7 +54,7 @@ class CommercialInventoryManager
             }
 
             $payload = [
-                'room_type_id' => $data['room_type_id'] ?? $property->room_type_id,
+                'room_type_id' => $data['room_type_id'] ?? $lockedProperty->room_type_id,
                 'name' => $data['name'],
                 'slug' => $slug,
                 'description' => $data['description'] ?? null,
@@ -67,7 +72,7 @@ class CommercialInventoryManager
                 'service_charge' => (float) ($data['service_charge'] ?? 0),
                 'security_deposit' => (float) ($data['security_deposit'] ?? 0),
                 'tax_rate' => (float) ($data['tax_rate'] ?? 0),
-                'currency' => strtoupper((string) ($data['currency'] ?? $property->currency ?? 'USD')),
+                'currency' => strtoupper((string) ($data['currency'] ?? $lockedProperty->currency ?? 'USD')),
                 'minimum_stay' => max(1, (int) ($data['minimum_stay'] ?? 1)),
                 'maximum_stay' => $data['maximum_stay'] ?? null,
                 'same_day_booking' => (bool) ($data['same_day_booking'] ?? false),
@@ -77,10 +82,10 @@ class CommercialInventoryManager
             ];
 
             $type->fill($payload);
-            $type->property_id = $property->getKey();
+            $type->property_id = $lockedProperty->getKey();
 
             if (! $type->code) {
-                $type->code = 'RES-'.$property->getKey().'-'.Str::upper(Str::random(6));
+                $type->code = 'RES-'.$lockedProperty->getKey().'-'.Str::upper(Str::random(6));
             }
 
             $type->save();
