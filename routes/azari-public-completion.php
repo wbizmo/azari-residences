@@ -39,7 +39,7 @@ foreach ([
     'restaurant' => 'restaurant',
     'airport-transfers' => 'airport-transfers',
     'local-guide' => 'local-guide',
-    'about-azari' => 'about',
+    'about-reserva' => 'about',
     'contact' => 'contact',
     'support' => 'support',
     'booking-terms' => 'booking-terms',
@@ -64,6 +64,8 @@ Route::prefix('azaridevadmin')
             ->parameters(['room-types' => 'roomType'])
             ->names('room-types');
     });
+
+Route::redirect('/about-azari', '/about-reserva', 301);
 
 Route::post('/contact', [PublicPageController::class, 'contact'])
     ->middleware('throttle:6,1')
