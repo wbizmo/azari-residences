@@ -125,4 +125,58 @@ class PublicBookingRoutesTest extends TestCase
         $this->expectException(ValidationException::class);
         $engine->hold($property, $in, $out, 1, 0, 1, null);
     }
+    public function test_property_page_exposes_multiple_public_rate_choices_and_preserves_selection(): void
+    {
+        $property = Property::factory()->create([
+            'is_published' => true,
+            'status' => 'available',
+            'nightly_rate' => 200,
+        ]);
+
+        $type = $property->accommodationTypes()->firstOrFail();
+
+        $flexible = $type->ratePlans()->create([
+            'name' => 'Flexible breakfast',
+            'code' => 'FLEX_BREAKFAST',
+            'pricing_adjustment_type' => 'fixed',
+            'pricing_adjustment' => 25,
+            'meal_plan' => 'Breakfast included',
+            'is_refundable' => true,
+            'is_active' => true,
+            'is_public' => true,
+        ]);
+
+        $response = $this->get(route('properties.show', $property));
+
+        $response
+            ->assertSuccessful()
+            ->assertSee('Accommodation and rate options')
+            ->assertSee('Flexible breakfast')
+            ->assertSee('Breakfast included')
+            ->assertSee('accommodation_type_id='.$type->id, false)
+            ->assertSee('rate_plan_id='.$flexible->id, false);
+    }
+
+    public function test_property_availability_rejects_a_rate_plan_from_another_property(): void
+    {
+        $wanted = Property::factory()->create([
+            'is_published' => true,
+            'status' => 'available',
+        ]);
+
+        $other = Property::factory()->create([
+            'is_published' => true,
+            'status' => 'available',
+        ]);
+
+        $foreignType = $other->accommodationTypes()->firstOrFail();
+        $foreignPlan = $foreignType->ratePlans()->firstOrFail();
+
+        $this->get(route('availability.property', [
+            'property' => $wanted,
+            'accommodation_type_id' => $foreignType->id,
+            'rate_plan_id' => $foreignPlan->id,
+        ]))->assertNotFound();
+    }
+
 }
