@@ -13,9 +13,9 @@ class DestinationSearchService
     public function suggest(string $rawQuery, int $limit = 8): Collection
     {
         $query = $this->normalize($rawQuery);
-        $limit = max(1, min($limit, 10));
+        $limit = max(1, min($limit, (int) config('reserva.search.autocomplete_max_limit', 10)));
 
-        if (mb_strlen($query) < 2) {
+        if (mb_strlen($query) < (int) config('reserva.search.autocomplete_min_chars', 2)) {
             return collect();
         }
 
