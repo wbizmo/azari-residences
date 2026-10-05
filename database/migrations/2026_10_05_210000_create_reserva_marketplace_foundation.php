@@ -244,19 +244,32 @@ return new class extends Migration
     {
         if (Schema::hasTable('locations')) {
             Schema::table('locations', function (Blueprint $table): void {
-                $table->index('name', 'locations_name_search_idx');
-                $table->index('city', 'locations_city_search_idx');
-                $table->index('country', 'locations_country_search_idx');
+                if (! Schema::hasIndex('locations', 'locations_name_search_idx')) {
+                    $table->index('name', 'locations_name_search_idx');
+                }
+                if (! Schema::hasIndex('locations', 'locations_city_search_idx')) {
+                    $table->index('city', 'locations_city_search_idx');
+                }
+                if (! Schema::hasIndex('locations', 'locations_country_search_idx')) {
+                    $table->index('country', 'locations_country_search_idx');
+                }
             });
         }
 
         if (Schema::hasTable('properties')) {
             Schema::table('properties', function (Blueprint $table): void {
-                $table->index('name', 'properties_name_search_idx');
-                if (Schema::hasColumn('properties', 'address_city')) {
+                if (! Schema::hasIndex('properties', 'properties_name_search_idx')) {
+                    $table->index('name', 'properties_name_search_idx');
+                }
+                if (
+                    Schema::hasColumn('properties', 'address_city')
+                    && ! Schema::hasIndex('properties', 'properties_city_search_idx')
+                ) {
                     $table->index('address_city', 'properties_city_search_idx');
                 }
-                $table->index('location', 'properties_location_search_idx');
+                if (! Schema::hasIndex('properties', 'properties_location_search_idx')) {
+                    $table->index('location', 'properties_location_search_idx');
+                }
             });
         }
     }
@@ -365,17 +378,35 @@ return new class extends Migration
     public function down(): void
     {
         if (Schema::hasTable('pricing_rules')) {
-            foreach (['rate_plan_id', 'accommodation_type_id', 'adjustment_type'] as $column) {
+            foreach (['rate_plan_id', 'accommodation_type_id'] as $column) {
                 if (Schema::hasColumn('pricing_rules', $column)) {
-                    Schema::table('pricing_rules', fn (Blueprint $table) => $table->dropColumn($column));
+                    Schema::table('pricing_rules', fn (Blueprint $table) =>
+                        $table->dropConstrainedForeignId($column)
+                    );
                 }
+            }
+
+            if (Schema::hasColumn('pricing_rules', 'adjustment_type')) {
+                Schema::table('pricing_rules', fn (Blueprint $table) =>
+                    $table->dropColumn('adjustment_type')
+                );
             }
         }
 
         if (Schema::hasTable('bookings')) {
-            foreach (['policy_snapshot', 'rate_plan_name_snapshot', 'accommodation_type_name_snapshot', 'rate_plan_id', 'accommodation_type_id'] as $column) {
+            foreach (['rate_plan_id', 'accommodation_type_id'] as $column) {
                 if (Schema::hasColumn('bookings', $column)) {
-                    Schema::table('bookings', fn (Blueprint $table) => $table->dropColumn($column));
+                    Schema::table('bookings', fn (Blueprint $table) =>
+                        $table->dropConstrainedForeignId($column)
+                    );
+                }
+            }
+
+            foreach (['policy_snapshot', 'rate_plan_name_snapshot', 'accommodation_type_name_snapshot'] as $column) {
+                if (Schema::hasColumn('bookings', $column)) {
+                    Schema::table('bookings', fn (Blueprint $table) =>
+                        $table->dropColumn($column)
+                    );
                 }
             }
         }
@@ -383,7 +414,9 @@ return new class extends Migration
         if (Schema::hasTable('booking_holds')) {
             foreach (['rate_plan_id', 'accommodation_type_id'] as $column) {
                 if (Schema::hasColumn('booking_holds', $column)) {
-                    Schema::table('booking_holds', fn (Blueprint $table) => $table->dropColumn($column));
+                    Schema::table('booking_holds', fn (Blueprint $table) =>
+                        $table->dropConstrainedForeignId($column)
+                    );
                 }
             }
         }
@@ -396,5 +429,25 @@ return new class extends Migration
         Schema::dropIfExists('inventory_dates');
         Schema::dropIfExists('accommodation_type_amenity');
         Schema::dropIfExists('accommodation_types');
+
+        if (Schema::hasTable('properties')) {
+            Schema::table('properties', function (Blueprint $table): void {
+                foreach (['properties_name_search_idx', 'properties_city_search_idx', 'properties_location_search_idx'] as $index) {
+                    if (Schema::hasIndex('properties', $index)) {
+                        $table->dropIndex($index);
+                    }
+                }
+            });
+        }
+
+        if (Schema::hasTable('locations')) {
+            Schema::table('locations', function (Blueprint $table): void {
+                foreach (['locations_name_search_idx', 'locations_city_search_idx', 'locations_country_search_idx'] as $index) {
+                    if (Schema::hasIndex('locations', $index)) {
+                        $table->dropIndex($index);
+                    }
+                }
+            });
+        }
     }
 };
