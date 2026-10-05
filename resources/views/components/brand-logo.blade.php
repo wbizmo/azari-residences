@@ -7,7 +7,7 @@
     $isFooter = $variant === 'footer';
     $isGuestSidebar = in_array($variant, ['guest-sidebar', 'guest-drawer'], true);
     $onDark = $dark || $isFooter || $isGuestSidebar || in_array($variant, ['drawer', 'hero', 'mobile'], true);
-    $siteName = 'Resavar';
+    $siteName = 'Reserva';
 
     // Approved bundled assets:
     // logo-light.png = navy/dark artwork for white/light surfaces.
