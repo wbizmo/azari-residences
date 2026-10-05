@@ -15,7 +15,13 @@
             <a href="{{ route('properties.show', $property) }}">← Back to residence</a>
             <span class="eyebrow">Live 90-day inventory</span>
             <h1>{{ $property->name }}</h1>
-            <p>{{ $property->locationRecord?->name ?? 'Reserva' }} · {{ $property->roomType?->name ?? 'Private residence' }}</p>
+            <p>
+                {{ $property->locationRecord?->name ?? 'Reserva' }}
+                · {{ $selectedAccommodationType?->name ?? $property->roomType?->name ?? 'Private stay' }}
+                @if($selectedRatePlan)
+                    · {{ $selectedRatePlan->name }}
+                @endif
+            </p>
         </div>
     </section>
 
@@ -26,8 +32,28 @@
             <p>Unavailable dates already have a confirmed stay, an active booking hold, or scheduled maintenance. Inventory updates from the database on every request.</p>
         </div>
 
+        @if($selectedRatePlan)
+            <div class="reserva-selected-rate">
+                <strong>{{ $selectedAccommodationType?->name }} · {{ $selectedRatePlan->name }}</strong>
+                <span>
+                    {{ $selectedRatePlan->is_refundable
+                        ? ($selectedRatePlan->cancellationPolicy?->name ?? 'Refundable')
+                        : 'Non-refundable' }}
+                    @if($selectedRatePlan->paymentPolicy)
+                        · {{ $selectedRatePlan->paymentPolicy->name }}
+                    @endif
+                </span>
+            </div>
+        @endif
+
         <form method="GET" action="{{ route('availability.results') }}" class="az-inventory-form">
             <input type="hidden" name="property_id" value="{{ $property->getKey() }}">
+            @if($selectedAccommodationType)
+                <input type="hidden" name="accommodation_type_id" value="{{ $selectedAccommodationType->id }}">
+            @endif
+            @if($selectedRatePlan)
+                <input type="hidden" name="rate_plan_id" value="{{ $selectedRatePlan->id }}">
+            @endif
             <label>Check-in
                 <input id="property-check-in" type="date" name="check_in"
                     min="{{ $sameDay ? $start->toDateString() : $start->addDay()->toDateString() }}"
@@ -42,9 +68,20 @@
                 <input type="number" name="adults" min="1" step="1" inputmode="numeric" value="{{ max(1, (int) request('adults', 1)) }}" required>
             </label>
             <label>Children
-                <input type="number" name="children" min="0" step="1" inputmode="numeric" value="{{ max(0, (int) request('children', 0)) }}" required>
+                <input type="number" name="children" min="0" max="8" step="1" inputmode="numeric" value="{{ max(0, (int) request('children', 0)) }}" required>
             </label>
-            <input type="hidden" name="rooms" value="1">
+            <label>Rooms
+                <input
+                    type="number"
+                    name="rooms"
+                    min="1"
+                    max="{{ max(1, min(20, (int) ($selectedAccommodationType?->total_inventory ?? 20))) }}"
+                    step="1"
+                    inputmode="numeric"
+                    value="{{ max(1, (int) request('rooms', 1)) }}"
+                    required
+                >
+            </label>
             <button type="submit">Check these dates</button>
         </form>
 
@@ -59,6 +96,9 @@
                     <small>{{ $day['date']->format('D') }}</small>
                     <strong>{{ $day['date']->format('j') }}</strong>
                     <span>{{ $day['date']->format('M') }}</span>
+                    @if($day['available'] && isset($day['remaining']))
+                        <span>{{ $day['remaining'] }} left</span>
+                    @endif
                 </button>
             @endforeach
         </div>
