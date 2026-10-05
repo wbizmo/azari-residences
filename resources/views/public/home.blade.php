@@ -1,8 +1,8 @@
 
 
 <x-public-site.layout
-    title="Resavar | Home"
-    :description="$content['hero_body'] ?? 'Luxury serviced apartments by Resavar.'"
+    title="Reserva | Home"
+    :description="$content['hero_body'] ?? 'Luxury serviced apartments by Reserva.'"
 >
 
     @include('public.partials.promotion-popup')
@@ -10,7 +10,7 @@
     <section class="azari-home-hero" aria-labelledby="azari-home-hero-title">
         <img
             src="{{ asset('images/resavar-hero.png') }}"
-            alt="Luxury Resavar serviced apartment interior"
+            alt="Luxury Reserva serviced apartment interior"
             class="azari-home-hero__image"
             width="2048"
             height="1152"
@@ -71,7 +71,7 @@
                 <form
                     class="availability-form"
                     method="GET"
-                    action="{{ route('availability.results') }}"
+                    action="{{ route('availability.search') }}"
                     data-availability-form
                     novalidate
                 >
@@ -159,8 +159,9 @@
                             hidden
                         >
                             @foreach([
-                                'adults' => ['Adults', 1],
-                                'children' => ['Children', 0],
+                                'adults' => ['Adults', max(1, (int) session('azari_stay_search.adults', 1))],
+                                'children' => ['Children', max(0, (int) session('azari_stay_search.children', 0))],
+                                'rooms' => ['Rooms', max(1, (int) session('azari_stay_search.rooms', 1))],
                             ] as $key => [$label, $count])
                                 <div class="guest-row">
                                     <div>
@@ -221,21 +222,61 @@
                             value="{{ max(0, (int) session('azari_stay_search.children', 0)) }}"
                             data-guest-input="children"
                         >
+
+                        <input
+                            type="hidden"
+                            name="rooms"
+                            value="{{ max(1, (int) session('azari_stay_search.rooms', 1)) }}"
+                            data-guest-input="rooms"
+                        >
                     </div>
 
-                    <div class="search-field">
-                        <label for="location_id">Location</label>
+                    <div
+                        class="search-field reserva-destination-search"
+                        data-destination-search
+                        data-suggest-url="{{ route('destinations.suggest') }}"
+                    >
+                        <label for="destination">Destination or property</label>
 
-                        <div class="input-shell select-shell">
+                        <div class="input-shell">
                             <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
 
-                            <select id="location_id" name="location_id">
-                                <option value="">All available locations</option>
-                                @foreach($locations as $location)
-                                    <option value="{{ $location->id }}">{{ $location->name }}, {{ $location->city }}</option>
-                                @endforeach
-                            </select>
+                            <input
+                                id="destination"
+                                name="destination"
+                                type="search"
+                                value="{{ session('azari_stay_search.destination') }}"
+                                placeholder="City, area or property"
+                                autocomplete="off"
+                                role="combobox"
+                                aria-autocomplete="list"
+                                aria-expanded="false"
+                                aria-controls="reserva-destination-list"
+                                data-destination-input
+                            >
                         </div>
+
+                        <input
+                            type="hidden"
+                            name="destination_type"
+                            value="{{ session('azari_stay_search.destination_type') }}"
+                            data-destination-type
+                        >
+                        <input
+                            type="hidden"
+                            name="destination_id"
+                            value="{{ session('azari_stay_search.destination_id') }}"
+                            data-destination-id
+                        >
+
+                        <div
+                            id="reserva-destination-list"
+                            class="reserva-destination-list"
+                            role="listbox"
+                            data-destination-list
+                            hidden
+                        ></div>
+                        <span class="sr-only" role="status" aria-live="polite" data-destination-status></span>
                     </div>
 
                     <div class="search-field">
@@ -275,6 +316,97 @@
         </div>
     </section>
 
+    @if(($popularLocations ?? collect())->isNotEmpty() && data_get($homepageSections->get('popular_destinations')?->content, 'enabled', true))
+        <section class="reserva-discovery-section" aria-labelledby="reserva-popular-destinations">
+            <div class="site-container">
+                <div class="section-heading">
+                    <div>
+                        <span class="eyebrow">Explore Reserva</span>
+                        <h2 id="reserva-popular-destinations">
+                            {{ data_get($homepageSections->get('popular_destinations')?->content, 'title', 'Popular destinations') }}
+                        </h2>
+                    </div>
+                </div>
+
+                <div class="reserva-destination-grid">
+                    @foreach($popularLocations as $location)
+                        <a
+                            class="reserva-destination-card"
+                            href="{{ route('availability.index', ['location' => $location->name]) }}"
+                        >
+                            <span class="material-symbols-outlined" aria-hidden="true">location_city</span>
+                            <strong>{{ $location->name }}</strong>
+                            <span>{{ $location->city }}, {{ $location->country }}</span>
+                            <small>{{ $location->published_properties_count }} {{ Str::plural('stay', $location->published_properties_count) }}</small>
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+    @endif
+
+    @if(($propertyTypeStats ?? collect())->isNotEmpty() && data_get($homepageSections->get('property_types')?->content, 'enabled', true))
+        <section class="reserva-discovery-section reserva-discovery-section--soft" aria-labelledby="reserva-property-types">
+            <div class="site-container">
+                <div class="section-heading">
+                    <div>
+                        <span class="eyebrow">Browse your way</span>
+                        <h2 id="reserva-property-types">
+                            {{ data_get($homepageSections->get('property_types')?->content, 'title', 'Browse by property type') }}
+                        </h2>
+                    </div>
+                </div>
+
+                <div class="reserva-type-grid">
+                    @foreach($propertyTypeStats as $typeStat)
+                        <a
+                            class="reserva-type-card"
+                            href="{{ route('availability.index', ['property_type' => $typeStat->property_type]) }}"
+                        >
+                            <span class="material-symbols-outlined" aria-hidden="true">apartment</span>
+                            <strong>{{ Str::headline($typeStat->property_type) }}</strong>
+                            <span>{{ $typeStat->properties_count }} {{ Str::plural('property', $typeStat->properties_count) }}</span>
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+    @endif
+
+    @if(($newResidences ?? collect())->isNotEmpty() && data_get($homepageSections->get('new_properties')?->content, 'enabled', true))
+        <section class="reserva-discovery-section" aria-labelledby="reserva-new-properties">
+            <div class="site-container">
+                <div class="section-heading">
+                    <div>
+                        <span class="eyebrow">Recently added</span>
+                        <h2 id="reserva-new-properties">
+                            {{ data_get($homepageSections->get('new_properties')?->content, 'title', 'New to Reserva') }}
+                        </h2>
+                    </div>
+                </div>
+
+                <div class="reserva-new-grid">
+                    @foreach($newResidences as $property)
+                        <a class="reserva-new-card" href="{{ route('properties.show', $property) }}">
+                            <span class="reserva-new-card__media">
+                                @if($property->cover_image)
+                                    <img src="{{ Storage::url($property->cover_image) }}" alt="{{ $property->name }}" loading="lazy" decoding="async">
+                                @else
+                                    <img src="{{ asset('images/azari-residence-fallback.png') }}" alt="" loading="lazy" decoding="async">
+                                @endif
+                            </span>
+                            <span class="reserva-new-card__body">
+                                <small>{{ $property->locationRecord?->name ?? $property->location }}</small>
+                                <strong>{{ $property->name }}</strong>
+                                <span>{{ Str::headline($property->property_type) }}</span>
+                            </span>
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+    @endif
+
     <section class="intro-section" id="about">
         <div class="site-container intro-grid">
             <div class="intro-heading">
@@ -293,7 +425,7 @@
                 </p>
 
                 <p>
-                    Each Resavar residence combines the privacy and comfort of a
+                    Each Reserva residence combines the privacy and comfort of a
                     personal home with the thoughtful service expected from
                     premium hospitality. From carefully furnished interiors and
                     reliable housekeeping to responsive guest support, every
@@ -768,20 +900,20 @@
             <div class="azari-app-card">
                 <div class="azari-app-copy">
                     <span class="azari-app-kicker">
-                        The Resavar App
+                        The Reserva App
                     </span>
 
                     <h2
                         class="azari-app-title"
                         id="azari-app-title"
                     >
-                        Your Resavar experience, wherever you are.
+                        Your Reserva experience, wherever you are.
                     </h2>
 
                     <p class="azari-app-description">
-                        Download the Resavar app on Google Play
+                        Download the Reserva app on Google Play
                         for convenient access to your bookings, guest account
-                        and Resavar experience on Android.
+                        and Reserva experience on Android.
                     </p>
 
                     <div
@@ -803,7 +935,7 @@
                             class="azari-google-play-link"
                             target="_blank"
                             rel="noopener noreferrer"
-                            aria-label="Get Resavar on Google Play"
+                            aria-label="Get Reserva on Google Play"
                         >
                             <img
                                 src="{{ asset('images/google-play-badge.png') }}"
@@ -824,7 +956,7 @@
                 <div class="azari-app-visual">
                     <img
                         src="{{ asset('images/azari-hospitality-welcome.png') }}"
-                        alt="Resavar hospitality experience"
+                        alt="Reserva hospitality experience"
                         loading="lazy"
                         decoding="async"
                     >
@@ -836,7 +968,7 @@
                         >devices</span>
 
                         <div>
-                            <strong>Resavar on Android.</strong>
+                            <strong>Reserva on Android.</strong>
                             <span>Available on Google Play</span>
                         </div>
                     </div>
