@@ -289,6 +289,14 @@ return new class extends Migration
             ? DB::table('bookings')
                 ->selectRaw('property_id, MAX(COALESCE(rooms, 1)) as max_rooms')
                 ->whereIn('status', $activeBookingStatuses)
+                ->where(function ($query): void {
+                    $query->whereNotIn('status', ['pending', 'pending_payment'])
+                        ->orWhere(function ($pending): void {
+                            $pending->whereIn('status', ['pending', 'pending_payment'])
+                                ->whereNotNull('expires_at')
+                                ->where('expires_at', '>', now());
+                        });
+                })
                 ->whereDate('check_out', '>', now()->toDateString())
                 ->groupBy('property_id')
                 ->pluck('max_rooms', 'property_id')
@@ -311,8 +319,23 @@ return new class extends Migration
                         ->orderBy('id')
                         ->first();
 
+                    $requiredInventory = max(
+                        1,
+                        (int) ($futureBookingInventory[$property->id] ?? 0),
+                        (int) ($activeHoldInventory[$property->id] ?? 0)
+                    );
+
                     if ($existing) {
                         $typeId = $existing->id;
+
+                        if ((int) ($existing->total_inventory ?? 1) < $requiredInventory) {
+                            DB::table('accommodation_types')
+                                ->where('id', $typeId)
+                                ->update([
+                                    'total_inventory' => $requiredInventory,
+                                    'updated_at' => now(),
+                                ]);
+                        }
                     } else {
                         $slug = Str::slug((string) ($property->property_type ?: $property->name ?: 'standard')) ?: 'standard';
 
@@ -330,11 +353,7 @@ return new class extends Migration
                             'max_guests' => max(1, (int) ($property->max_guests ?? 2)),
                             'bed_configuration' => $property->bed_configuration ?? null,
                             'room_size' => $property->room_size ?? null,
-                            'total_inventory' => max(
-                                1,
-                                (int) ($futureBookingInventory[$property->id] ?? 0),
-                                (int) ($activeHoldInventory[$property->id] ?? 0)
-                            ),
+                            'total_inventory' => $requiredInventory,
                             'base_rate' => (float) ($property->nightly_rate ?? 0),
                             'weekend_rate' => $property->weekend_rate ?? null,
                             'cleaning_fee' => (float) ($property->cleaning_fee ?? 0),
