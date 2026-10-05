@@ -18,13 +18,13 @@ class CommercialInventoryManager
         array $data,
         ?AccommodationType $type = null
     ): AccommodationType {
-        if ($type && (int) $type->property_id !== (int) $lockedProperty->getKey()) {
+        if ($type && (int) $type->property_id !== (int) $property->getKey()) {
             abort(404);
         }
 
         return DB::transaction(function () use ($property, $data, $type): AccommodationType {
             $lockedProperty = Property::query()
-                ->whereKey($lockedProperty->getKey())
+                ->whereKey($property->getKey())
                 ->lockForUpdate()
                 ->firstOrFail();
 
