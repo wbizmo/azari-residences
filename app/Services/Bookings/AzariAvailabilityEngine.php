@@ -370,7 +370,8 @@ class AzariAvailabilityEngine
         $inventory = Schema::hasTable('inventory_dates')
             ? InventoryDate::query()
                 ->where('accommodation_type_id', $accommodationType->getKey())
-                ->whereIn('date', $dates->all())
+                ->whereDate('date', '>=', $start->toDateString())
+                ->whereDate('date', '<', $end->toDateString())
                 ->get()
                 ->keyBy(fn (InventoryDate $row) => $row->date->toDateString())
             : collect();
