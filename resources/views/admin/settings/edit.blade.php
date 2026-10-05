@@ -6,9 +6,9 @@
 @section('content')
     <div class="az-admin-page-head">
         <div>
-            <span class="az-eyebrow">Resavar identity</span>
+            <span class="az-eyebrow">Reserva identity</span>
             <h1>Brand settings</h1>
-            <p>The production Resavar logos are bundled with the application and cannot be replaced from the CMS.</p>
+            <p>The production Reserva logos are bundled with the application and cannot be replaced from the CMS.</p>
         </div>
     </div>
 
@@ -26,7 +26,7 @@
 
             <label class="az-field">
                 <span>Site name</span>
-                <input name="site_name" value="{{ old('site_name', $settings['site_name'] ?? 'Resavar') }}" required>
+                <input name="site_name" value="{{ old('site_name', $settings['site_name'] ?? 'Reserva') }}" required>
             </label>
 
             <label class="az-field">
