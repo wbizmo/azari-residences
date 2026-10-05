@@ -627,7 +627,7 @@
         </div>
     </section>
 
-    <!-- RESAVAR APP DOWNLOAD START -->
+    <!-- RESERVA APP DOWNLOAD START -->
     <section
         class="azari-app-section"
         aria-labelledby="azari-app-title"
@@ -976,6 +976,6 @@
             </div>
         </div>
     </section>
-    <!-- RESAVAR APP DOWNLOAD END -->
+    <!-- RESERVA APP DOWNLOAD END -->
 
 </x-public-site.layout>
