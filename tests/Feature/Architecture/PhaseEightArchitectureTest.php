@@ -16,7 +16,8 @@ class PhaseEightArchitectureTest extends TestCase
 
     public function test_material_symbols_are_local_and_visually_contained(): void
     {
-        $css = File::get(resource_path('css/app.css'));
+        $css = File::get(resource_path('css/app.css'))
+            ."\n".File::get(resource_path('css/legacy/app-legacy.css'));
 
         $this->assertStringContainsString("@font-face {", $css);
         $this->assertStringContainsString("font-family: 'Material Symbols Outlined';", $css);
