@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests\CommercialInventory;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\AzariFormRequest;
 
-class AccommodationTypeRequest extends FormRequest
+class AccommodationTypeRequest extends AzariFormRequest
 {
     public function authorize(): bool
     {
