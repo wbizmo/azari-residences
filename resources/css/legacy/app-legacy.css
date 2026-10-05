@@ -1,8 +1,8 @@
-@import './azari-frontend-ux.css';
-@import './azari-responsive-ui-hardening.css';
-@import './azari-production-ui.css';
-@import './azari-user-area.css';
-@import './azari-sprints-07-08-admin.css';
+@import '../azari-frontend-ux.css';
+@import '../azari-responsive-ui-hardening.css';
+@import '../azari-production-ui.css';
+@import '../azari-user-area.css';
+@import '../azari-sprints-07-08-admin.css';
 
 
 @font-face {
@@ -15,28 +15,6 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-:root {
-    --azari-ink: #052058;
-    --azari-ink-soft: #052058;
-    --azari-ivory: #052058;
-    --azari-ivory-deep: #052058;
-    --azari-brass: #052058;
-    --azari-brass-light: #052058;
-    --azari-wine: #000000;
-    --azari-white: #FFFFFF;
-    --azari-text: #052058;
-    --azari-muted: #052058;
-    --azari-border: rgba(5, 32, 88, 0.16);
-    --azari-success: #052058;
-    --azari-error: #000000;
-    --font-display: 'Montserrat', Arial, sans-serif, 'Montserrat', Arial, sans-serif;
-    --font-body: 'Montserrat', Arial, sans-serif, ui-sans-serif, system-ui, sans-serif;
-    --font-mono: 'Montserrat', Arial, sans-serif, ui-monospace, monospace;
-    --shadow-card: 0 24px 50px -28px rgba(5, 32, 88, 0.42);
-    --shadow-floating: 0 30px 80px -30px rgba(0, 0, 0, 0.6);
-    --container: 1180px;
-}
 
 * {
     box-sizing: border-box;
@@ -4784,29 +4762,6 @@ button.back-to-top:focus-visible,
 /* AZARI_SPRINT_03_04_ADMIN_END */
 
 /* AZARI_ADMIN_DESIGN_SYSTEM_START */
-:root {
-    --az-admin-green-950: #052058;
-    --az-admin-green-900: #052058;
-    --az-admin-green-800: #052058;
-    --az-admin-green-700: #052058;
-    --az-admin-ivory: #FFFFFF;
-    --az-admin-paper: #FFFFFF;
-    --az-admin-brass: #052058;
-    --az-admin-brass-deep: #052058;
-    --az-admin-wine: #000000;
-    --az-admin-ink: #052058;
-    --az-admin-muted: #052058;
-    --az-admin-line: #052058;
-    --az-admin-success: #052058;
-    --az-admin-danger: #000000;
-    --az-admin-shadow: 0 20px 55px rgb(8 27 22 / 10%);
-    --az-admin-sidebar-width: 286px;
-    --az-admin-topbar-height: 78px;
-    --az-admin-radius-sm: 10px;
-    --az-admin-radius-md: 16px;
-    --az-admin-radius-lg: 24px;
-}
-
 html[data-admin-theme="dark"] {
     --az-admin-ivory: #000000;
     --az-admin-paper: #052058;
@@ -6127,7 +6082,6 @@ input[type="range"]::-webkit-slider-thumb {
     .az-toast-region { top: auto; right: 1rem; bottom: 1rem; }
 }
 /* AZARI UNIFIED PRODUCTION HOTFIX START */
-:root{--az-ui-text:#052058;--az-ui-muted:#052058;--az-ui-border:rgba(5, 32, 88, .16);--az-ui-primary:#052058;--az-ui-focus:rgba(5, 32, 88, .14)}
 html,body,button,input,select,textarea{font-weight:400}h1,h2,h3,h4,h5,h6,label,th,strong,b,button,.button{font-weight:500}.material-symbols-outlined,.material-icons{font-variation-settings:'FILL' 0,'wght' 200,'GRAD' 0,'opsz' 24!important;font-weight:200!important}
 .azari-inner-page :is(.site-header,.public-header,header[data-site-header]):not(.is-scrolled){color:var(--az-ui-text);background:rgba(255, 255, 255, .96);border-bottom:1px solid rgba(5, 32, 88, .08);backdrop-filter:blur(14px)}.azari-inner-page :is(.site-header,.public-header,header[data-site-header]):not(.is-scrolled) :is(a,button,.material-symbols-outlined){color:var(--az-ui-text)}
 :where(input:not([type=checkbox]):not([type=radio]):not([type=hidden]),textarea,select){width:100%;min-height:46px;padding:.75rem .9rem;color:var(--az-ui-text);background:#FFFFFF;border:1px solid var(--az-ui-border);border-radius:.72rem;box-shadow:none;outline:0;font:inherit;transition:.16s}:where(input:not([type=checkbox]):not([type=radio]):not([type=hidden]),textarea,select):focus{border-color:var(--az-ui-primary);box-shadow:0 0 0 4px var(--az-ui-focus)}textarea{min-height:120px;resize:vertical}select{appearance:none;padding-right:2.6rem;background-image:linear-gradient(45deg,transparent 50%,var(--az-ui-primary) 50%),linear-gradient(135deg,var(--az-ui-primary) 50%,transparent 50%);background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;background-repeat:no-repeat;background-size:5px 5px}
@@ -6139,14 +6093,6 @@ html,body,button,input,select,textarea{font-weight:400}h1,h2,h3,h4,h5,h6,label,t
 /* AZARI UNIFIED PRODUCTION HOTFIX END */
 
 /* AZARI UI OVERHAUL V3 START */
-:root {
-    --az-v3-text: #052058;
-    --az-v3-muted: #052058;
-    --az-v3-border: rgba(5, 32, 88, .13);
-    --az-v3-green: #052058;
-    --az-v3-panel: #052058;
-}
-
 .az-date-v3__native {
     position: absolute !important;
     width: 1px !important;
@@ -6555,15 +6501,6 @@ html,body,button,input,select,textarea{font-weight:400}h1,h2,h3,h4,h5,h6,label,t
 /* =========================================================
    Permanent public header, Book Now and authentication fixes
    ========================================================= */
-
-:root {
-    --azari-deep-green: #052058;
-    --azari-deep-green-hover: #052058;
-    --azari-gold: #052058;
-    --azari-cream: #FFFFFF;
-    --azari-paper: #FFFFFF;
-    --azari-ink: #000000;
-}
 
 /*
  * Public navigation must remain readable by default.
@@ -7580,11 +7517,6 @@ body.az-auth-page {
 |
 */
 
-:root {
-    --azari-hamburger-peach: var(--azari-peach, #052058);
-    --azari-hamburger-green: var(--azari-green, #052058);
-}
-
 /* Default state before JavaScript initializes */
 html:not([data-azari-hamburger-variant]) :is(
     [data-mobile-menu-toggle],
@@ -7781,11 +7713,6 @@ html[data-azari-hamburger-variant="green"] :is(
 | animated open state change.
 |
 */
-
-:root {
-    --azari-menu-peach: #052058;
-    --azari-menu-green: var(--azari-green, #052058);
-}
 
 .azari-menu-toggle {
     --azari-menu-current-color: var(--azari-menu-green);
@@ -8834,12 +8761,6 @@ body.az-admin-body {
 /* AZARI_GLOBAL_RESPONSIVE_TOPBAR_CARDS_V1_END */
 
 /* RESAVAR FINAL CONTRAST + RESPONSIVE AUTHORITY */
-:root{
-    --resavar-navy:#052058;
-    --resavar-black:#000000;
-    --resavar-white:#FFFFFF;
-}
-
 /* Keep the restored Oct 2 layout intact; this block changes skin/contrast only. */
 html,body,.public-site,#main-content{
     width:100%;
