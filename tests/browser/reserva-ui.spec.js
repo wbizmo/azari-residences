@@ -114,8 +114,10 @@ test('public homepage has readable booking controls and keyboard focus', async (
 
     await expect(page).toHaveTitle(/Reserva/i);
     await expectReadable(page.locator('.availability-submit').first(), 4.5);
-    await expectReadable(page.locator('.back-to-top').first(), 4.5);
     await expectVisibleFocus(page.locator('.availability-submit').first());
+
+    await page.evaluate(() => window.scrollTo(0, Math.max(900, document.body.scrollHeight / 2)));
+    await expectReadable(page.locator('.back-to-top').first(), 4.5);
 
     await page.screenshot({
         path: 'playwright-artifacts/homepage.png',
@@ -128,7 +130,7 @@ test('admin dashboard inverse surfaces remain readable', async ({ page }) => {
     await page.locator('#admin-email').fill('admin@example.test');
     await page.locator('#admin-password').fill('password');
     await page.getByRole('button', { name: 'Sign in' }).click();
-    await page.waitForURL(/azaridevadmin/);
+    await page.waitForURL(/\/azaridevadmin(?:\?|$)/);
 
     await expectReadable(page.locator('.az-dashboard-hero .az-eyebrow').first(), 4.5);
     await expectReadable(page.locator('.az-admin-sidebar .az-nav-link').first(), 4.5);
