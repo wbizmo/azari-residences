@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#052058">
-    <title>Resavar | Exceptional Stays, Everywhere.</title>
+    <title>Reserva | Exceptional Stays, Everywhere.</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -15,19 +15,19 @@
 <body class="resavar-welcome-body">
     <main class="resavar-welcome">
         <section class="resavar-welcome__brand">
-            <a href="{{ url('/') }}" aria-label="Resavar home">
-                <img src="{{ asset('images/resavar-logo-dark.png') . '?v=20261004-4' }}" alt="Resavar">
+            <a href="{{ url('/') }}" aria-label="Reserva home">
+                <img src="{{ asset('images/resavar-logo-dark.png') . '?v=20261004-4' }}" alt="Reserva">
             </a>
             <div>
                 <span>Exceptional Stays, Everywhere.</span>
-                <h1>Welcome to Resavar.</h1>
+                <h1>Welcome to Reserva.</h1>
                 <p>Discover thoughtfully managed stays, direct booking and dependable guest support.</p>
             </div>
         </section>
 
         <section class="resavar-welcome__actions">
             <div>
-                <span>Resavar</span>
+                <span>Reserva</span>
                 <h2>Plan your next stay.</h2>
                 <p>Search live availability or sign in to manage an existing booking.</p>
 
