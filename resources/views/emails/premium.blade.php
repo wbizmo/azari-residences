@@ -7,26 +7,26 @@
     <meta name="supported-color-schemes" content="light">
     <title>{{ $title }}</title>
 </head>
-<body style="margin:0;padding:0;background:#052058;color:#052058;font-family:Montserrat,Arial,sans-serif;-webkit-text-size-adjust:100%">
+<body style="margin:0;padding:0;background:#EEF2F8;color:#052058;font-family:Montserrat,Arial,sans-serif;-webkit-text-size-adjust:100%">
 <span style="display:none!important;max-height:0;max-width:0;overflow:hidden;opacity:0;color:transparent">{{ $preheader ?? $title }}</span>
 @php
     $emailTone = $tone ?? 'default';
     $accent = match ($emailTone) {
-        'success' => '#052058',
-        'warning' => '#052058',
-        'danger' => '#052058',
+        'success' => '#1F6F4A',
+        'warning' => '#F58F07',
+        'danger' => '#8F1D1D',
         'internal' => '#052058',
-        default => '#052058',
+        default => '#0577F5',
     };
     $noticeBackground = match ($emailTone) {
-        'success' => '#052058',
-        'warning' => '#052058',
-        'danger' => '#052058',
-        'internal' => '#052058',
-        default => '#052058',
+        'success' => '#EAF6EF',
+        'warning' => '#FFF4D6',
+        'danger' => '#FDE9E9',
+        'internal' => '#EEF2F8',
+        default => '#EEF2F8',
     };
 @endphp
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;background:#052058">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;background:#EEF2F8">
     <tr>
         <td align="center" style="padding:32px 12px">
             <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="width:100%;max-width:660px;background:#FFFFFF;border:1px solid #052058">
@@ -36,13 +36,13 @@
                             <tr>
                                 <td valign="middle">
                                     @if(!empty($logoUrl))
-                                        <img src="{{ $logoUrl }}" width="174" alt="Resavar" style="display:block;width:174px;max-width:100%;height:auto;border:0">
+                                        <img src="{{ $logoUrl }}" width="174" alt="Reserva" style="display:block;width:174px;max-width:100%;height:auto;border:0">
                                     @else
-                                        <div style="color:#FFFFFF;font-family:Montserrat,Arial,sans-serif;font-size:22px;letter-spacing:1px">RESAVAR</div>
+                                        <div style="color:#FFFFFF;font-family:Montserrat,Arial,sans-serif;font-size:22px;letter-spacing:1px">RESERVA</div>
                                     @endif
                                 </td>
                                 <td align="right" valign="middle" style="color:#FFFFFF;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase">
-                                    {{ $eyebrow ?? 'Resavar' }}
+                                    {{ $eyebrow ?? 'Reserva' }}
                                 </td>
                             </tr>
                         </table>
@@ -63,14 +63,14 @@
                         @endforeach
 
                         @if(!empty($details))
-                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:24px 0;border:1px solid #052058;background:#052058">
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:24px 0;border:1px solid rgba(5,32,88,.18);background:#FFFFFF">
                                 @foreach($details as $label => $value)
                                     @if(filled($value))
                                         <tr>
-                                            <td valign="top" style="width:38%;padding:11px 14px;border-bottom:1px solid #052058;color:#052058;font-size:12px;font-weight:700;letter-spacing:.4px;text-transform:uppercase">
+                                            <td valign="top" style="width:38%;padding:11px 14px;border-bottom:1px solid rgba(5,32,88,.12);color:#052058;font-size:12px;font-weight:700;letter-spacing:.4px;text-transform:uppercase">
                                                 {{ $label }}
                                             </td>
-                                            <td valign="top" style="padding:11px 14px;border-bottom:1px solid #052058;color:#052058;font-size:14px;line-height:1.55;overflow-wrap:anywhere">
+                                            <td valign="top" style="padding:11px 14px;border-bottom:1px solid rgba(5,32,88,.12);color:#052058;font-size:14px;line-height:1.55;overflow-wrap:anywhere">
                                                 {{ $value }}
                                             </td>
                                         </tr>
@@ -91,7 +91,7 @@
                             <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:28px 0 18px">
                                 <tr>
                                     <td style="background:#052058">
-                                        <a href="{{ $actionUrl }}" style="display:inline-block;padding:14px 22px;color:#052058;font-size:14px;font-weight:700;text-decoration:none">
+                                        <a href="{{ $actionUrl }}" style="display:inline-block;padding:14px 22px;color:#FFFFFF;font-size:14px;font-weight:700;text-decoration:none">
                                             {{ $actionLabel }}
                                         </a>
                                     </td>
@@ -117,11 +117,11 @@
                 </tr>
 
                 <tr>
-                    <td style="padding:22px 30px;background:#052058;border-top:1px solid #052058;color:#052058;font-size:11px;line-height:1.65">
-                        <div style="margin-bottom:7px;color:#052058;font-weight:700">Resavar</div>
-                        <div>{{ $footerText ?? 'This is a transactional message from Resavar.' }}</div>
+                    <td style="padding:22px 30px;background:#052058;border-top:1px solid #052058;color:#FFFFFF;font-size:11px;line-height:1.65">
+                        <div style="margin-bottom:7px;color:#FFFFFF;font-weight:700">Reserva</div>
+                        <div>{{ $footerText ?? 'This is a transactional message from Reserva.' }}</div>
                         @if(!empty($supportEmail))
-                            <div style="margin-top:7px">Need assistance? Contact <a href="mailto:{{ $supportEmail }}" style="color:#052058">{{ $supportEmail }}</a>.</div>
+                            <div style="margin-top:7px">Need assistance? Contact <a href="mailto:{{ $supportEmail }}" style="color:#FFFFFF">{{ $supportEmail }}</a>.</div>
                         @endif
                     </td>
                 </tr>
