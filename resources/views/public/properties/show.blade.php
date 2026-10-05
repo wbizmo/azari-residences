@@ -66,17 +66,18 @@
 
                 <div class="reserva-rate-grid">
                     @foreach($property->publicAccommodationTypes as $type)
-                        @php($publicPlans = $type->ratePlans->where('is_active', true)->where('is_public', true))
-
-                        @foreach($publicPlans as $plan)
+                        @foreach($type->ratePlans->where('is_active', true)->where('is_public', true) as $plan)
                             @php
                                 $baseRate = (float) $type->base_rate;
                                 $adjustment = (float) $plan->pricing_adjustment;
-                                $fromRate = match ($plan->pricing_adjustment_type) {
-                                    'percentage' => $baseRate + ($baseRate * ($adjustment / 100)),
-                                    'fixed' => $baseRate + $adjustment,
-                                    default => $baseRate,
-                                };
+                                $fromRate = $baseRate;
+
+                                if ($plan->pricing_adjustment_type === 'percentage') {
+                                    $fromRate += $baseRate * ($adjustment / 100);
+                                } elseif ($plan->pricing_adjustment_type === 'fixed') {
+                                    $fromRate += $adjustment;
+                                }
+
                                 $fromRate = max(0, $fromRate);
                             @endphp
 
@@ -91,7 +92,7 @@
 
                                 <div class="reserva-rate-card__facts">
                                     <span>Up to {{ $type->max_guests }} guests</span>
-                                    <span>{{ $type->bedrooms }} {{ IlluminateSupportStr::plural('bedroom', $type->bedrooms) }}</span>
+                                    <span>{{ $type->bedrooms }} {{ Str::plural('bedroom', $type->bedrooms) }}</span>
                                     @if($type->bed_configuration)
                                         <span>{{ $type->bed_configuration }}</span>
                                     @endif
