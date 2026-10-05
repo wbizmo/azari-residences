@@ -23,6 +23,58 @@
     --reserva-warning: #7a4b00;
     --reserva-danger: #8f1d1d;
 
+
+    --font-display: var(--reserva-font-sans);
+    --font-body: var(--reserva-font-sans);
+    --font-mono: var(--reserva-font-sans);
+    --shadow-card: 0 24px 50px -28px rgba(5, 32, 88, .22);
+    --shadow-floating: 0 30px 80px -30px rgba(0, 0, 0, .32);
+    --container: 1180px;
+
+    --az-font-weight-body: 400;
+    --az-font-weight-medium: 500;
+    --az-font-weight-heading: 500;
+
+    --az-admin-shadow: 0 20px 55px rgba(5, 32, 88, .10);
+    --az-admin-sidebar-width: 286px;
+    --az-admin-topbar-height: 78px;
+    --az-admin-radius-sm: 10px;
+    --az-admin-radius-md: 16px;
+    --az-admin-radius-lg: 24px;
+
+    --az-user-sidebar: 250px;
+    --az-user-topbar: 82px;
+    --az-user-shadow: 0 20px 60px rgba(5, 32, 88, .10);
+    --az-user-shadow-sm: 0 10px 30px rgba(5, 32, 88, .08);
+
+    --az-ui-text: var(--reserva-text);
+    --az-ui-muted: var(--reserva-text-muted);
+    --az-ui-border: var(--reserva-border);
+    --az-ui-primary: var(--reserva-action);
+    --az-ui-focus: var(--reserva-focus);
+
+    --az-v3-text: var(--reserva-text);
+    --az-v3-muted: var(--reserva-text-muted);
+    --az-v3-border: var(--reserva-border);
+    --az-v3-green: var(--reserva-navy);
+    --az-v3-panel: var(--reserva-white);
+
+    --azari-deep-green: var(--reserva-navy);
+    --azari-deep-green-hover: var(--reserva-black);
+    --azari-gold: var(--reserva-blue);
+    --azari-cream: var(--reserva-white);
+    --azari-paper: var(--reserva-white);
+    --azari-peach: var(--reserva-surface-soft);
+    --azari-green: var(--reserva-navy);
+    --azari-hamburger-peach: var(--reserva-white);
+    --azari-hamburger-green: var(--reserva-navy);
+    --azari-menu-peach: var(--reserva-white);
+    --azari-menu-green: var(--reserva-navy);
+
+    --resavar-navy: var(--reserva-navy);
+    --resavar-black: var(--reserva-black);
+    --resavar-white: var(--reserva-white);
+
     /* Safe compatibility mappings while legacy Azari selectors are retired. */
     --azari-ink: var(--reserva-navy);
     --azari-ink-soft: var(--reserva-navy);
