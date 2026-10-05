@@ -21,7 +21,8 @@ class AggressiveStaticAssetCachingTest extends TestCase
 
     public function test_material_symbols_font_preserves_the_phase_eight_canonical_url(): void
     {
-        $css = (string) file_get_contents(resource_path('css/app.css'));
+        $css = (string) file_get_contents(resource_path('css/app.css'))
+            ."\n".(string) file_get_contents(resource_path('css/legacy/app-legacy.css'));
         $preload = (string) file_get_contents(resource_path('views/partials/material-symbols-preload.blade.php'));
         $head = (string) file_get_contents(resource_path('views/partials/azari-head-assets.blade.php'));
 
