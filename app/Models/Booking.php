@@ -17,13 +17,13 @@ class Booking extends Model
     protected $perPage = 10;
 
     protected $fillable = [
-        'reference', 'user_id', 'property_id', 'voucher_id', 'voucher_code', 'discount_total', 'voucher_snapshot', 'hold_token', 'guest_name',
+        'reference', 'user_id', 'property_id', 'accommodation_type_id', 'rate_plan_id', 'voucher_id', 'voucher_code', 'discount_total', 'voucher_snapshot', 'hold_token', 'guest_name',
         'guest_first_name', 'guest_last_name', 'guest_email', 'guest_phone',
         'arrival_time', 'country', 'city', 'address', 'nationality', 'check_in',
         'check_out', 'adults', 'children', 'rooms', 'status', 'verification_status',
         'currency', 'nightly_rate', 'nights', 'subtotal', 'fee_total',
         'add_on_total', 'tax_rate', 'tax_total', 'total', 'pricing_snapshot',
-        'property_name_snapshot', 'property_formatted_address',
+        'property_name_snapshot', 'accommodation_type_name_snapshot', 'rate_plan_name_snapshot', 'policy_snapshot', 'property_formatted_address',
         'property_latitude', 'property_longitude',
         'guest_notes', 'admin_notes', 'paid_at', 'receipt_number', 'payment_reference',
         'cancelled_at', 'cancellation_reason', 'cancellation_internal_note',
@@ -40,7 +40,7 @@ class Booking extends Model
             'checked_in_at' => 'datetime', 'checked_out_at' => 'datetime', 'no_show_at' => 'datetime', 'check_in_reversed_at' => 'datetime', 'completed_at' => 'datetime',
             'room_assignment_locked_at' => 'datetime', 'payment_transfer_locked_at' => 'datetime',
             'modified_at' => 'datetime', 'expires_at' => 'datetime', 'payment_reminder_sent_at' => 'datetime',
-            'pricing_snapshot' => 'array', 'voucher_snapshot' => 'array', 'discount_total' => 'decimal:2', 'nightly_rate' => 'decimal:2',
+            'pricing_snapshot' => 'array', 'policy_snapshot' => 'array', 'voucher_snapshot' => 'array', 'discount_total' => 'decimal:2', 'nightly_rate' => 'decimal:2',
             'subtotal' => 'decimal:2', 'fee_total' => 'decimal:2',
             'add_on_total' => 'decimal:2', 'tax_rate' => 'decimal:4',
             'tax_total' => 'decimal:2', 'total' => 'decimal:2',
@@ -49,6 +49,8 @@ class Booking extends Model
     }
 
     public function property(): BelongsTo { return $this->belongsTo(Property::class); }
+    public function accommodationType(): BelongsTo { return $this->belongsTo(AccommodationType::class); }
+    public function ratePlan(): BelongsTo { return $this->belongsTo(RatePlan::class); }
     public function voucher(): BelongsTo { return $this->belongsTo(Voucher::class); }
     public function user(): BelongsTo { return $this->belongsTo(User::class); }
     public function cancelledBy(): BelongsTo { return $this->belongsTo(User::class, 'cancelled_by'); }
