@@ -3,7 +3,16 @@
 <header>
     <span class="eyebrow">Step 1 of 3</span>
     <h1>Your booking details</h1>
-    <p>{{ $hold->property->name }} · {{ $hold->check_in->format('d M Y') }} to {{ $hold->check_out->format('d M Y') }}</p>
+    <p>
+        {{ $hold->property->name }}
+        @if($hold->accommodationType)
+            · {{ $hold->accommodationType->name }}
+        @endif
+        @if($hold->ratePlan)
+            · {{ $hold->ratePlan->name }}
+        @endif
+        · {{ $hold->check_in->format('d M Y') }} to {{ $hold->check_out->format('d M Y') }}
+    </p>
 </header>
 
 <section class="az-panel">
@@ -208,7 +217,26 @@
 
 <section class="az-panel az-booking-total">
     <h2>Booking total</h2>
-    <p>{{ $quote['nights'] }} nights · {{ $quote['currency'] }} {{ number_format($quote['total'],2) }}</p>
+    <p>
+        {{ $quote['nights'] }} nights
+        · {{ $hold->rooms }} {{ IlluminateSupportStr::plural('unit', $hold->rooms) }}
+        · {{ $quote['currency'] }} {{ number_format($quote['total'],2) }}
+    </p>
+
+    @if($hold->ratePlan)
+        <div class="az-notice">
+            <strong>{{ $hold->ratePlan->name }}</strong>
+            @if(data_get($quote, 'policy.rate_plan.is_refundable') === false)
+                <span> · Non-refundable</span>
+            @elseif(data_get($quote, 'policy.cancellation.name'))
+                <span> · {{ data_get($quote, 'policy.cancellation.name') }}</span>
+            @endif
+
+            @if(data_get($quote, 'policy.payment.name'))
+                <span> · {{ data_get($quote, 'policy.payment.name') }}</span>
+            @endif
+        </div>
+    @endif
 
     <label class="az-check">
         <input type="checkbox" name="terms" value="1" @checked(old('terms')) required>
