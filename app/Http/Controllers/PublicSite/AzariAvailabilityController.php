@@ -125,7 +125,7 @@ class AzariAvailabilityController extends Controller
             ->orderByDesc('is_featured')
             ->orderBy('sort_order')
             ->orderBy('name')
-            ->limit(60)
+            ->limit(max(1, (int) config('reserva.search.max_properties', 60)))
             ->get();
 
         $ruleFailures = [];
@@ -423,7 +423,10 @@ class AzariAvailabilityController extends Controller
         $nights = max(1, $requestedIn->diffInDays($requestedOut));
         $alternatives = collect();
 
-        foreach ($properties->take(12) as $property) {
+        $propertyLimit = max(1, (int) config('reserva.search.alternative_property_limit', 12));
+        $alternativeDays = max(1, (int) config('reserva.search.alternative_days', 30));
+
+        foreach ($properties->take($propertyLimit) as $property) {
             $type = $availability->resolveAccommodationType($property);
             $ratePlan = $type ? $availability->resolveRatePlan($type) : null;
 
@@ -432,10 +435,10 @@ class AzariAvailabilityController extends Controller
             }
 
             $windowStart = $requestedIn->addDay();
-            $windowEnd = $requestedIn->addDays(31 + $nights);
+            $windowEnd = $requestedIn->addDays($alternativeDays + 1 + $nights);
             $remaining = $availability->remainingByDate($type, $windowStart, $windowEnd);
 
-            for ($offset = 1; $offset <= 30; $offset++) {
+            for ($offset = 1; $offset <= $alternativeDays; $offset++) {
                 $checkIn = $requestedIn->addDays($offset);
                 $checkOut = $checkIn->addDays($nights);
                 $rangeAvailable = true;
