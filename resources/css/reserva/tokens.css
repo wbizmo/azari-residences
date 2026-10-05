@@ -1,7 +1,11 @@
 :root {
     --reserva-navy: #052058;
+    --reserva-blue: #0577F5;
+    --reserva-orange: #F58F07;
     --reserva-black: #000000;
     --reserva-white: #FFFFFF;
+    --reserva-surface-muted: #EEF2F8;
+    --reserva-font-sans: Montserrat, Arial, sans-serif;
     --reserva-surface: #FFFFFF;
     --reserva-surface-soft: rgba(5, 32, 88, .055);
     --reserva-surface-inverse: #052058;
