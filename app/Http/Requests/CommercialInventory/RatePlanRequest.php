@@ -2,10 +2,10 @@
 
 namespace App\Http\Requests\CommercialInventory;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\AzariFormRequest;
 use Illuminate\Validation\Rule;
 
-class RatePlanRequest extends FormRequest
+class RatePlanRequest extends AzariFormRequest
 {
     public function authorize(): bool
     {
