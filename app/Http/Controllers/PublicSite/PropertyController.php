@@ -13,7 +13,13 @@ class PropertyController extends Controller
         abort_unless($property->is_published, 404);
 
         return view('public.properties.show', [
-            'property' => $property->load('amenities'),
+            'property' => $property->load([
+                'amenities',
+                'publicAccommodationTypes.ratePlans' => fn ($query) => $query
+                    ->where('is_active', true)
+                    ->where('is_public', true)
+                    ->with(['cancellationPolicy', 'paymentPolicy']),
+            ]),
         ]);
     }
 }
