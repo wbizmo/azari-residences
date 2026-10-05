@@ -1,8 +1,8 @@
 {
     "id": "/",
-    "name": "Resavar",
-    "short_name": "Resavar",
-    "description": "Resavar guest application",
+    "name": "Reserva",
+    "short_name": "Reserva",
+    "description": "Reserva guest application",
     "start_url": "/login",
     "scope": "/",
     "display": "standalone",
