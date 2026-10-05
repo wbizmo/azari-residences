@@ -42,13 +42,14 @@ class CanonicalAdminAndBrandRegressionTest extends TestCase
         $this->assertStringContainsString('logo-dark.png', $brand);
         $this->assertStringNotContainsString('azari-logo-mask', $brand);
     }
-    public function test_primary_brand_matches_resavar_identity_guide(): void
+    public function test_primary_brand_matches_reserva_identity(): void
     {
-        $this->assertSame('Resavar', config('app.name'));
+        $this->assertSame('Reserva', config('app.name'));
 
         $email = file_get_contents(resource_path('views/emails/premium.blade.php'));
         $this->assertStringContainsString('#0577F5', $email);
-        $this->assertStringContainsString('Resavar', $email);
+        $this->assertStringContainsString('Reserva', $email);
+        $this->assertStringNotContainsString('Resavar', $email);
         $this->assertStringContainsString('#052058', $email);
         $this->assertStringContainsString('#F58F07', $email);
         $this->assertStringContainsString('Exceptional Stays, Everywhere.', $email);
@@ -56,7 +57,7 @@ class CanonicalAdminAndBrandRegressionTest extends TestCase
     }
 
 
-    public function test_resavar_brand_authority_uses_documented_palette_and_typography(): void
+    public function test_reserva_brand_authority_uses_documented_palette_and_typography(): void
     {
         $brand = file_get_contents(resource_path('css/azari-brand-2026.css'));
 
@@ -69,7 +70,7 @@ class CanonicalAdminAndBrandRegressionTest extends TestCase
         }
     }
 
-    public function test_public_brand_positioning_uses_resavar_name_and_exact_tagline(): void
+    public function test_public_brand_positioning_uses_reserva_name_and_exact_tagline(): void
     {
         $layout = file_get_contents(resource_path('views/layouts/public.blade.php'));
 
