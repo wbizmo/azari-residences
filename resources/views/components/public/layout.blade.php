@@ -1,5 +1,5 @@
 @props([
-    'title' => 'RESAVAR | Exceptional Stays, Everywhere.',
+    'title' => 'RESERVA | Exceptional Stays, Everywhere.',
     'description' => null,
     'keywords' => null,
     'canonical' => null,
@@ -35,7 +35,7 @@
     @stack('head')
 </head>
 <body class="public-site {{ request()->routeIs('home') ? 'home-page azari-home-page' : 'inner-page azari-inner-page azari-solid-header' }} {{ $bodyClass ?? '' }}">
-    <div class="azari-preloader" data-public-preloader role="status" aria-label="Loading Resavar">
+    <div class="azari-preloader" data-public-preloader role="status" aria-label="Loading Reserva">
         <span class="azari-preloader__mark" aria-hidden="true">
             <span class="azari-preloader__spinner"></span>
             <img src="{{ asset('images/resavar-logo-light.png') }}?v=20261004-4" alt="" width="42" height="42" loading="eager" decoding="sync">
