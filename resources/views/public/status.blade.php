@@ -8,7 +8,7 @@
         name="robots"
         content="noindex, noarchive"
     >
-<title>System Status | Resavar</title>
+<title>System Status | Reserva</title>
 
     <style>
         :root {
@@ -657,7 +657,7 @@
             >
 
             <span class="brand-copy">
-                <strong>Resavar</strong>
+                <strong>Reserva</strong>
                 <span>System Status</span>
             </span>
         </a>
@@ -676,7 +676,7 @@
             <h1>System status</h1>
 
             <p class="intro-copy">
-                Current operational health for Resavar guest-facing
+                Current operational health for Reserva guest-facing
                 and transaction-processing services.
             </p>
         </section>
@@ -822,7 +822,7 @@
             <strong>About these checks.</strong>
             {{ $notice }}
 
-            Status reflects the Resavar platform's own service
+            Status reflects the Reserva platform's own service
             availability and processing readiness. Upstream service
             incidents may take time to surface through application
             health checks.
