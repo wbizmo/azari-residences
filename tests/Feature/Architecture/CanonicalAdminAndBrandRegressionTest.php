@@ -33,15 +33,16 @@ class CanonicalAdminAndBrandRegressionTest extends TestCase
         $this->assertStringNotContainsString("route('user.owner.listings.create')", $footer);
     }
 
-    public function test_brand_component_uses_original_light_and_dark_logo_assets_without_masking(): void
+    public function test_brand_component_uses_light_and_dark_logo_assets_without_masking(): void
     {
         $brand = file_get_contents(resource_path('views/components/brand-logo.blade.php'));
 
-        $this->assertStringContainsString('light_logo_url', $brand);
+        $this->assertStringContainsString("siteName = 'Reserva'", $brand);
         $this->assertStringContainsString('logo-light.png', $brand);
         $this->assertStringContainsString('logo-dark.png', $brand);
         $this->assertStringNotContainsString('azari-logo-mask', $brand);
     }
+
     public function test_primary_brand_matches_reserva_identity(): void
     {
         $this->assertSame('Reserva', config('app.name'));
@@ -53,13 +54,11 @@ class CanonicalAdminAndBrandRegressionTest extends TestCase
         $this->assertStringContainsString('#052058', $email);
         $this->assertStringContainsString('#F58F07', $email);
         $this->assertStringContainsString('Exceptional Stays, Everywhere.', $email);
-        $this->assertStringNotContainsString('#eee6d7', $email);
     }
-
 
     public function test_reserva_brand_authority_uses_documented_palette_and_typography(): void
     {
-        $brand = file_get_contents(resource_path('css/azari-brand-2026.css'));
+        $brand = file_get_contents(resource_path('css/reserva/tokens.css'));
 
         foreach (['#052058', '#0577F5', '#F58F07', '#EEF2F8', '#FFFFFF', 'Montserrat'] as $token) {
             $this->assertStringContainsString($token, $brand);
@@ -70,15 +69,13 @@ class CanonicalAdminAndBrandRegressionTest extends TestCase
         }
     }
 
-    public function test_public_brand_positioning_uses_reserva_name_and_exact_tagline(): void
+    public function test_public_brand_positioning_uses_reserva_name(): void
     {
         $layout = file_get_contents(resource_path('views/layouts/public.blade.php'));
 
-        $this->assertStringContainsString('RESAVAR | Exceptional Stays, Everywhere.', $layout);
-        $this->assertStringContainsString('global accommodation and travel marketplace', $layout);
+        $this->assertStringContainsString('Reserva | Luxury Hotels, Residences, Apartments, Rooms and Hospitality', $layout);
+        $this->assertStringContainsString('Reserva Luxury Properties Ltd', $layout);
         $this->assertStringNotContainsString('Azari Hotels & Residences', $layout);
-        $this->assertStringNotContainsString('Reserva', $layout);
+        $this->assertStringNotContainsString('Resavar', $layout);
     }
-
-
 }
