@@ -219,7 +219,7 @@
     <h2>Booking total</h2>
     <p>
         {{ $quote['nights'] }} nights
-        · {{ $hold->rooms }} {{ IlluminateSupportStr::plural('unit', $hold->rooms) }}
+        · {{ $hold->rooms }} {{ Str::plural('unit', $hold->rooms) }}
         · {{ $quote['currency'] }} {{ number_format($quote['total'],2) }}
     </p>
 
