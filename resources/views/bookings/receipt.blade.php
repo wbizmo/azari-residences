@@ -12,13 +12,13 @@
 <div class="toolbar"><button type="button" onclick="window.print()">Print or save as PDF</button></div>
 <main class="invoice">
     <header class="head">
-        <div><div class="kicker">Resavar</div><div class="brand">Booking invoice</div><span class="status">{{ ucwords(str_replace('_', ' ', $booking->status)) }}</span></div>
+        <div><div class="kicker">Reserva</div><div class="brand">Booking invoice</div><span class="status">{{ ucwords(str_replace('_', ' ', $booking->status)) }}</span></div>
         <div class="meta"><strong>{{ $booking->reference }}</strong><br><span>{{ $booking->created_at?->format('d M Y, H:i') }}</span></div>
     </header>
 
     <section class="grid">
         <div class="card"><h2>Guest</h2><p><strong>{{ $booking->guest_name }}</strong><br>{{ $booking->guest_email }}<br>{{ $booking->guest_phone ?: 'Phone not supplied' }}<br>{{ collect([$booking->address, $booking->city, $booking->country])->filter()->implode(', ') }}</p></div>
-        <div class="card"><h2>Stay</h2><p><strong>{{ $booking->property?->name ?? 'Resavar Residence' }}</strong><br>{{ $booking->property?->unit_number ?: $booking->property?->code }}<br>{{ $booking->check_in?->format('d M Y') }} to {{ $booking->check_out?->format('d M Y') }}<br>{{ $booking->nights }} night{{ $booking->nights == 1 ? '' : 's' }}</p></div>
+        <div class="card"><h2>Stay</h2><p><strong>{{ $booking->property?->name ?? 'Reserva Residence' }}</strong><br>{{ $booking->property?->unit_number ?: $booking->property?->code }}<br>{{ $booking->check_in?->format('d M Y') }} to {{ $booking->check_out?->format('d M Y') }}<br>{{ $booking->nights }} night{{ $booking->nights == 1 ? '' : 's' }}</p></div>
     </section>
 
     <section class="section"><h2>Booking statistics</h2><div class="stats"><div class="stat"><span>Adults</span><strong>{{ $booking->adults }}</strong></div><div class="stat"><span>Children</span><strong>{{ $booking->children }}</strong></div><div class="stat"><span>Rooms</span><strong>{{ $booking->rooms }}</strong></div><div class="stat"><span>Status</span><strong>{{ ucwords(str_replace('_', ' ', $booking->status)) }}</strong></div></div></section>
@@ -40,7 +40,7 @@
     </tbody></table></section>
 
     @php($verificationUrl = route('bookings.verify', ['reference' => $booking->reference]))
-    <section class="verify"><div><div class="kicker">Booking verification</div><strong>{{ $booking->reference }}</strong><p>Scan the QR code or enter the reference on the Resavar verification page. Public verification reveals only the booking reference and current status.</p></div><img alt="Verification QR code" src="https://quickchart.io/qr?size=220&margin=1&text={{ urlencode($verificationUrl) }}"></section>
+    <section class="verify"><div><div class="kicker">Booking verification</div><strong>{{ $booking->reference }}</strong><p>Scan the QR code or enter the reference on the Reserva verification page. Public verification reveals only the booking reference and current status.</p></div><img alt="Verification QR code" src="https://quickchart.io/qr?size=220&margin=1&text={{ urlencode($verificationUrl) }}"></section>
     <footer class="foot">Generated {{ now()->format('d M Y, H:i') }} · This invoice reflects the booking record and payment information available at the time of generation.</footer>
 </main>
 </body>
