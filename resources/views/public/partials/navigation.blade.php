@@ -1,6 +1,6 @@
 <header class="site-header" data-site-header>
     <div class="site-container nav-shell">
-        <a href="{{ route('home') }}" class="brand azari-brand azari-brand--header azari-header-logo" aria-label="{{ config('app.name', 'Resavar') }} home">
+        <a href="{{ route('home') }}" class="brand azari-brand azari-brand--header azari-header-logo" aria-label="{{ config('app.name', 'Reserva') }} home">
 
         <span class="brand-logo-slot azari-brand__logo-slot azari-header-logo__slot">
                 <img
@@ -8,7 +8,7 @@
                     data-azari-public-logo
                     data-dark-logo="{{ asset('images/resavar-logo-dark.png') }}?v=20261004-4"
                     data-light-logo="{{ asset('images/resavar-logo-light.png') }}?v=20261004-4"
-                    alt="{{ config('app.name', 'Resavar') }}"
+                    alt="{{ config('app.name', 'Reserva') }}"
                     class="brand-image azari-brand__image azari-header-logo__image"
                     loading="eager"
                     decoding="async"
