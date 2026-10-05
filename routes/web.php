@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\CommercialInventoryController;
 use App\Http\Controllers\Admin\ContentBlockController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PropertyController as AdminPropertyController;
@@ -49,6 +50,17 @@ Route::prefix('azaridevadmin')->middleware(['auth.session', 'azari.staff'])->gro
     Route::resource('properties', AdminPropertyController::class)
         ->except(['show', 'destroy'])
         ->names('azari.admin.properties');
+
+    Route::get('/properties/{property}/commercial', [CommercialInventoryController::class, 'edit'])
+        ->name('azari.admin.properties.commercial');
+    Route::post('/properties/{property}/commercial/accommodations', [CommercialInventoryController::class, 'storeAccommodation'])
+        ->name('azari.admin.properties.commercial.accommodations.store');
+    Route::put('/properties/{property}/commercial/accommodations/{accommodationType}', [CommercialInventoryController::class, 'updateAccommodation'])
+        ->name('azari.admin.properties.commercial.accommodations.update');
+    Route::post('/properties/{property}/commercial/accommodations/{accommodationType}/rate-plans', [CommercialInventoryController::class, 'storeRatePlan'])
+        ->name('azari.admin.properties.commercial.rate-plans.store');
+    Route::put('/properties/{property}/commercial/accommodations/{accommodationType}/rate-plans/{ratePlan}', [CommercialInventoryController::class, 'updateRatePlan'])
+        ->name('azari.admin.properties.commercial.rate-plans.update');
 
     Route::middleware('azari.admin')->group(function (): void {
         Route::get('/staff', [StaffController::class, 'index'])->name('azari.admin.staff.index');
