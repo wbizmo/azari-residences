@@ -134,6 +134,20 @@ class Property extends Model
         return $this->hasMany(PricingRule::class)->orderByDesc('priority');
     }
 
+    public function accommodationTypes(): HasMany
+    {
+        return $this->hasMany(AccommodationType::class)
+            ->orderBy('sort_order')
+            ->orderBy('id');
+    }
+
+    public function publicAccommodationTypes(): HasMany
+    {
+        return $this->accommodationTypes()
+            ->where('is_active', true)
+            ->where('is_published', true);
+    }
+
     public function getRouteKeyName(): string
     {
         return 'slug';
