@@ -472,11 +472,12 @@ class AzariPricingEngine
                     $query->orWhere('rate_plan_id', $ratePlan->getKey());
                 }
             })
-            ->where(function (Builder $query) use ($end): void {
-                $query->whereNull('stay_starts_on')->orWhereDate('stay_starts_on', '<', $end->toDateString());
-            })
             ->where(function (Builder $query) use ($start): void {
-                $query->whereNull('stay_ends_on')->orWhereDate('stay_ends_on', '>=', $start->toDateString());
+                $query->whereNull('stay_starts_on')->orWhereDate('stay_starts_on', '<=', $start->toDateString());
+            })
+            ->where(function (Builder $query) use ($end): void {
+                $lastNight = $end->subDay()->toDateString();
+                $query->whereNull('stay_ends_on')->orWhereDate('stay_ends_on', '>=', $lastNight);
             })
             ->where(function (Builder $query) use ($nights): void {
                 $query->whereNull('minimum_nights')->orWhere('minimum_nights', '<=', $nights);
