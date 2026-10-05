@@ -23,8 +23,8 @@ class AvailabilitySearchController extends Controller
         $validated = $request->validate([
             'check_in' => ['required', 'date', 'after_or_equal:today'],
             'check_out' => ['required', 'date', 'after:check_in'],
-            'adults' => ['required', 'integer', 'min:1', 'max:40'],
-            'children' => ['nullable', 'integer', 'min:0', 'max:40'],
+            'adults' => ['required', 'integer', 'min:1', 'max:12'],
+            'children' => ['nullable', 'integer', 'min:0', 'max:8'],
             'rooms' => ['nullable', 'integer', 'min:1', 'max:20'],
             'location_id' => ['nullable', 'integer', 'exists:locations,id'],
             'room_type_id' => ['nullable', 'integer', 'exists:room_types,id'],
