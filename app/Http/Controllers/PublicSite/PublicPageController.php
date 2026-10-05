@@ -60,6 +60,31 @@ class PublicPageController extends Controller
             'amenities',
         ]);
 
+        $requestedTypeId = $request->filled('accommodation_type_id')
+            ? $request->integer('accommodation_type_id')
+            : null;
+
+        $selectedAccommodationType = $availability->resolveAccommodationType(
+            $property,
+            $requestedTypeId
+        );
+
+        if ($requestedTypeId) {
+            abort_unless($selectedAccommodationType, 404);
+        }
+
+        $requestedRatePlanId = $request->filled('rate_plan_id')
+            ? $request->integer('rate_plan_id')
+            : null;
+
+        $selectedRatePlan = $selectedAccommodationType
+            ? $availability->resolveRatePlan($selectedAccommodationType, $requestedRatePlanId)
+            : null;
+
+        if ($requestedRatePlanId) {
+            abort_unless($selectedRatePlan, 404);
+        }
+
         $timezone = config(
             'azari.timezone',
             'Africa/Lagos'
@@ -108,10 +133,15 @@ class PublicPageController extends Controller
                     $availability->calendar(
                         $property->getKey(),
                         $start,
-                        90
+                        90,
+                        $selectedAccommodationType?->getKey()
                     ),
                 'start' =>
                     $start,
+                'selectedAccommodationType' =>
+                    $selectedAccommodationType,
+                'selectedRatePlan' =>
+                    $selectedRatePlan,
             ]
         );
     }
