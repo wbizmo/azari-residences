@@ -5,6 +5,7 @@ namespace App\Services\Bookings;
 use App\Models\AccommodationType;
 use App\Models\Booking;
 use App\Models\BookingHold;
+use App\Models\DailyRate;
 use App\Models\InventoryDate;
 use App\Models\MaintenancePeriod;
 use App\Models\Property;
@@ -114,6 +115,57 @@ class AzariAvailabilityEngine
                 throw ValidationException::withMessages([
                     'check_out' => 'Departure is closed for the selected date.',
                 ]);
+            }
+        }
+
+        if ($accommodationType && Schema::hasTable('daily_rates')) {
+            $rateRestrictions = DailyRate::query()
+                ->where('accommodation_type_id', $accommodationType->getKey())
+                ->whereDate('date', '>=', $checkIn->toDateString())
+                ->whereDate('date', '<', $checkOut->toDateString())
+                ->where(function (Builder $query) use ($ratePlan): void {
+                    $query->whereNull('rate_plan_id');
+
+                    if ($ratePlan) {
+                        $query->orWhere('rate_plan_id', $ratePlan->getKey());
+                    }
+                })
+                ->get(['rate_plan_id', 'date', 'minimum_stay', 'maximum_stay', 'stop_sell']);
+
+            $effectiveRateRestrictions = $rateRestrictions
+                ->groupBy(fn (DailyRate $row) => $row->date->toDateString())
+                ->map(function (Collection $rows) use ($ratePlan): ?DailyRate {
+                    if ($ratePlan) {
+                        $specific = $rows->first(
+                            fn (DailyRate $row) => (int) $row->rate_plan_id === (int) $ratePlan->getKey()
+                        );
+
+                        if ($specific) {
+                            return $specific;
+                        }
+                    }
+
+                    return $rows->first(fn (DailyRate $row) => $row->rate_plan_id === null);
+                })
+                ->filter();
+
+            if ($effectiveRateRestrictions->contains(fn (DailyRate $row) => (bool) $row->stop_sell)) {
+                throw ValidationException::withMessages([
+                    'rate_plan_id' => 'The selected rate is closed for one or more nights.',
+                ]);
+            }
+
+            $rateMinimum = $effectiveRateRestrictions->pluck('minimum_stay')->filter()->max();
+            $rateMaximum = $effectiveRateRestrictions->pluck('maximum_stay')->filter()->min();
+
+            if ($rateMinimum) {
+                $minimumStay = max($minimumStay, (int) $rateMinimum);
+            }
+
+            if ($rateMaximum) {
+                $maximumStay = $maximumStay
+                    ? min((int) $maximumStay, (int) $rateMaximum)
+                    : (int) $rateMaximum;
             }
         }
 
@@ -329,12 +381,14 @@ class AzariAvailabilityEngine
             $events[$date] = ($events[$date] ?? 0) + $delta;
         };
 
+        $isPrimaryType = $this->isPrimaryAccommodationType($accommodationType);
+
         $blockingBookings = Booking::query()
             ->where('property_id', $accommodationType->property_id)
-            ->where(function (Builder $query) use ($accommodationType): void {
+            ->where(function (Builder $query) use ($accommodationType, $isPrimaryType): void {
                 $query->where('accommodation_type_id', $accommodationType->getKey());
 
-                if ($this->isPrimaryAccommodationType($accommodationType)) {
+                if ($isPrimaryType) {
                     $query->orWhereNull('accommodation_type_id');
                 }
             })
@@ -369,10 +423,10 @@ class AzariAvailabilityEngine
         $blockingHolds = BookingHold::query()
             ->active()
             ->where('property_id', $accommodationType->property_id)
-            ->where(function (Builder $query) use ($accommodationType): void {
+            ->where(function (Builder $query) use ($accommodationType, $isPrimaryType): void {
                 $query->where('accommodation_type_id', $accommodationType->getKey());
 
-                if ($this->isPrimaryAccommodationType($accommodationType)) {
+                if ($isPrimaryType) {
                     $query->orWhereNull('accommodation_type_id');
                 }
             })
@@ -562,6 +616,7 @@ class AzariAvailabilityEngine
                 ->firstOrFail();
 
             BookingHold::query()
+                ->where('property_id', $property->getKey())
                 ->where('expires_at', '<=', now())
                 ->delete();
 
