@@ -280,9 +280,31 @@ return new class extends Migration
             return;
         }
 
+        $activeBookingStatuses = [
+            'hold', 'pending', 'pending_payment', 'approved', 'confirmed',
+            'paid', 'check_in', 'checked_in',
+        ];
+
+        $futureBookingInventory = Schema::hasTable('bookings')
+            ? DB::table('bookings')
+                ->selectRaw('property_id, MAX(COALESCE(rooms, 1)) as max_rooms')
+                ->whereIn('status', $activeBookingStatuses)
+                ->whereDate('check_out', '>', now()->toDateString())
+                ->groupBy('property_id')
+                ->pluck('max_rooms', 'property_id')
+            : collect();
+
+        $activeHoldInventory = Schema::hasTable('booking_holds')
+            ? DB::table('booking_holds')
+                ->selectRaw('property_id, MAX(COALESCE(rooms, 1)) as max_rooms')
+                ->where('expires_at', '>', now())
+                ->groupBy('property_id')
+                ->pluck('max_rooms', 'property_id')
+            : collect();
+
         DB::table('properties')
             ->orderBy('id')
-            ->chunkById(100, function ($properties): void {
+            ->chunkById(100, function ($properties) use ($futureBookingInventory, $activeHoldInventory): void {
                 foreach ($properties as $property) {
                     $existing = DB::table('accommodation_types')
                         ->where('property_id', $property->id)
@@ -308,7 +330,11 @@ return new class extends Migration
                             'max_guests' => max(1, (int) ($property->max_guests ?? 2)),
                             'bed_configuration' => $property->bed_configuration ?? null,
                             'room_size' => $property->room_size ?? null,
-                            'total_inventory' => 1,
+                            'total_inventory' => max(
+                                1,
+                                (int) ($futureBookingInventory[$property->id] ?? 0),
+                                (int) ($activeHoldInventory[$property->id] ?? 0)
+                            ),
                             'base_rate' => (float) ($property->nightly_rate ?? 0),
                             'weekend_rate' => $property->weekend_rate ?? null,
                             'cleaning_fee' => (float) ($property->cleaning_fee ?? 0),
