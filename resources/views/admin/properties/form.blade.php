@@ -2,6 +2,11 @@
 @section('content')
 <div class="admin-heading">
     <div><span>Inventory</span><h1>{{ $property->exists ? 'Edit property' : 'Add property' }}</h1></div>
+    @if($property->exists)
+        <a class="button button-secondary" href="{{ route('azari.admin.properties.commercial', $property) }}">
+            Accommodation & rates
+        </a>
+    @endif
 </div>
 
 @if($locations->isEmpty() || $roomTypes->isEmpty())
