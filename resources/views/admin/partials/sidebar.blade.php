@@ -1,7 +1,7 @@
 @php
     $siteName = class_exists(\App\Models\SiteSetting::class)
-        ? \App\Models\SiteSetting::valueFor('site_name', 'Resavar')
-        : 'Resavar';
+        ? \App\Models\SiteSetting::valueFor('site_name', 'Reserva')
+        : 'Reserva';
     $adminActor = auth()->user();
     $can = fn (string $permission): bool => (bool) ($adminActor?->isAdministrator() || $adminActor?->hasPermission($permission));
 
@@ -32,7 +32,7 @@
 
 @endphp
 <aside class="az-admin-sidebar" id="az-admin-sidebar" data-admin-sidebar aria-label="Administration navigation">
-    <div class="az-sidebar-brand"><a href="{{ route('azari.admin.dashboard') }}" class="az-sidebar-brand__link" aria-label="{{ $siteName }} dashboard"><img class="az-sidebar-brand__logo" src="{{ asset('images/resavar-logo-dark.png') }}?v=20261004-4" alt="{{ $siteName }}"></a><button type="button" class="az-icon-button az-sidebar-close" data-sidebar-close aria-label="Close navigation"><span class="material-symbols-outlined" aria-hidden="true">close</span></button></div>
+    <div class="az-sidebar-brand"><a href="{{ route('azari.admin.dashboard') }}" class="az-sidebar-brand__link" aria-label="{{ $siteName }} dashboard"><img class="az-sidebar-brand__logo" src="{{ asset('images/resavar-logo-light.png') }}?v=20261004-4" alt="{{ $siteName }}"></a><button type="button" class="az-icon-button az-sidebar-close" data-sidebar-close aria-label="Close navigation"><span class="material-symbols-outlined" aria-hidden="true">close</span></button></div>
     <div class="az-sidebar-context"><span class="az-sidebar-context__eyebrow">Administration</span><strong>Residence operations</strong></div>
     <nav class="az-sidebar-nav">
         <section class="az-nav-section"><h2>Overview</h2><a href="{{ route('azari.admin.dashboard') }}" class="az-nav-link {{ request()->routeIs('azari.admin.dashboard') ? 'is-active' : '' }}"><span class="material-symbols-outlined">space_dashboard</span><span>Dashboard</span></a></section>
