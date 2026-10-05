@@ -23,6 +23,44 @@ function showToast(message, type = 'info') {
     }
 }
 
+function trackReservaEvent(name, detail = {}) {
+    const safeDetail = Object.fromEntries(
+        Object.entries(detail).filter(([, value]) =>
+            ['string', 'number', 'boolean'].includes(typeof value) || value === null
+        )
+    );
+
+    window.dispatchEvent(new CustomEvent('reserva:analytics', {
+        detail: { name, ...safeDetail },
+    }));
+
+    if (Array.isArray(window.dataLayer)) {
+        window.dataLayer.push({
+            event: name,
+            ...safeDetail,
+        });
+    }
+}
+
+function rememberReservaSearch(form) {
+    try {
+        const data = new FormData(form);
+        const recent = {
+            destination: String(data.get('destination') || ''),
+            check_in: String(data.get('check_in') || ''),
+            check_out: String(data.get('check_out') || ''),
+            adults: Number(data.get('adults') || 1),
+            children: Number(data.get('children') || 0),
+            rooms: Number(data.get('rooms') || 1),
+            saved_at: new Date().toISOString(),
+        };
+
+        localStorage.setItem('reserva:last-search', JSON.stringify(recent));
+    } catch {
+        // Storage can be disabled by the browser; booking search must still work.
+    }
+}
+
 document.querySelectorAll('[data-toast]').forEach((trigger) => {
     trigger.addEventListener('click', () => showToast(trigger.dataset.toast));
 });
@@ -436,6 +474,18 @@ document.querySelectorAll('[data-destination-search]').forEach((root) => {
 document.querySelectorAll('[data-availability-form]').forEach((form) => {
     const checkIn = form.querySelector('[name="check_in"]');
     const checkOut = form.querySelector('[name="check_out"]');
+    let reservaSearchStarted = false;
+
+    form.addEventListener('focusin', () => {
+        if (reservaSearchStarted) {
+            return;
+        }
+
+        reservaSearchStarted = true;
+        trackReservaEvent('search_started', {
+            surface: form.closest('.availability-section') ? 'homepage' : 'availability',
+        });
+    }, { once: false });
 
     const clearErrors = () => {
         form.querySelectorAll('.field-error').forEach((error) => {
@@ -491,7 +541,22 @@ document.querySelectorAll('[data-availability-form]').forEach((form) => {
             event.preventDefault();
             form.querySelector('[aria-invalid="true"]')?.focus();
             showToast('Please review the highlighted booking-search fields.');
+            return;
         }
+
+        const adults = Number(form.querySelector('[name="adults"]')?.value || 1);
+        const children = Number(form.querySelector('[name="children"]')?.value || 0);
+        const rooms = Number(form.querySelector('[name="rooms"]')?.value || 1);
+
+        trackReservaEvent('search_submitted', {
+            surface: form.closest('.availability-section') ? 'homepage' : 'availability',
+            adults,
+            children,
+            rooms,
+            has_destination: Boolean(form.querySelector('[name="destination"]')?.value?.trim()),
+        });
+
+        rememberReservaSearch(form);
     });
 });
 
