@@ -58,6 +58,16 @@ class ReservaDesignSystemRegressionTest extends TestCase
     {
         $files = $this->bladeFiles(resource_path('views'));
 
+        foreach ([
+            app_path('Http/Controllers/PublicSite'),
+            app_path('Mail'),
+            app_path('Notifications'),
+        ] as $path) {
+            if (is_dir($path)) {
+                $files = array_merge($files, $this->phpFiles($path));
+            }
+        }
+
         $files[] = new SplFileInfo(config_path('app.php'));
         $files[] = new SplFileInfo(public_path('manifest.webmanifest'));
 
@@ -76,6 +86,19 @@ class ReservaDesignSystemRegressionTest extends TestCase
             $offenders,
             'Retired Resavar branding remains in: '.implode(', ', $offenders)
         );
+    }
+
+    private function phpFiles(string $path): array
+    {
+        $files = [];
+
+        foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path)) as $file) {
+            if ($file instanceof SplFileInfo && $file->isFile() && $file->getExtension() === 'php') {
+                $files[] = $file;
+            }
+        }
+
+        return $files;
     }
 
     private function bladeFiles(string $path): array
