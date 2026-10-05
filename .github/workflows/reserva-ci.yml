@@ -1,0 +1,100 @@
+name: Reserva CI
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      APP_ENV: local
+      APP_DEBUG: "false"
+      APP_URL: http://127.0.0.1:8000
+      DB_CONNECTION: sqlite
+      DB_DATABASE: database/database.sqlite
+      SESSION_DRIVER: file
+      SESSION_SECURE_COOKIE: "false"
+      CACHE_STORE: array
+      QUEUE_CONNECTION: sync
+      MAIL_MAILER: array
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          extensions: mbstring, sqlite3, pdo_sqlite
+          coverage: none
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Prepare application
+        run: |
+          cp .env.example .env
+          touch database/database.sqlite
+          php artisan key:generate
+          php artisan migrate --force
+
+      - name: PHP syntax gate
+        run: find app config database routes tests -name '*.php' -print0 | xargs -0 -n1 php -l
+
+      - name: Run Laravel tests
+        run: php artisan test
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Install browser test runtime
+        run: |
+          npm install --no-save @playwright/test@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Create browser-test accounts
+        run: |
+          php artisan tinker --execute="\App\Models\User::query()->updateOrCreate(['email'=>'customer@example.test'], ['name'=>'Reserva Customer','password'=>\Illuminate\Support\Facades\Hash::make('password'),'email_verified_at'=>now(),'is_admin'=>false,'staff_role'=>null,'is_active'=>true,'status'=>'active']);"
+          php artisan tinker --execute="\App\Models\User::query()->updateOrCreate(['email'=>'admin@example.test'], ['name'=>'Reserva Administrator','username'=>'reserva-admin','password'=>\Illuminate\Support\Facades\Hash::make('password'),'email_verified_at'=>now(),'is_admin'=>true,'staff_role'=>'administrator','is_active'=>true,'status'=>'active']);"
+
+      - name: Start application
+        run: |
+          php artisan serve --host=127.0.0.1 --port=8000 > storage/logs/ci-server.log 2>&1 &
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:8000 >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat storage/logs/ci-server.log
+          exit 1
+
+      - name: Run rendered contrast and interaction checks
+        env:
+          RESERVA_BASE_URL: http://127.0.0.1:8000
+        run: npx playwright test tests/browser --reporter=line
+
+      - name: Upload browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reserva-browser-evidence
+          path: |
+            playwright-artifacts
+            test-results
+            storage/logs/ci-server.log
+          if-no-files-found: ignore
