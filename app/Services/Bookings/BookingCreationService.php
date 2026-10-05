@@ -33,7 +33,7 @@ class BookingCreationService
         }
 
         $hold = BookingHold::query()
-            ->with('property')
+            ->with(['property', 'accommodationType', 'ratePlan.cancellationPolicy', 'ratePlan.paymentPolicy'])
             ->active()
             ->where('token', $request->input('hold_token'))
             ->first();
@@ -52,7 +52,7 @@ class BookingCreationService
 
         $booking = DB::transaction(function () use ($request, $user, $hold, $data): Booking {
             $lockedHold = BookingHold::query()
-                ->with('property')
+                ->with(['property', 'accommodationType', 'ratePlan.cancellationPolicy', 'ratePlan.paymentPolicy'])
                 ->active()
                 ->whereKey($hold->id)
                 ->when(
@@ -78,28 +78,56 @@ class BookingCreationService
                 )
                 ->firstOrFail();
 
-            if (! $this->availability->available(
-                $lockedHold->property_id,
+            $accommodationType = $lockedHold->accommodationType;
+
+            if ($accommodationType) {
+                $accommodationType = $accommodationType->newQuery()
+                    ->whereKey($accommodationType->getKey())
+                    ->when(
+                        DB::connection()->getDriverName() !== 'sqlite',
+                        fn (Builder $query) => $query->lockForUpdate()
+                    )
+                    ->firstOrFail();
+
+                $this->availability->lockInventoryRange(
+                    $accommodationType,
+                    $lockedHold->check_in,
+                    $lockedHold->check_out
+                );
+            }
+
+            if (! $this->availability->availableForProperty(
+                $property,
                 $lockedHold->check_in,
                 $lockedHold->check_out,
+                max(1, (int) $lockedHold->rooms),
+                $accommodationType?->getKey(),
                 null,
                 $lockedHold->token
             )) {
                 throw ValidationException::withMessages([
-                    'hold_token' => 'This residence is no longer available.',
+                    'hold_token' => 'This accommodation is no longer available in the requested quantity.',
                 ]);
             }
+
+            $ratePlan = $lockedHold->ratePlan;
 
             $quote = $this->pricing->quote(
                 $property,
                 $lockedHold->check_in,
-                $lockedHold->check_out
+                $lockedHold->check_out,
+                [],
+                $accommodationType,
+                $ratePlan,
+                max(1, (int) $lockedHold->rooms)
             );
 
             $booking = Booking::query()->create([
                 'reference' => $this->reference(),
                 'user_id' => $user->id,
                 'property_id' => $lockedHold->property_id,
+                'accommodation_type_id' => $accommodationType?->getKey(),
+                'rate_plan_id' => $ratePlan?->getKey(),
                 'hold_token' => $lockedHold->token,
                 'guest_name' => $data['first_name'].' '.$data['last_name'],
                 'guest_first_name' => $data['first_name'],
@@ -119,7 +147,7 @@ class BookingCreationService
                 'rooms' => $lockedHold->rooms,
                 'status' => 'pending_payment',
                 'verification_status' => 'unverified',
-                'currency' => (string) config('azari.currency', 'USD'),
+                'currency' => $quote['currency'],
                 'nightly_rate' => $quote['nightly_rate'],
                 'nights' => $quote['nights'],
                 'subtotal' => $quote['subtotal'],
@@ -128,10 +156,11 @@ class BookingCreationService
                 'tax_rate' => $quote['tax_rate'],
                 'tax_total' => $quote['tax_total'],
                 'total' => $quote['total'],
-                'pricing_snapshot' => array_merge($quote, [
-                    'currency' => (string) config('azari.currency', 'USD'),
-                ]),
+                'pricing_snapshot' => $quote,
+                'policy_snapshot' => $quote['policy'] ?? [],
                 'property_name_snapshot' => $property->name,
+                'accommodation_type_name_snapshot' => $accommodationType?->name,
+                'rate_plan_name_snapshot' => $ratePlan?->name,
                 'property_formatted_address' => $property->formatted_address ?: $property->location,
                 'property_latitude' => $property->latitude,
                 'property_longitude' => $property->longitude,
@@ -298,7 +327,7 @@ class BookingCreationService
     private function reference(): string
     {
         do {
-            $reference = 'AZR-'.now()->format('ymd').'-'.Str::upper(Str::random(7));
+            $reference = 'RSV-'.now()->format('ymd').'-'.Str::upper(Str::random(7));
         } while (Booking::query()->where('reference', $reference)->exists());
 
         return $reference;
