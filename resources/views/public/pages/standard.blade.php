@@ -18,7 +18,7 @@
                 @elseif($key === 'local-guide')
                     <a class="button button-primary" href="#guide">Explore the guide</a>
                 @elseif($key === 'about')
-                    <a class="button button-primary" href="{{ route('public.apartments') }}">Explore hotels & residences</a>
+                    <a class="button button-primary" href="{{ route('public.apartments') }}">Explore stays</a>
                 @endif
             </div>
 
@@ -38,13 +38,13 @@
 
                 <div>
                     <p>Resavar brings together carefully selected homes, consistent preparation and responsive guest support. Our focus is not simply where guests sleep, but how confidently they can arrive, settle in and move through every day of their stay.</p>
-                    <p>From business travel and relocation to longer visits and private city breaks, each residence is managed around comfort, discretion and thoughtful service.</p>
+                    <p>From business travel and relocation to longer visits and private city breaks, each stay is managed around comfort, discretion and thoughtful service.</p>
                 </div>
             </div>
 
             <div class="site-container az-value-grid">
                 @foreach([
-                    ['verified_user', 'Dependable standards', 'Every residence is prepared and managed to a consistent hospitality standard.'],
+                    ['verified_user', 'Dependable standards', 'Every stay is prepared and managed to a consistent hospitality standard.'],
                     ['home_work', 'Private comfort', 'The freedom and privacy of a home without losing professional guest support.'],
                     ['support_agent', 'Responsive care', 'A team available to coordinate requests before arrival and throughout the stay.']
                 ] as [$icon, $heading, $copy])
@@ -186,7 +186,7 @@
                     ['support_agent', 'Guest assistance', 'Responsive support before arrival and during your stay.']
                 ],
                 'housekeeping' => [
-                    ['cleaning_services', 'Residence cleaning', 'Professional servicing scheduled around your stay.'],
+                    ['cleaning_services', 'Stay cleaning', 'Professional servicing scheduled around your stay.'],
                     ['bed', 'Fresh linen', 'Linen and towel replacement when required.'],
                     ['local_laundry_service', 'Laundry support', 'Coordinated laundry pickup and return.']
                 ],
@@ -208,7 +208,7 @@
                 <div class="az-service-detail-copy">
                     <span class="eyebrow">Considered guest care</span>
                     <h2>Support designed around a smoother stay.</h2>
-                    <p>Availability can depend on residence, location, dates and notice period. Service requests will be connected to live booking workflows in the dedicated guest-services sprint.</p>
+                    <p>Availability can depend on the stay, location, dates and notice period. Service requests will be connected to live booking workflows in the dedicated guest-services sprint.</p>
 
                     <a class="az-text-link" href="{{ route('availability.index') }}">
                         Start with your stay
