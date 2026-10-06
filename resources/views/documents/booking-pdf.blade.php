@@ -388,7 +388,7 @@
     @endif
 
     <tr>
-        <td>Residence</td>
+        <td>Stay</td>
         <td>{{ $booking->property?->name ?: 'Not assigned' }}</td>
     </tr>
 
@@ -545,7 +545,7 @@
         'booking-confirmation', 'confirmation' => [
             'eyebrow' => 'Stay confirmation',
             'title' => 'Verify your reservation instantly',
-            'note' => 'Scan the code to confirm the reservation reference, residence, stay dates and current booking status. Keep this confirmation available for arrival and check-in assistance.',
+            'note' => 'Scan the code to confirm the reservation reference, stay, stay dates and current booking status. Keep this confirmation available for arrival and check-in assistance.',
             'security' => 'Guests may be asked to present a valid identity document matching the booking record.',
         ],
 
