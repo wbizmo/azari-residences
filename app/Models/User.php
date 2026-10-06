@@ -73,6 +73,12 @@ class User extends Authenticatable implements MustVerifyEmail
     public function ownerLedgerEntries(): HasMany { return $this->hasMany(\App\Models\OwnerLedgerEntry::class); }
     public function withdrawalRequests(): HasMany { return $this->hasMany(\App\Models\WithdrawalRequest::class); }
     public function ownerPayoutProfile(): HasOne { return $this->hasOne(\App\Models\OwnerPayoutProfile::class); }
+    public function favourites(): HasMany { return $this->hasMany(UserFavourite::class); }
+    public function savedSearches(): HasMany { return $this->hasMany(SavedSearch::class); }
+    public function recentlyViewedProperties(): HasMany { return $this->hasMany(RecentlyViewedProperty::class); }
+    public function bookingModificationRequests(): HasMany { return $this->hasMany(BookingModificationRequest::class); }
+    public function communicationPreference(): HasOne { return $this->hasOne(CommunicationPreference::class); }
+    public function analyticsEvents(): HasMany { return $this->hasMany(AnalyticsEvent::class); }
 
     public function hasVerifiedIdentity(): bool
     {
