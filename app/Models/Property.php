@@ -69,6 +69,17 @@ class Property extends Model
         'same_day_booking',
         'status',
         'internal_notes',
+        'accessibility_notes',
+        'children_policy',
+        'pet_policy',
+        'smoking_policy',
+        'party_policy',
+        'check_in_instructions',
+        'check_out_instructions',
+        'host_name',
+        'host_description',
+        'house_rules',
+        'faqs',
         'is_featured',
         'is_published',
         'sort_order',
@@ -78,6 +89,8 @@ class Property extends Model
     {
         return [
             'gallery' => 'array',
+            'house_rules' => 'array',
+            'faqs' => 'array',
             'is_featured' => 'boolean',
             'is_published' => 'boolean',
             'nightly_rate' => 'decimal:2',
@@ -174,6 +187,13 @@ class Property extends Model
     public function maintenancePeriods(): HasMany
     {
         return $this->hasMany(MaintenancePeriod::class);
+    }
+
+    public function pointsOfInterest(): HasMany
+    {
+        return $this->hasMany(PropertyPointOfInterest::class)
+            ->orderBy('sort_order')
+            ->orderBy('id');
     }
 
     public function getRouteKeyName(): string
