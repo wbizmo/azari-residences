@@ -129,6 +129,7 @@
                     <div
                         class="search-field guest-selector"
                         data-guest-selector
+                        data-desktop-summary-label="Select guests"
                     >
                         <span class="field-label">Guests</span>
 
@@ -144,7 +145,7 @@
                             >group</span>
 
                             <span data-guest-summary>
-                                1 adult · 0 children
+                                Select guests
                             </span>
 
                             <span
@@ -236,7 +237,7 @@
                         data-destination-search
                         data-suggest-url="{{ route('destinations.suggest') }}"
                     >
-                        <label for="destination">Destination or property</label>
+                        <label for="destination">Destination</label>
 
                         <div class="input-shell">
                             <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
@@ -246,7 +247,7 @@
                                 name="destination"
                                 type="search"
                                 value="{{ session('azari_stay_search.destination') }}"
-                                placeholder="City, area or property"
+                                placeholder="City or area"
                                 autocomplete="off"
                                 role="combobox"
                                 aria-autocomplete="list"
