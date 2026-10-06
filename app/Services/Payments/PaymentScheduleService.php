@@ -3,6 +3,10 @@
 namespace App\Services\Payments;
 
 use App\Models\Booking;
+use App\Models\BookingStatusHistory;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Carbon\CarbonImmutable;
 
 class PaymentScheduleService
@@ -99,6 +103,77 @@ class PaymentScheduleService
             'confirmation_threshold_met' => $paid + 0.009 >= $confirmationThreshold,
             'fully_paid' => $balance <= 0.009,
         ];
+    }
+
+
+    public function confirmDeferredBooking(Booking $booking, ?int $actorId = null): Booking
+    {
+        return DB::transaction(function () use ($booking, $actorId): Booking {
+            $locked = Booking::query()
+                ->whereKey($booking->getKey())
+                ->when(
+                    DB::connection()->getDriverName() !== 'sqlite',
+                    fn (Builder $query) => $query->lockForUpdate()
+                )
+                ->firstOrFail();
+
+            if (in_array($locked->status, ['cancelled', 'completed', 'checked_out', 'no_show'], true)) {
+                throw ValidationException::withMessages([
+                    'booking' => 'This booking can no longer be confirmed.',
+                ]);
+            }
+
+            if ($locked->status === 'confirmed') {
+                return $locked;
+            }
+
+            $schedule = $this->forBooking($locked);
+
+            if (
+                ! in_array($schedule['payment_type'], ['pay_later', 'pay_at_property'], true)
+                || ! $schedule['can_defer']
+                || $schedule['required_now'] > 0
+            ) {
+                throw ValidationException::withMessages([
+                    'payment' => 'This booking requires payment before confirmation.',
+                ]);
+            }
+
+            $from = $locked->status;
+            $locked->update([
+                'status' => 'confirmed',
+                'expires_at' => null,
+            ]);
+
+            BookingStatusHistory::query()->create([
+                'booking_id' => $locked->getKey(),
+                'changed_by' => $actorId,
+                'from_status' => $from,
+                'to_status' => 'confirmed',
+                'note' => 'Booking confirmed under deferred payment terms.',
+                'metadata' => [
+                    'payment_type' => $schedule['payment_type'],
+                    'balance' => $schedule['balance'],
+                    'due_on' => $schedule['due_on'],
+                ],
+            ]);
+
+            app(\App\Services\Analytics\AnalyticsTracker::class)->track(
+                'booking_confirmed',
+                [
+                    'user_id' => $locked->user_id,
+                    'booking_id' => $locked->getKey(),
+                    'property_id' => $locked->property_id,
+                    'accommodation_type_id' => $locked->accommodation_type_id,
+                    'rate_plan_id' => $locked->rate_plan_id,
+                    'source' => 'deferred_payment',
+                    'payload' => ['payment_type' => $schedule['payment_type']],
+                ],
+                hash('sha256', 'booking-confirmed|'.$locked->getKey())
+            );
+
+            return $locked->refresh();
+        }, 5);
     }
 
     public function amountToCollect(Booking $booking): array
