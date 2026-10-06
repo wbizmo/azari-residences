@@ -4,6 +4,7 @@ namespace App\Http\Controllers\UserArea;
 
 use App\Http\Controllers\Controller;
 use App\Services\Bookings\BookingModificationService;
+use App\Services\Payments\PaymentScheduleService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
@@ -60,7 +61,8 @@ class UserBookingController extends Controller
     public function show(
         Request $request,
         string $reference,
-        BookingModificationService $modifications
+        BookingModificationService $modifications,
+        PaymentScheduleService $paymentSchedule
     ): View {
         $booking = $request->user()->bookings()
             ->with([
@@ -100,7 +102,9 @@ class UserBookingController extends Controller
             $type => $modifications->policyAllows($booking, $type),
         ])->all();
 
-        return view('user.bookings.show', compact('booking', 'timeline', 'selfService'));
+        $schedule = $paymentSchedule->forBooking($booking);
+
+        return view('user.bookings.show', compact('booking', 'timeline', 'selfService', 'schedule'));
     }
 
     public function receipt(Request $request, string $reference): Response
