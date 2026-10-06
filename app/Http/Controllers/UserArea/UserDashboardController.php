@@ -93,7 +93,6 @@ class UserDashboardController extends Controller
                 ->latest()
                 ->limit(5)
                 ->get(),
-            'identityVerified' => $user->hasVerifiedIdentity(),
             'openServiceRequests' => $user->serviceRequests()->whereNotIn('status', ['resolved', 'closed', 'cancelled'])->count(),
             'openSupportTickets' => $user->supportTickets()->whereNotIn('status', ['resolved', 'closed'])->count(),
         ]);
