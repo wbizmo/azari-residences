@@ -9,12 +9,12 @@
                     <span class="eyebrow">Direct booking</span>
 
                     <h1 id="az-book-title">
-                        Find your next residence.
+                        Find your next stay.
                     </h1>
 
                     <p>
                         Select your dates, guests, preferred location and
-                        residence category. We will show only currently
+                        stay category. We will show only currently
                         available stays.
                     </p>
                 </div>
@@ -47,7 +47,7 @@
 
                             <p>
                                 Complete the search below to view matching
-                                hotels & residences and current rates.
+                                stays and current rates.
                             </p>
                         </div>
 
@@ -297,7 +297,7 @@
 
                             <div class="search-field">
                                 <label for="room_type_id">
-                                    Residence category
+                                    Stay category
                                 </label>
 
                                 <div class="input-shell select-shell">
