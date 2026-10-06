@@ -1,5 +1,5 @@
 @props([
-    'title' => 'RESAVAR | Exceptional Stays, Everywhere.',
+    'title' => 'Resavar: Exceptional Stays, Everywhere.',
     'description' => null,
     'keywords' => null,
     'canonical' => null,
