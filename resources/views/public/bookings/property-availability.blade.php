@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'Availability — '.$property->name.' | Resarva')
+@section('title', 'Availability — '.$property->name.' | Resavar')
 
 @section('content')
 @php
@@ -16,7 +16,7 @@
             <span class="eyebrow">Live 90-day inventory</span>
             <h1>{{ $property->name }}</h1>
             <p>
-                {{ $property->locationRecord?->name ?? 'Resarva' }}
+                {{ $property->locationRecord?->name ?? 'Resavar' }}
                 · {{ $selectedAccommodationType?->name ?? $property->roomType?->name ?? 'Private stay' }}
                 @if($selectedRatePlan)
                     · {{ $selectedRatePlan->name }}
