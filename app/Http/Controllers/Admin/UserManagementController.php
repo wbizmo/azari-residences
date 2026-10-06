@@ -25,12 +25,11 @@ class UserManagementController extends Controller
     public function show(User $user): View
     {
         abort_if($user->isStaff(), 404);
-        $user->loadCount(['bookings', 'payments', 'identityDocuments']);
+        $user->loadCount(['bookings', 'payments']);
         $bookings = $user->bookings()->with('property')->latest()->paginate(10, ['*'], 'bookings')->withQueryString();
         $payments = $user->payments()->with('booking')->latest()->paginate(10, ['*'], 'payments')->withQueryString();
-        $identities = $user->identityDocuments()->with('identityType')->latest()->paginate(10, ['*'], 'identities')->withQueryString();
 
-        return view('admin.users.show', compact('user', 'bookings', 'payments', 'identities'));
+        return view('admin.users.show', compact('user', 'bookings', 'payments'));
     }
 
     public function suspend(Request $request, User $user): RedirectResponse
