@@ -47,7 +47,7 @@ class SeamlessBookingOnboardingTest extends TestCase
         $this->get(route('azari.booking.checkout', $hold->token))
             ->assertOk()
             ->assertSee('Your booking details')
-            ->assertSee('Secure your Azari access');
+            ->assertSee('Secure your Reserva access');
 
         $response = $this->post(route('azari.booking.onboarding.begin', $hold->token), [
             'hold_token' => $hold->token,
