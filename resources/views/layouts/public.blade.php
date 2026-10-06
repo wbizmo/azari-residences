@@ -1,6 +1,6 @@
 @php
     $defaultSeoTitle =
-        'Resavar | Luxury Stays, Hotels, Apartments, Rooms and Hospitality';
+        'Resavar: Luxury Stays, Hotels, Apartments, Rooms and Hospitality';
 
     $defaultSeoDescription =
         'Discover Resavar, a premium hospitality and accommodation platform owned by Azari Luxury Properties Limited. Explore hotels, stays, serviced apartments, rooms, concierge services, housekeeping, dining, airport transfers, guest services and secure online booking across Resavar locations.';
