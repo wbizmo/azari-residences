@@ -31,7 +31,7 @@
 
 <section class="az-user-detail-grid">
     <div class="az-user-panel">
-        <header class="az-user-panel-header"><div><h2 class="az-user-panel-title">Reservation</h2><p class="az-user-panel-subtitle">{{ $booking->property_name_snapshot ?: ($booking->property?->name ?? 'Resavar Residence') }}</p></div><span class="az-user-status">{{ str_replace('_', ' ', $booking->status) }}</span></header>
+        <header class="az-user-panel-header"><div><h2 class="az-user-panel-title">Reservation</h2><p class="az-user-panel-subtitle">{{ $booking->property_name_snapshot ?: ($booking->property?->name ?? 'Resavar Stay') }}</p></div><span class="az-user-status">{{ str_replace('_', ' ', $booking->status) }}</span></header>
         <div class="az-user-panel-body"><dl class="az-user-detail-list">
             <div class="az-user-detail-row"><dt>Booking reference</dt><dd>{{ $booking->reference }}</dd></div>
             <div class="az-user-detail-row"><dt>Property</dt><dd>{{ $booking->property_name_snapshot ?: $booking->property?->name }}</dd></div>
