@@ -264,3 +264,52 @@ html[data-admin-theme="dark"] :is(.az-section-heading__meta,.az-topbar-page__eye
     margin: 0 !important;
 }
 /* RESAVAR_ADMIN_CONTRAST_ALIGNMENT_V1 */_END
+
+
+/* RESAVAR_USER_PROFILE_ALIGNMENT_V1 */
+.az-user-profile-chip {
+    display: inline-flex !important;
+    min-width: 0 !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 10px !important;
+    padding: 5px 8px !important;
+    line-height: 1.2 !important;
+}
+.az-user-profile-chip .az-user-avatar {
+    display: inline-grid !important;
+    width: 40px !important;
+    height: 40px !important;
+    flex: 0 0 40px !important;
+    place-items: center !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    border-radius: 50% !important;
+    background: #052058 !important;
+    color: #FFFFFF !important;
+    line-height: 1 !important;
+}
+.az-user-profile-chip .az-user-avatar img {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    border-radius: 50% !important;
+}
+.az-user-profile-meta {
+    display: flex !important;
+    min-width: 0 !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    gap: 2px !important;
+    margin: 0 !important;
+    line-height: 1.2 !important;
+}
+.az-user-profile-meta strong,
+.az-user-profile-meta span {
+    display: block !important;
+    margin: 0 !important;
+    line-height: 1.2 !important;
+}
+/* RESAVAR_USER_PROFILE_ALIGNMENT_V1 */_END
