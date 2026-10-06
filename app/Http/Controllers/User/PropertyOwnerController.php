@@ -150,10 +150,16 @@ class PropertyOwnerController extends Controller
         return redirect()->route('user.owner.listings.show', $listing)->with('status', 'Property submitted for Reserva review.');
     }
 
-    public function show(Request $request, PropertyListing $listing): View
-    {
+    public function show(
+        Request $request,
+        PropertyListing $listing,
+        ListingCompletenessService $completeness
+    ): View {
         abort_unless($listing->user_id === $request->user()->id, 404);
-        return view('user.owner.listing-show', compact('listing'));
+        $listing->load('user.ownerPayoutProfile');
+        $completion = $completeness->evaluate($listing);
+
+        return view('user.owner.listing-show', compact('listing', 'completion'));
     }
 
     public function edit(Request $request, PropertyListing $listing): View
