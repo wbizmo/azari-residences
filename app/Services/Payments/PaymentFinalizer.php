@@ -99,6 +99,38 @@ class PaymentFinalizer
                 )
                 ->firstOrFail()
     ;
+            if ($booking->status === 'cancelled') {
+                $paidAt = filled($verification['paid_at'] ?? null)
+                    ? CarbonImmutable::parse((string) $verification['paid_at'])
+                    : now();
+                $receipt = $locked->receipt_number ?: $this->receiptNumber($locked);
+
+                $locked->update([
+                    'status' => 'successful_excess',
+                    'provider_reference' => $verification['provider_reference'] ?? $locked->provider_reference,
+                    'payment_method' => $verification['payment_method'] ?? $locked->payment_method,
+                    'paid_at' => $paidAt,
+                    'verified_at' => now(),
+                    'failed_at' => null,
+                    'provider_response_summary' => $verification['safe_response'] ?? null,
+                    'receipt_number' => $receipt,
+                    'administrative_note' => trim(
+                        ($locked->administrative_note ? $locked->administrative_note."\n" : '').
+                        'Provider reported a successful payment after the booking had already been cancelled. Do not reactivate the booking automatically; review and refund or resolve manually.'
+                    ),
+                ]);
+
+                AuditLog::record(
+                    'payment.successful_after_booking_cancelled',
+                    $locked,
+                    [],
+                    ['status' => 'successful_excess'],
+                    ['source' => $source, 'booking_status' => $booking->status]
+                );
+
+                return $locked->refresh();
+            }
+
             $alreadyAllocated = (float) $booking->payments()
                 ->where('status', Payment::SUCCESSFUL)
                 ->where('id', '!=', $locked->id)
