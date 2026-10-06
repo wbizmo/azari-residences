@@ -115,7 +115,8 @@ class AzariAvailabilityController extends Controller
     public function hold(
         Request $request,
         Property $property,
-        AzariAvailabilityEngine $availability
+        AzariAvailabilityEngine $availability,
+        AnalyticsTracker $analytics
     ): RedirectResponse {
         $data = $request->validate([
             'check_in' => ['required', 'date', 'after_or_equal:today'],
@@ -154,6 +155,18 @@ class AzariAvailabilityController extends Controller
             isset($data['accommodation_type_id']) ? (int) $data['accommodation_type_id'] : null,
             isset($data['rate_plan_id']) ? (int) $data['rate_plan_id'] : null
         );
+
+        $analytics->track('rate_selected', [
+            'user_id' => $request->user()?->getKey(),
+            'property_id' => $property->getKey(),
+            'accommodation_type_id' => $hold->accommodation_type_id,
+            'rate_plan_id' => $hold->rate_plan_id,
+            'source' => 'availability_hold',
+            'payload' => [
+                'rooms' => (int) $hold->rooms,
+                'nights' => $hold->check_in->diffInDays($hold->check_out),
+            ],
+        ], hash('sha256', 'rate-selected|'.$hold->token));
 
         return redirect()->route('azari.booking.checkout', $hold->token);
     }
