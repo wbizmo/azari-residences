@@ -58,7 +58,7 @@
             <div class="az-user-detail-row"><dt>Paid</dt><dd>{{ $booking->currency }} {{ number_format($booking->successfulPaymentsTotal(), 2) }}</dd></div>
             <div class="az-user-detail-row"><dt>Refunded</dt><dd>{{ $booking->currency }} {{ number_format($booking->successfulRefundsTotal(), 2) }}</dd></div>
             <div class="az-user-detail-row"><dt>Balance</dt><dd>{{ $booking->currency }} {{ number_format($schedule['balance'], 2) }}</dd></div>
-            <div class="az-user-detail-row"><dt>Payment terms</dt><dd>{{ Str::headline($schedule['payment_type']) }}@if($schedule['due_on']) · due {{ CarbonCarbonImmutable::parse($schedule['due_on'])->format('j M Y') }}@endif</dd></div>
+            <div class="az-user-detail-row"><dt>Payment terms</dt><dd>{{ Str::headline($schedule['payment_type']) }}@if($schedule['due_on']) · due {{ Carbon\CarbonImmutable::parse($schedule['due_on'])->format('j M Y') }}@endif</dd></div>
             <div class="az-user-detail-row"><dt>Payment status</dt><dd>{{ str_replace('_', ' ', $latestPayment?->status ?? 'not started') }}</dd></div>
             <div class="az-user-detail-row"><dt>Gateway</dt><dd>{{ $latestPayment ? ucfirst($latestPayment->provider) : 'Not selected' }}</dd></div>
         </dl></div>
