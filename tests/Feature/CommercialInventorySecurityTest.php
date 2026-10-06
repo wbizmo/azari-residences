@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Http\Middleware\EnsureDojahVerified;
 use App\Models\AccommodationType;
 use App\Models\Property;
 use App\Models\User;
@@ -29,7 +30,7 @@ class CommercialInventorySecurityTest extends TestCase
 
     public function test_owner_cannot_open_another_owners_commercial_inventory(): void
     {
-        $this->withoutMiddleware();
+        $this->withoutMiddleware(EnsureDojahVerified::class);
 
         $ownerA = User::factory()->create(['email_verified_at' => now()]);
         $ownerB = User::factory()->create(['email_verified_at' => now()]);
@@ -47,7 +48,7 @@ class CommercialInventorySecurityTest extends TestCase
 
     public function test_owner_cannot_update_an_accommodation_type_from_another_property(): void
     {
-        $this->withoutMiddleware();
+        $this->withoutMiddleware(EnsureDojahVerified::class);
 
         $ownerA = User::factory()->create(['email_verified_at' => now()]);
         $ownerB = User::factory()->create(['email_verified_at' => now()]);
@@ -78,7 +79,7 @@ class CommercialInventorySecurityTest extends TestCase
 
     public function test_owner_can_manage_their_own_type_and_rate_policy(): void
     {
-        $this->withoutMiddleware();
+        $this->withoutMiddleware(EnsureDojahVerified::class);
 
         $owner = User::factory()->create(['email_verified_at' => now()]);
         $property = Property::factory()->create([
