@@ -127,7 +127,7 @@
                 @if(Route::has('public.list-property'))
                     <a href="{{ route('public.list-property') }}">List my property</a>
                 @endif
-                <a href="{{ route('public.contact') }}">Contact Resarva</a>
+                <a href="{{ route('public.contact') }}">Contact Resavar</a>
             </div>
 
             <div class="footer-column">
@@ -142,14 +142,14 @@
 
         <div
             class="azari-footer-store-row"
-            aria-label="Resarva on Google Play"
+            aria-label="Resavar on Google Play"
         >
             <a
                 href="https://play.google.com/store/apps/details?id=com.azariresidences.app"
                 class="azari-footer-play-badge"
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="Get Resarva on Google Play"
+                aria-label="Get Resavar on Google Play"
             >
                 <img
                     src="{{ asset('images/google-play-badge.png') }}"
@@ -163,8 +163,8 @@
         </div>
 
         <div class="footer-legal">
-            <span>&copy; {{ now()->year }} Resarva.</span>
-            <span>Resarva Luxury Properties LTD.</span>
+            <span>&copy; {{ now()->year }} Resavar.</span>
+            <span>Azari Luxury Properties Limited</span>
             <a href="{{ route('home') }}">Back home</a>
         </div>
     </div>
