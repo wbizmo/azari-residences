@@ -149,6 +149,28 @@ class Property extends Model
             ->where('is_published', true);
     }
 
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class)
+            ->where('verified_stay', true)
+            ->where('status', 'approved');
+    }
+
+    public function favourites(): HasMany
+    {
+        return $this->hasMany(UserFavourite::class);
+    }
+
+    public function recentViews(): HasMany
+    {
+        return $this->hasMany(RecentlyViewedProperty::class);
+    }
+
+    public function inventoryChangeLogs(): HasMany
+    {
+        return $this->hasMany(InventoryChangeLog::class);
+    }
+
     public function getRouteKeyName(): string
     {
         return 'slug';
