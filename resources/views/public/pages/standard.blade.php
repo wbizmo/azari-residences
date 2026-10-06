@@ -1,6 +1,6 @@
 @extends('components.public.layout')
 
-@section('title', $title.' | Resavar')
+@section('title', $title.' — Resavar')
 
 @section('content')
 <main class="az-editorial-page az-standard-page az-standard-page--{{ $key }}">
