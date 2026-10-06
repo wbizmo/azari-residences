@@ -1247,3 +1247,286 @@ const initialiseAzariResponsiveTables = () => {
 };
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initialiseAzariResponsiveTables, { once: true });
 else initialiseAzariResponsiveTables();
+
+
+// RESAVAR_BOOKING_FRONTEND_PARITY_V1
+(() => {
+    const KEYS = {
+        searches: 'resavar:recent-searches:v1',
+        favourites: 'resavar:local-favourites:v1',
+        compare: 'resavar:compare:v1',
+        viewed: 'resavar:recent-viewed:v1',
+    };
+
+    const read = (key) => {
+        try {
+            const value = JSON.parse(localStorage.getItem(key) || '[]');
+            return Array.isArray(value) ? value : [];
+        } catch {
+            return [];
+        }
+    };
+
+    const write = (key, value) => {
+        try {
+            localStorage.setItem(key, JSON.stringify(value));
+        } catch {}
+    };
+
+    const safePath = (value) => {
+        try {
+            const url = new URL(String(value || ''), window.location.origin);
+            return url.origin === window.location.origin ? `${url.pathname}${url.search}` : '/';
+        } catch {
+            return '/';
+        }
+    };
+
+    const cleanText = (value, max = 160) => String(value || '').trim().slice(0, max);
+
+    document.querySelectorAll('form[data-availability-form]').forEach((form) => {
+        form.addEventListener('submit', () => {
+            const data = new FormData(form);
+            const params = new URLSearchParams();
+            data.forEach((value, key) => {
+                if (typeof value === 'string' && value !== '') params.append(key, value);
+            });
+
+            const item = {
+                destination: cleanText(data.get('destination') || 'Any destination', 120),
+                checkIn: cleanText(data.get('check_in'), 10),
+                checkOut: cleanText(data.get('check_out'), 10),
+                adults: Math.max(1, Number(data.get('adults') || 1)),
+                children: Math.max(0, Number(data.get('children') || 0)),
+                rooms: Math.max(1, Number(data.get('rooms') || 1)),
+                url: safePath(`${form.action}?${params.toString()}`),
+                savedAt: Date.now(),
+            };
+
+            const prior = read(KEYS.searches).filter((entry) => entry && entry.url !== item.url);
+            write(KEYS.searches, [item, ...prior].slice(0, 5));
+        });
+
+        const recent = read(KEYS.searches).filter((entry) => entry && entry.url).slice(0, 4);
+        if (!recent.length || form.parentElement?.querySelector('[data-resavar-recent-searches]')) return;
+
+        const box = document.createElement('section');
+        box.className = 'resavar-recent-searches';
+        box.dataset.resavarRecentSearches = '';
+        box.setAttribute('aria-label', 'Recent searches');
+
+        const head = document.createElement('div');
+        head.className = 'resavar-recent-searches__head';
+        const title = document.createElement('strong');
+        title.textContent = 'Recent searches';
+        const clear = document.createElement('button');
+        clear.type = 'button';
+        clear.className = 'button button-secondary';
+        clear.textContent = 'Clear';
+        clear.addEventListener('click', () => {
+            write(KEYS.searches, []);
+            box.remove();
+        });
+        head.append(title, clear);
+
+        const list = document.createElement('div');
+        list.className = 'resavar-recent-searches__list';
+
+        recent.forEach((entry) => {
+            const link = document.createElement('a');
+            link.className = 'resavar-recent-search';
+            link.href = safePath(entry.url);
+
+            const strong = document.createElement('strong');
+            strong.textContent = cleanText(entry.destination || 'Any destination');
+
+            const small = document.createElement('small');
+            small.textContent = [entry.checkIn, entry.checkOut].filter(Boolean).join(' → ') ||
+                `${entry.adults || 1} guest${Number(entry.adults || 1) === 1 ? '' : 's'}`;
+
+            link.append(strong, small);
+            list.append(link);
+        });
+
+        box.append(head, list);
+        form.insertAdjacentElement('afterend', box);
+    });
+
+    const syncFavouriteButtons = () => {
+        const saved = new Set(read(KEYS.favourites).map((item) => String(item.id)));
+        document.querySelectorAll('[data-resavar-local-favourite]').forEach((button) => {
+            const active = saved.has(String(button.dataset.resavarLocalFavourite));
+            button.setAttribute('aria-pressed', active ? 'true' : 'false');
+            const icon = button.querySelector('.material-symbols-outlined');
+            if (icon) icon.textContent = active ? 'favorite' : 'favorite_border';
+            const label = button.querySelector('[data-favourite-label]');
+            if (label) label.textContent = active ? 'Saved' : 'Save';
+        });
+    };
+
+    document.addEventListener('click', (event) => {
+        const button = event.target.closest('[data-resavar-local-favourite]');
+        if (!button) return;
+
+        const id = cleanText(button.dataset.resavarLocalFavourite, 64);
+        if (!id) return;
+
+        const current = read(KEYS.favourites);
+        const index = current.findIndex((item) => String(item.id) === id);
+
+        if (index >= 0) {
+            current.splice(index, 1);
+        } else {
+            current.unshift({
+                id,
+                name: cleanText(button.dataset.propertyName),
+                url: safePath(button.dataset.propertyUrl),
+                savedAt: Date.now(),
+            });
+        }
+
+        write(KEYS.favourites, current.slice(0, 50));
+        syncFavouriteButtons();
+    });
+
+    syncFavouriteButtons();
+
+    let compare = read(KEYS.compare).filter((item) => item && item.id && item.url).slice(0, 3);
+    const tray = document.createElement('aside');
+    tray.className = 'resavar-compare-tray';
+    tray.hidden = true;
+    tray.setAttribute('aria-label', 'Compare selected stays');
+    document.body.append(tray);
+
+    const renderCompare = () => {
+        compare = compare.slice(0, 3);
+        write(KEYS.compare, compare);
+        tray.replaceChildren();
+        tray.hidden = compare.length === 0;
+
+        document.querySelectorAll('[data-resavar-compare]').forEach((button) => {
+            const active = compare.some((item) => String(item.id) === String(button.dataset.resavarCompare));
+            button.setAttribute('aria-pressed', active ? 'true' : 'false');
+            button.textContent = active ? 'Added to compare' : 'Compare';
+        });
+
+        if (!compare.length) return;
+
+        const head = document.createElement('div');
+        head.className = 'resavar-compare-tray__head';
+
+        const strong = document.createElement('strong');
+        strong.textContent = `Compare stays (${compare.length}/3)`;
+
+        const clear = document.createElement('button');
+        clear.type = 'button';
+        clear.className = 'button button-secondary';
+        clear.textContent = 'Clear';
+        clear.addEventListener('click', () => {
+            compare = [];
+            renderCompare();
+        });
+
+        head.append(strong, clear);
+
+        const items = document.createElement('div');
+        items.className = 'resavar-compare-tray__items';
+
+        compare.forEach((item) => {
+            const row = document.createElement('div');
+            row.className = 'resavar-compare-tray__item';
+
+            const link = document.createElement('a');
+            link.href = safePath(item.url);
+            link.textContent = cleanText(item.name || 'Stay');
+
+            const remove = document.createElement('button');
+            remove.type = 'button';
+            remove.className = 'resavar-compare-tray__remove';
+            remove.setAttribute('aria-label', `Remove ${cleanText(item.name || 'stay')} from comparison`);
+            remove.textContent = '×';
+            remove.addEventListener('click', () => {
+                compare = compare.filter((entry) => String(entry.id) !== String(item.id));
+                renderCompare();
+            });
+
+            row.append(link, remove);
+            items.append(row);
+        });
+
+        tray.append(head, items);
+    };
+
+    document.addEventListener('click', (event) => {
+        const button = event.target.closest('[data-resavar-compare]');
+        if (!button) return;
+
+        const id = cleanText(button.dataset.resavarCompare, 64);
+        if (!id) return;
+
+        if (compare.some((item) => String(item.id) === id)) {
+            compare = compare.filter((item) => String(item.id) !== id);
+        } else if (compare.length < 3) {
+            compare.push({
+                id,
+                name: cleanText(button.dataset.propertyName),
+                url: safePath(button.dataset.propertyUrl),
+            });
+        } else {
+            showToast('You can compare up to three stays at a time.', 'info');
+        }
+
+        renderCompare();
+    });
+
+    renderCompare();
+
+    const property = document.querySelector('[data-resavar-property]');
+    if (property) {
+        const item = {
+            id: cleanText(property.dataset.resavarProperty, 64),
+            name: cleanText(property.dataset.propertyName),
+            url: safePath(property.dataset.propertyUrl),
+            location: cleanText(property.dataset.propertyLocation),
+            image: safePath(property.dataset.propertyImage),
+            viewedAt: Date.now(),
+        };
+
+        if (item.id) {
+            const prior = read(KEYS.viewed).filter((entry) => String(entry.id) !== item.id);
+            write(KEYS.viewed, [item, ...prior].slice(0, 8));
+        }
+    }
+
+    const recentHost = document.querySelector('[data-resavar-recent-viewed-host]');
+    const recentList = recentHost?.querySelector('[data-resavar-recent-viewed-list]');
+
+    if (recentHost && recentList) {
+        const viewed = read(KEYS.viewed).filter((item) => item && item.id && item.url).slice(0, 6);
+
+        viewed.forEach((item) => {
+            const link = document.createElement('a');
+            link.className = 'resavar-recent-viewed__card';
+            link.href = safePath(item.url);
+
+            const img = document.createElement('img');
+            img.src = safePath(item.image);
+            img.alt = '';
+            img.loading = 'lazy';
+
+            const copy = document.createElement('span');
+            const strong = document.createElement('strong');
+            strong.textContent = cleanText(item.name || 'Stay');
+
+            const small = document.createElement('small');
+            small.textContent = cleanText(item.location || 'Recently viewed');
+
+            copy.append(strong, small);
+            link.append(img, copy);
+            recentList.append(link);
+        });
+
+        recentHost.hidden = viewed.length === 0;
+    }
+})();
+// RESAVAR_BOOKING_FRONTEND_PARITY_V1_END
