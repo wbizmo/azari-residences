@@ -1,9 +1,9 @@
 @php
     $defaultSeoTitle =
-        'Resavar | Luxury Hotels, Residences, Apartments, Rooms and Hospitality';
+        'Resavar | Luxury Stays, Hotels, Apartments, Rooms and Hospitality';
 
     $defaultSeoDescription =
-        'Discover Resavar, a premium hospitality and accommodation platform owned by Azari Luxury Properties Limited. Explore hotels, residences, serviced apartments, rooms, concierge services, housekeeping, dining, airport transfers, guest services and secure online booking across Resavar locations.';
+        'Discover Resavar, a premium hospitality and accommodation platform owned by Azari Luxury Properties Limited. Explore hotels, stays, serviced apartments, rooms, concierge services, housekeeping, dining, airport transfers, guest services and secure online booking across Resavar locations.';
 
     $defaultSeoKeywords = implode(', ', [
         /*
@@ -15,11 +15,11 @@
         'Resavar',
         'Resavar',
         'The Resavar',
-        'Resavar Residence',
+        'Resavar Stay',
         'Resavar',
         'Resavar Hotel',
         'Resavar Hotels',
-        'Resavar Luxury Hotels & Residences',
+        'Resavar Luxury Stays',
         'Azari Luxury Properties Limited',
         'Azari Luxury Properties Limited',
         'Azari Luxury Properties Limited',
@@ -46,11 +46,11 @@
         'Resavar Guest Accommodation',
         'Resavar Short Stay',
         'Resavar Extended Stay',
-        'Resavar Holiday Residences',
-        'Resavar Vacation Residences',
-        'Resavar Premium Residences',
-        'Resavar Private Residences',
-        'Resavar Executive Residences',
+        'Resavar Holiday Stays',
+        'Resavar Vacation Stays',
+        'Resavar Premium Stays',
+        'Resavar Private Stays',
+        'Resavar Executive Stays',
         'Resavar Corporate Accommodation',
         'Resavar Family Accommodation',
 
@@ -73,9 +73,9 @@
         'Resavar available apartments',
         'Resavar room booking',
         'Resavar apartment booking',
-        'Resavar residence booking',
+        'Resavar stay booking',
         'Resavar accommodation prices',
-        'Resavar residence prices',
+        'Resavar stay prices',
         'Resavar booking confirmation',
         'verify Resavar booking',
         'Resavar booking payment',
@@ -106,7 +106,7 @@
         'Resavar Property',
         'Resavar Property Booking',
         'Resavar Property Management',
-        'Resavar Residence Management',
+        'Resavar Stay Management',
         'Resavar Property Owners',
         'Resavar Property Listings',
         'Resavar property owner registration',
@@ -118,7 +118,7 @@
         |--------------------------------------------------------------------------
         */
         'luxury hotel booking',
-        'luxury residence booking',
+        'luxury stay booking',
         'luxury apartment booking',
         'serviced apartment booking',
         'short stay accommodation',
