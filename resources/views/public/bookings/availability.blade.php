@@ -1,6 +1,6 @@
 <x-public-site.layout
-    title="Available hotels & residences | Resarva"
-    description="Compare live Resarva inventory, policies, verified reviews and total stay prices."
+    title="Available hotels & residences | Resavar"
+    description="Compare live Resavar inventory, policies, verified reviews and total stay prices."
 >
     @php
         $checkIn = Carbon\CarbonImmutable::parse($filters['check_in']);
