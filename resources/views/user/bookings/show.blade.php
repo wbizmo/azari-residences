@@ -9,7 +9,6 @@
     $receiptAvailable = $booking->receiptAvailable();
     $showLocation = in_array($booking->status, ['confirmed','paid','check_in','checked_in','checked_out','completed'], true);
     $directionsUrl = $showLocation ? $booking->directionsUrl() : null;
-    $dojahEnabled = (bool) config('azari.identity.dojah.enabled', false);
 @endphp
 
 <div class="az-user-actions" style="margin-bottom:18px">
@@ -67,17 +66,11 @@
 
 <section class="az-user-detail-grid" style="margin-top:18px">
     <div class="az-user-panel">
-        <header class="az-user-panel-header"><div><h2 class="az-user-panel-title">Guests and identities</h2></div></header>
+        <header class="az-user-panel-header"><div><h2 class="az-user-panel-title">Guests</h2></div></header>
         <div class="az-user-panel-body"><div class="az-user-list">
         @forelse($booking->guests as $guest)
-            @php
-                $identity = $guest->identityLink?->userIdentityDocument ?: $guest->identityDocument;
-                $verification = $guest->latestIdentityVerification;
-                $ready = $guest->type !== 'adult' || ($dojahEnabled ? $verification?->isVerified() : (bool) $identity);
-            @endphp
             <div class="az-user-list-item">
-                <div><h3>{{ $guest->full_name }} {{ $guest->is_lead ? '(booking owner)' : '' }}</h3><p>{{ ucfirst($guest->type) }} · {{ $guest->type !== 'adult' ? 'No adult ID requirement' : ($dojahEnabled ? 'Dojah '.str_replace('_',' ',$verification?->status ?? 'required') : ($identity ? 'Identity attached' : 'Identity pending')) }}</p></div>
-                <span class="az-user-status {{ !$ready ? 'az-user-status--warning' : '' }}">{{ $ready ? 'Ready' : 'Pending' }}</span>
+                <div><h3>{{ $guest->full_name }} {{ $guest->is_lead ? '(booking owner)' : '' }}</h3><p>{{ ucfirst($guest->type) }}</p></div>
             </div>
         @empty
             <div class="az-user-list-item"><div><h3>No additional guests</h3></div></div>
@@ -167,7 +160,7 @@
 )
 <section class="az-user-panel" style="margin-top:18px">
     <header class="az-user-panel-header">
-        <div><h2 class="az-user-panel-title">Review your stay</h2><p class="az-user-panel-subtitle">Only completed verified stays can submit one review.</p></div>
+        <div><h2 class="az-user-panel-title">Review your stay</h2><p class="az-user-panel-subtitle">Only completed stays can submit one review.</p></div>
     </header>
     <div class="az-user-panel-body">
         <form method="POST" action="{{ route('user.reviews.store',$booking) }}" class="az-form-grid">
@@ -205,7 +198,7 @@
             <label class="wide"><span>What did you like?</span><textarea name="positive_feedback" maxlength="1500"></textarea></label>
             <label class="wide"><span>What could be better?</span><textarea name="negative_feedback" maxlength="1500"></textarea></label>
             <label class="wide"><span>Your review</span><textarea name="body" minlength="20" maxlength="3000" required></textarea></label>
-            <button class="az-user-button az-user-button--dark" type="submit">Submit verified review</button>
+            <button class="az-user-button az-user-button--dark" type="submit">Submit review</button>
         </form>
     </div>
 </section>
