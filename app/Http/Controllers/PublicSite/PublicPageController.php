@@ -148,7 +148,7 @@ class PublicPageController extends Controller
 
     public function apartments(): View
     {
-        return $this->collection('Apartments', 'apartment', 'azari-hub.png', 'Private residences with the freedom of home and the consistency of thoughtful hospitality.');
+        return $this->collection('Apartments', 'apartment', 'azari-hub.png', 'Private stays with the freedom of home and the consistency of thoughtful hospitality.');
     }
 
     public function rooms(): View
@@ -176,9 +176,9 @@ class PublicPageController extends Controller
         $pages = [
             'services' => ['Services', 'Thoughtful support for every stage of your stay.', 'azari-concierge.png'],
             'concierge' => ['Concierge', 'Personal assistance, considered recommendations and dependable arrangements.', 'azari-concierge.png'],
-            'housekeeping' => ['Housekeeping', 'Professional care that keeps every residence calm, fresh and ready.', 'azari-housekeeping.png'],
+            'housekeeping' => ['Housekeeping', 'Professional care that keeps every stay calm, fresh and ready.', 'azari-housekeeping.png'],
             'restaurant' => ['Restaurant & dining', 'Curated dining support, local recommendations and memorable table experiences.', 'azari-food.png'],
-            'airport-transfers' => ['Airport transfers', 'Reliable pickup and drop-off coordination from arrival to residence.', 'azari-airport.png'],
+            'airport-transfers' => ['Airport transfers', 'Reliable pickup and drop-off coordination from arrival to your stay.', 'azari-airport.png'],
             'local-guide' => ['Local guide', 'Discover dining, culture, business districts and everyday essentials with local confidence.', 'local-guides-azari.png'],
             'about' => ['About Resavar', 'A hospitality team creating dependable, private and beautifully managed stays.', 'team-azari.png'],
             'contact' => ['Contact', 'Speak with the Resavar team about bookings, stays, partnerships or guest support.', 'contact-azari.png'],
