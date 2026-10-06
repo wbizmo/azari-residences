@@ -91,22 +91,34 @@ document.querySelectorAll('[data-popover]').forEach((popover) => {
         return;
     }
 
+    const open = () => {
+        document.querySelectorAll('[data-popover]').forEach((otherPopover) => {
+            if (otherPopover === popover) return;
+            const otherPanel = otherPopover.querySelector('[data-popover-panel]');
+            const otherTrigger = otherPopover.querySelector('[data-popover-trigger]');
+            if (otherPanel) otherPanel.hidden = true;
+            otherTrigger?.setAttribute('aria-expanded', 'false');
+        });
+
+        panel.hidden = false;
+        trigger.setAttribute('aria-expanded', 'true');
+    };
+
     const close = () => {
         panel.hidden = true;
         trigger.setAttribute('aria-expanded', 'false');
     };
 
-    window.addEventListener('resize', updateSummary);
-
     trigger.addEventListener('click', (event) => {
+        event.preventDefault();
         event.stopPropagation();
-        const shouldOpen = panel.hidden;
-        document.querySelectorAll('[data-popover-panel]').forEach((otherPanel) => {
-            otherPanel.hidden = true;
-        });
-        panel.hidden = !shouldOpen;
-        trigger.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
+        panel.hidden ? open() : close();
     });
+
+    if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+        popover.addEventListener('mouseenter', open);
+        popover.addEventListener('mouseleave', close);
+    }
 
     document.addEventListener('click', (event) => {
         if (!popover.contains(event.target)) {
