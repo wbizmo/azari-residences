@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class MarketplaceSearchService
 {
@@ -51,6 +52,9 @@ class MarketplaceSearchService
             ->withCount('reviews as verified_review_count')
             ->withAvg('reviews as verified_review_score', 'rating')
             ->withCount('favourites as favourites_count')
+            ->when(auth()->check(), fn (Builder $q) => $q->withExists([
+                'favourites as is_favourite' => fn (Builder $fav) => $fav->where('user_id', auth()->id()),
+            ]))
             ->withMin([
                 'publicAccommodationTypes as search_min_rate' => fn (Builder $typeQuery) =>
                     $this->applyStaticTypeFilters($typeQuery, $filters, $rooms, $guests),
@@ -87,6 +91,21 @@ class MarketplaceSearchService
                     ->first(fn ($plan) => ! $requestedRatePlanId || (int) $plan->getKey() === $requestedRatePlanId)
                     ?: $type->ratePlans->first();
 
+                try {
+                    $this->availability->assertRules(
+                        $property,
+                        $checkIn,
+                        $checkOut,
+                        (int) ($filters['adults'] ?? 1),
+                        (int) ($filters['children'] ?? 0),
+                        $rooms,
+                        $type,
+                        $ratePlan
+                    );
+                } catch (ValidationException) {
+                    return ['property' => $property, 'unavailable' => true];
+                }
+
                 $quote = $this->pricing->quote(
                     $property,
                     $checkIn,
@@ -108,9 +127,7 @@ class MarketplaceSearchService
                         'overall' => null,
                         'categories' => [],
                     ]),
-                    'is_favourite' => auth()->check()
-                        ? auth()->user()->favourites()->where('property_id', $property->getKey())->exists()
-                        : false,
+                    'is_favourite' => (bool) ($property->is_favourite ?? false),
                 ];
             })->filter(fn (array $result) => empty($result['unavailable']))->values()
         );
