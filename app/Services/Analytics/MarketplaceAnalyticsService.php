@@ -67,11 +67,17 @@ class MarketplaceAnalyticsService
                 CASE
                     WHEN inventory_dates.stop_sell = 1 THEN -accommodation_types.total_inventory
                     ELSE (
-                        GREATEST(
-                            0,
-                            COALESCE(inventory_dates.sellable_inventory, accommodation_types.total_inventory)
-                            - COALESCE(inventory_dates.maintenance_inventory, 0)
-                        ) - accommodation_types.total_inventory
+                        CASE
+                            WHEN (
+                                COALESCE(inventory_dates.sellable_inventory, accommodation_types.total_inventory)
+                                - COALESCE(inventory_dates.maintenance_inventory, 0)
+                            ) < 0 THEN 0
+                            ELSE (
+                                COALESCE(inventory_dates.sellable_inventory, accommodation_types.total_inventory)
+                                - COALESCE(inventory_dates.maintenance_inventory, 0)
+                            )
+                        END
+                        - accommodation_types.total_inventory
                     )
                 END
             ) AS delta')
