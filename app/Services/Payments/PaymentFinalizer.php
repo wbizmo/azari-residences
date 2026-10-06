@@ -151,7 +151,7 @@ class PaymentFinalizer
                     'failed_at' => null,
                     'provider_response_summary' => $verification['safe_response'] ?? null,
                     'receipt_number' => $receipt,
-                    'administrative_note' => trim(($locked->administrative_note ? $locked->administrative_note."\n" : '').'Provider reported success after the booking balance had already been satisfied. Review the excess payment and process any required refund through the Resarva refund workflow.'),
+                    'administrative_note' => trim(($locked->administrative_note ? $locked->administrative_note."\n" : '').'Provider reported success after the booking balance had already been satisfied. Review the excess payment and process any required refund through the Resavar refund workflow.'),
                 ]);
                 AuditLog::record('payment.successful_excess_detected', $locked, [], ['status' => 'successful_excess'], ['source' => $source, 'remaining_before_payment' => $remainingBeforeThisPayment]);
                 return $locked->refresh();
