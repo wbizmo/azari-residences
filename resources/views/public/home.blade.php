@@ -1,7 +1,7 @@
 
 
 <x-public-site.layout
-    title="Resavar | Home"
+    title="Resavar: Exceptional Stays, Everywhere."
     :description="$content['hero_body'] ?? 'Luxury serviced apartments by Resavar.'"
 >
 
