@@ -10,7 +10,7 @@
 
     <title>
         @yield('title', 'Guest area') |
-        {{ $siteSettings['site_name'] ?? 'Resarva' }}
+        {{ $siteSettings['site_name'] ?? 'Resavar' }}
     </title>
 
     @vite([
@@ -38,12 +38,12 @@
             <a
                 href="{{ route('user.dashboard') }}"
                 class="brand brand-dark azari-brand azari-brand--guest-sidebar"
-                aria-label="Resarva guest dashboard"
+                aria-label="Resavar guest dashboard"
             >
                 <span class="brand-logo-slot azari-brand__logo-slot guest-brand-logo-slot">
                     <img
                         src="{{ asset('images/resavar-logo-dark.png') }}?v=20261004-4"
-                        alt="Resarva"
+                        alt="Resavar"
                         class="brand-image azari-brand__image guest-brand-image"
                         loading="eager"
                         decoding="async"
@@ -115,12 +115,12 @@
                 <a
                     href="{{ route('user.dashboard') }}"
                     class="brand brand-dark azari-brand azari-brand--guest-sidebar"
-                    aria-label="Resarva guest dashboard"
+                    aria-label="Resavar guest dashboard"
                 >
                     <span class="brand-logo-slot azari-brand__logo-slot guest-brand-logo-slot">
                         <img
                             src="{{ asset('images/resavar-logo-dark.png') }}?v=20261004-4"
-                            alt="Resarva"
+                            alt="Resavar"
                             class="brand-image azari-brand__image guest-brand-image"
                             loading="eager"
                             decoding="async"
@@ -216,7 +216,7 @@
                     </div>
 
                     <h1 class="az-user-page-title">
-                        @yield('page_title', 'Your Resarva stay')
+                        @yield('page_title', 'Your Resavar stay')
                     </h1>
                 </div>
             </div>
@@ -517,7 +517,7 @@
 
     /* =========================================================
        LIVE USER MOBILE DRAWER FIX
-       Uses the actual Resarva Blade markup and body state.
+       Uses the actual Resavar Blade markup and body state.
        ========================================================= */
 
     @media (max-width: 980px) {
