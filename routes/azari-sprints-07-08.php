@@ -9,7 +9,6 @@ use App\Http\Controllers\PublicSite\PaymentCheckoutController;
 use App\Http\Controllers\UserArea\AdditionalGuestController;
 use App\Http\Controllers\UserArea\BookingSelfServiceController;
 use App\Http\Controllers\UserArea\UserDiscoveryController;
-use App\Http\Controllers\UserArea\DojahVerificationController;
 use App\Http\Controllers\UserArea\PhoneVerificationController;
 use App\Http\Controllers\UserArea\UserBookingController;
 use App\Http\Controllers\UserArea\UserContactController;
@@ -19,7 +18,6 @@ use App\Http\Controllers\UserArea\UserNotificationController;
 use App\Http\Controllers\UserArea\UserPaymentController;
 use App\Http\Controllers\UserArea\UserProfileController;
 use App\Http\Controllers\UserArea\UserSecurityController;
-use App\Http\Controllers\Webhooks\DojahWebhookController;
 use App\Http\Controllers\Webhooks\TwilioMessageStatusController;
 use Illuminate\Support\Facades\Route;
 
@@ -36,32 +34,19 @@ Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer', 'azari.
         Route::delete('/saved-searches/{savedSearch}', [UserDiscoveryController::class, 'destroySearch'])
             ->name('saved-searches.destroy');
 
-        Route::middleware('azari.identity.verified')->group(function (): void {
-            Route::get('/bookings', [UserBookingController::class, 'index'])->name('bookings.index');
-            Route::get('/bookings/{reference}', [UserBookingController::class, 'show'])->name('bookings.show');
-            Route::get('/bookings/{reference}/receipt', [UserBookingController::class, 'receipt'])->name('bookings.receipt');
-            Route::post('/bookings/{reference}/modifications', [BookingSelfServiceController::class, 'storeModification'])
-                ->middleware('throttle:20,1')
-                ->name('bookings.modifications.store');
-            Route::get('/payments', [UserPaymentController::class, 'index'])->name('payments.index');
-            Route::get('/payments/{payment}', [UserPaymentController::class, 'show'])->name('payments.show');
-            Route::post('/payments/{payment}/retry', [UserPaymentController::class, 'retry'])->name('payments.retry');
-            Route::get('/documents', [UserDocumentController::class, 'index'])->name('documents.index');
+        Route::get('/bookings', [UserBookingController::class, 'index'])->name('bookings.index');
+        Route::get('/bookings/{reference}', [UserBookingController::class, 'show'])->name('bookings.show');
+        Route::get('/bookings/{reference}/receipt', [UserBookingController::class, 'receipt'])->name('bookings.receipt');
+        Route::post('/bookings/{reference}/modifications', [BookingSelfServiceController::class, 'storeModification'])
+            ->middleware('throttle:20,1')
+            ->name('bookings.modifications.store');
+        Route::get('/payments', [UserPaymentController::class, 'index'])->name('payments.index');
+        Route::get('/payments/{payment}', [UserPaymentController::class, 'show'])->name('payments.show');
+        Route::post('/payments/{payment}/retry', [UserPaymentController::class, 'retry'])->name('payments.retry');
+        Route::get('/documents', [UserDocumentController::class, 'index'])->name('documents.index');
 
-            Route::get('/additional-guests', [AdditionalGuestController::class, 'index'])
-                ->name('guests.index');
-
-            Route::post('/bookings/{reference}/guests/{guest}/verification-invite', [AdditionalGuestController::class, 'sendInvite'])
-                ->middleware('throttle:10,1')
-                ->name('guests.verification-invite.send');
-        });
-
-        // Dojah verification itself remains reachable while the customer is
-        // unverified. Profile/security/support are also reachable so account
-        // data can be corrected without bypassing KYC.
-        Route::get('/identity', [DojahVerificationController::class, 'user'])->name('identity.index');
-        Route::get('/identity/dojah', [DojahVerificationController::class, 'user'])->name('identity.dojah');
-        Route::get('/identity/status', [DojahVerificationController::class, 'status'])->middleware('throttle:60,1')->name('identity.status');
+        Route::get('/additional-guests', [AdditionalGuestController::class, 'index'])
+            ->name('guests.index');
         Route::get('/notifications', [UserNotificationController::class, 'index'])->name('notifications.index');
         Route::patch('/notifications/{notification}/read', [UserNotificationController::class, 'read'])->name('notifications.read');
         Route::patch('/notifications/read-all', [UserNotificationController::class, 'readAll'])->name('notifications.read-all');
@@ -85,15 +70,12 @@ Route::middleware(['auth', 'auth.session', 'throttle:60,1'])
         Route::get('/reverse', [AddressLookupController::class, 'reverse'])->name('reverse');
     });
 
-Route::post('/webhooks/dojah/kyc', DojahWebhookController::class)
-    ->middleware('throttle:240,1')
-    ->name('webhooks.dojah.kyc');
 
 Route::post('/webhooks/twilio/message-status', TwilioMessageStatusController::class)
     ->middleware('throttle:600,1')
     ->name('webhooks.twilio.message-status');
 
-Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer', 'azari.identity.verified'])
+Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer'])
     ->group(function (): void {
         Route::get('/booking/{reference}/payment', [PaymentCheckoutController::class, 'select'])->name('public.payment.select');
         Route::post('/booking/{reference}/payment', [PaymentCheckoutController::class, 'initialise'])
