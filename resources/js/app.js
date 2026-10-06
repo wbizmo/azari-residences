@@ -1052,16 +1052,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         /*
          * Homepage:
-         *   top       -> logo-light.png
-         *   scrolled  -> logo-dark.png
+         *   top       -> logo-dark.png
+         *   scrolled  -> logo-light.png
          *
          * Other public pages:
-         *   always    -> logo-light.png
+         *   always    -> logo-dark.png
          */
         const requiredLogo =
             isHomepage && hasScrolled
-                ? darkLogo
-                : lightLogo;
+                ? lightLogo
+                : darkLogo;
 
         if (
             requiredLogo &&
@@ -1072,8 +1072,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         logo.dataset.logoVariant =
             isHomepage && hasScrolled
-                ? 'dark'
-                : 'light';
+                ? 'light'
+                : 'dark';
     };
 
     updateAzariPublicLogo();
@@ -1173,11 +1173,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (publicLogo) {
             const requiredLogo =
                 isHomepageTop
-                    ? publicLogo.dataset.lightLogo
+                    ? publicLogo.dataset.darkLogo
                     : (
                         isHomepage
-                            ? publicLogo.dataset.darkLogo
-                            : publicLogo.dataset.lightLogo
+                            ? publicLogo.dataset.lightLogo
+                            : publicLogo.dataset.darkLogo
                     );
 
             if (
