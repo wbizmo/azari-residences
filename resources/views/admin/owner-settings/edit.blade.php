@@ -1,7 +1,7 @@
 @extends('admin.layouts.app')
 @section('title','Property owner settings')
 @section('content')
-<div class="az-admin-page-header"><div><h1>Property owner marketplace</h1><p>Control agreements, withdrawal days and payout gateways. Resarva platform commission on owner-property room sales is disabled. Settlement currency is {{ $currency }} and remains centrally controlled.</p></div></div>
+<div class="az-admin-page-header"><div><h1>Property owner marketplace</h1><p>Control agreements, withdrawal days and payout gateways. Resavar platform commission on owner-property room sales is disabled. Settlement currency is {{ $currency }} and remains centrally controlled.</p></div></div>
 <form method="post" action="{{ route('azari.admin.owner-settings.update') }}" class="az-admin-form az-admin-card">@csrf @method('PUT')
 <label>Withdrawal weekdays (ISO 1–7, comma-separated)<input name="owner_withdrawal_days" value="{{ old('owner_withdrawal_days',$settings['owner_withdrawal_days']) }}" required></label>
 <label>Minimum withdrawal ({{ $currency }})<input type="number" name="owner_withdrawal_minimum" min="0" step="0.01" value="{{ old('owner_withdrawal_minimum',$settings['owner_withdrawal_minimum']) }}" required></label>
