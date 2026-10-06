@@ -143,7 +143,7 @@ class ReservaMarketplaceFoundationTest extends TestCase
 
         Property::factory()->create([
             'location_id' => $location->id,
-            'name' => 'Reserva Victoria Grand',
+            'name' => 'Resarva Victoria Grand',
             'slug' => 'reserva-victoria-grand',
             'is_published' => true,
         ]);
@@ -151,7 +151,7 @@ class ReservaMarketplaceFoundationTest extends TestCase
         $service = app(DestinationSearchService::class);
 
         $locationResults = $service->suggest('Vic', 8);
-        $propertyResults = $service->suggest('Reserva', 8);
+        $propertyResults = $service->suggest('Resarva', 8);
 
         $this->assertTrue($locationResults->contains(
             fn (array $item) => $item['type'] === 'location'
@@ -160,7 +160,7 @@ class ReservaMarketplaceFoundationTest extends TestCase
 
         $this->assertTrue($propertyResults->contains(
             fn (array $item) => $item['type'] === 'property'
-                && $item['label'] === 'Reserva Victoria Grand'
+                && $item['label'] === 'Resarva Victoria Grand'
         ));
 
         $this->assertLessThanOrEqual(8, $locationResults->count());

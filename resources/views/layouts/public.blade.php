@@ -1,9 +1,9 @@
 @php
     $defaultSeoTitle =
-        'Reserva | Luxury Hotels, Residences, Apartments, Rooms and Hospitality';
+        'Resarva | Luxury Hotels, Residences, Apartments, Rooms and Hospitality';
 
     $defaultSeoDescription =
-        'Discover Reserva, a premium hospitality and accommodation platform owned by Reserva Luxury Properties Ltd. Explore hotels, residences, serviced apartments, rooms, concierge services, housekeeping, dining, airport transfers, guest services and secure online booking across Reserva locations.';
+        'Discover Resarva, a premium hospitality and accommodation platform owned by Resarva Luxury Properties Ltd. Explore hotels, residences, serviced apartments, rooms, concierge services, housekeeping, dining, airport transfers, guest services and secure online booking across Resarva locations.';
 
     $defaultSeoKeywords = implode(', ', [
         /*
@@ -11,106 +11,106 @@
         | Brand searches
         |--------------------------------------------------------------------------
         */
-        'Reserva',
-        'Reserva',
-        'Reserva',
-        'The Reserva',
-        'Reserva Residence',
-        'Reserva',
-        'Reserva Hotel',
-        'Reserva Hotels',
-        'Reserva Luxury Hotels & Residences',
-        'Reserva Luxury Properties',
-        'Reserva Luxury Properties Ltd',
-        'Reserva Luxury Properties Limited',
-        'Reserva Group',
-        'Reserva Group',
-        'Reserva Holdings',
-        'Reserva Holdings Ltd',
-        'Reserva Holdings Limited',
-        'Reserva Hospitality',
-        'Reserva Hospitality Group',
-        'Reserva Hospitality Services',
+        'Resarva',
+        'Resarva',
+        'Resarva',
+        'The Resarva',
+        'Resarva Residence',
+        'Resarva',
+        'Resarva Hotel',
+        'Resarva Hotels',
+        'Resarva Luxury Hotels & Residences',
+        'Resarva Luxury Properties',
+        'Resarva Luxury Properties Ltd',
+        'Resarva Luxury Properties Limited',
+        'Resarva Group',
+        'Resarva Group',
+        'Resarva Holdings',
+        'Resarva Holdings Ltd',
+        'Resarva Holdings Limited',
+        'Resarva Hospitality',
+        'Resarva Hospitality Group',
+        'Resarva Hospitality Services',
 
         /*
         |--------------------------------------------------------------------------
         | Accommodation
         |--------------------------------------------------------------------------
         */
-        'Reserva Accommodation',
-        'Reserva Luxury Accommodation',
-        'Reserva Apartments',
-        'Reserva Serviced Apartments',
-        'Reserva Rooms',
-        'Reserva Guest House',
-        'Reserva Guest Accommodation',
-        'Reserva Short Stay',
-        'Reserva Extended Stay',
-        'Reserva Holiday Residences',
-        'Reserva Vacation Residences',
-        'Reserva Premium Residences',
-        'Reserva Private Residences',
-        'Reserva Executive Residences',
-        'Reserva Corporate Accommodation',
-        'Reserva Family Accommodation',
+        'Resarva Accommodation',
+        'Resarva Luxury Accommodation',
+        'Resarva Apartments',
+        'Resarva Serviced Apartments',
+        'Resarva Rooms',
+        'Resarva Guest House',
+        'Resarva Guest Accommodation',
+        'Resarva Short Stay',
+        'Resarva Extended Stay',
+        'Resarva Holiday Residences',
+        'Resarva Vacation Residences',
+        'Resarva Premium Residences',
+        'Resarva Private Residences',
+        'Resarva Executive Residences',
+        'Resarva Corporate Accommodation',
+        'Resarva Family Accommodation',
 
         /*
         |--------------------------------------------------------------------------
         | Booking and availability
         |--------------------------------------------------------------------------
         */
-        'Reserva booking',
-        'Reserva booking',
-        'book Reserva',
-        'Reserva online booking',
-        'Reserva secure booking',
-        'Reserva reservation platform',
-        'Reserva booking platform',
-        'Reserva availability',
-        'Reserva availability',
-        'check Reserva availability',
-        'Reserva available rooms',
-        'Reserva available apartments',
-        'Reserva room booking',
-        'Reserva apartment booking',
-        'Reserva residence booking',
-        'Reserva accommodation prices',
-        'Reserva residence prices',
-        'Reserva booking confirmation',
-        'verify Reserva booking',
-        'Reserva booking payment',
+        'Resarva booking',
+        'Resarva booking',
+        'book Resarva',
+        'Resarva online booking',
+        'Resarva secure booking',
+        'Resarva reservation platform',
+        'Resarva booking platform',
+        'Resarva availability',
+        'Resarva availability',
+        'check Resarva availability',
+        'Resarva available rooms',
+        'Resarva available apartments',
+        'Resarva room booking',
+        'Resarva apartment booking',
+        'Resarva residence booking',
+        'Resarva accommodation prices',
+        'Resarva residence prices',
+        'Resarva booking confirmation',
+        'verify Resarva booking',
+        'Resarva booking payment',
 
         /*
         |--------------------------------------------------------------------------
         | Guest services
         |--------------------------------------------------------------------------
         */
-        'Reserva Guest Services',
-        'Reserva Concierge',
-        'Reserva Housekeeping',
-        'Reserva Airport Transfers',
-        'Reserva airport pickup',
-        'Reserva Dining',
-        'Reserva Restaurant',
-        'Reserva Local Guide',
-        'Reserva guest login',
-        'Reserva customer portal',
-        'Reserva Guest Portal',
+        'Resarva Guest Services',
+        'Resarva Concierge',
+        'Resarva Housekeeping',
+        'Resarva Airport Transfers',
+        'Resarva airport pickup',
+        'Resarva Dining',
+        'Resarva Restaurant',
+        'Resarva Local Guide',
+        'Resarva guest login',
+        'Resarva customer portal',
+        'Resarva Guest Portal',
 
         /*
         |--------------------------------------------------------------------------
         | Property and owner searches
         |--------------------------------------------------------------------------
         */
-        'Reserva Properties',
-        'Reserva Property',
-        'Reserva Property Booking',
-        'Reserva Property Management',
-        'Reserva Residence Management',
-        'Reserva Property Owners',
-        'Reserva Property Listings',
-        'Reserva property owner registration',
-        'list property with Reserva',
+        'Resarva Properties',
+        'Resarva Property',
+        'Resarva Property Booking',
+        'Resarva Property Management',
+        'Resarva Residence Management',
+        'Resarva Property Owners',
+        'Resarva Property Listings',
+        'Resarva property owner registration',
+        'list property with Resarva',
 
         /*
         |--------------------------------------------------------------------------
@@ -138,14 +138,14 @@
         | Informational searches
         |--------------------------------------------------------------------------
         */
-        'Reserva website',
-        'Reserva website',
-        'what is Reserva',
-        'who owns Reserva',
-        'where is Reserva',
-        'how to book Reserva',
-        'contact Reserva',
-        'Reserva contact information',
+        'Resarva website',
+        'Resarva website',
+        'what is Resarva',
+        'who owns Resarva',
+        'where is Resarva',
+        'how to book Resarva',
+        'contact Resarva',
+        'Resarva contact information',
     ]);
 
     $resolvedTitle =
@@ -176,6 +176,6 @@
     @yield('content')
 </x-public.layout>
 
-<!-- RESERVA PWA RUNTIME START -->
+<!-- RESARVA PWA RUNTIME START -->
 <script src="/pwa-install.js" defer></script>
-<!-- RESERVA PWA RUNTIME END -->
+<!-- RESARVA PWA RUNTIME END -->

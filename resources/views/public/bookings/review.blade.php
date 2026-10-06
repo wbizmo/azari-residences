@@ -1,4 +1,4 @@
-<x-public-site.layout title="Review {{ $booking->reference }} | Reserva">
+<x-public-site.layout title="Review {{ $booking->reference }} | Resarva">
 <main class="site-container az-s56-page">
 <header>
     <span class="eyebrow">Step 2 of 3</span>

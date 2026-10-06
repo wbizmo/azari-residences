@@ -1,4 +1,4 @@
-name: Reserva CI
+name: Resarva CI
 
 on:
   pull_request:

@@ -1,5 +1,5 @@
 @extends('layouts.public')
-@section('title','Check availability | Reserva')
+@section('title','Check availability | Resarva')
 @section('content')
 @php($locations=$locations??collect()) @php($roomTypes=$roomTypes??collect())
 <style>

@@ -41,7 +41,7 @@
                     @endphp
                     <a class="az-user-list-item" href="{{ route('user.bookings.show',$booking->reference) }}">
                         <div>
-                            <h3>{{ $booking->property?->name ?? $booking->property_name_snapshot ?? 'Reserva stay' }}</h3>
+                            <h3>{{ $booking->property?->name ?? $booking->property_name_snapshot ?? 'Resarva stay' }}</h3>
                             <p>
                                 {{ $booking->check_in?->format('j M Y') }} to {{ $booking->check_out?->format('j M Y') }}
                                 · {{ $booking->accommodationType?->name ?? $booking->accommodation_type_name_snapshot ?? 'Accommodation' }}

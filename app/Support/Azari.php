@@ -4,7 +4,7 @@ namespace App\Support;
 
 final class Azari
 {
-    public const NAME = 'Reserva';
+    public const NAME = 'Resarva';
 
     public const DEFAULT_CURRENCY = 'USD';
 
