@@ -58,9 +58,16 @@ class SprintEightPaymentFinalizationTest extends TestCase
         $this->assertDatabaseHas('payment_verification_attempts', ['payment_id' => $payment->id, 'result' => 'amount_mismatch']);
     }
 
-    public function test_no_refund_routes_or_controller_actions_are_registered(): void
+    public function test_refund_routes_are_registered_for_payment_operations(): void
     {
-        $routes = collect(app('router')->getRoutes()->getRoutes())->map(fn ($route) => ($route->getName() ?? '').' '.$route->uri());
-        $this->assertFalse($routes->contains(fn (string $route) => str_contains(strtolower($route), 'refund')));
+        $routes = collect(app('router')->getRoutes()->getRoutes())
+            ->map(fn ($route) => ($route->getName() ?? '').' '.$route->uri());
+
+        $this->assertTrue($routes->contains(
+            fn (string $route) => str_contains($route, 'azari.admin.payments.refunds.store')
+        ));
+        $this->assertTrue($routes->contains(
+            fn (string $route) => str_contains($route, 'azari.admin.payments.refunds.update')
+        ));
     }
 }
