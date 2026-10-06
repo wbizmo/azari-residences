@@ -1,6 +1,6 @@
 <x-public-site.layout
-    title="Book your stay | Resarva"
-    description="Search live availability and book directly with Resarva."
+    title="Book your stay | Resavar"
+    description="Search live availability and book directly with Resavar."
 >
     <main class="az-book-page">
         <section
@@ -26,7 +26,7 @@
                     <figure class="az-book-media">
                         <img
                             src="{{ asset('images/azari-hospitality-welcome.png') }}"
-                            alt="Resarva hospitality interior"
+                            alt="Resavar hospitality interior"
                             width="1200"
                             height="1500"
                         >
@@ -37,7 +37,7 @@
                         ></span>
 
                         <figcaption class="az-book-media__copy">
-                            <span>Resarva</span>
+                            <span>Resavar</span>
 
                             <strong>
                                 Thoughtfully managed stays across our locations.
@@ -162,6 +162,45 @@
                                 </div>
                             </div>
 
+                            <div
+                                class="search-field reserva-destination-search"
+                                data-destination-search
+                                data-suggest-url="{{ route('destinations.suggest') }}"
+                            >
+                                <label for="destination">Destination or property</label>
+
+                                <div class="input-shell">
+                                    <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
+
+                                    <input
+                                        id="destination"
+                                        name="destination"
+                                        type="search"
+                                        value="{{ request('destination', session('azari_stay_search.destination')) }}"
+                                        placeholder="City, area or property"
+                                        autocomplete="off"
+                                        role="combobox"
+                                        aria-autocomplete="list"
+                                        aria-expanded="false"
+                                        aria-controls="resavar-destination-list"
+                                        data-destination-input
+                                    >
+                                </div>
+
+                                <input type="hidden" name="destination_type" value="{{ request('destination_type', session('azari_stay_search.destination_type')) }}" data-destination-type>
+                                <input type="hidden" name="destination_id" value="{{ request('destination_id', session('azari_stay_search.destination_id')) }}" data-destination-id>
+
+                                <div
+                                    id="resavar-destination-list"
+                                    class="reserva-destination-list"
+                                    role="listbox"
+                                    data-destination-list
+                                    hidden
+                                ></div>
+
+                                <span class="sr-only" role="status" aria-live="polite" data-destination-status></span>
+                            </div>
+
                             <div class="search-field">
                                 <label for="location_id">Location</label>
 
@@ -254,7 +293,7 @@
 
                             <p>
                                 Live inventory, direct rates and secure booking
-                                through Resarva.
+                                through Resavar.
                             </p>
                         </footer>
                     </section>
