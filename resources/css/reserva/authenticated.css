@@ -377,3 +377,31 @@ html[data-admin-theme="dark"] :is(.az-section-heading__meta,.az-topbar-page__eye
     white-space: nowrap !important;
 }
 /* RESAVAR_ADMIN_AVATAR_INITIAL_ABSOLUTE_CENTER_V3_END */
+
+
+/* RESAVAR_USER_AVATAR_INITIAL_ABSOLUTE_CENTER_V2 */
+.az-user-profile-chip .az-user-avatar {
+    position: relative !important;
+    overflow: hidden !important;
+}
+.az-user-profile-chip .az-user-avatar .az-user-avatar-initial {
+    position: absolute !important;
+    inset: 0 !important;
+    display: grid !important;
+    width: 100% !important;
+    height: 100% !important;
+    place-items: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    font: inherit !important;
+    font-size: .9rem !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    text-align: center !important;
+    text-indent: 0 !important;
+    white-space: nowrap !important;
+}
+/* RESAVAR_USER_AVATAR_INITIAL_ABSOLUTE_CENTER_V2_END */
