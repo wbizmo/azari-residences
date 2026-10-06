@@ -43,6 +43,27 @@
             <img src="{{ asset('images/resavar-logo-light.png') }}?v=20261004-4" alt="" width="42" height="42" loading="eager" decoding="sync">
         </span>
     </div>
+    <script>
+        (() => {
+            const dismiss = () => {
+                document.querySelectorAll('[data-public-preloader]').forEach((preloader) => {
+                    if (preloader.dataset.dismissed === 'true') return;
+                    preloader.dataset.dismissed = 'true';
+                    preloader.classList.add('is-hidden');
+                    window.setTimeout(() => preloader.remove(), 350);
+                });
+            };
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', dismiss, { once: true });
+            } else {
+                dismiss();
+            }
+
+            window.addEventListener('pageshow', dismiss, { once: true });
+            window.setTimeout(dismiss, 3000);
+        })();
+    </script>
 
     <a class="skip-link" href="#main-content">Skip to main content</a>
 
