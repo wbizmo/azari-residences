@@ -1,9 +1,9 @@
 @php
     $defaultSeoTitle =
-        'Resarva | Luxury Hotels, Residences, Apartments, Rooms and Hospitality';
+        'Resavar | Luxury Hotels, Residences, Apartments, Rooms and Hospitality';
 
     $defaultSeoDescription =
-        'Discover Resarva, a premium hospitality and accommodation platform owned by Resarva Luxury Properties Ltd. Explore hotels, residences, serviced apartments, rooms, concierge services, housekeeping, dining, airport transfers, guest services and secure online booking across Resarva locations.';
+        'Discover Resavar, a premium hospitality and accommodation platform owned by Azari Luxury Properties Limited Explore hotels, residences, serviced apartments, rooms, concierge services, housekeeping, dining, airport transfers, guest services and secure online booking across Resavar locations.';
 
     $defaultSeoKeywords = implode(', ', [
         /*
@@ -11,106 +11,106 @@
         | Brand searches
         |--------------------------------------------------------------------------
         */
-        'Resarva',
-        'Resarva',
-        'Resarva',
-        'The Resarva',
-        'Resarva Residence',
-        'Resarva',
-        'Resarva Hotel',
-        'Resarva Hotels',
-        'Resarva Luxury Hotels & Residences',
-        'Resarva Luxury Properties',
-        'Resarva Luxury Properties Ltd',
-        'Resarva Luxury Properties Limited',
-        'Resarva Group',
-        'Resarva Group',
-        'Resarva Holdings',
-        'Resarva Holdings Ltd',
-        'Resarva Holdings Limited',
-        'Resarva Hospitality',
-        'Resarva Hospitality Group',
-        'Resarva Hospitality Services',
+        'Resavar',
+        'Resavar',
+        'Resavar',
+        'The Resavar',
+        'Resavar Residence',
+        'Resavar',
+        'Resavar Hotel',
+        'Resavar Hotels',
+        'Resavar Luxury Hotels & Residences',
+        'Resavar Luxury Properties',
+        'Azari Luxury Properties Limited',
+        'Azari Luxury Properties Limited',
+        'Resavar Group',
+        'Resavar Group',
+        'Resavar Holdings',
+        'Resavar Holdings Ltd',
+        'Resavar Holdings Limited',
+        'Resavar Hospitality',
+        'Resavar Hospitality Group',
+        'Resavar Hospitality Services',
 
         /*
         |--------------------------------------------------------------------------
         | Accommodation
         |--------------------------------------------------------------------------
         */
-        'Resarva Accommodation',
-        'Resarva Luxury Accommodation',
-        'Resarva Apartments',
-        'Resarva Serviced Apartments',
-        'Resarva Rooms',
-        'Resarva Guest House',
-        'Resarva Guest Accommodation',
-        'Resarva Short Stay',
-        'Resarva Extended Stay',
-        'Resarva Holiday Residences',
-        'Resarva Vacation Residences',
-        'Resarva Premium Residences',
-        'Resarva Private Residences',
-        'Resarva Executive Residences',
-        'Resarva Corporate Accommodation',
-        'Resarva Family Accommodation',
+        'Resavar Accommodation',
+        'Resavar Luxury Accommodation',
+        'Resavar Apartments',
+        'Resavar Serviced Apartments',
+        'Resavar Rooms',
+        'Resavar Guest House',
+        'Resavar Guest Accommodation',
+        'Resavar Short Stay',
+        'Resavar Extended Stay',
+        'Resavar Holiday Residences',
+        'Resavar Vacation Residences',
+        'Resavar Premium Residences',
+        'Resavar Private Residences',
+        'Resavar Executive Residences',
+        'Resavar Corporate Accommodation',
+        'Resavar Family Accommodation',
 
         /*
         |--------------------------------------------------------------------------
         | Booking and availability
         |--------------------------------------------------------------------------
         */
-        'Resarva booking',
-        'Resarva booking',
-        'book Resarva',
-        'Resarva online booking',
-        'Resarva secure booking',
-        'Resarva reservation platform',
-        'Resarva booking platform',
-        'Resarva availability',
-        'Resarva availability',
-        'check Resarva availability',
-        'Resarva available rooms',
-        'Resarva available apartments',
-        'Resarva room booking',
-        'Resarva apartment booking',
-        'Resarva residence booking',
-        'Resarva accommodation prices',
-        'Resarva residence prices',
-        'Resarva booking confirmation',
-        'verify Resarva booking',
-        'Resarva booking payment',
+        'Resavar booking',
+        'Resavar booking',
+        'book Resavar',
+        'Resavar online booking',
+        'Resavar secure booking',
+        'Resavar reservation platform',
+        'Resavar booking platform',
+        'Resavar availability',
+        'Resavar availability',
+        'check Resavar availability',
+        'Resavar available rooms',
+        'Resavar available apartments',
+        'Resavar room booking',
+        'Resavar apartment booking',
+        'Resavar residence booking',
+        'Resavar accommodation prices',
+        'Resavar residence prices',
+        'Resavar booking confirmation',
+        'verify Resavar booking',
+        'Resavar booking payment',
 
         /*
         |--------------------------------------------------------------------------
         | Guest services
         |--------------------------------------------------------------------------
         */
-        'Resarva Guest Services',
-        'Resarva Concierge',
-        'Resarva Housekeeping',
-        'Resarva Airport Transfers',
-        'Resarva airport pickup',
-        'Resarva Dining',
-        'Resarva Restaurant',
-        'Resarva Local Guide',
-        'Resarva guest login',
-        'Resarva customer portal',
-        'Resarva Guest Portal',
+        'Resavar Guest Services',
+        'Resavar Concierge',
+        'Resavar Housekeeping',
+        'Resavar Airport Transfers',
+        'Resavar airport pickup',
+        'Resavar Dining',
+        'Resavar Restaurant',
+        'Resavar Local Guide',
+        'Resavar guest login',
+        'Resavar customer portal',
+        'Resavar Guest Portal',
 
         /*
         |--------------------------------------------------------------------------
         | Property and owner searches
         |--------------------------------------------------------------------------
         */
-        'Resarva Properties',
-        'Resarva Property',
-        'Resarva Property Booking',
-        'Resarva Property Management',
-        'Resarva Residence Management',
-        'Resarva Property Owners',
-        'Resarva Property Listings',
-        'Resarva property owner registration',
-        'list property with Resarva',
+        'Resavar Properties',
+        'Resavar Property',
+        'Resavar Property Booking',
+        'Resavar Property Management',
+        'Resavar Residence Management',
+        'Resavar Property Owners',
+        'Resavar Property Listings',
+        'Resavar property owner registration',
+        'list property with Resavar',
 
         /*
         |--------------------------------------------------------------------------
@@ -138,14 +138,14 @@
         | Informational searches
         |--------------------------------------------------------------------------
         */
-        'Resarva website',
-        'Resarva website',
-        'what is Resarva',
-        'who owns Resarva',
-        'where is Resarva',
-        'how to book Resarva',
-        'contact Resarva',
-        'Resarva contact information',
+        'Resavar website',
+        'Resavar website',
+        'what is Resavar',
+        'who owns Resavar',
+        'where is Resavar',
+        'how to book Resavar',
+        'contact Resavar',
+        'Resavar contact information',
     ]);
 
     $resolvedTitle =
@@ -179,6 +179,6 @@
     @yield('content')
 </x-public.layout>
 
-<!-- RESARVA PWA RUNTIME START -->
+<!-- RESAVAR PWA RUNTIME START -->
 <script src="/pwa-install.js" defer></script>
-<!-- RESARVA PWA RUNTIME END -->
+<!-- RESAVAR PWA RUNTIME END -->
