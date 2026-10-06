@@ -3,7 +3,7 @@
      * Central SEO metadata for PUBLIC Resavar pages only.
      * User, staff, admin and authentication shells do not include this file.
      */
-    $azariSeoTitle = trim((string) ($seoTitle ?? $title ?? 'RESAVAR | Exceptional Stays, Everywhere.'));
+    $azariSeoTitle = trim((string) ($seoTitle ?? $title ?? 'Resavar: Exceptional Stays, Everywhere.'));
 
     $azariSeoDescription = trim((string) ($seoDescription ?? $description ?? <<<'TEXT'
 Resavar is a global accommodation and travel marketplace. Exceptional Stays, Everywhere. Find stays chosen for quality with a clear, calm and dependable booking experience.
