@@ -3,8 +3,8 @@
     description="Compare live Reserva inventory, policies, verified reviews and total stay prices."
 >
     @php
-        $checkIn = CarbonCarbonImmutable::parse($filters['check_in']);
-        $checkOut = CarbonCarbonImmutable::parse($filters['check_out']);
+        $checkIn = Carbon\CarbonImmutable::parse($filters['check_in']);
+        $checkOut = Carbon\CarbonImmutable::parse($filters['check_out']);
         $nightCount = max(1, $checkIn->diffInDays($checkOut));
         $guestCount = (int) $filters['adults'] + (int) ($filters['children'] ?? 0);
         $queryWithoutPage = collect(request()->query())->except('page')->all();
@@ -156,12 +156,14 @@
                 <div>
                     <section data-results-pane="list" aria-label="Available stays">
                         @forelse($results as $result)
-                            @php($property = $result['property'])
-                            @php($type = $result['accommodation_type'])
-                            @php($ratePlan = $result['rate_plan'])
-                            @php($remaining = $result['remaining'])
-                            @php($quote = $result['quote'])
-                            @php($review = $result['reviews'])
+                            @php
+                                $property = $result['property'];
+                                $type = $result['accommodation_type'];
+                                $ratePlan = $result['rate_plan'];
+                                $remaining = $result['remaining'];
+                                $quote = $result['quote'];
+                                $review = $result['reviews'];
+                            @endphp
 
                             <article class="reserva-results-card" data-property-card="{{ $property->id }}">
                                 <div class="reserva-results-card__image">
