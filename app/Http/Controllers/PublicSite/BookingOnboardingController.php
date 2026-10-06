@@ -4,7 +4,6 @@ namespace App\Http\Controllers\PublicSite;
 
 use App\Http\Controllers\Controller;
 use App\Models\BookingHold;
-use App\Models\IdentityVerification;
 use App\Models\User;
 use App\Services\Bookings\AzariPricingEngine;
 use App\Services\Bookings\BookingCreationService;
@@ -48,14 +47,6 @@ class BookingOnboardingController extends Controller
                 $this->issueEmailCode($hold, $user, false);
 
                 return redirect()->route('azari.booking.onboarding.email', $hold->token);
-            }
-
-            if (! IdentityVerification::userIsVerified((int) $user->id)) {
-                $request->session()->put('url.intended', route('azari.booking.checkout', $hold->token));
-
-                return redirect()
-                    ->route('user.identity.index')
-                    ->with('warning', 'Verify your identity with Dojah to continue this booking.');
             }
 
             if (filled($hold->guest_draft)) {
@@ -142,14 +133,6 @@ class BookingOnboardingController extends Controller
                 ->with('success', 'Account created. Enter the six-digit code sent to your email to continue.');
         }
 
-        if (! IdentityVerification::userIsVerified((int) $user->id)) {
-            $request->session()->put('url.intended', route('azari.booking.checkout', $hold->token));
-
-            return redirect()
-                ->route('user.identity.index')
-                ->with('warning', 'Your booking details are saved. Complete Dojah verification to continue.');
-        }
-
         return redirect()->route('azari.booking.checkout', $hold->token);
     }
 
@@ -228,12 +211,6 @@ class BookingOnboardingController extends Controller
 
         $request->session()->put('url.intended', route('azari.booking.checkout', $hold->token));
 
-        if (! IdentityVerification::userIsVerified((int) $user->id)) {
-            return redirect()
-                ->route('user.identity.index')
-                ->with('success', 'Email verified. Complete secure Dojah identity verification to continue your booking.');
-        }
-
         return redirect()->route('azari.booking.checkout', $hold->token);
     }
 
@@ -245,7 +222,6 @@ class BookingOnboardingController extends Controller
         $hold = $this->ownedHold($request, $token);
 
         abort_unless($request->user()->hasVerifiedEmail(), 403);
-        abort_unless(IdentityVerification::userIsVerified((int) $request->user()->id), 403);
         abort_unless(filled($hold->guest_draft), 422, 'Booking details are missing.');
 
         $request->merge([
@@ -260,7 +236,7 @@ class BookingOnboardingController extends Controller
 
         return redirect()
             ->route('azari.booking.review', $booking->reference)
-            ->with('success', 'Booking created. Additional adults have been invited to complete Dojah verification.');
+            ->with('success', 'Booking created. You can now review the reservation and continue to payment.');
     }
 
     private function hold(string $token): BookingHold
