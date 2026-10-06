@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Jobs\GenerateResponsiveImageDerivatives;
 use App\Support\ResponsiveImage;
 use App\Models\Amenity;
-use App\Models\IdentityVerification;
 use App\Models\ListingAgreement;
 use App\Models\Location;
 use App\Models\OwnerPayoutProfile;
@@ -48,20 +47,12 @@ class PropertyOwnerController extends Controller
         return view('user.owner.agreement', [
             'version' => (string) SiteSetting::valueFor('owner_listing_agreement_version', '1.0'),
             'agreementText' => $this->agreementText(),
-            'identity' => $request->user()->currentIdentity,
-            'dojahVerified' => IdentityVerification::userIsVerified($request->user()->id),
         ]);
     }
 
     public function signAgreement(Request $request): RedirectResponse
     {
         $user = $request->user();
-
-        if ((bool) config('azari.identity.dojah.enabled', false)) {
-            abort_unless(IdentityVerification::userIsVerified($user->id), 422, 'Complete Dojah identity verification before signing the listing agreement.');
-        } else {
-            abort_unless($user->currentIdentity, 422, 'Upload your means of identification before signing the listing agreement.');
-        }
 
         $data = $request->validate([
             'legal_name' => ['required', 'string', 'max:180'],
@@ -213,7 +204,6 @@ class PropertyOwnerController extends Controller
             'paypalEnabled' => filter_var(SiteSetting::valueFor('owner_paypal_enabled', '0'), FILTER_VALIDATE_BOOL),
             'stripeEnabled' => filter_var(SiteSetting::valueFor('owner_stripe_enabled', '0'), FILTER_VALIDATE_BOOL),
             'withdrawalOpen' => $this->withdrawalOpen(),
-            'dojahVerified' => IdentityVerification::userIsVerified($request->user()->id),
         ]);
     }
 
@@ -241,9 +231,6 @@ class PropertyOwnerController extends Controller
     {
         abort_unless($this->withdrawalOpen(), 422, 'Withdrawals are not available today.');
 
-        if ((bool) config('azari.identity.dojah.enabled', false)) {
-            abort_unless(IdentityVerification::userIsVerified($request->user()->id), 422, 'Complete Dojah identity verification before requesting a withdrawal.');
-        }
 
         $currency = (string) config('azari.currency', 'USD');
         $minimum = (float) SiteSetting::valueFor('owner_withdrawal_minimum', 50);
