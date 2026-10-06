@@ -13,7 +13,7 @@ class SendAzariTransactionalReminders extends Command
 
     public function handle(AzariTransactionalMailService $mail): int
     {
-        $timezone = config('azari.timezone', 'Africa/Lagos');
+        $timezone = config('localization.platform_timezone', 'UTC');
         $today = now($timezone)->startOfDay();
 
         $counts = [

@@ -31,6 +31,18 @@
             'postalCode' => $property->address_postal_code,
             'addressCountry' => $property->address_country_code ?: $property->country,
         ]),
+        'currenciesAccepted' => $property->currency,
+        'checkinTime' => $property->check_in_time,
+        'checkoutTime' => $property->check_out_time,
+        'image' => $images->map(fn ($image) => \App\Support\ResponsiveImage::originalUrl($image))->values()->all(),
+        'amenityFeature' => $property->amenities->map(fn ($amenity) => ['@type'=>'LocationFeatureSpecification','name'=>$amenity->name,'value'=>true])->values()->all(),
+        'offers' => [
+            '@type' => 'Offer',
+            'priceCurrency' => $property->currency,
+            'price' => (float) $property->nightly_rate,
+            'availability' => 'https://schema.org/InStock',
+            'url' => route('properties.show', $property),
+        ],
     ];
 
     if ($property->latitude !== null && $property->longitude !== null) {
@@ -114,7 +126,7 @@
                 <section class="reserva-property-gallery" aria-label="{{ $property->name }} photo gallery">
                     @foreach($images->take(5) as $index => $image)
                         <button type="button" data-modal-open="reserva-property-gallery-modal" aria-label="Open full photo gallery">
-                            <img src="{{ Storage::url($image) }}" alt="{{ $property->name }} photo {{ $index + 1 }}" @if($index > 0) loading="lazy" decoding="async" @endif>
+                            <x-public.responsive-image :path="$image" :alt="$property->name.' photo '.($index + 1)" :priority="$index === 0" width="1200" height="800" sizes="(max-width: 760px) 100vw, 60vw" />
                             @if($index === min(4, $images->count() - 1))
                                 <span class="reserva-gallery-count">{{ $images->count() }} photos</span>
                             @endif
@@ -214,13 +226,13 @@
 
                                         <div class="reserva-rate-row__price">
                                             @if($quote)
-                                                <strong>{{ $quote['currency'] }} {{ number_format((float) $quote['total'], 2) }}</strong>
+                                                <strong>{{ \App\Support\Money::format($quote['total'], $quote['currency']) }}</strong>
                                                 <small>Total for {{ $quote['nights'] }} {{ Str::plural('night', $quote['nights']) }}</small>
                                                 @if(($option['remaining'] ?? null) !== null && $option['remaining'] <= 5)
                                                     <small>{{ $option['remaining'] }} {{ Str::plural('unit', $option['remaining']) }} left</small>
                                                 @endif
                                             @else
-                                                <strong>{{ $type->currency }} {{ number_format((float) ($option['from_rate'] ?? $type->base_rate), 2) }}</strong>
+                                                <strong>{{ \App\Support\Money::format(($option['from_rate'] ?? $type->base_rate), $type->currency) }}</strong>
                                                 <small>From per night</small>
                                             @endif
                                         </div>

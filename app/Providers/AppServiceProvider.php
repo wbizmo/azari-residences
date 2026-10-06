@@ -94,7 +94,7 @@ class AppServiceProvider extends ServiceProvider
             ]);
         });
 
-        date_default_timezone_set(config('azari.timezone', 'Africa/Lagos'));
+        date_default_timezone_set(config('localization.platform_timezone', 'UTC'));
         $applicationUrl = rtrim((string) config('app.url'), '/');
         if ($applicationUrl !== '') {
             URL::forceRootUrl($applicationUrl);

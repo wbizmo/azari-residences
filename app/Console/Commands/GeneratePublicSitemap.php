@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Property;
+use App\Models\Location;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -94,6 +95,25 @@ class GeneratePublicSitemap extends Command
                 'lastmod' => null,
                 'changefreq' => $frequency,
                 'priority' => $priority,
+                'images' => [],
+            ];
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Every active destination landing page with public inventory.
+        |--------------------------------------------------------------------------
+        */
+        $locations = Location::query()->where('is_active', true)
+            ->whereHas('properties', fn ($query) => $query->where('is_published', true))
+            ->orderBy('sort_order')->orderBy('name')->get();
+
+        foreach ($locations as $location) {
+            $entries[] = [
+                'loc' => route('destinations.show', $location),
+                'lastmod' => $location->updated_at?->toAtomString(),
+                'changefreq' => 'weekly',
+                'priority' => '0.8',
                 'images' => [],
             ];
         }

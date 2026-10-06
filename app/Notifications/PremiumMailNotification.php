@@ -115,7 +115,7 @@ class PremiumMailNotification extends Notification implements ShouldQueue
             'safe_error' => null,
             'classification' => $this->context['classification'] ?? 'transactional',
             'locale' => $this->context['locale'] ?? app()->getLocale(),
-            'timezone' => $this->context['timezone'] ?? ($notifiable->timezone ?? config('azari.timezone', 'Africa/Lagos')),
+            'timezone' => $this->context['timezone'] ?? ($notifiable->timezone ?? config('localization.platform_timezone', 'UTC')),
             'payload_hash' => $payloadHash,
             'meta' => array_merge($this->context, ['notification_id' => $this->id]),
         ];
@@ -181,7 +181,7 @@ class PremiumMailNotification extends Notification implements ShouldQueue
                 'delivered_at' => now(),
                 'classification' => $this->context['classification'] ?? 'transactional',
                 'locale' => $this->context['locale'] ?? app()->getLocale(),
-                'timezone' => $this->context['timezone'] ?? ($notifiable->timezone ?? config('azari.timezone', 'Africa/Lagos')),
+                'timezone' => $this->context['timezone'] ?? ($notifiable->timezone ?? config('localization.platform_timezone', 'UTC')),
                 'payload_hash' => hash('sha256', json_encode([$this->subject, $this->lines, $this->actionUrl])),
                 'meta' => array_merge($this->context, ['notification_id' => $this->id]),
             ]

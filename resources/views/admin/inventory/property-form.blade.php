@@ -45,7 +45,8 @@
 
         <div class="az-form-section-head"><span class="material-symbols-outlined">account_balance_wallet</span><div><h2>Base pricing</h2><p>Seasonal and promotional rules can be added after saving.</p></div></div>
 
-        <label class="az-field"><span>Currency</span><select name="currency"><option value="USD" selected>USD</option></select></label>
+        <label class="az-field"><span>Currency</span><select name="currency" required>@foreach($supportedCurrencies as $code => $label)<option value="{{ $code }}" @selected(old('currency', $property->currency ?: config('localization.default_currency')) === $code)>{{ $code }} · {{ $label }}</option>@endforeach</select></label>
+        <label class="az-field"><span>Property timezone</span><input name="timezone" value="{{ old('timezone', $property->timezone ?: optional($property->locationRecord)->timezone) }}" placeholder="Africa/Lagos"></label>
         <label class="az-field"><span>Nightly rate</span><input type="number" step="0.01" min="0" name="nightly_rate" value="{{ old('nightly_rate', $property->nightly_rate ?: 0) }}" required></label>
         <label class="az-field"><span>Weekend rate</span><input type="number" step="0.01" min="0" name="weekend_rate" value="{{ old('weekend_rate', $property->weekend_rate) }}"></label>
         <label class="az-field"><span>Cleaning fee</span><input type="number" step="0.01" min="0" name="cleaning_fee" value="{{ old('cleaning_fee', $property->cleaning_fee ?: 0) }}"></label>

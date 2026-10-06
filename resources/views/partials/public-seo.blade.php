@@ -116,6 +116,7 @@ TEXT));
     $azariSeoCanonical = $seoCanonical ?? $canonical ?? url()->current();
     $azariSeoImage = $seoImage ?? $image ?? asset('images/resavar-logo-light.png');
     $azariSeoType = $seoType ?? $type ?? 'website';
+    $azariSeoRobots = $seoRobots ?? 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1';
     $azariSeoLocale = str_replace('-', '_', app()->getLocale());
     $azariSeoSiteName = 'Resarva';
     $azariSeoHome = url('/');
@@ -132,8 +133,7 @@ TEXT));
         'logo' => $azariSeoImage,
         'image' => $azariSeoImage,
         'slogan' => 'Exceptional Stays, Everywhere.',
-        'priceRange' => '$$',
-        'currenciesAccepted' => 'USD',
+        'currenciesAccepted' => implode(', ', array_keys((array) config('localization.supported_currencies', []))),
         'paymentAccepted' => ['Credit Card', 'Debit Card', 'Online Payment'],
         'amenityFeature' => [
             ['@type' => 'LocationFeatureSpecification', 'name' => 'Serviced residences', 'value' => true],
@@ -220,9 +220,9 @@ TEXT));
 <meta name="author" content="Resarva">
 <meta name="application-name" content="Resarva">
 <meta name="apple-mobile-web-app-title" content="Resarva">
-<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
-<meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
-<meta name="bingbot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+<meta name="robots" content="{{ $azariSeoRobots }}">
+<meta name="googlebot" content="{{ $azariSeoRobots }}">
+<meta name="bingbot" content="{{ $azariSeoRobots }}">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="theme-color" content="#052058">
 <meta name="color-scheme" content="light">

@@ -1348,7 +1348,7 @@ class AzariTransactionalMailService
                 'queued_at' => now(),
                 'classification' => 'transactional',
                 'locale' => app()->getLocale(),
-                'timezone' => $user?->timezone ?: config('azari.timezone', 'Africa/Lagos'),
+                'timezone' => $user?->timezone ?: config('localization.platform_timezone', 'UTC'),
                 'payload_hash' => hash('sha256', json_encode($snapshot)),
                 'meta' => array_merge($context, [
                     'dedupe_key' => $dedupeKey,
@@ -1366,7 +1366,7 @@ class AzariTransactionalMailService
             'dedupe_key' => $dedupeKey,
             'classification' => 'transactional',
             'locale' => app()->getLocale(),
-            'timezone' => $user?->timezone ?: config('azari.timezone', 'Africa/Lagos'),
+            'timezone' => $user?->timezone ?: config('localization.platform_timezone', 'UTC'),
             'snapshot' => $snapshot,
         ]);
 
@@ -1494,7 +1494,7 @@ class AzariTransactionalMailService
         }
 
         return $value instanceof CarbonInterface
-            ? $value->timezone(config('azari.timezone', 'Africa/Lagos'))->format('d M Y, H:i')
+            ? $value->timezone(config('localization.platform_timezone', 'UTC'))->format('d M Y, H:i')
             : date('d M Y, H:i', strtotime((string) $value));
     }
 

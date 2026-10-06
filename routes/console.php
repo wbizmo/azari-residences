@@ -10,6 +10,9 @@ Schedule::command('azari:provision-successful-booking-accounts')->hourly()->with
 Schedule::command('model:prune')->daily();
 Schedule::command('azari:expire-unpaid-bookings')->everyFiveMinutes()->name('expire-unpaid-bookings')->withoutOverlapping();
 Schedule::command('azari:sitemap')->dailyAt('04:15')->name('public-sitemap')->withoutOverlapping();
+Schedule::command('azari:heartbeat')->everyMinute()->name('system-heartbeat')->withoutOverlapping();
+Schedule::command('azari:sync-channels')->everyTenMinutes()->name('channel-sync')->withoutOverlapping();
+
 
 require __DIR__.'/azari-final-schedule.php';
 

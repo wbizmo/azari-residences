@@ -204,7 +204,7 @@ class PublicGuestVerificationController extends Controller
             'account_type' => 'customer',
             'status' => 'active',
             'is_active' => true,
-            'timezone' => config('azari.timezone', 'Africa/Lagos'),
+            'timezone' => config('localization.platform_timezone', 'UTC'),
         ]);
 
         $guest->forceFill(['user_id' => $user->id])->save();

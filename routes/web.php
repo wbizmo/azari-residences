@@ -11,11 +11,19 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicSite\AccountDeletionRequestController;
 use App\Http\Controllers\PublicSite\HomeController;
 use App\Http\Controllers\PublicSite\PropertyController;
+use App\Http\Controllers\Admin\ChannelConnectionController;
+use App\Http\Controllers\PublicSite\ChannelCalendarController;
+use App\Http\Controllers\PublicSite\DestinationController;
+use App\Http\Controllers\HealthController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
+Route::get('/health/live', [HealthController::class, 'live'])->middleware('throttle:120,1')->name('health.live');
+Route::get('/health/ready', [HealthController::class, 'ready'])->middleware('throttle:60,1')->name('health.ready');
 // Availability routes are registered in azari-public-completion.php
 Route::get('/residences/{property}', [PropertyController::class, 'show'])->name('properties.show');
+Route::get('/destinations/{location:slug}', [DestinationController::class, 'show'])->name('destinations.show');
+Route::get('/calendar/{token}.ics', ChannelCalendarController::class)->middleware('throttle:120,1')->name('channels.export');
 
 Route::get('/account-deletion', [AccountDeletionRequestController::class, 'show'])
     ->name('account-deletion.show');
@@ -50,6 +58,12 @@ Route::prefix('azaridevadmin')->middleware(['auth.session', 'azari.staff'])->gro
     Route::resource('properties', AdminPropertyController::class)
         ->except(['show', 'destroy'])
         ->names('azari.admin.properties');
+
+    Route::get('/channels', [ChannelConnectionController::class, 'index'])->middleware('azari.permission:system-health.view')->name('azari.admin.channels.index');
+    Route::post('/channels', [ChannelConnectionController::class, 'store'])->middleware('azari.permission:system-health.manage')->name('azari.admin.channels.store');
+    Route::put('/channels/{connection}', [ChannelConnectionController::class, 'update'])->middleware('azari.permission:system-health.manage')->name('azari.admin.channels.update');
+    Route::post('/channels/{connection}/sync', [ChannelConnectionController::class, 'sync'])->middleware('azari.permission:system-health.manage')->name('azari.admin.channels.sync');
+    Route::delete('/channels/{connection}', [ChannelConnectionController::class, 'destroy'])->middleware('azari.permission:system-health.manage')->name('azari.admin.channels.destroy');
 
     Route::get('/properties/{property}/commercial', [CommercialInventoryController::class, 'edit'])
         ->name('azari.admin.properties.commercial');

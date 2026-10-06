@@ -22,7 +22,7 @@
 <button class="az-user-button az-user-button--dark">Save payout destination</button>
 </form></div></section>
 
-<section class="az-user-panel"><header class="az-user-panel-header"><div><h2 class="az-user-panel-title">Request withdrawal</h2><p class="az-user-panel-subtitle">Submitted funds are reserved immediately to prevent duplicate withdrawals. Owner payouts are locked to USD.</p></div></header><div class="az-user-panel-body">
+<section class="az-user-panel"><header class="az-user-panel-header"><div><h2 class="az-user-panel-title">Request withdrawal</h2><p class="az-user-panel-subtitle">Submitted funds are reserved immediately to prevent duplicate withdrawals. Owner payouts are processed in {{ $currency }}.</p></div></header><div class="az-user-panel-body">
 <form method="post" action="{{ route('user.owner.withdrawals.store') }}" class="az-user-form">@csrf
 <label>Amount ({{ $currency }})<input type="number" name="amount" min="{{ $minimum }}" max="{{ $available }}" step="0.01" required></label>
 <label>Note<textarea name="owner_note" rows="3"></textarea></label>

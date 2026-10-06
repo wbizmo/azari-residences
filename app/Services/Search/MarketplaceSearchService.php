@@ -152,12 +152,12 @@ class MarketplaceSearchService
 
     public function filterOptions(): array
     {
-        return [
+        return Cache::remember('public:search:filter-options', now()->addMinutes(10), fn () => [
             'amenities' => Amenity::query()
                 ->where('is_active', true)
                 ->orderBy('name')
                 ->get(['id', 'name', 'icon']),
-        ];
+        ]);
     }
 
     private function eligibleProperties(
@@ -378,6 +378,20 @@ class MarketplaceSearchService
         ),
         0
     )
+    - COALESCE(
+        (
+            SELECT SUM(COALESCE(cr.quantity, 1))
+            FROM channel_reservations cr
+            JOIN channel_connections cc ON cc.id = cr.channel_connection_id
+            WHERE cr.property_id = accommodation_types.property_id
+              AND (cr.accommodation_type_id IS NULL OR cr.accommodation_type_id = accommodation_types.id)
+              AND cr.status = 'active'
+              AND cc.is_active = 1
+              AND cr.starts_on <= ?
+              AND cr.ends_on > ?
+        ),
+        0
+    )
 ) >= ?
 SQL;
 
@@ -386,6 +400,8 @@ SQL;
             $date,
             $date,
             ...$statuses,
+            $date,
+            $date,
             $date,
             $date,
             $rooms,

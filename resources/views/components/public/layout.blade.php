@@ -5,6 +5,7 @@
     'canonical' => null,
     'image' => null,
     'type' => 'website',
+    'robots' => null,
     'bodyClass' => '',
 ])
 
@@ -23,6 +24,7 @@
         'seoCanonical' => $canonical,
         'seoImage' => $image,
         'seoType' => $type,
+        'seoRobots' => $robots,
     ])
 
     @include('partials.azari-head-assets')

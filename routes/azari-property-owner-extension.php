@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\OwnerMarketplaceController;
 use App\Http\Controllers\User\OwnerCommercialInventoryController;
+use App\Http\Controllers\User\OwnerChannelConnectionController;
 use App\Http\Controllers\User\PropertyOwnerController;
 use Illuminate\Support\Facades\Route;
 
@@ -39,6 +40,11 @@ Route::prefix('user/property-centre')
             ->name('commercial.rate-plans.store');
         Route::put('/properties/{property}/commercial/accommodations/{accommodationType}/rate-plans/{ratePlan}', [OwnerCommercialInventoryController::class, 'updateRatePlan'])
             ->name('commercial.rate-plans.update');
+
+        Route::get('/channels', [OwnerChannelConnectionController::class, 'index'])->name('channels.index');
+        Route::post('/channels', [OwnerChannelConnectionController::class, 'store'])->name('channels.store');
+        Route::post('/channels/{connection}/sync', [OwnerChannelConnectionController::class, 'sync'])->name('channels.sync');
+        Route::delete('/channels/{connection}', [OwnerChannelConnectionController::class, 'destroy'])->name('channels.destroy');
 
         Route::get('/earnings', [PropertyOwnerController::class, 'earnings'])->name('earnings');
         Route::get('/withdrawals', [PropertyOwnerController::class, 'withdrawals'])->name('withdrawals');

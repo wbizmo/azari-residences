@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\GenerateResponsiveImageDerivatives;
+use App\Support\ResponsiveImage;
 use App\Models\Amenity;
 use App\Models\IdentityVerification;
 use App\Models\ListingAgreement;
@@ -283,7 +285,8 @@ class PropertyOwnerController extends Controller
             'locations' => Location::query()->where('is_active', true)->orderBy('sort_order')->orderBy('name')->get(),
             'roomTypes' => RoomType::query()->where('is_active', true)->orderBy('sort_order')->orderBy('name')->get(),
             'amenities' => Amenity::query()->orderBy('name')->get(),
-            'currency' => (string) config('azari.currency', 'USD'),
+            'currency' => (string) config('localization.default_currency', config('azari.currency', 'USD')),
+            'currencies' => (array) config('localization.supported_currencies', ['USD'=>'US Dollar']),
         ];
     }
 
@@ -312,6 +315,8 @@ class PropertyOwnerController extends Controller
             'cleaning_fee' => ['nullable', 'numeric', 'min:0'],
             'service_charge' => ['nullable', 'numeric', 'min:0'],
             'tax_rate' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'currency' => ['required', Rule::in(array_keys((array) config('localization.supported_currencies', ['USD'=>'US Dollar'])))],
+            'timezone' => ['nullable', 'timezone:all'],
             'short_description' => ['required', 'string', 'max:500'],
             'description' => ['required', 'string', 'max:20000'],
             'cover_image' => [$listing?->cover_image ? 'nullable' : 'required', 'image', 'max:8192'],
@@ -331,7 +336,8 @@ class PropertyOwnerController extends Controller
         $propertyData['country'] = $location->country;
         $propertyData['address_country_code'] = filled($propertyData['address_country_code'] ?? null) ? strtoupper($propertyData['address_country_code']) : null;
         $propertyData['property_type'] = Str::lower($roomType->slug ?: $roomType->name);
-        $propertyData['currency'] = (string) config('azari.currency', 'USD');
+        $propertyData['currency'] = strtoupper((string) $data['currency']);
+        $propertyData['timezone'] = $data['timezone'] ?: $location->timezone ?: config('localization.platform_timezone', config('azari.timezone', 'UTC'));
         $propertyData['is_featured'] = false;
         $propertyData['is_published'] = false;
         $propertyData['same_day_booking'] = false;
@@ -340,19 +346,27 @@ class PropertyOwnerController extends Controller
         $cover = $listing?->cover_image;
         if ($request->hasFile('cover_image')) {
             if ($cover) {
+                ResponsiveImage::deleteDerivatives($cover);
                 Storage::disk('public')->delete($cover);
             }
             $cover = $request->file('cover_image')->store('owner-listings/covers', 'public');
+            GenerateResponsiveImageDerivatives::dispatch($cover);
         }
 
         $gallery = $listing?->gallery ?? [];
         $removeGallery = array_values(array_intersect($gallery, $data['remove_gallery'] ?? []));
         if ($removeGallery !== []) {
+            foreach ($removeGallery as $removedImage) ResponsiveImage::deleteDerivatives($removedImage);
             Storage::disk('public')->delete($removeGallery);
             $gallery = array_values(array_diff($gallery, $removeGallery));
         }
         if ($request->hasFile('gallery')) {
-            $gallery = array_values([...$gallery, ...collect($request->file('gallery'))->map(fn ($image) => $image->store('owner-listings/gallery', 'public'))->all()]);
+            $uploadedGallery = collect($request->file('gallery'))->map(function ($image) {
+                $path = $image->store('owner-listings/gallery', 'public');
+                GenerateResponsiveImageDerivatives::dispatch($path);
+                return $path;
+            })->all();
+            $gallery = array_values([...$gallery, ...$uploadedGallery]);
         }
 
         return [
@@ -377,6 +391,6 @@ TEXT;
         $days = collect(explode(',', (string) SiteSetting::valueFor('owner_withdrawal_days', '1,2,3,4,5')))
             ->map(fn ($day) => (int) trim($day))->filter()->all();
 
-        return in_array((int) now(config('azari.timezone', 'Africa/Lagos'))->dayOfWeekIso, $days, true);
+        return in_array((int) now(config('localization.platform_timezone', 'UTC'))->dayOfWeekIso, $days, true);
     }
 }

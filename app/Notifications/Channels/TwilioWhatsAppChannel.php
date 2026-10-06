@@ -41,7 +41,7 @@ final class TwilioWhatsAppChannel
                     'queued_at' => now(),
                     'classification' => $notification->context['classification'] ?? 'transactional',
                     'locale' => $notification->context['locale'] ?? app()->getLocale(),
-                    'timezone' => $notification->context['timezone'] ?? ($notifiable->timezone ?? config('azari.timezone', 'Africa/Lagos')),
+                    'timezone' => $notification->context['timezone'] ?? ($notifiable->timezone ?? config('localization.platform_timezone', 'UTC')),
                     'payload_hash' => hash('sha256', $message),
                     'meta' => [
                         'dedupe_key' => $dedupeKey,

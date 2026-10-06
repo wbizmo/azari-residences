@@ -88,7 +88,7 @@ class BookingModificationService
             return false;
         }
 
-        $hours = now(config('azari.timezone', 'Africa/Lagos'))->diffInHours($booking->check_in->startOfDay(), false);
+        $hours = now(config('localization.platform_timezone', 'UTC'))->diffInHours($booking->check_in->startOfDay(), false);
 
         return $hours >= 24;
     }

@@ -58,6 +58,7 @@ class Property extends Model
         'service_charge',
         'tax_rate',
         'currency',
+        'timezone',
         'short_description',
         'description',
         'cover_image',
@@ -206,7 +207,8 @@ class Property extends Model
         static::creating(function (self $property): void {
             $property->ownership_type = $property->owner_id ? 'third_party' : ($property->ownership_type ?: 'azari');
             $property->managed_for_owner = $property->ownership_type === 'third_party';
-            $property->currency = (string) config('azari.currency', 'USD');
+            $property->currency = strtoupper((string) ($property->currency ?: config('localization.default_currency', config('azari.currency', 'USD'))));
+            $property->timezone = $property->timezone ?: $property->locationRecord?->timezone ?: config('localization.platform_timezone', config('azari.timezone', 'UTC'));
 
             if ($property->ownership_type === 'third_party' && blank($property->owner_share_percentage)) {
                 $property->owner_share_percentage = (float) config('azari.owners.default_owner_share_percentage', 88);
@@ -270,7 +272,8 @@ class Property extends Model
         });
 
         static::saving(function (self $property): void {
-            $property->currency = (string) config('azari.currency', 'USD');
+            $property->currency = strtoupper((string) ($property->currency ?: config('localization.default_currency', config('azari.currency', 'USD'))));
+            $property->timezone = $property->timezone ?: $property->locationRecord?->timezone ?: config('localization.platform_timezone', config('azari.timezone', 'UTC'));
 
             if ($property->isDirty('owner_id') && ! $property->isDirty('ownership_type')) {
                 $property->ownership_type = $property->owner_id ? 'third_party' : 'azari';

@@ -25,6 +25,8 @@ class UserProfileController extends Controller
             'email' => ['required', 'email:rfc', 'max:190', Rule::unique('users', 'email')->ignore($user)],
             'phone' => ['nullable', 'string', 'max:50'],
             'timezone' => ['nullable', 'timezone:all'],
+            'locale' => ['nullable', Rule::in(array_keys((array) config('localization.supported_locales', ['en'=>'English'])))],
+            'display_currency' => ['nullable', Rule::in(array_keys((array) config('localization.supported_currencies', ['USD'=>'US Dollar'])))],
             'emergency_contact_name' => ['nullable', 'string', 'max:120'],
             'emergency_contact_phone' => ['nullable', 'string', 'max:50'],
             'profile_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
@@ -37,7 +39,7 @@ class UserProfileController extends Controller
             throw ValidationException::withMessages(['phone' => $e->getMessage()]);
         }
 
-        $old = $user->only(['name', 'email', 'phone', 'timezone']);
+        $old = $user->only(['name', 'email', 'phone', 'timezone', 'locale', 'display_currency']);
         if ($request->hasFile('profile_image')) {
             if ($user->profile_photo_path) Storage::disk('public')->delete($user->profile_photo_path);
             $data['profile_photo_path'] = $request->file('profile_image')->store('profiles/customers', 'public');
@@ -47,7 +49,7 @@ class UserProfileController extends Controller
         if (($data['phone'] ?? null) !== $user->phone) $data['phone_verified_at'] = null;
         $user->update($data);
         AuditLog::record('user.profile_updated', $user, $old, $user->only(array_keys($old)));
-        return back()->with('success', 'Profile updated.');
+        return back()->with('success', __('resarva.account.profile_updated'));
     }
 
     public function preferences(Request $request): RedirectResponse
@@ -82,11 +84,11 @@ class UserProfileController extends Controller
                 'email_marketing' => $marketing && $email,
                 'sms_marketing' => $marketing && $sms,
                 'whatsapp_marketing' => $marketing && $whatsapp,
-                'locale' => app()->getLocale(),
+                'locale' => $user->locale ?: app()->getLocale(),
                 'timezone' => $user->timezone,
             ]
         );
 
-        return back()->with('success', 'Notification preferences updated.');
+        return back()->with('success', __('resarva.account.preferences_updated'));
     }
 }

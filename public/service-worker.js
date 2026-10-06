@@ -1,4 +1,4 @@
-const CACHE_NAME = 'resavar-pwa-v2';
+const CACHE_NAME = 'resarva-pwa-v3';
 
 const STATIC_ASSETS = [
     '/manifest.webmanifest'
@@ -18,7 +18,7 @@ self.addEventListener('activate', event => {
             .then(keys => Promise.all(
                 keys
                     .filter(key =>
-                        (key.startsWith('azari-pwa-') || key.startsWith('resavar-pwa-')) &&
+                        (key.startsWith('azari-pwa-') || key.startsWith('resarva-pwa-')) &&
                         key !== CACHE_NAME
                     )
                     .map(key => caches.delete(key))

@@ -10,6 +10,8 @@ use App\Models\InventoryDate;
 use App\Models\MaintenancePeriod;
 use App\Models\Property;
 use App\Models\RatePlan;
+use App\Services\Channels\ChannelAvailabilityService;
+use App\Support\LocalDate;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
@@ -20,6 +22,8 @@ use Illuminate\Validation\ValidationException;
 
 class AzariAvailabilityEngine
 {
+    public function __construct(private readonly ChannelAvailabilityService $channels) {}
+
     public function assertRules(
         Property $property,
         CarbonInterface $in,
@@ -30,7 +34,7 @@ class AzariAvailabilityEngine
         ?AccommodationType $accommodationType = null,
         ?RatePlan $ratePlan = null
     ): void {
-        $timezone = (string) config('azari.timezone', 'Africa/Lagos');
+        $timezone = LocalDate::propertyTimezone($property);
         $today = CarbonImmutable::now($timezone)->startOfDay();
         $checkIn = CarbonImmutable::parse($in->toDateString(), $timezone)->startOfDay();
         $checkOut = CarbonImmutable::parse($out->toDateString(), $timezone)->startOfDay();
@@ -450,6 +454,7 @@ class AzariAvailabilityEngine
         $remaining = collect();
         $occupied = 0;
         $baseInventory = max(0, (int) $accommodationType->total_inventory);
+        $channelBlocked = $this->channels->blockedByDate($accommodationType, $start, $end);
 
         foreach ($dates as $date) {
             $occupied += (int) ($events[$date] ?? 0);
@@ -463,7 +468,8 @@ class AzariAvailabilityEngine
                 $sellable = 0;
             }
 
-            $remaining->put($date, max(0, $sellable - $maintenance - $occupied));
+            $external = max(0, (int) $channelBlocked->get($date, 0));
+            $remaining->put($date, max(0, $sellable - $maintenance - $occupied - $external));
         }
 
         return $remaining;

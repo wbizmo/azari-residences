@@ -11,6 +11,7 @@ use App\Models\Promotion;
 use App\Models\RoomType;
 use App\Models\SiteSetting;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Cache;
 
 class HomeController extends Controller
 {
@@ -26,9 +27,9 @@ class HomeController extends Controller
                 ->latest('updated_at')
                 ->first(),
 
-            'settings' => SiteSetting::query()->pluck('value', 'key'),
+            'settings' => Cache::remember('public:site-settings', now()->addMinutes(5), fn () => SiteSetting::query()->pluck('value', 'key')),
 
-            'content' => ContentBlock::query()->where('is_active', true)->pluck('value', 'key'),
+            'content' => Cache::remember('public:content-blocks', now()->addMinutes(5), fn () => ContentBlock::query()->where('is_active', true)->pluck('value', 'key')),
 
             'featuredResidences' => Property::query()
                 ->with(['locationRecord', 'roomType', 'amenities'])
