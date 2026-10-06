@@ -13,7 +13,7 @@ class ReconcileAzariPayments extends Command
     public function handle(PaymentReconciliationService $reconciliation): int
     {
         $result = $reconciliation->reconcilePending((int) $this->option('limit'));
-        $this->info("Checked: {$result['checked']}; successful: {$result['successful']}; pending: {$result['pending']}; failed: {$result['failed']}");
+        $this->info("Checked: {$result['checked']}; successful: {$result['successful']}; pending: {$result['pending']}; failed: {$result['failed']}; stale abandoned: {$result['abandoned']}");
         return self::SUCCESS;
     }
 }
