@@ -10292,3 +10292,27 @@ html body .site-header .desktop-navigation .nav-popover .nav-popover-panel a.is-
     .resavar-compare-tray { right:12px; bottom:84px; width:calc(100vw - 24px); }
 }
 /* RESAVAR_BOOKING_FRONTEND_PARITY_V1_END */
+
+
+/* RESAVAR_DESKTOP_SUBMENU_RELIABILITY_V1 */
+@media (min-width: 1101px) and (hover: hover) and (pointer: fine) {
+    .desktop-navigation .nav-popover:hover > .nav-popover-panel {
+        display: block !important;
+    }
+}
+
+.desktop-navigation .nav-popover-panel:not([hidden]) {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+.desktop-navigation .nav-popover {
+    z-index: 181;
+}
+
+.desktop-navigation .nav-popover-panel {
+    z-index: 182 !important;
+}
+/* RESAVAR_DESKTOP_SUBMENU_RELIABILITY_V1_END */
