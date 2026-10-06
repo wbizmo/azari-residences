@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
+use App\Http\Controllers\Admin\RefundController;
 use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\SystemSettingsController;
 use App\Http\Controllers\Location\AddressLookupController;
@@ -134,6 +135,12 @@ Route::prefix('azaridevadmin')
         Route::post('/payments/{payment}/reconcile', [AdminPaymentController::class, 'reconcile'])
             ->middleware('azari.permission:payments.manage')
             ->name('payments.reconcile');
+        Route::post('/payments/{payment}/refunds', [RefundController::class, 'store'])
+            ->middleware('azari.permission:payments.manage')
+            ->name('payments.refunds.store');
+        Route::patch('/payments/{payment}/refunds/{refund}', [RefundController::class, 'update'])
+            ->middleware('azari.permission:payments.manage')
+            ->name('payments.refunds.update');
         Route::get('/payments/{payment}/proof', [AdminPaymentController::class, 'proof'])->name('payments.proof');
     });
 
