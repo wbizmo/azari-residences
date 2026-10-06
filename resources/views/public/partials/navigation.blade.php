@@ -19,8 +19,24 @@
 
         <nav class="desktop-navigation" aria-label="Primary navigation">
             <a href="{{ route('public.apartments') }}">{{ __('resarva.nav.apartments') }}</a>
-            <a href="{{ route('public.rooms') }}">{{ __('resarva.nav.rooms') }}</a>
-            <a href="{{ route('availability.index') }}">{{ __('resarva.nav.availability') }}</a>
+            <div class="nav-popover" data-popover>
+                <button type="button" class="nav-popover-trigger" data-popover-trigger
+                        aria-expanded="false" aria-controls="rooms-popover">
+                    {{ __('resarva.nav.rooms') }}
+                    <span class="material-symbols-outlined" aria-hidden="true">keyboard_arrow_down</span>
+                </button>
+
+                <div class="nav-popover-panel" id="rooms-popover" data-popover-panel hidden>
+                    <a href="{{ route('public.rooms') }}" class="{{ request()->routeIs('public.rooms') ? 'is-active' : '' }}">
+                        <span class="material-symbols-outlined" aria-hidden="true">bed</span>
+                        <span class="nav-popover-label">{{ __('resarva.nav.rooms') }}</span>
+                    </a>
+                    <a href="{{ route('availability.index') }}" class="{{ request()->routeIs('availability.*') ? 'is-active' : '' }}">
+                        <span class="material-symbols-outlined" aria-hidden="true">event_available</span>
+                        <span class="nav-popover-label">{{ __('resarva.nav.availability') }}</span>
+                    </a>
+                </div>
+            </div>
 
             <div class="nav-popover" data-popover>
                 <button type="button" class="nav-popover-trigger" data-popover-trigger
@@ -49,10 +65,13 @@
                     <a href="{{ route('public.airport-transfers') }}" class="{{ request()->routeIs('public.airport-transfers') ? 'is-active' : '' }}">
                         <span class="material-symbols-outlined">airport_shuttle</span><span class="nav-popover-label">Airport transfers</span>
                     </a>
+                    <a href="{{ route('public.local-guide') }}" class="{{ request()->routeIs('public.local-guide') ? 'is-active' : '' }}">
+                        <span class="material-symbols-outlined" aria-hidden="true">map</span>
+                        <span class="nav-popover-label">{{ __('resarva.nav.local_guide') }}</span>
+                    </a>
                 </div>
             </div>
 
-            <a href="{{ route('public.local-guide') }}">{{ __('resarva.nav.local_guide') }}</a>
             <a href="{{ route('public.about') }}">{{ __('resarva.nav.about') }}</a>
 
             <a href="{{ route('public.contact') }}">{{ __('resarva.nav.contact') }}</a>
