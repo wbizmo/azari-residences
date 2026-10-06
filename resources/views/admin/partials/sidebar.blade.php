@@ -27,6 +27,7 @@
         ['azari.admin.audit-logs.index','history','Audit logs','audit-logs.view'],
         ['azari.admin.promotions.index','campaign','Promotions','promotions.view'],
         ['azari.admin.vouchers.index','sell','Vouchers','vouchers.view'],
+        ['azari.admin.communications.index','outgoing_mail','Communications','system-health.view'],
         ['azari.admin.system-health.index','health_metrics','System health','system-health.view'],
     ];
 
