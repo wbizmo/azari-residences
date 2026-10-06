@@ -54,13 +54,6 @@
 
     <section class="panel">
         <div class="wrap">
-            <a class="az-auth-home-link" href="{{ url('/') }}">
-                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                    <path d="M19 12H5"/>
-                    <path d="m11 18-6-6 6-6"/>
-                </svg>
-                <span>Back to homepage</span>
-            </a>
 
             <p class="kicker">Guest access</p>
             <h1>Welcome back.</h1>
