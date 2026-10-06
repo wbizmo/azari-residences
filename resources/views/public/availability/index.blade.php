@@ -130,7 +130,7 @@
                                     <span data-guest-summary>
                                         {{ max(1, (int) request('adults', 1)) }}
                                         {{ (int) request('adults', 1) === 1 ? 'adult' : 'adults' }}
-                                        路
+                                        ·
                                         {{ max(0, (int) request('children', 0)) }}
                                         {{ (int) request('children', 0) === 1 ? 'child' : 'children' }}
                                     </span>
