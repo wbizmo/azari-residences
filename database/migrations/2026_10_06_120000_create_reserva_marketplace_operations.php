@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
@@ -277,6 +278,10 @@ return new class extends Migration
                     'Resavar | Exceptional serviced stays',
                 ])
                 ->update(['value' => 'Reserva | Exceptional serviced stays', 'updated_at' => now()]);
+
+            Cache::forget('site-setting:site_name');
+            Cache::forget('site-setting:business_name');
+            Cache::forget('site-setting:seo_title');
         }
 
         if (Schema::hasTable('communication_logs')) {
