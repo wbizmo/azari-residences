@@ -23,6 +23,44 @@ function showToast(message, type = 'info') {
     }
 }
 
+function trackReservaEvent(name, detail = {}) {
+    const safeDetail = Object.fromEntries(
+        Object.entries(detail).filter(([, value]) =>
+            ['string', 'number', 'boolean'].includes(typeof value) || value === null
+        )
+    );
+
+    window.dispatchEvent(new CustomEvent('reserva:analytics', {
+        detail: { name, ...safeDetail },
+    }));
+
+    if (Array.isArray(window.dataLayer)) {
+        window.dataLayer.push({
+            event: name,
+            ...safeDetail,
+        });
+    }
+}
+
+function rememberReservaSearch(form) {
+    try {
+        const data = new FormData(form);
+        const recent = {
+            destination: String(data.get('destination') || ''),
+            check_in: String(data.get('check_in') || ''),
+            check_out: String(data.get('check_out') || ''),
+            adults: Number(data.get('adults') || 1),
+            children: Number(data.get('children') || 0),
+            rooms: Number(data.get('rooms') || 1),
+            saved_at: new Date().toISOString(),
+        };
+
+        localStorage.setItem('reserva:last-search', JSON.stringify(recent));
+    } catch {
+        // Storage can be disabled by the browser; booking search must still work.
+    }
+}
+
 document.querySelectorAll('[data-toast]').forEach((trigger) => {
     trigger.addEventListener('click', () => showToast(trigger.dataset.toast));
 });
@@ -169,13 +207,28 @@ document.querySelectorAll('[data-guest-selector]').forEach((selector) => {
     const limits = {
         adults: { min: 1, max: 12 },
         children: { min: 0, max: 8 },
+        rooms: { min: 1, max: 20 },
     };
 
     const updateSummary = () => {
-        const adults = Number(selector.querySelector('[data-guest-input="adults"]').value);
-        const children = Number(selector.querySelector('[data-guest-input="children"]').value);
+        const adultsInput = selector.querySelector('[data-guest-input="adults"]');
+        const childrenInput = selector.querySelector('[data-guest-input="children"]');
+        const roomsInput = selector.querySelector('[data-guest-input="rooms"]');
 
-        summary.textContent = `${adults} ${adults === 1 ? 'adult' : 'adults'} · ${children} ${children === 1 ? 'child' : 'children'}`;
+        const adults = Number(adultsInput?.value || 1);
+        const children = Number(childrenInput?.value || 0);
+        const rooms = Number(roomsInput?.value || 1);
+
+        const parts = [
+            `${adults} ${adults === 1 ? 'adult' : 'adults'}`,
+            `${children} ${children === 1 ? 'child' : 'children'}`,
+        ];
+
+        if (roomsInput) {
+            parts.push(`${rooms} ${rooms === 1 ? 'room' : 'rooms'}`);
+        }
+
+        summary.textContent = parts.join(' · ');
     };
 
     const close = () => {
@@ -195,8 +248,14 @@ document.querySelectorAll('[data-guest-selector]').forEach((selector) => {
             const direction = Number(button.dataset.direction);
             const input = selector.querySelector(`[data-guest-input="${field}"]`);
             const output = selector.querySelector(`[data-count-for="${field}"]`);
+            const limit = limits[field];
+
+            if (!input || !output || !limit) {
+                return;
+            }
+
             const current = Number(input.value);
-            const next = Math.min(limits[field].max, Math.max(limits[field].min, current + direction));
+            const next = Math.min(limit.max, Math.max(limit.min, current + direction));
 
             input.value = String(next);
             output.textContent = String(next);
@@ -225,9 +284,208 @@ document.querySelectorAll('[data-guest-selector]').forEach((selector) => {
     updateSummary();
 });
 
+
+document.querySelectorAll('[data-destination-search]').forEach((root) => {
+    const input = root.querySelector('[data-destination-input]');
+    const typeInput = root.querySelector('[data-destination-type]');
+    const idInput = root.querySelector('[data-destination-id]');
+    const list = root.querySelector('[data-destination-list]');
+    const status = root.querySelector('[data-destination-status]');
+    const suggestUrl = root.dataset.suggestUrl;
+
+    if (!input || !typeInput || !idInput || !list || !suggestUrl) {
+        return;
+    }
+
+    let timer = null;
+    let controller = null;
+    let requestSequence = 0;
+    let activeIndex = -1;
+    let options = [];
+
+    const close = () => {
+        list.hidden = true;
+        input.setAttribute('aria-expanded', 'false');
+        input.removeAttribute('aria-activedescendant');
+        activeIndex = -1;
+    };
+
+    const setActive = (index) => {
+        if (!options.length) {
+            activeIndex = -1;
+            return;
+        }
+
+        activeIndex = Math.max(0, Math.min(index, options.length - 1));
+
+        options.forEach((option, optionIndex) => {
+            const active = optionIndex === activeIndex;
+            option.classList.toggle('is-active', active);
+            option.setAttribute('aria-selected', active ? 'true' : 'false');
+        });
+
+        const active = options[activeIndex];
+        if (active) {
+            input.setAttribute('aria-activedescendant', active.id);
+            active.scrollIntoView({ block: 'nearest' });
+        }
+    };
+
+    const select = (item) => {
+        input.value = item.value || item.label || '';
+        typeInput.value = item.type || '';
+        idInput.value = item.id ?? '';
+        close();
+        input.focus();
+    };
+
+    const render = (items) => {
+        list.replaceChildren();
+        options = [];
+
+        items.forEach((item, index) => {
+            const option = document.createElement('button');
+            option.type = 'button';
+            option.className = 'reserva-destination-option';
+            option.id = `reserva-destination-option-${index}-${Date.now()}`;
+            option.setAttribute('role', 'option');
+            option.setAttribute('aria-selected', 'false');
+
+            const label = document.createElement('strong');
+            label.textContent = item.label || item.value || '';
+
+            const meta = document.createElement('span');
+            meta.textContent = [item.secondary, item.type].filter(Boolean).join(' · ');
+
+            option.append(label, meta);
+            option.addEventListener('click', () => select(item));
+            list.append(option);
+            options.push(option);
+        });
+
+        if (!options.length) {
+            close();
+            if (status) {
+                status.textContent = 'No matching destinations.';
+            }
+            return;
+        }
+
+        list.hidden = false;
+        input.setAttribute('aria-expanded', 'true');
+        if (status) {
+            status.textContent = `${options.length} destination ${options.length === 1 ? 'suggestion' : 'suggestions'} available.`;
+        }
+    };
+
+    const search = async () => {
+        const query = input.value.trim();
+        typeInput.value = '';
+        idInput.value = '';
+
+        if (query.length < 2) {
+            controller?.abort();
+            close();
+            if (status) {
+                status.textContent = '';
+            }
+            return;
+        }
+
+        controller?.abort();
+        controller = new AbortController();
+        const sequence = ++requestSequence;
+
+        try {
+            const url = new URL(suggestUrl, window.location.origin);
+            url.searchParams.set('q', query);
+            url.searchParams.set('limit', '8');
+
+            const response = await fetch(url, {
+                headers: { Accept: 'application/json' },
+                signal: controller.signal,
+                credentials: 'same-origin',
+            });
+
+            if (!response.ok) {
+                throw new Error(`Destination search failed with ${response.status}`);
+            }
+
+            const payload = await response.json();
+
+            if (sequence !== requestSequence || input.value.trim() !== query) {
+                return;
+            }
+
+            render(Array.isArray(payload.data) ? payload.data : []);
+        } catch (error) {
+            if (error?.name === 'AbortError') {
+                return;
+            }
+
+            close();
+            if (status) {
+                status.textContent = 'Destination suggestions are temporarily unavailable. You can still search with the text you entered.';
+            }
+        }
+    };
+
+    input.addEventListener('input', () => {
+        typeInput.value = '';
+        idInput.value = '';
+        window.clearTimeout(timer);
+        timer = window.setTimeout(search, 180);
+    });
+
+    input.addEventListener('keydown', (event) => {
+        if (event.key === 'ArrowDown') {
+            if (!list.hidden && options.length) {
+                event.preventDefault();
+                setActive(activeIndex < 0 ? 0 : activeIndex + 1);
+            }
+        } else if (event.key === 'ArrowUp') {
+            if (!list.hidden && options.length) {
+                event.preventDefault();
+                setActive(activeIndex <= 0 ? options.length - 1 : activeIndex - 1);
+            }
+        } else if (event.key === 'Enter' && activeIndex >= 0 && options[activeIndex]) {
+            event.preventDefault();
+            options[activeIndex].click();
+        } else if (event.key === 'Escape') {
+            close();
+        }
+    });
+
+    input.addEventListener('blur', () => {
+        window.setTimeout(() => {
+            if (!root.contains(document.activeElement)) {
+                close();
+            }
+        }, 120);
+    });
+
+    document.addEventListener('click', (event) => {
+        if (!root.contains(event.target)) {
+            close();
+        }
+    });
+});
+
 document.querySelectorAll('[data-availability-form]').forEach((form) => {
     const checkIn = form.querySelector('[name="check_in"]');
     const checkOut = form.querySelector('[name="check_out"]');
+    let reservaSearchStarted = false;
+
+    form.addEventListener('focusin', () => {
+        if (reservaSearchStarted) {
+            return;
+        }
+
+        reservaSearchStarted = true;
+        trackReservaEvent('search_started', {
+            surface: form.closest('.availability-section') ? 'homepage' : 'availability',
+        });
+    }, { once: false });
 
     const clearErrors = () => {
         form.querySelectorAll('.field-error').forEach((error) => {
@@ -283,7 +541,22 @@ document.querySelectorAll('[data-availability-form]').forEach((form) => {
             event.preventDefault();
             form.querySelector('[aria-invalid="true"]')?.focus();
             showToast('Please review the highlighted booking-search fields.');
+            return;
         }
+
+        const adults = Number(form.querySelector('[name="adults"]')?.value || 1);
+        const children = Number(form.querySelector('[name="children"]')?.value || 0);
+        const rooms = Number(form.querySelector('[name="rooms"]')?.value || 1);
+
+        trackReservaEvent('search_submitted', {
+            surface: form.closest('.availability-section') ? 'homepage' : 'availability',
+            adults,
+            children,
+            rooms,
+            has_destination: Boolean(form.querySelector('[name="destination"]')?.value?.trim()),
+        });
+
+        rememberReservaSearch(form);
     });
 });
 

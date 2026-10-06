@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\OwnerMarketplaceController;
+use App\Http\Controllers\User\OwnerCommercialInventoryController;
 use App\Http\Controllers\User\PropertyOwnerController;
 use Illuminate\Support\Facades\Route;
 
@@ -25,6 +26,17 @@ Route::prefix('user/property-centre')
         Route::get('/listings/{listing}', [PropertyOwnerController::class, 'show'])->name('listings.show');
         Route::get('/listings/{listing}/edit', [PropertyOwnerController::class, 'edit'])->name('listings.edit');
         Route::put('/listings/{listing}', [PropertyOwnerController::class, 'update'])->name('listings.update');
+
+        Route::get('/properties/{property}/commercial', [OwnerCommercialInventoryController::class, 'edit'])
+            ->name('commercial.edit');
+        Route::post('/properties/{property}/commercial/accommodations', [OwnerCommercialInventoryController::class, 'storeAccommodation'])
+            ->name('commercial.accommodations.store');
+        Route::put('/properties/{property}/commercial/accommodations/{accommodationType}', [OwnerCommercialInventoryController::class, 'updateAccommodation'])
+            ->name('commercial.accommodations.update');
+        Route::post('/properties/{property}/commercial/accommodations/{accommodationType}/rate-plans', [OwnerCommercialInventoryController::class, 'storeRatePlan'])
+            ->name('commercial.rate-plans.store');
+        Route::put('/properties/{property}/commercial/accommodations/{accommodationType}/rate-plans/{ratePlan}', [OwnerCommercialInventoryController::class, 'updateRatePlan'])
+            ->name('commercial.rate-plans.update');
 
         Route::get('/earnings', [PropertyOwnerController::class, 'earnings'])->name('earnings');
         Route::get('/withdrawals', [PropertyOwnerController::class, 'withdrawals'])->name('withdrawals');

@@ -1,0 +1,164 @@
+/* Canonical Reserva contrast contract. */
+:is(.button-primary,.button-brass,.availability-submit,.azari-view-all-residences,.az-results-submit,.az-book-submit,.az-checkout-provider-button,.resavar-auth-submit,.az-auth-submit) {
+    background: var(--reserva-action) !important;
+    border-color: var(--reserva-action) !important;
+    color: var(--reserva-on-action) !important;
+    -webkit-text-fill-color: var(--reserva-on-action) !important;
+}
+:is(.button-primary,.button-brass,.availability-submit,.azari-view-all-residences,.az-results-submit,.az-book-submit,.az-checkout-provider-button,.resavar-auth-submit,.az-auth-submit):hover {
+    background: var(--reserva-action-hover) !important;
+    border-color: var(--reserva-action-hover) !important;
+    color: var(--reserva-white) !important;
+}
+:is(.button-primary,.button-brass,.availability-submit,.azari-view-all-residences,.az-results-submit,.az-book-submit) .material-symbols-outlined {
+    color: currentColor !important;
+}
+
+:is(.button-secondary,.az-button--secondary,.az-admin-button--secondary,.az-user-button--light) {
+    background: var(--reserva-white) !important;
+    border: 1px solid var(--reserva-navy) !important;
+    color: var(--reserva-navy) !important;
+    -webkit-text-fill-color: var(--reserva-navy) !important;
+}
+:is(.button-secondary,.az-button--secondary,.az-admin-button--secondary,.az-user-button--light):hover {
+    background: var(--reserva-navy) !important;
+    color: var(--reserva-white) !important;
+    -webkit-text-fill-color: var(--reserva-white) !important;
+}
+
+:is(button,a,input,select,textarea,[tabindex]):focus-visible {
+    outline: 3px solid var(--reserva-focus);
+    outline-offset: 2px;
+}
+
+.back-to-top,
+[data-back-to-top] {
+    background: var(--reserva-white) !important;
+    border: 1px solid var(--reserva-navy) !important;
+    color: var(--reserva-navy) !important;
+    -webkit-text-fill-color: var(--reserva-navy) !important;
+}
+.back-to-top .material-symbols-outlined,
+[data-back-to-top] .material-symbols-outlined {
+    color: var(--reserva-navy) !important;
+}
+
+:is(.az-status--published,.az-status--available,.az-status--active,.az-status--draft,.az-status--maintenance,.az-status--archived,.az-results-meta>span) {
+    background: var(--reserva-navy) !important;
+    color: var(--reserva-white) !important;
+    -webkit-text-fill-color: var(--reserva-white) !important;
+}
+.az-status-pill--good,
+.az-alert--success {
+    color: var(--reserva-success) !important;
+}
+.az-alert--danger {
+    color: var(--reserva-danger) !important;
+}
+
+::placeholder {
+    color: rgba(5, 32, 88, .56);
+    opacity: 1;
+}
+
+
+/* Commercial inventory editors */
+.reserva-commercial-editor,
+.reserva-rate-plan-editor {
+    margin-top: 14px;
+    border: 1px solid var(--reserva-border);
+    border-radius: 14px;
+    background: var(--reserva-white);
+}
+.reserva-commercial-editor > summary,
+.reserva-rate-plan-editor > summary {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 18px;
+    color: var(--reserva-navy);
+    cursor: pointer;
+    list-style: none;
+}
+.reserva-commercial-editor > summary::-webkit-details-marker,
+.reserva-rate-plan-editor > summary::-webkit-details-marker {
+    display: none;
+}
+.reserva-commercial-editor > summary span,
+.reserva-rate-plan-editor > summary span {
+    color: var(--reserva-text-muted);
+    font-size: .78rem;
+}
+.reserva-commercial-form {
+    padding: 0 18px 18px;
+}
+.reserva-commercial-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+}
+.reserva-commercial-grid label {
+    display: grid;
+    gap: 7px;
+    color: var(--reserva-navy);
+    font-size: .78rem;
+    font-weight: 700;
+}
+.reserva-commercial-grid :is(input,select,textarea) {
+    width: 100%;
+    min-height: 44px;
+    border: 1px solid var(--reserva-border);
+    border-radius: 10px;
+    background: var(--reserva-white);
+    color: var(--reserva-navy);
+    padding: 10px 12px;
+    font: inherit;
+}
+.reserva-commercial-grid textarea {
+    min-height: 110px;
+    resize: vertical;
+}
+.reserva-commercial-span-2 {
+    grid-column: span 2;
+}
+.reserva-commercial-checks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px 20px;
+    margin: 14px 0;
+}
+.reserva-commercial-checks label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--reserva-navy);
+    font-size: .8rem;
+    font-weight: 700;
+}
+.reserva-rate-plan-stack {
+    margin: 0 18px 18px;
+    padding-top: 18px;
+    border-top: 1px solid var(--reserva-border);
+}
+.reserva-rate-plan-stack > h3 {
+    margin: 0 0 8px;
+    color: var(--reserva-navy);
+}
+@media (max-width: 900px) {
+    .reserva-commercial-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+@media (max-width: 600px) {
+    .reserva-commercial-grid {
+        grid-template-columns: 1fr;
+    }
+    .reserva-commercial-span-2 {
+        grid-column: auto;
+    }
+    .reserva-commercial-editor > summary,
+    .reserva-rate-plan-editor > summary {
+        flex-direction: column;
+        gap: 5px;
+    }
+}

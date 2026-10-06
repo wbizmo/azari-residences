@@ -16,7 +16,7 @@
 
 <section class="az-user-panel">
     <header class="az-user-panel-header">
-        <div><h2 class="az-user-panel-title">Your property portfolio</h2><p class="az-user-panel-subtitle">Submit, monitor and manage properties offered through Resavar.</p></div>
+        <div><h2 class="az-user-panel-title">Your property portfolio</h2><p class="az-user-panel-subtitle">Submit, monitor and manage properties offered through Reserva.</p></div>
         <a class="az-user-button az-user-button--dark" href="{{ route('user.owner.listings.create') }}">Add property</a>
     </header>
     <div class="az-user-panel-body">

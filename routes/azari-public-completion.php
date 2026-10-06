@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Admin\RoomTypeController;
 use App\Http\Controllers\PublicSite\AvailabilitySearchController;
+use App\Http\Controllers\PublicSite\DestinationSearchController;
 use App\Http\Controllers\PublicSite\AzariAvailabilityController;
 use App\Http\Controllers\PublicSite\PublicPageController;
 use Illuminate\Support\Facades\Route;
@@ -17,6 +18,10 @@ Route::get('/availability/results', [AzariAvailabilityController::class, 'index'
 
 Route::get('/availability/search', AvailabilitySearchController::class)
     ->name('availability.search');
+
+Route::get('/destinations/suggest', DestinationSearchController::class)
+    ->middleware('throttle:30,1')
+    ->name('destinations.suggest');
 
 Route::get('/book-now', [PublicPageController::class, 'availability'])
     ->name('public.book-now');
@@ -34,7 +39,7 @@ foreach ([
     'restaurant' => 'restaurant',
     'airport-transfers' => 'airport-transfers',
     'local-guide' => 'local-guide',
-    'about-azari' => 'about',
+    'about-reserva' => 'about',
     'contact' => 'contact',
     'support' => 'support',
     'booking-terms' => 'booking-terms',
@@ -59,6 +64,8 @@ Route::prefix('azaridevadmin')
             ->parameters(['room-types' => 'roomType'])
             ->names('room-types');
     });
+
+Route::redirect('/about-azari', '/about-reserva', 301);
 
 Route::post('/contact', [PublicPageController::class, 'contact'])
     ->middleware('throttle:6,1')

@@ -18,6 +18,7 @@ class AuditFrontendUx extends Command
 
         $appJs = $this->read('resources/js/app.js', $issues);
         $appCss = $this->read('resources/css/app.css', $issues);
+        $legacyCss = $this->read('resources/css/legacy/app-legacy.css', $issues);
         $uxJs = $this->read('resources/js/azari-frontend-ux.js', $issues);
         $uxCss = $this->read('resources/css/azari-frontend-ux.css', $issues);
 
@@ -25,8 +26,11 @@ class AuditFrontendUx extends Command
             $issues[] = 'resources/js/app.js does not import the Phase 2 UX module.';
         }
 
-        if (! str_contains($appCss, "@import './azari-frontend-ux.css';")) {
-            $issues[] = 'resources/css/app.css does not import the Phase 2 UX stylesheet.';
+        $directUxImport = str_contains($appCss, "@import './azari-frontend-ux.css';");
+        $legacyUxImport = str_contains($legacyCss, "@import '../azari-frontend-ux.css';");
+
+        if (! $directUxImport && ! $legacyUxImport) {
+            $issues[] = 'The CSS entrypoint chain does not import the Phase 2 UX stylesheet.';
         }
 
         foreach (['data-async-form', 'aria-busy', 'dataset.confirm', 'requestConfirmation', 'azari:form-success'] as $marker) {

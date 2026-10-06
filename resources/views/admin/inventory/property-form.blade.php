@@ -2,7 +2,7 @@
 @section('title', $property->exists ? 'Edit property' : 'Add property')
 @section('content')
     <div class="admin-heading">
-        <div><span>PROPERTY EDITOR</span><h1>{{ $property->exists ? $property->name : 'Add property' }}</h1><p>Every control below uses the Resavar administration design system.</p></div>
+        <div><span>PROPERTY EDITOR</span><h1>{{ $property->exists ? $property->name : 'Add property' }}</h1><p>Every control below uses the Reserva administration design system.</p></div>
         <a class="button button-secondary" href="{{ route('azari.admin.inventory.index') }}">Back to inventory</a>
     </div>
 

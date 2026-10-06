@@ -19,11 +19,10 @@ class PhaseTwoFrontendUxTest extends TestCase
     public function test_frontend_ux_styles_are_imported_by_the_main_stylesheet(): void
     {
         $app = file_get_contents(resource_path('css/app.css'));
+        $legacy = file_get_contents(resource_path('css/legacy/app-legacy.css'));
 
-        $this->assertStringContainsString(
-            "@import './azari-frontend-ux.css';",
-            $app
-        );
+        $this->assertStringContainsString("@import './legacy/app-legacy.css';", $app);
+        $this->assertStringContainsString("@import '../azari-frontend-ux.css';", $legacy);
     }
 
     public function test_frontend_module_covers_submission_confirmation_async_and_toggle_states(): void

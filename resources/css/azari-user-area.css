@@ -1,26 +1,3 @@
-:root {
-    --az-user-green-950: #052058;
-    --az-user-green-900: #052058;
-    --az-user-green-800: #052058;
-    --az-user-green-700: #052058;
-    --az-user-green-100: #052058;
-    --az-user-ivory: #FFFFFF;
-    --az-user-paper: #FFFFFF;
-    --az-user-brass: #052058;
-    --az-user-brass-soft: #052058;
-    --az-user-wine: #000000;
-    --az-user-ink: #052058;
-    --az-user-muted: #052058;
-    --az-user-line: #052058;
-    --az-user-success: #052058;
-    --az-user-warning: #000000;
-    --az-user-danger: #000000;
-    --az-user-sidebar: 286px;
-    --az-user-topbar: 82px;
-    --az-user-shadow: 0 20px 60px rgba(5, 32, 88, .10);
-    --az-user-shadow-sm: 0 10px 30px rgba(5, 32, 88, .08);
-}
-
 .az-user-body { margin: 0; min-height: 100vh; background: var(--az-user-ivory); color: var(--az-user-ink); }
 .az-user-body.az-user-drawer-open { overflow: hidden; }
 .az-user-shell { min-height: 100vh; }
@@ -161,7 +138,7 @@
 .az-user-pagination { margin-top: 18px; }
 .az-user-restricted-note { padding: 14px 16px; border-radius: 14px; background: #FFFFFF; color: #000000; font-size: 12px; line-height: 1.6; }
 
-@media (max-width: 1180px) { :root { --az-user-sidebar: 250px; } }
+@media (max-width: 1180px) { }
 @media (max-width: 980px) {
     .az-user-sidebar { display: none; }
     .az-user-main { margin-left: 0; padding: 0 22px 92px; }

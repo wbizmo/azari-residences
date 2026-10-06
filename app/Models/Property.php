@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class Property extends Model
@@ -134,6 +135,20 @@ class Property extends Model
         return $this->hasMany(PricingRule::class)->orderByDesc('priority');
     }
 
+    public function accommodationTypes(): HasMany
+    {
+        return $this->hasMany(AccommodationType::class)
+            ->orderBy('sort_order')
+            ->orderBy('id');
+    }
+
+    public function publicAccommodationTypes(): HasMany
+    {
+        return $this->accommodationTypes()
+            ->where('is_active', true)
+            ->where('is_published', true);
+    }
+
     public function getRouteKeyName(): string
     {
         return 'slug';
@@ -155,6 +170,56 @@ class Property extends Model
 
             $property->code = $property->code
                 ?: 'AZR-'.Str::upper(Str::random(8));
+        });
+
+        static::created(function (self $property): void {
+            if (! Schema::hasTable('accommodation_types') || ! Schema::hasTable('rate_plans')) {
+                return;
+            }
+
+            $type = $property->accommodationTypes()->create([
+                'room_type_id' => $property->room_type_id,
+                'name' => $property->property_type
+                    ? Str::headline((string) $property->property_type)
+                    : 'Standard accommodation',
+                'slug' => 'standard',
+                'code' => 'RES-'.$property->getKey().'-STD',
+                'description' => $property->short_description,
+                'bedrooms' => max(0, (int) ($property->bedrooms ?? 1)),
+                'bathrooms' => max(0, (int) ($property->bathrooms ?? 1)),
+                'adult_capacity' => max(1, (int) ($property->adult_capacity ?? $property->max_guests ?? 2)),
+                'child_capacity' => max(0, (int) ($property->child_capacity ?? 0)),
+                'max_guests' => max(1, (int) ($property->max_guests ?? 2)),
+                'bed_configuration' => $property->bed_configuration,
+                'room_size' => $property->room_size,
+                'total_inventory' => 1,
+                'base_rate' => (float) ($property->nightly_rate ?? 0),
+                'weekend_rate' => $property->weekend_rate,
+                'cleaning_fee' => (float) ($property->cleaning_fee ?? 0),
+                'service_charge' => (float) ($property->service_charge ?? $property->service_fee ?? 0),
+                'security_deposit' => (float) ($property->security_deposit ?? 0),
+                'tax_rate' => (float) ($property->tax_rate ?? 0),
+                'currency' => (string) ($property->currency ?: config('azari.currency', 'USD')),
+                'minimum_stay' => max(1, (int) ($property->minimum_stay ?? 1)),
+                'maximum_stay' => $property->maximum_stay,
+                'same_day_booking' => (bool) ($property->same_day_booking ?? false),
+                'cover_image' => $property->cover_image,
+                'gallery' => $property->gallery,
+                'is_active' => ! in_array((string) $property->status, ['inactive', 'archived'], true),
+                'is_published' => (bool) $property->is_published,
+                'sort_order' => 0,
+            ]);
+
+            $type->ratePlans()->create([
+                'name' => 'Standard',
+                'code' => 'STANDARD',
+                'pricing_adjustment_type' => 'none',
+                'pricing_adjustment' => 0,
+                'is_refundable' => true,
+                'is_active' => true,
+                'is_public' => true,
+                'sort_order' => 0,
+            ]);
         });
 
         static::saving(function (self $property): void {

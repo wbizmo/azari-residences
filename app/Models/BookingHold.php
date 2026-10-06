@@ -13,6 +13,8 @@ class BookingHold extends Model
 
     protected $fillable = [
         'property_id',
+        'accommodation_type_id',
+        'rate_plan_id',
         'user_id',
         'token',
         'check_in',
@@ -55,6 +57,16 @@ class BookingHold extends Model
     public function property(): BelongsTo
     {
         return $this->belongsTo(Property::class);
+    }
+
+    public function accommodationType(): BelongsTo
+    {
+        return $this->belongsTo(AccommodationType::class);
+    }
+
+    public function ratePlan(): BelongsTo
+    {
+        return $this->belongsTo(RatePlan::class);
     }
 
     public function user(): BelongsTo

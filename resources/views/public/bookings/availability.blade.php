@@ -1,6 +1,6 @@
 <x-public-site.layout
-    title="Available hotels & residences | Resavar"
-    description="Review live Resavar inventory and refine your stay request."
+    title="Available hotels & residences | Reserva"
+    description="Review live Reserva inventory and refine your stay request."
 >
     @php
         $checkIn = \Carbon\CarbonImmutable::parse($filters['check_in']);
@@ -107,6 +107,9 @@
             <section class="az-results-grid" aria-label="Available hotels & residences">
                 @forelse($results as $result)
                     @php($property = $result['property'])
+                    @php($type = $result['accommodation_type'] ?? null)
+                    @php($ratePlan = $result['rate_plan'] ?? null)
+                    @php($remaining = $result['remaining'] ?? null)
                     @php($quote = $result['quote'])
                     <article class="az-results-card">
                         <div class="az-results-card__image">
@@ -120,6 +123,19 @@
                             <span class="eyebrow">{{ $property->locationRecord?->name ?? $property->location }}</span>
                             <h2>{{ $property->name }}</h2>
                             <p>{{ $property->short_description }}</p>
+                            @if($type)
+                                <p class="az-results-accommodation">
+                                    <strong>{{ $type->name }}</strong>
+                                    @if($ratePlan)
+                                        <span aria-hidden="true">·</span>
+                                        {{ $ratePlan->name }}
+                                    @endif
+                                    @if($remaining !== null && $remaining <= 5)
+                                        <span aria-hidden="true">·</span>
+                                        {{ $remaining }} {{ \Illuminate\Support\Str::plural('unit', $remaining) }} left
+                                    @endif
+                                </p>
+                            @endif
                             <div class="az-results-meta">
                                 <span><span class="material-symbols-outlined">group</span>Up to {{ $property->max_guests }}</span>
                                 <span><span class="material-symbols-outlined">bed</span>{{ $property->bedrooms }} bedrooms</span>
@@ -128,7 +144,7 @@
                             <div class="az-results-card__footer">
                                 <div class="az-results-price">
                                     <small>Total for {{ $quote['nights'] }} {{ \Illuminate\Support\Str::plural('night', $quote['nights']) }}</small>
-                                    <strong>${{ number_format((float) $quote['total'], 2) }} <span>USD</span></strong>
+                                    <strong>{{ $quote['currency'] }} {{ number_format((float) $quote['total'], 2) }}</strong>
                                 </div>
                                 <form method="POST" action="{{ route('azari.availability.hold', $property) }}">
                                     @csrf
@@ -137,7 +153,13 @@
                                     <input type="hidden" name="adults" value="{{ $filters['adults'] }}">
                                     <input type="hidden" name="children" value="{{ $filters['children'] ?? 0 }}">
                                     <input type="hidden" name="rooms" value="{{ $filters['rooms'] ?? 1 }}">
-                                    <button class="button button-brass" type="submit">Reserve residence</button>
+                                    @if($type)
+                                        <input type="hidden" name="accommodation_type_id" value="{{ $type->id }}">
+                                    @endif
+                                    @if($ratePlan)
+                                        <input type="hidden" name="rate_plan_id" value="{{ $ratePlan->id }}">
+                                    @endif
+                                    <button class="button button-brass" type="submit">Reserve stay</button>
                                 </form>
                             </div>
                         </div>
@@ -168,7 +190,7 @@
                                     <span class="eyebrow">{{ $property->locationRecord?->name ?? $property->location }}</span>
                                     <h3>{{ $property->name }}</h3>
                                     <p>{{ $alternative['check_in']->format('j M Y') }} to {{ $alternative['check_out']->format('j M Y') }}</p>
-                                    <strong class="az-results-alt-price">${{ number_format((float) $alternative['quote']['total'], 2) }} USD</strong>
+                                    <strong class="az-results-alt-price">{{ $alternative['quote']['currency'] }} {{ number_format((float) $alternative['quote']['total'], 2) }}</strong>
                                     <form method="POST" action="{{ route('azari.availability.hold', $property) }}">
                                         @csrf
                                         <input type="hidden" name="check_in" value="{{ $alternative['check_in']->toDateString() }}">
@@ -176,6 +198,12 @@
                                         <input type="hidden" name="adults" value="{{ $filters['adults'] }}">
                                         <input type="hidden" name="children" value="{{ $filters['children'] ?? 0 }}">
                                         <input type="hidden" name="rooms" value="{{ $filters['rooms'] ?? 1 }}">
+                                        @if($alternative['accommodation_type'] ?? null)
+                                            <input type="hidden" name="accommodation_type_id" value="{{ $alternative['accommodation_type']->id }}">
+                                        @endif
+                                        @if($alternative['rate_plan'] ?? null)
+                                            <input type="hidden" name="rate_plan_id" value="{{ $alternative['rate_plan']->id }}">
+                                        @endif
                                         <button class="button button-brass" type="submit">Choose these dates</button>
                                     </form>
                                 </div>

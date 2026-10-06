@@ -1,6 +1,6 @@
 <x-public-site.layout
-    title="Book your stay | Resavar"
-    description="Search live availability and book directly with Resavar."
+    title="Book your stay | Reserva"
+    description="Search live availability and book directly with Reserva."
 >
     <main class="az-book-page">
         <section
@@ -26,7 +26,7 @@
                     <figure class="az-book-media">
                         <img
                             src="{{ asset('images/azari-hospitality-welcome.png') }}"
-                            alt="Resavar hospitality interior"
+                            alt="Reserva hospitality interior"
                             width="1200"
                             height="1500"
                         >
@@ -37,7 +37,7 @@
                         ></span>
 
                         <figcaption class="az-book-media__copy">
-                            <span>Resavar</span>
+                            <span>Reserva</span>
 
                             <strong>
                                 Thoughtfully managed stays across our locations.
@@ -254,7 +254,7 @@
 
                             <p>
                                 Live inventory, direct rates and secure booking
-                                through Resavar.
+                                through Reserva.
                             </p>
                         </footer>
                     </section>

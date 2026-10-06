@@ -41,7 +41,7 @@ class AccountDeletionRequestController extends Controller
 
             return back()
                 ->withInput($request->except(['confirm', 'company_website']))
-                ->withErrors(['email' => 'Deletion requests are temporarily unavailable. Please contact Resavar support and try again later.']);
+                ->withErrors(['email' => 'Deletion requests are temporarily unavailable. Please contact Reserva support and try again later.']);
         }
 
         $reference = 'AZDEL-'.now()->format('Ymd').'-'.Str::upper(Str::random(8));

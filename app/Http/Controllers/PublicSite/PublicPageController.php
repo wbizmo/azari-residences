@@ -60,6 +60,31 @@ class PublicPageController extends Controller
             'amenities',
         ]);
 
+        $requestedTypeId = $request->filled('accommodation_type_id')
+            ? $request->integer('accommodation_type_id')
+            : null;
+
+        $selectedAccommodationType = $availability->resolveAccommodationType(
+            $property,
+            $requestedTypeId
+        );
+
+        if ($requestedTypeId) {
+            abort_unless($selectedAccommodationType, 404);
+        }
+
+        $requestedRatePlanId = $request->filled('rate_plan_id')
+            ? $request->integer('rate_plan_id')
+            : null;
+
+        $selectedRatePlan = $selectedAccommodationType
+            ? $availability->resolveRatePlan($selectedAccommodationType, $requestedRatePlanId)
+            : null;
+
+        if ($requestedRatePlanId) {
+            abort_unless($selectedRatePlan, 404);
+        }
+
         $timezone = config(
             'azari.timezone',
             'Africa/Lagos'
@@ -108,10 +133,15 @@ class PublicPageController extends Controller
                     $availability->calendar(
                         $property->getKey(),
                         $start,
-                        90
+                        90,
+                        $selectedAccommodationType?->getKey()
                     ),
                 'start' =>
                     $start,
+                'selectedAccommodationType' =>
+                    $selectedAccommodationType,
+                'selectedRatePlan' =>
+                    $selectedRatePlan,
             ]
         );
     }
@@ -150,13 +180,13 @@ class PublicPageController extends Controller
             'restaurant' => ['Restaurant & dining', 'Curated dining support, local recommendations and memorable table experiences.', 'azari-food.png'],
             'airport-transfers' => ['Airport transfers', 'Reliable pickup and drop-off coordination from arrival to residence.', 'azari-airport.png'],
             'local-guide' => ['Local guide', 'Discover dining, culture, business districts and everyday essentials with local confidence.', 'local-guides-azari.png'],
-            'about' => ['About Resavar', 'A hospitality team creating dependable, private and beautifully managed stays.', 'team-azari.png'],
-            'contact' => ['Contact', 'Speak with the Resavar team about bookings, stays, partnerships or guest support.', 'contact-azari.png'],
+            'about' => ['About Reserva', 'A hospitality team creating dependable, private and beautifully managed stays.', 'team-azari.png'],
+            'contact' => ['Contact', 'Speak with the Reserva team about bookings, stays, partnerships or guest support.', 'contact-azari.png'],
             'support' => ['Guest support', 'Get help with an existing or upcoming stay.', 'contact-azari.png'],
-            'booking-terms' => ['Booking terms', 'The terms applying to Resavar reservations.', 'azari-hub.png'],
+            'booking-terms' => ['Booking terms', 'The terms applying to Reserva reservations.', 'azari-hub.png'],
             'cancellation-policy' => ['Cancellation policy', 'Cancellation conditions are confirmed with each reservation.', 'azari-hub.png'],
-            'privacy-policy' => ['Privacy policy', 'How Resavar handles guest and booking information.', 'azari-hub.png'],
-            'terms' => ['Terms and conditions', 'The general terms governing use of the Resavar website and services.', 'azari-hub.png'],
+            'privacy-policy' => ['Privacy policy', 'How Reserva handles guest and booking information.', 'azari-hub.png'],
+            'terms' => ['Terms and conditions', 'The general terms governing use of the Reserva website and services.', 'azari-hub.png'],
         ];
 
         abort_unless(isset($pages[$key]), 404);
@@ -179,7 +209,7 @@ class PublicPageController extends Controller
 
         Mail::to($recipient)->send(new ContactEnquiry($data));
 
-        return back()->with('success', 'Your message has been sent. The Resavar team will respond as soon as possible.');
+        return back()->with('success', 'Your message has been sent. The Reserva team will respond as soon as possible.');
     }
 
     private function collection(string $title, string $type, string $image, string $intro): View

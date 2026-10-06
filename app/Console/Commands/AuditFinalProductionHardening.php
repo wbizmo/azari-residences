@@ -36,6 +36,12 @@ class AuditFinalProductionHardening extends Command
             $issues[] = 'resources/css/app.css is missing.';
         } else {
             $css = File::get($cssPath);
+            $legacyCssPath = resource_path('css/legacy/app-legacy.css');
+
+            if (File::exists($legacyCssPath)) {
+                $css .= "
+".File::get($legacyCssPath);
+            }
 
             foreach ([
                 "@font-face {",

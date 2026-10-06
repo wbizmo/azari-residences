@@ -1,18 +1,27 @@
-<x-public-site.layout title="Guest details | Resavar">
+<x-public-site.layout title="Guest details | Reserva">
 <main class="site-container az-s56-page">
 <header>
     <span class="eyebrow">Step 1 of 3</span>
     <h1>Your booking details</h1>
-    <p>{{ $hold->property->name }} · {{ $hold->check_in->format('d M Y') }} to {{ $hold->check_out->format('d M Y') }}</p>
+    <p>
+        {{ $hold->property->name }}
+        @if($hold->accommodationType)
+            · {{ $hold->accommodationType->name }}
+        @endif
+        @if($hold->ratePlan)
+            · {{ $hold->ratePlan->name }}
+        @endif
+        · {{ $hold->check_in->format('d M Y') }} to {{ $hold->check_out->format('d M Y') }}
+    </p>
 </header>
 
 <section class="az-panel">
     <div class="az-notice">
         <strong>Your place is being held while you finish.</strong>
         @if($creatingAccount)
-            Enter the booking details first. Resavar will create your account as part of this booking, verify your email, then send you through secure Dojah identity verification without making you restart.
+            Enter the booking details first. Reserva will create your account as part of this booking, verify your email, then send you through secure Dojah identity verification without making you restart.
         @else
-            Your signed-in account will stay attached to this hold. If identity verification is needed, Resavar will return you to this same booking afterward.
+            Your signed-in account will stay attached to this hold. If identity verification is needed, Reserva will return you to this same booking afterward.
         @endif
     </div>
 </section>
@@ -52,7 +61,7 @@
                 required
             >
             @if(auth()->check())
-                <small>The booking uses the email on your signed-in Resavar account.</small>
+                <small>The booking uses the email on your signed-in Reserva account.</small>
             @endif
         </label>
 
@@ -99,10 +108,10 @@
 
 @if($creatingAccount)
 <section class="az-panel">
-    <h2>Secure your Resavar access</h2>
+    <h2>Secure your Reserva access</h2>
     <p>
-        If this email is new to Resavar, choose a password and the account is created inside this booking.
-        If the email already belongs to an Resavar account, leave the password fields blank if you prefer; Resavar will preserve the booking and ask you to sign in instead of creating a duplicate.
+        If this email is new to Reserva, choose a password and the account is created inside this booking.
+        If the email already belongs to an Reserva account, leave the password fields blank if you prefer; Reserva will preserve the booking and ask you to sign in instead of creating a duplicate.
     </p>
 
     <div class="az-form-grid">
@@ -118,7 +127,7 @@
     </div>
 
     <p class="az-user-panel-subtitle">
-        If this email already has an Resavar account, your details will remain saved and you will be asked to sign in instead of creating a duplicate.
+        If this email already has an Reserva account, your details will remain saved and you will be asked to sign in instead of creating a duplicate.
     </p>
 </section>
 @endif
@@ -129,7 +138,7 @@
     @if($hold->adults > 1)
         <div class="az-notice">
             <strong>Each additional adult verifies themselves.</strong>
-            Add a separate email address for every additional adult. After the booking is created, Resavar emails each person their own private verification link. You can also resend or copy those links from your account.
+            Add a separate email address for every additional adult. After the booking is created, Reserva emails each person their own private verification link. You can also resend or copy those links from your account.
         </div>
     @endif
 
@@ -176,7 +185,7 @@
 @if($hold->children>0)
 <section class="az-panel">
     <h2>Children</h2>
-    <p>Children do not require identity verification under the current Resavar rules.</p>
+    <p>Children do not require identity verification under the current Reserva rules.</p>
 
     @for($i=0;$i<$hold->children;$i++)
         <article class="az-guest-card">
@@ -208,7 +217,26 @@
 
 <section class="az-panel az-booking-total">
     <h2>Booking total</h2>
-    <p>{{ $quote['nights'] }} nights · {{ $quote['currency'] }} {{ number_format($quote['total'],2) }}</p>
+    <p>
+        {{ $quote['nights'] }} nights
+        · {{ $hold->rooms }} {{ Str::plural('unit', $hold->rooms) }}
+        · {{ $quote['currency'] }} {{ number_format($quote['total'],2) }}
+    </p>
+
+    @if($hold->ratePlan)
+        <div class="az-notice">
+            <strong>{{ $hold->ratePlan->name }}</strong>
+            @if(data_get($quote, 'policy.rate_plan.is_refundable') === false)
+                <span> · Non-refundable</span>
+            @elseif(data_get($quote, 'policy.cancellation.name'))
+                <span> · {{ data_get($quote, 'policy.cancellation.name') }}</span>
+            @endif
+
+            @if(data_get($quote, 'policy.payment.name'))
+                <span> · {{ data_get($quote, 'policy.payment.name') }}</span>
+            @endif
+        </div>
+    @endif
 
     <label class="az-check">
         <input type="checkbox" name="terms" value="1" @checked(old('terms')) required>

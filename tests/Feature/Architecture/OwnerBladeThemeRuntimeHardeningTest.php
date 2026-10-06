@@ -38,7 +38,7 @@ class OwnerBladeThemeRuntimeHardeningTest extends TestCase
             resource_path('views/admin/owner-settings/*.blade.php'),
         ] as $pattern) {
             foreach (glob($pattern) as $path) {
-                $this->assertStringContainsString("@extends('layouts.admin')", file_get_contents($path), $path);
+                $this->assertStringContainsString("@extends('admin.layouts.app')", file_get_contents($path), $path);
             }
         }
     }

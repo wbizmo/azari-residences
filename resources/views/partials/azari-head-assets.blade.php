@@ -1,4 +1,4 @@
-{{-- Shared Resavar browser assets --}}
+{{-- Shared Reserva browser assets --}}
 <meta name="theme-color" content="#052058">
 
 <style>

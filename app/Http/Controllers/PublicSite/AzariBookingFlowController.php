@@ -14,7 +14,11 @@ class AzariBookingFlowController extends Controller
 {
     public function checkout(Request $request, string $token, AzariPricingEngine $pricing)
     {
-        $hold = BookingHold::query()->with('property')->active()->where('token', $token)->firstOrFail();
+        $hold = BookingHold::query()
+            ->with(['property', 'accommodationType', 'ratePlan.cancellationPolicy', 'ratePlan.paymentPolicy'])
+            ->active()
+            ->where('token', $token)
+            ->firstOrFail();
 
         abort_unless(
             $request->user() && IdentityVerification::userIsVerified((int) $request->user()->id),
@@ -22,9 +26,21 @@ class AzariBookingFlowController extends Controller
             'Complete Dojah identity verification before booking.'
         );
 
+        if ($hold->user_id !== null) {
+            abort_unless((int) $hold->user_id === (int) $request->user()->id, 403);
+        }
+
         return view('public.bookings.checkout', [
             'hold' => $hold,
-            'quote' => $pricing->quote($hold->property, $hold->check_in, $hold->check_out),
+            'quote' => $pricing->quote(
+                $hold->property,
+                $hold->check_in,
+                $hold->check_out,
+                [],
+                $hold->accommodationType,
+                $hold->ratePlan,
+                max(1, (int) $hold->rooms)
+            ),
         ]);
     }
 

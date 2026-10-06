@@ -23,18 +23,18 @@
         <div class="az-form-section-head">
             <span class="material-symbols-outlined">branding_watermark</span>
             <div>
-                <h2>Resavar identity</h2>
+                <h2>Reserva identity</h2>
                 <p>The approved production logos are bundled with the application and are not replaceable from the CMS.</p>
             </div>
         </div>
 
         <div class="az-cms-brand-preview">
             <div class="az-cms-brand-preview__light">
-                <img src="{{ asset('images/logo-light.png') }}" alt="Resavar">
+                <img src="{{ asset('images/logo-light.png') }}" alt="Reserva">
                 <span>Primary logo on white</span>
             </div>
             <div class="az-cms-brand-preview__dark">
-                <img src="{{ asset('images/logo-dark.png') }}" alt="Resavar">
+                <img src="{{ asset('images/logo-dark.png') }}" alt="Reserva">
                 <span>White logo on deep navy</span>
             </div>
         </div>
@@ -45,12 +45,12 @@
 
             <label class="az-field">
                 <span>Website name</span>
-                <input type="text" name="site_name" value="{{ old('site_name', $settings['site_name'] ?? 'Resavar') }}" required>
+                <input type="text" name="site_name" value="{{ old('site_name', $settings['site_name'] ?? 'Reserva') }}" required>
             </label>
 
             <label class="az-field">
                 <span>Registered business name</span>
-                <input type="text" name="business_name" value="{{ old('business_name', $settings['business_name'] ?? 'Resavar Luxury Properties LTD') }}">
+                <input type="text" name="business_name" value="{{ old('business_name', $settings['business_name'] ?? 'Reserva Luxury Properties LTD') }}">
             </label>
 
             <label class="az-field az-span-2">
@@ -90,7 +90,7 @@
         <div class="az-form-section-head">
             <span class="material-symbols-outlined">palette</span>
             <div>
-                <h2>Resavar design system</h2>
+                <h2>Reserva design system</h2>
                 <p>The live interface is locked to deep navy, black and white with Montserrat typography.</p>
             </div>
         </div>
@@ -106,7 +106,7 @@
 
             <label class="az-field az-span-2">
                 <span>Revision name</span>
-                <input type="text" name="name" value="{{ old('name', 'Resavar navy system') }}" required>
+                <input type="text" name="name" value="{{ old('name', 'Reserva navy system') }}" required>
             </label>
 
             <div class="az-field">
@@ -313,7 +313,7 @@
             @csrf
             @method('PUT')
             <div class="az-form-section-head"><span class="material-symbols-outlined">travel_explore</span><div><h2>SEO and social metadata</h2><p>Control search previews, indexing and social sharing.</p></div></div>
-            <label class="az-field az-span-2"><span>SEO title</span><input name="seo_title" maxlength="70" value="{{ old('seo_title', $settings['seo_title'] ?? 'Resavar') }}" required></label>
+            <label class="az-field az-span-2"><span>SEO title</span><input name="seo_title" maxlength="70" value="{{ old('seo_title', $settings['seo_title'] ?? 'Reserva') }}" required></label>
             <label class="az-field az-span-2"><span>Meta description</span><textarea name="seo_description" maxlength="180" rows="3" required>{{ old('seo_description', $settings['seo_description'] ?? '') }}</textarea></label>
             <label class="az-field az-span-2"><span>Canonical domain</span><input type="url" name="canonical_domain" value="{{ old('canonical_domain', $settings['canonical_domain'] ?? '') }}"></label>
             <label class="az-field"><span>Open Graph title</span><input name="og_title" value="{{ old('og_title', $settings['og_title'] ?? '') }}"></label>

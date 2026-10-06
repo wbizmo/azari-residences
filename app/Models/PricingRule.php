@@ -10,7 +10,7 @@ class PricingRule extends Model
     protected $perPage = 10;
 
     protected $fillable = [
-        'property_id', 'name', 'rule_type', 'starts_on', 'ends_on',
+        'property_id', 'accommodation_type_id', 'rate_plan_id', 'name', 'rule_type', 'adjustment_type', 'starts_on', 'ends_on',
         'days_of_week', 'amount', 'percentage', 'minimum_stay',
         'maximum_stay', 'priority', 'is_active',
     ];
@@ -30,5 +30,15 @@ class PricingRule extends Model
     public function property(): BelongsTo
     {
         return $this->belongsTo(Property::class);
+    }
+
+    public function accommodationType(): BelongsTo
+    {
+        return $this->belongsTo(AccommodationType::class);
+    }
+
+    public function ratePlan(): BelongsTo
+    {
+        return $this->belongsTo(RatePlan::class);
     }
 }

@@ -1,0 +1,301 @@
+.az-inventory {
+    min-height: 100vh;
+    padding: 140px 5vw 80px;
+    background: var(--reserva-surface-soft);
+    color: var(--reserva-text);
+}
+
+.az-inventory-hero {
+    display: grid;
+    grid-template-columns: minmax(260px, 480px) 1fr;
+    max-width: 1180px;
+    margin: auto;
+    overflow: hidden;
+    border-radius: 18px;
+    background: var(--reserva-navy);
+    color: var(--reserva-white);
+}
+
+.az-inventory-hero img {
+    width: 100%;
+    height: 330px;
+    object-fit: cover;
+}
+
+.az-inventory-hero > div {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 42px;
+}
+
+.az-inventory-hero a,
+.az-inventory-hero .eyebrow,
+.az-inventory-hero h1,
+.az-inventory-hero p {
+    color: var(--reserva-white);
+}
+
+.az-inventory-hero a {
+    margin-bottom: 32px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.az-inventory-hero h1 {
+    margin: 10px 0;
+    font: 500 clamp(2rem, 5vw, 4rem) / 1.05 var(--reserva-font-sans);
+}
+
+.az-inventory-panel {
+    max-width: 1180px;
+    margin: 24px auto 0;
+    padding: 36px;
+    border: 1px solid var(--reserva-border);
+    border-radius: 18px;
+    background: var(--reserva-white);
+    color: var(--reserva-text);
+}
+
+.az-inventory-copy {
+    max-width: 680px;
+}
+
+.az-inventory-copy h2 {
+    margin: 8px 0;
+    font: 500 2rem var(--reserva-font-sans);
+}
+
+.az-inventory-form {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) auto;
+    gap: 12px;
+    margin: 28px 0;
+}
+
+.az-inventory-form label {
+    color: var(--reserva-text);
+    font-size: .76rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.az-inventory-form input,
+.az-inventory-form select {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 7px;
+    padding: 13px;
+    border: 1px solid var(--reserva-border-strong);
+    border-radius: 8px;
+    background: var(--reserva-white);
+    color: var(--reserva-text);
+}
+
+.az-inventory-form > button[type="submit"] {
+    align-self: end;
+    min-height: 48px;
+    padding: 14px 22px;
+    border: 1px solid var(--reserva-navy);
+    border-radius: 8px;
+    background: var(--reserva-navy);
+    color: var(--reserva-white);
+    font-weight: 800;
+}
+
+.az-inventory-form > button[type="submit"]:hover {
+    border-color: var(--reserva-black);
+    background: var(--reserva-black);
+}
+
+.az-calendar-key {
+    display: flex;
+    gap: 22px;
+    margin: 24px 0 12px;
+}
+
+.az-calendar-key span {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: .82rem;
+}
+
+.az-calendar-key i {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.az-calendar-key .open {
+    border: 1px solid var(--reserva-navy);
+    background: var(--reserva-white);
+}
+
+.az-calendar-key .blocked {
+    background: var(--reserva-text-muted);
+}
+
+.az-calendar {
+    display: grid;
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.az-calendar-day {
+    min-height: 76px;
+    padding: 7px;
+    border: 1px solid var(--reserva-border);
+    border-radius: 8px;
+    background: var(--reserva-white);
+    color: var(--reserva-text);
+}
+
+.az-calendar-day small,
+.az-calendar-day span {
+    display: block;
+    color: var(--reserva-text-muted);
+    font-size: .64rem;
+    text-transform: uppercase;
+}
+
+.az-calendar-day strong {
+    display: block;
+    margin: 3px;
+    font-size: 1.2rem;
+}
+
+.az-calendar-day.is-open {
+    border-color: var(--reserva-navy);
+    cursor: pointer;
+}
+
+.az-calendar-day.is-open:hover,
+.az-calendar-day.is-selected {
+    background: var(--reserva-navy);
+    color: var(--reserva-white);
+}
+
+.az-calendar-day.is-open:hover small,
+.az-calendar-day.is-open:hover span,
+.az-calendar-day.is-selected small,
+.az-calendar-day.is-selected span {
+    color: rgba(255, 255, 255, .78);
+}
+
+.az-calendar-day.is-blocked {
+    background: var(--reserva-surface-soft);
+    color: var(--reserva-text-muted);
+    opacity: .72;
+    text-decoration: line-through;
+}
+
+.az-calendar-day:disabled {
+    cursor: not-allowed;
+}
+
+.az-inventory-form .az-date-v3 {
+    width: 100%;
+    min-width: 0;
+}
+
+.az-inventory-form .az-date-v3__trigger,
+.az-inventory-form .az-date-v3__trigger:hover,
+.az-inventory-form .az-date-v3__trigger:focus-visible {
+    width: 100%;
+    min-height: 46px;
+    box-sizing: border-box;
+    margin-top: 7px;
+    padding: 13px;
+    border: 1px solid var(--reserva-border-strong);
+    border-radius: 8px;
+    background: var(--reserva-white);
+    color: var(--reserva-text);
+}
+
+.az-inventory-form .az-date-v3__panel {
+    width: min(320px, calc(100vw - 32px));
+    max-width: calc(100vw - 32px);
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.az-inventory-form .az-date-v3__panel button {
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+}
+
+.az-inventory-form .az-date-v3__nav {
+    width: 36px;
+    min-width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--reserva-navy);
+    color: var(--reserva-white);
+}
+
+.az-inventory-form .az-date-v3__day {
+    width: 100%;
+    max-width: 38px;
+    aspect-ratio: 1;
+    justify-self: center;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--reserva-text);
+}
+
+.az-inventory-form .az-date-v3__day:hover:not(:disabled) {
+    background: var(--reserva-surface-soft);
+    color: var(--reserva-text);
+}
+
+.az-inventory-form .az-date-v3__day.is-selected {
+    background: var(--reserva-navy);
+    color: var(--reserva-white);
+}
+
+@media (max-width: 900px) {
+    .az-inventory-hero {
+        grid-template-columns: 1fr;
+    }
+
+    .az-inventory-form {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .az-inventory-form button {
+        grid-column: 1 / -1;
+    }
+
+    .az-calendar {
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 560px) {
+    .az-inventory {
+        padding: 96px 14px 50px;
+    }
+
+    .az-inventory-panel {
+        padding: 22px 14px;
+    }
+
+    .az-inventory-form {
+        grid-template-columns: 1fr;
+    }
+
+    .az-calendar {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .az-inventory-form .az-date-v3__panel {
+        position: fixed;
+        inset: auto 16px 16px;
+        width: auto;
+        max-width: none;
+    }
+}

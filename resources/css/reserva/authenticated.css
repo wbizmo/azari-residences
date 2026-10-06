@@ -1,0 +1,141 @@
+/* Admin shell */
+.az-admin-sidebar {
+    background: var(--reserva-navy) !important;
+    color: var(--reserva-white) !important;
+}
+.az-admin-sidebar .az-nav-link:not(.is-active),
+.az-admin-sidebar .az-nav-link:not(.is-active) :is(span,strong,.material-symbols-outlined),
+.az-sidebar-context strong,
+.az-sidebar-footer,
+.az-sidebar-footer :is(strong,span,.material-symbols-outlined) {
+    color: var(--reserva-white) !important;
+    -webkit-text-fill-color: var(--reserva-white) !important;
+}
+.az-admin-sidebar .az-nav-link.is-active,
+.az-admin-sidebar .az-nav-link.is-active :is(span,strong,.material-symbols-outlined) {
+    background: var(--reserva-white) !important;
+    color: var(--reserva-navy) !important;
+    -webkit-text-fill-color: var(--reserva-navy) !important;
+}
+.az-dashboard-hero {
+    background: var(--reserva-navy) !important;
+    color: var(--reserva-white) !important;
+}
+.az-dashboard-hero :is(h1,p,.az-eyebrow,.material-symbols-outlined) {
+    color: var(--reserva-white) !important;
+    -webkit-text-fill-color: var(--reserva-white) !important;
+}
+.az-dashboard-hero .az-button--brass {
+    background: var(--reserva-white) !important;
+    border-color: var(--reserva-white) !important;
+    color: var(--reserva-navy) !important;
+    -webkit-text-fill-color: var(--reserva-navy) !important;
+}
+.az-dashboard-hero .az-button--ghost-light {
+    background: transparent !important;
+    border: 1px solid rgba(255,255,255,.7) !important;
+    color: var(--reserva-white) !important;
+    -webkit-text-fill-color: var(--reserva-white) !important;
+}
+.az-dashboard-hero .az-button--brass:hover,
+.az-dashboard-hero .az-button--ghost-light:hover {
+    background: var(--reserva-black) !important;
+    border-color: var(--reserva-black) !important;
+    color: var(--reserva-white) !important;
+}
+.az-metric-card__icon {
+    background: var(--reserva-surface-soft) !important;
+    color: var(--reserva-navy) !important;
+}
+.az-sidebar-footer > .material-symbols-outlined {
+    color: var(--reserva-white) !important;
+}
+
+/* Guest shell */
+.az-user-sidebar,
+.az-user-mobile-drawer {
+    background: var(--reserva-navy) !important;
+    color: var(--reserva-white) !important;
+}
+.az-user-sidebar .az-user-nav-link:not(.is-active),
+.az-user-mobile-drawer .az-user-nav-link:not(.is-active),
+.az-user-sidebar .az-user-nav-link:not(.is-active) :is(span,.material-symbols-outlined),
+.az-user-mobile-drawer .az-user-nav-link:not(.is-active) :is(span,.material-symbols-outlined),
+.az-user-support-card :is(strong,p,a) {
+    color: var(--reserva-white) !important;
+    -webkit-text-fill-color: var(--reserva-white) !important;
+}
+.az-user-sidebar .az-user-nav-link.is-active,
+.az-user-mobile-drawer .az-user-nav-link.is-active {
+    background: var(--reserva-white) !important;
+    color: var(--reserva-navy) !important;
+}
+.az-user-sidebar .az-user-nav-link.is-active > :is(span,.material-symbols-outlined):not(.az-user-nav-badge),
+.az-user-mobile-drawer .az-user-nav-link.is-active > :is(span,.material-symbols-outlined):not(.az-user-nav-badge) {
+    color: var(--reserva-navy) !important;
+    -webkit-text-fill-color: var(--reserva-navy) !important;
+}
+.az-user-nav-badge {
+    background: var(--reserva-black) !important;
+    color: var(--reserva-white) !important;
+}
+.az-user-avatar {
+    background: var(--reserva-navy) !important;
+    color: var(--reserva-white) !important;
+}
+.az-user-timezone-icon,
+.az-user-summary-icon,
+.az-user-mini-icon,
+.az-user-stat > .material-symbols-outlined {
+    background: var(--reserva-surface-soft) !important;
+    color: var(--reserva-navy) !important;
+}
+.az-user-welcome {
+    background: var(--reserva-navy) !important;
+    color: var(--reserva-white) !important;
+}
+.az-user-welcome :is(h2,p,.az-user-eyebrow,.material-symbols-outlined) {
+    color: var(--reserva-white) !important;
+    -webkit-text-fill-color: var(--reserva-white) !important;
+}
+.az-user-welcome .az-user-button--primary {
+    background: var(--reserva-white) !important;
+    border-color: var(--reserva-white) !important;
+    color: var(--reserva-navy) !important;
+}
+.az-user-welcome .az-user-button--ghost {
+    background: transparent !important;
+    border-color: rgba(255,255,255,.65) !important;
+    color: var(--reserva-white) !important;
+}
+.az-user-welcome .az-user-button--primary:hover,
+.az-user-welcome .az-user-button--ghost:hover {
+    background: var(--reserva-black) !important;
+    border-color: var(--reserva-black) !important;
+    color: var(--reserva-white) !important;
+}
+.az-user-status {
+    background: var(--reserva-surface-soft) !important;
+    color: var(--reserva-navy) !important;
+}
+.az-user-status--warning {
+    background: #fff4d6 !important;
+    color: #704200 !important;
+}
+.az-user-status--danger {
+    background: #fde9e9 !important;
+    color: #7b1515 !important;
+}
+
+html[data-admin-theme="dark"] .az-admin-body {
+    background: var(--az-admin-ivory) !important;
+    color: var(--az-admin-ink) !important;
+}
+html[data-admin-theme="dark"] :is(.az-metric-card,.az-panel,.az-profile-dropdown,.az-admin-search) {
+    background: var(--az-admin-paper) !important;
+    border-color: var(--az-admin-line) !important;
+    color: var(--az-admin-ink) !important;
+}
+html[data-admin-theme="dark"] :is(.az-section-heading__meta,.az-topbar-page__eyebrow,.az-profile-trigger__copy small,.az-metric-card small,.az-metric-card>div:last-child>span) {
+    color: var(--az-admin-muted) !important;
+}

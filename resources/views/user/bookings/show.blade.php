@@ -31,7 +31,7 @@
 
 <section class="az-user-detail-grid">
     <div class="az-user-panel">
-        <header class="az-user-panel-header"><div><h2 class="az-user-panel-title">Reservation</h2><p class="az-user-panel-subtitle">{{ $booking->property_name_snapshot ?: ($booking->property?->name ?? 'Resavar Residence') }}</p></div><span class="az-user-status">{{ str_replace('_', ' ', $booking->status) }}</span></header>
+        <header class="az-user-panel-header"><div><h2 class="az-user-panel-title">Reservation</h2><p class="az-user-panel-subtitle">{{ $booking->property_name_snapshot ?: ($booking->property?->name ?? 'Reserva Residence') }}</p></div><span class="az-user-status">{{ str_replace('_', ' ', $booking->status) }}</span></header>
         <div class="az-user-panel-body"><dl class="az-user-detail-list">
             <div class="az-user-detail-row"><dt>Booking reference</dt><dd>{{ $booking->reference }}</dd></div>
             <div class="az-user-detail-row"><dt>Property</dt><dd>{{ $booking->property_name_snapshot ?: $booking->property?->name }}</dd></div>
@@ -87,7 +87,7 @@
             @if($directionsUrl)<a class="az-user-list-item" href="{{ $directionsUrl }}" target="_blank" rel="noopener noreferrer"><div><h3>Google Maps directions</h3><p>{{ $booking->property_formatted_address }}</p></div><span class="material-symbols-outlined">directions</span></a>@endif
             <a class="az-user-list-item" href="{{ route('user.payments.index') }}"><div><h3>Payments</h3><p>{{ $booking->payments_count }} payment record(s)</p></div><span class="material-symbols-outlined">chevron_right</span></a>
             <a class="az-user-list-item" href="{{ route('user.documents.index') }}"><div><h3>Receipts and invoices</h3><p>{{ $receiptAvailable ? 'Receipt available' : 'Available after successful payment' }}</p></div><span class="material-symbols-outlined">chevron_right</span></a>
-            <a class="az-user-list-item" href="{{ route('user.contact') }}"><div><h3>Contact Resavar</h3><p>Get help with this booking</p></div><span class="material-symbols-outlined">chevron_right</span></a>
+            <a class="az-user-list-item" href="{{ route('user.contact') }}"><div><h3>Contact Reserva</h3><p>Get help with this booking</p></div><span class="material-symbols-outlined">chevron_right</span></a>
         </div>
     </div>
 </section>
