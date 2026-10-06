@@ -61,8 +61,11 @@ class UserDashboardController extends Controller
             'upcomingCount' => $tripCounts['upcoming'],
             'pendingPaymentCount' => $user->bookings()
                 ->whereNotIn('status', ['cancelled', 'completed', 'checked_out', 'no_show'])
-                ->get()
-                ->filter(fn ($booking) => $booking->balanceDue() > 0)
+                ->whereNull('paid_at')
+                ->whereRaw(
+                    'total > COALESCE((SELECT SUM(amount) FROM payments WHERE payments.booking_id = bookings.id AND payments.status = ?), 0)',
+                    [Payment::SUCCESSFUL]
+                )
                 ->count(),
             'recentPayments' => $user->payments()
                 ->with('booking.property')
