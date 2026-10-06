@@ -103,7 +103,7 @@
                 <x-brand-logo variant="footer" />
 
                 <p>
-                    Private, fully serviced hotels & residences managed with
+                    Private, fully serviced stays managed with
                     dedicated support from booking through checkout.
                 </p>
             </div>
