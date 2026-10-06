@@ -39,7 +39,7 @@
                     @if ($avatarPath)
                         <img src="{{ asset('storage/'.$avatarPath) }}" alt="">
                     @else
-                        {{ mb_strtoupper(mb_substr($displayName, 0, 1)) }}
+                        <span class="az-avatar-initial" aria-hidden="true">{{ mb_strtoupper(mb_substr($displayName, 0, 1)) }}</span>
                     @endif
                 </span>
 
