@@ -93,7 +93,6 @@
     <input type="search" name="neighbourhood" maxlength="120" placeholder="Area or neighbourhood" value="{{ $filters['neighbourhood'] ?? '' }}">
 </fieldset>
 
-<input type="hidden" name="sort" value="{{ $filters['sort'] ?? 'recommended' }}">
 
 <div class="reserva-filter-actions">
     <button class="button button-primary" type="submit">Apply filters</button>
