@@ -103,7 +103,6 @@
     </div>
     <div class="az-user-pagination"><span>Page {{ $timeline->currentPage() }} of {{ $timeline->lastPage() }}</span>{{ $timeline->links() }}</div>
 </section>
-@endsection
 
 <section class="az-user-detail-grid" style="margin-top:18px">
     <div class="az-user-panel">
@@ -225,3 +224,4 @@
     </div>
 </section>
 @endif
+@endsection
