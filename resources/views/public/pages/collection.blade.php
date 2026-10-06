@@ -63,7 +63,7 @@
                 @endforelse
             </div>
 
-            <div class="az-pagination-wrap">{{ $properties->links('vendor.pagination.azari-fancy') }}</div>
+            <div class="az-pagination-wrap">{{ $properties->links() }}</div>
         </div>
     </section>
 </main>
