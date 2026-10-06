@@ -233,12 +233,12 @@
                             alt=""
                         >
                     @else
-                        {{
+                        <span class="az-user-avatar-initial" aria-hidden="true">{{
                             collect(explode(' ', auth()->user()->name))
                                 ->map(fn ($name) => mb_substr($name, 0, 1))
                                 ->take(2)
                                 ->implode('')
-                        }}
+                        }}</span>
                     @endif
                 </span>
 
