@@ -36,12 +36,16 @@ class OwnerMarketplaceController extends Controller
         ]);
     }
 
-    public function showListing(PropertyListing $listing): View
-    {
-        $listing->load(['user', 'agreement', 'approvedProperty', 'reviewedBy']);
+    public function showListing(
+        PropertyListing $listing,
+        ListingCompletenessService $completeness
+    ): View {
+        $listing->load(['user.ownerPayoutProfile', 'agreement', 'approvedProperty', 'reviewedBy']);
+        $completion = $completeness->evaluate($listing);
 
         return view('admin.owner-listings.show', [
             'listing' => $listing,
+            'completion' => $completion,
             'amenities' => Amenity::query()->whereIn('id', $listing->amenity_ids ?? [])->pluck('name'),
         ]);
     }
