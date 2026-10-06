@@ -79,6 +79,7 @@ class UserBookingController extends Controller
                 'modificationRequests',
                 'serviceRequests',
                 'supportTickets',
+                'review',
             ])
             ->withCount('payments')
             ->where('reference', $reference)
