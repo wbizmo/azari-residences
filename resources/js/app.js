@@ -96,6 +96,8 @@ document.querySelectorAll('[data-popover]').forEach((popover) => {
         trigger.setAttribute('aria-expanded', 'false');
     };
 
+    window.addEventListener('resize', updateSummary);
+
     trigger.addEventListener('click', (event) => {
         event.stopPropagation();
         const shouldOpen = panel.hidden;
@@ -230,7 +232,13 @@ document.querySelectorAll('[data-guest-selector]').forEach((selector) => {
             parts.push(`${rooms} ${rooms === 1 ? 'room' : 'rooms'}`);
         }
 
-        summary.textContent = parts.join(' · ');
+        const desktopLabel = selector.dataset.desktopSummaryLabel;
+        const useDesktopLabel = desktopLabel
+            && window.matchMedia('(min-width: 769px)').matches;
+
+        summary.textContent = useDesktopLabel
+            ? desktopLabel
+            : parts.join(' · ');
     };
 
     const close = () => {
