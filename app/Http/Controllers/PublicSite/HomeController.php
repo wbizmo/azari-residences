@@ -27,9 +27,9 @@ class HomeController extends Controller
                 ->latest('updated_at')
                 ->first(),
 
-            'settings' => Cache::remember('public:site-settings', now()->addMinutes(5), fn () => SiteSetting::query()->pluck('value', 'key')),
+            'settings' => Cache::remember('public:site-settings', now()->addMinutes(5), fn () => SiteSetting::query()->pluck('value', 'key')->all()),
 
-            'content' => Cache::remember('public:content-blocks', now()->addMinutes(5), fn () => ContentBlock::query()->where('is_active', true)->pluck('value', 'key')),
+            'content' => Cache::remember('public:content-blocks', now()->addMinutes(5), fn () => ContentBlock::query()->where('is_active', true)->pluck('value', 'key')->all()),
 
             'featuredResidences' => Property::query()
                 ->with(['locationRecord', 'roomType', 'amenities'])
