@@ -1116,7 +1116,7 @@ class AzariTransactionalMailService
             $secondaryActionLabel,
             $secondaryActionUrl,
             $critical,
-            true,
+            false,
             $eyebrow,
             ['booking_id' => $booking->id, 'user_id' => $booking->user_id],
             $dedupeKey
@@ -1154,7 +1154,7 @@ class AzariTransactionalMailService
             null,
             null,
             true,
-            true,
+            false,
             $eyebrow,
             ['user_id' => $user->id],
             $dedupeKey
@@ -1219,30 +1219,55 @@ class AzariTransactionalMailService
         string $dedupeKey,
     ): void {
         $email = trim(strtolower($email));
+
         if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return;
         }
 
-        if (! $critical && $user && ! (bool) ($user->email_notifications ?? true)) {
-            return;
-        }
-
-        if ($this->alreadyQueued($template, $email, $dedupeKey)) {
-            return;
-        }
-
-        $log = CommunicationLog::query()->create([
-            'channel' => 'email',
+        $snapshot = [
             'template' => $template,
-            'booking_id' => $context['booking_id'] ?? null,
-            'user_id' => $context['user_id'] ?? $user?->id,
-            'recipient' => $email,
-            'masked_recipient' => $this->maskEmail($email),
-            'provider' => config('mail.default'),
-            'status' => 'queued',
-            'queued_at' => now(),
-            'meta' => array_merge($context, ['dedupe_key' => $dedupeKey, 'reserved' => true]),
-        ]);
+            'subject' => $subject,
+            'lines' => array_values($lines),
+            'action_label' => $actionLabel,
+            'action_url' => $actionUrl,
+            'details' => $details,
+            'notice' => $notice,
+            'tone' => $tone,
+            'secondary_action_label' => $secondaryActionLabel,
+            'secondary_action_url' => $secondaryActionUrl,
+            'critical' => $critical,
+            'mail_only' => $mailOnly,
+            'eyebrow' => $eyebrow,
+        ];
+
+        $dispatchKey = hash('sha256', 'dispatch|'.($user?->id ?: $email).'|'.$dedupeKey);
+        $dispatch = CommunicationLog::query()->firstOrCreate(
+            ['idempotency_key' => $dispatchKey],
+            [
+                'channel' => 'dispatch',
+                'template' => $template,
+                'booking_id' => $context['booking_id'] ?? null,
+                'user_id' => $context['user_id'] ?? $user?->id,
+                'recipient' => $email,
+                'masked_recipient' => $this->maskEmail($email),
+                'provider' => 'laravel-notifications',
+                'status' => 'queued',
+                'queued_at' => now(),
+                'classification' => 'transactional',
+                'locale' => app()->getLocale(),
+                'timezone' => $user?->timezone ?: config('azari.timezone', 'Africa/Lagos'),
+                'payload_hash' => hash('sha256', json_encode($snapshot)),
+                'meta' => array_merge($context, [
+                    'dedupe_key' => $dedupeKey,
+                    'reserved' => true,
+                    'snapshot' => $snapshot,
+                ]),
+            ]
+        );
+
+        if (! $dispatch->wasRecentlyCreated) {
+            return;
+        }
 
         $notification = new PremiumMailNotification(
             template: $template,
@@ -1252,7 +1277,10 @@ class AzariTransactionalMailService
             actionUrl: $actionUrl,
             context: array_merge($context, [
                 'dedupe_key' => $dedupeKey,
-                'communication_log_id' => $log->id,
+                'classification' => 'transactional',
+                'locale' => app()->getLocale(),
+                'timezone' => $user?->timezone ?: config('azari.timezone', 'Africa/Lagos'),
+                'snapshot' => $snapshot,
             ]),
             details: $details,
             notice: $notice,
@@ -1270,26 +1298,22 @@ class AzariTransactionalMailService
             } else {
                 Notification::route('mail', $email)->notify($notification);
             }
+
+            $dispatch->update([
+                'status' => 'sent',
+                'sent_at' => now(),
+                'safe_error' => null,
+            ]);
         } catch (Throwable $exception) {
-            $log->update([
+            $dispatch->update([
                 'status' => 'failed',
                 'failed_at' => now(),
+                'next_attempt_at' => now()->addMinutes(5),
                 'safe_error' => 'The notification could not be queued.',
             ]);
+
             report($exception);
         }
-    }
-
-    private function alreadyQueued(string $template, string $email, string $dedupeKey): bool
-    {
-        return CommunicationLog::query()
-            ->where('channel', 'email')
-            ->where('template', $template)
-            ->where('recipient', $email)
-            ->latest('id')
-            ->limit(100)
-            ->get(['meta'])
-            ->contains(fn (CommunicationLog $log): bool => data_get($log->meta, 'dedupe_key') === $dedupeKey);
     }
 
     private function bookingDetails(Booking $booking): array
