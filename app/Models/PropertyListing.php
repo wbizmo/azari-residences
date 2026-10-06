@@ -23,6 +23,9 @@ class PropertyListing extends Model
             'declined_at' => 'datetime',
             'proposed_owner_share_percentage' => 'decimal:2',
             'approved_owner_share_percentage' => 'decimal:2',
+            'completion_snapshot' => 'array',
+            'publication_blockers' => 'array',
+            'last_completed_at' => 'datetime',
         ];
     }
 
