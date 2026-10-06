@@ -35,6 +35,8 @@
         <div class="az-user-panel-body"><dl class="az-user-detail-list">
             <div class="az-user-detail-row"><dt>Booking reference</dt><dd>{{ $booking->reference }}</dd></div>
             <div class="az-user-detail-row"><dt>Property</dt><dd>{{ $booking->property_name_snapshot ?: $booking->property?->name }}</dd></div>
+            <div class="az-user-detail-row"><dt>Accommodation</dt><dd>{{ $booking->accommodationType?->name ?? $booking->accommodation_type_name_snapshot ?? 'Accommodation' }}</dd></div>
+            <div class="az-user-detail-row"><dt>Rate plan</dt><dd>{{ $booking->ratePlan?->name ?? $booking->rate_plan_name_snapshot ?? 'Standard' }}</dd></div>
             <div class="az-user-detail-row"><dt>Unit or room</dt><dd>{{ $booking->property?->unit_number ?: $booking->property?->code }}</dd></div>
             @if($showLocation && $booking->property_formatted_address)<div class="az-user-detail-row"><dt>Property address</dt><dd>{{ $booking->property_formatted_address }}</dd></div>@endif
             <div class="az-user-detail-row"><dt>Adults / children</dt><dd>{{ $booking->adults }} / {{ $booking->children }}</dd></div>
@@ -54,7 +56,9 @@
             @if((float)$booking->discount_total > 0)<div class="az-user-detail-row"><dt>Voucher {{ $booking->voucher_code }}</dt><dd>-{{ $booking->currency }} {{ number_format((float)$booking->discount_total,2) }}</dd></div>@endif
             <div class="az-user-detail-row"><dt>Total</dt><dd>{{ $booking->currency }} {{ number_format((float) $booking->total, 2) }}</dd></div>
             <div class="az-user-detail-row"><dt>Paid</dt><dd>{{ $booking->currency }} {{ number_format($booking->successfulPaymentsTotal(), 2) }}</dd></div>
-            <div class="az-user-detail-row"><dt>Balance</dt><dd>{{ $booking->currency }} {{ number_format($booking->balanceDue(), 2) }}</dd></div>
+            <div class="az-user-detail-row"><dt>Refunded</dt><dd>{{ $booking->currency }} {{ number_format($booking->successfulRefundsTotal(), 2) }}</dd></div>
+            <div class="az-user-detail-row"><dt>Balance</dt><dd>{{ $booking->currency }} {{ number_format($schedule['balance'], 2) }}</dd></div>
+            <div class="az-user-detail-row"><dt>Payment terms</dt><dd>{{ Str::headline($schedule['payment_type']) }}@if($schedule['due_on']) · due {{ CarbonCarbonImmutable::parse($schedule['due_on'])->format('j M Y') }}@endif</dd></div>
             <div class="az-user-detail-row"><dt>Payment status</dt><dd>{{ str_replace('_', ' ', $latestPayment?->status ?? 'not started') }}</dd></div>
             <div class="az-user-detail-row"><dt>Gateway</dt><dd>{{ $latestPayment ? ucfirst($latestPayment->provider) : 'Not selected' }}</dd></div>
         </dl></div>
@@ -100,3 +104,60 @@
     <div class="az-user-pagination"><span>Page {{ $timeline->currentPage() }} of {{ $timeline->lastPage() }}</span>{{ $timeline->links() }}</div>
 </section>
 @endsection
+
+<section class="az-user-detail-grid" style="margin-top:18px">
+    <div class="az-user-panel">
+        <header class="az-user-panel-header"><div><h2 class="az-user-panel-title">Manage this trip</h2><p class="az-user-panel-subtitle">Only changes allowed by the frozen booking policy are offered.</p></div></header>
+        <div class="az-user-panel-body">
+            <form method="POST" action="{{ route('user.bookings.modifications.store',$booking->reference) }}" class="az-form-grid">
+                @csrf
+                <label class="wide">
+                    <span>Change request</span>
+                    <select name="type" required>
+                        <option value="">Choose a request</option>
+                        @foreach([
+                            'date_change' => 'Change dates',
+                            'guest_change' => 'Change guest count',
+                            'arrival_time' => 'Update arrival time',
+                            'room_preference' => 'Room or bed preference',
+                            'contact_details' => 'Update contact details',
+                            'add_extras' => 'Add extras',
+                            'cancellation' => 'Request cancellation',
+                        ] as $type => $label)
+                            @if($selfService[$type] ?? false)
+                                <option value="{{ $type }}">{{ $label }}</option>
+                            @endif
+                        @endforeach
+                    </select>
+                </label>
+                <label><span>New check-in</span><input type="date" name="check_in" min="{{ now()->toDateString() }}"></label>
+                <label><span>New check-out</span><input type="date" name="check_out" min="{{ now()->addDay()->toDateString() }}"></label>
+                <label><span>Arrival time</span><input type="time" name="arrival_time"></label>
+                <label><span>Adult count</span><input type="number" name="adult_count" min="1" max="12"></label>
+                <label><span>Child count</span><input type="number" name="child_count" min="0" max="8"></label>
+                <label class="wide"><span>Room or bed preference</span><input name="room_preference" maxlength="500"></label>
+                <label class="wide"><span>Reason or notes</span><textarea name="guest_note" maxlength="2000"></textarea></label>
+                <label class="wide"><span>Cancellation reason if applicable</span><input name="cancellation_reason" maxlength="500"></label>
+                <button class="az-user-button az-user-button--dark" type="submit">Submit request</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="az-user-panel">
+        <header class="az-user-panel-header"><div><h2 class="az-user-panel-title">Change requests</h2><p class="az-user-panel-subtitle">Status and staff response</p></div></header>
+        <div class="az-user-panel-body az-user-list">
+            @forelse($booking->modificationRequests as $requestItem)
+                <div class="az-user-list-item">
+                    <div>
+                        <h3>{{ Str::headline($requestItem->type) }} · {{ $requestItem->reference }}</h3>
+                        <p>{{ $requestItem->guest_note ?: 'No additional note.' }}</p>
+                        @if($requestItem->staff_note)<p><strong>Reserva:</strong> {{ $requestItem->staff_note }}</p>@endif
+                    </div>
+                    <span class="az-user-status {{ $requestItem->status==='pending'?'az-user-status--warning':'' }}">{{ Str::headline($requestItem->status) }}</span>
+                </div>
+            @empty
+                <div class="az-user-empty"><p>No change requests for this trip.</p></div>
+            @endforelse
+        </div>
+    </div>
+</section>
