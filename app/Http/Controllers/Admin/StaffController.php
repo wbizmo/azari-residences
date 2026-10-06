@@ -10,8 +10,11 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Throwable;
 use Illuminate\View\View;
 
 class StaffController extends Controller
@@ -35,15 +38,63 @@ class StaffController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validated($request);
-        $photo = $request->hasFile('profile_photo') ? $request->file('profile_photo')->store('profiles/staff', 'public') : null;
+        $plainPassword = $data['password'];
+        $photo = $request->hasFile('profile_photo')
+            ? $request->file('profile_photo')->store('profiles/staff', 'public')
+            : null;
+
         $staff = User::query()->create([
-            'name' => $data['name'], 'username' => $data['username'], 'email' => $data['email'], 'phone' => $data['phone'] ?? null,
-            'staff_role' => $data['staff_role'], 'account_type' => 'staff', 'status' => 'active', 'is_active' => true,
-            'profile_photo_path' => $photo, 'password' => Hash::make($data['password']), 'email_verified_at' => now(),
+            'name' => $data['name'],
+            'username' => $data['username'],
+            'email' => $data['email'],
+            'phone' => $data['phone'] ?? null,
+            'staff_role' => $data['staff_role'],
+            'account_type' => 'staff',
+            'status' => 'active',
+            'is_active' => true,
+            'profile_photo_path' => $photo,
+            'password' => Hash::make($plainPassword),
+            'email_verified_at' => now(),
         ]);
-        $this->syncPermissions($staff, $data['permissions'] ?? [], $request->user()->id);
-        AuditLog::record('staff.created', $staff, [], ['email' => $staff->email, 'staff_role' => $staff->staff_role, 'permissions' => $data['permissions'] ?? []]);
-        return redirect()->route('azari.admin.staff.index')->with('success', 'Staff account created.');
+
+        $this->syncPermissions(
+            $staff,
+            $data['permissions'] ?? [],
+            $request->user()->id
+        );
+
+        AuditLog::record(
+            'staff.created',
+            $staff,
+            [],
+            [
+                'email' => $staff->email,
+                'staff_role' => $staff->staff_role,
+                'permissions' => $data['permissions'] ?? [],
+            ]
+        );
+
+        try {
+            $this->sendStaffWelcomeEmail($staff, $plainPassword);
+            $message = 'Staff account created and login credentials emailed.';
+        } catch (Throwable $exception) {
+            Log::error('Staff welcome email failed.', [
+                'staff_id' => $staff->id,
+                'recipient' => $staff->email,
+                'exception_class' => $exception::class,
+                'safe_message' => 'Staff account was created, but the welcome email could not be sent.',
+            ]);
+
+            return redirect()
+                ->route('azari.admin.staff.edit', $staff)
+                ->with('warning', 'Staff account was created, but the credentials email could not be sent. Set a new password before sharing access.');
+        } finally {
+            unset($plainPassword);
+        }
+
+        return redirect()
+            ->route('azari.admin.staff.index')
+            ->with('success', $message);
     }
 
     public function update(Request $request, User $user): RedirectResponse
@@ -114,9 +165,49 @@ class StaffController extends Controller
             'staff_role' => ['required', Rule::in(['administrator', 'support', 'staff'])],
             'password' => [$user ? 'nullable' : 'required', 'string', 'min:12', 'confirmed'],
             'profile_photo' => ['nullable', 'image', 'max:4096'],
-            'permissions' => ['nullable', 'array'],
-            'permissions.*' => ['string', 'exists:permissions,slug'],
+            'permissions' => [
+                Rule::requiredIf(fn (): bool => $request->string('staff_role')->toString() !== 'administrator'),
+                'array',
+                'min:1',
+            ],
+            'permissions.*' => ['required', 'string', 'distinct', 'exists:permissions,slug'],
         ]);
+    }
+
+    private function sendStaffWelcomeEmail(User $staff, string $plainPassword): void
+    {
+        $loginUrl = route('azari.admin.login');
+
+        Mail::send('emails.premium', [
+            'title' => 'Your Resavar staff account is ready',
+            'preheader' => 'Your Resavar staff login details are ready.',
+            'eyebrow' => 'Staff access',
+            'lines' => [
+                'Hello '.$staff->name.',',
+                'A Resavar staff account has been created for you. Use the credentials below to sign in to the administration portal.',
+                'For security, change this temporary password after your first sign-in and do not forward this email.',
+            ],
+            'details' => [
+                'Name' => $staff->name,
+                'Username' => $staff->username,
+                'Email' => $staff->email,
+                'Temporary password' => $plainPassword,
+                'Role' => str((string) $staff->staff_role)->headline()->toString(),
+            ],
+            'notice' => 'This email contains a temporary credential. Sign in promptly and replace the password with one only you know.',
+            'tone' => 'internal',
+            'actionLabel' => 'Sign in to Resavar administration',
+            'actionUrl' => $loginUrl,
+            'secondaryActionLabel' => null,
+            'secondaryActionUrl' => null,
+            'logoUrl' => asset('images/logo-light.png'),
+            'supportEmail' => config('mail.from.address'),
+            'footerText' => 'This is a transactional staff-access message from Resavar. Keep your login credentials private.',
+        ], function ($message) use ($staff): void {
+            $message
+                ->to($staff->email, $staff->name)
+                ->subject('Your Resavar staff account is ready');
+        });
     }
 
     private function permissions(): array
