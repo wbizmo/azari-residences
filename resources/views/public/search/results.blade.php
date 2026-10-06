@@ -1,5 +1,5 @@
 @extends('layouts.public')
-@section('title','Available stays | Resavar')
+@section('title','Available stays — Resavar')
 @section('robots','noindex, follow, max-image-preview:large')
 @section('content')
 @php
