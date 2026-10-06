@@ -10091,3 +10091,57 @@ html body .site-header .desktop-navigation .nav-popover .nav-popover-panel a.is-
     }
 }
 /* RESARVA_DESKTOP_NAV_CENTERING_V1_END */
+
+
+/* RESARVA_ADMIN_CONTRAST_AUTHORITY_V1 */
+/* Blue/dark admin surfaces use white artwork/text; light dropdown surfaces use navy text until hover. */
+.az-admin-sidebar .az-sidebar-brand__logo {
+    filter: none !important;
+}
+
+.az-admin-body .az-avatar,
+.az-admin-body .az-avatar * {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+
+.az-admin-body .az-profile-trigger:hover,
+.az-admin-body .az-profile-trigger[aria-expanded="true"] {
+    border-color: #052058 !important;
+    background: #052058 !important;
+    color: #FFFFFF !important;
+}
+
+.az-admin-body .az-profile-trigger:hover .az-profile-trigger__copy strong,
+.az-admin-body .az-profile-trigger:hover .az-profile-trigger__copy small,
+.az-admin-body .az-profile-trigger:hover .az-profile-chevron,
+.az-admin-body .az-profile-trigger[aria-expanded="true"] .az-profile-trigger__copy strong,
+.az-admin-body .az-profile-trigger[aria-expanded="true"] .az-profile-trigger__copy small,
+.az-admin-body .az-profile-trigger[aria-expanded="true"] .az-profile-chevron {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+
+.az-admin-body .az-profile-dropdown a,
+.az-admin-body .az-profile-signout {
+    color: #052058 !important;
+    -webkit-text-fill-color: #052058 !important;
+}
+
+.az-admin-body .az-profile-dropdown a:hover,
+.az-admin-body .az-profile-dropdown a:focus-visible,
+.az-admin-body .az-profile-signout:hover,
+.az-admin-body .az-profile-signout:focus-visible {
+    background: #052058 !important;
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+
+.az-admin-body .az-profile-dropdown a:hover .material-symbols-outlined,
+.az-admin-body .az-profile-dropdown a:focus-visible .material-symbols-outlined,
+.az-admin-body .az-profile-signout:hover .material-symbols-outlined,
+.az-admin-body .az-profile-signout:focus-visible .material-symbols-outlined {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+/* RESARVA_ADMIN_CONTRAST_AUTHORITY_V1_END */
