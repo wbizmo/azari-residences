@@ -155,6 +155,10 @@
                                             'Children',
                                             max(0, (int) request('children', 0)),
                                         ],
+                                        'rooms' => [
+                                            'Rooms',
+                                            max(1, (int) request('rooms', 1)),
+                                        ],
                                     ] as $key => [$label, $count])
                                         <div class="guest-row">
                                             <strong>{{ $label }}</strong>
@@ -213,6 +217,52 @@
                                     value="{{ max(0, (int) request('children', 0)) }}"
                                     data-guest-input="children"
                                 >
+
+                                <input
+                                    type="hidden"
+                                    name="rooms"
+                                    value="{{ max(1, (int) request('rooms', 1)) }}"
+                                    data-guest-input="rooms"
+                                >
+                            </div>
+
+                            <div
+                                class="search-field reserva-destination-search"
+                                data-destination-search
+                                data-suggest-url="{{ route('destinations.suggest') }}"
+                            >
+                                <label for="destination">Destination or property</label>
+
+                                <div class="input-shell">
+                                    <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
+
+                                    <input
+                                        id="destination"
+                                        name="destination"
+                                        type="search"
+                                        value="{{ request('destination', session('azari_stay_search.destination')) }}"
+                                        placeholder="City, area or property"
+                                        autocomplete="off"
+                                        role="combobox"
+                                        aria-autocomplete="list"
+                                        aria-expanded="false"
+                                        aria-controls="resavar-destination-list"
+                                        data-destination-input
+                                    >
+                                </div>
+
+                                <input type="hidden" name="destination_type" value="{{ request('destination_type', session('azari_stay_search.destination_type')) }}" data-destination-type>
+                                <input type="hidden" name="destination_id" value="{{ request('destination_id', session('azari_stay_search.destination_id')) }}" data-destination-id>
+
+                                <div
+                                    id="resavar-destination-list"
+                                    class="reserva-destination-list"
+                                    role="listbox"
+                                    data-destination-list
+                                    hidden
+                                ></div>
+
+                                <span class="sr-only" role="status" aria-live="polite" data-destination-status></span>
                             </div>
 
                             <div class="search-field">
