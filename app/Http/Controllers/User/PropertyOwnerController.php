@@ -11,6 +11,7 @@ use App\Models\OwnerPayoutProfile;
 use App\Models\PropertyListing;
 use App\Models\RoomType;
 use App\Models\SiteSetting;
+use App\Services\Owners\ListingCompletenessService;
 use App\Services\Owners\OwnerBalanceService;
 use App\Services\Owners\OwnerWithdrawalService;
 use Dompdf\Dompdf;
@@ -69,7 +70,7 @@ class PropertyOwnerController extends Controller
         $signedName = Str::of($data['legal_name'])->lower()->squish()->value();
 
         if (! hash_equals($accountName, $signedName)) {
-            return back()->withErrors(['legal_name' => 'The typed legal name must match the full name on your Azari account.'])->withInput();
+            return back()->withErrors(['legal_name' => 'The typed legal name must match the full name on your Reserva account.'])->withInput();
         }
 
         $version = (string) SiteSetting::valueFor('owner_listing_agreement_version', '1.0');
@@ -106,7 +107,7 @@ class PropertyOwnerController extends Controller
             file_put_contents($path, $pdf->output());
         }
 
-        return response()->download($path, 'azari-listing-agreement-'.$agreement->version.'.pdf');
+        return response()->download($path, 'reserva-listing-agreement-'.$agreement->version.'.pdf');
     }
 
     public function index(Request $request): View
@@ -125,7 +126,7 @@ class PropertyOwnerController extends Controller
         return view('user.owner.listing-form', $this->formData(new PropertyListing));
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, ListingCompletenessService $completeness): RedirectResponse
     {
         $agreement = $this->currentAgreement($request);
         abort_unless($agreement, 403);
@@ -144,7 +145,9 @@ class PropertyOwnerController extends Controller
             'submitted_at' => now(),
         ]);
 
-        return redirect()->route('user.owner.listings.show', $listing)->with('status', 'Property submitted for Azari review.');
+        $completeness->sync($listing->load('user.ownerPayoutProfile'));
+
+        return redirect()->route('user.owner.listings.show', $listing)->with('status', 'Property submitted for Reserva review.');
     }
 
     public function show(Request $request, PropertyListing $listing): View
@@ -159,7 +162,7 @@ class PropertyOwnerController extends Controller
         return view('user.owner.listing-form', $this->formData($listing));
     }
 
-    public function update(Request $request, PropertyListing $listing): RedirectResponse
+    public function update(Request $request, PropertyListing $listing, ListingCompletenessService $completeness): RedirectResponse
     {
         abort_unless($listing->user_id === $request->user()->id && $listing->isEditable(), 403);
         $payload = $this->validatedListingPayload($request, $listing);
@@ -176,6 +179,8 @@ class PropertyOwnerController extends Controller
             'submitted_at' => now(),
             'declined_at' => null,
         ]);
+
+        $completeness->sync($listing->load('user.ownerPayoutProfile'));
 
         return redirect()->route('user.owner.listings.show', $listing)->with('status', 'Listing resubmitted for review.');
     }
@@ -237,7 +242,7 @@ class PropertyOwnerController extends Controller
         $profile = $request->user()->ownerPayoutProfile;
 
         abort_unless($profile, 422, 'Configure your payout destination first.');
-        abort_unless($profile->is_verified, 422, 'Your payout destination is awaiting Azari verification.');
+        abort_unless($profile->is_verified, 422, 'Your payout destination is awaiting Reserva verification.');
 
         $gatewayEnabled = $profile->preferred_gateway === 'paypal'
             ? filter_var(SiteSetting::valueFor('owner_paypal_enabled', '0'), FILTER_VALIDATE_BOOL)
@@ -357,7 +362,7 @@ class PropertyOwnerController extends Controller
     private function agreementText(): string
     {
         return <<<'TEXT'
-By submitting a property to Resavar, I confirm that I am legally authorised to offer the property for accommodation and management. I authorise Resavar to review the property, contact me for verification, approve or decline the listing, receive guest payments, credit the applicable owner-property booking revenue to my account balance, and process eligible withdrawals through the payout destination I provide. I confirm that all information and documents supplied are accurate and understand that approval is not guaranteed. I agree to keep property availability, pricing, safety information, ownership authority, and payout details accurate at all times.
+By submitting a property to Reserva, I confirm that I am legally authorised to offer the property for accommodation and management. I authorise Reserva to review the property, contact me for verification, approve or decline the listing, receive guest payments, credit the applicable owner-property booking revenue to my account balance, and process eligible withdrawals through the payout destination I provide. I confirm that all information and documents supplied are accurate and understand that approval is not guaranteed. I agree to keep property availability, pricing, safety information, ownership authority, and payout details accurate at all times.
 TEXT;
     }
 
