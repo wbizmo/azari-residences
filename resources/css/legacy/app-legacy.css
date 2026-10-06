@@ -10292,3 +10292,65 @@ html body .site-header .desktop-navigation .nav-popover .nav-popover-panel a.is-
     .resavar-compare-tray { right:12px; bottom:84px; width:calc(100vw - 24px); }
 }
 /* RESAVAR_BOOKING_FRONTEND_PARITY_V1_END */
+
+
+/* RESAVAR_LOGO_SURFACE_MAPPING_RESTORE_V1 */
+/*
+ * Restore the established Resavar logo/header relationship:
+ * - homepage top/dark hero surface: dark-surface logo artwork (white artwork)
+ * - white/solid header and all inner public pages: light-surface logo artwork (navy artwork)
+ * Admin and guest sidebars remain navy and therefore keep the dark-surface logo asset.
+ */
+html[data-azari-public-header-state="home-top"] body.home-page .site-header {
+    background: linear-gradient(180deg, rgba(5, 32, 88, .92), rgba(5, 32, 88, .38), rgba(5, 32, 88, 0)) !important;
+    color: #FFFFFF !important;
+    border-bottom-color: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+}
+html[data-azari-public-header-state="home-top"] body.home-page .site-header :is(
+    .desktop-navigation > a,
+    .nav-popover-trigger,
+    .nav-text-action
+) {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+html[data-azari-public-header-state="solid"] .site-header,
+body.inner-page .site-header,
+body.azari-solid-header .site-header,
+.site-header.is-scrolled,
+.search-results-page .site-header {
+    background: #FFFFFF !important;
+    color: #052058 !important;
+    border-bottom: 1px solid rgba(5, 32, 88, .14) !important;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, .06) !important;
+}
+html[data-azari-public-header-state="solid"] .site-header :is(
+    .desktop-navigation > a,
+    .nav-popover-trigger,
+    .nav-text-action
+),
+body.inner-page .site-header :is(
+    .desktop-navigation > a,
+    .nav-popover-trigger,
+    .nav-text-action
+),
+body.azari-solid-header .site-header :is(
+    .desktop-navigation > a,
+    .nav-popover-trigger,
+    .nav-text-action
+) {
+    color: #052058 !important;
+    -webkit-text-fill-color: #052058 !important;
+}
+
+/* Never recolor the uploaded logo artwork with CSS. */
+.site-header .azari-header-logo__image,
+.az-admin-sidebar .az-sidebar-brand__logo,
+.az-user-sidebar .guest-brand-image,
+.az-user-mobile-drawer .guest-brand-image {
+    filter: none !important;
+    opacity: 1 !important;
+}
+/* RESAVAR_LOGO_SURFACE_MAPPING_RESTORE_V1_END */
