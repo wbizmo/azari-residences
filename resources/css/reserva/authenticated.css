@@ -263,7 +263,7 @@ html[data-admin-theme="dark"] :is(.az-section-heading__meta,.az-topbar-page__eye
     height: 46px !important;
     margin: 0 !important;
 }
-/* RESAVAR_ADMIN_CONTRAST_ALIGNMENT_V1 */_END
+/* RESAVAR_ADMIN_CONTRAST_ALIGNMENT_V1_END */
 
 
 /* RESAVAR_USER_PROFILE_ALIGNMENT_V1 */
@@ -313,3 +313,37 @@ html[data-admin-theme="dark"] :is(.az-section-heading__meta,.az-topbar-page__eye
     line-height: 1.2 !important;
 }
 /* RESAVAR_USER_PROFILE_ALIGNMENT_V1_END */
+
+
+/* RESAVAR_ADMIN_AVATAR_CENTER_V2 */
+/* Center text initials exactly inside admin avatar circles. */
+.az-avatar,
+.az-profile-trigger .az-avatar,
+.az-profile-summary .az-avatar,
+.az-profile-summary .az-avatar--large {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+    font-weight: 700 !important;
+    text-indent: 0 !important;
+}
+.az-profile-trigger .az-avatar {
+    width: 40px !important;
+    height: 40px !important;
+    flex: 0 0 40px !important;
+}
+.az-profile-summary .az-avatar--large {
+    width: 46px !important;
+    height: 46px !important;
+    flex: 0 0 46px !important;
+}
+.az-avatar > img,
+.az-profile-trigger .az-avatar > img,
+.az-profile-summary .az-avatar > img {
+    margin: 0 !important;
+}
+/* RESAVAR_ADMIN_AVATAR_CENTER_V2_END */
