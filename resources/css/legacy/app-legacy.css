@@ -10145,3 +10145,150 @@ html body .site-header .desktop-navigation .nav-popover .nav-popover-panel a.is-
     -webkit-text-fill-color: #FFFFFF !important;
 }
 /* RESARVA_ADMIN_CONTRAST_AUTHORITY_V1_END */
+
+
+/* RESAVAR_BOOKING_FRONTEND_PARITY_V1 */
+/* Prevent global input styles from adding a second left gutter inside booking search fields. */
+.availability-form .input-shell input,
+.availability-form .input-shell select,
+.az-book-form .input-shell input,
+.az-book-form .input-shell select {
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    background-image: none !important;
+    box-shadow: none !important;
+}
+.availability-form .reserva-destination-search,
+.az-book-form .reserva-destination-search {
+    padding-left: 12px;
+}
+.availability-form .reserva-destination-search .input-shell,
+.az-book-form .reserva-destination-search .input-shell {
+    gap: 10px;
+    padding-inline: 0 !important;
+}
+.availability-form .reserva-destination-search .material-symbols-outlined,
+.az-book-form .reserva-destination-search .material-symbols-outlined {
+    margin: 0 !important;
+}
+.resavar-recent-searches,
+.resavar-recent-viewed {
+    margin-top: 18px;
+    padding: 16px;
+    border: 1px solid rgba(5,32,88,.12);
+    border-radius: 16px;
+    background: #fff;
+}
+.resavar-recent-searches[hidden],
+.resavar-recent-viewed[hidden] { display:none !important; }
+.resavar-recent-searches__head,
+.resavar-recent-viewed__head {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:12px;
+}
+.resavar-recent-searches__list,
+.resavar-recent-viewed__list {
+    display:flex;
+    gap:10px;
+    overflow-x:auto;
+}
+.resavar-recent-search {
+    flex:0 0 auto;
+    max-width:280px;
+    padding:10px 12px;
+    border:1px solid rgba(5,32,88,.14);
+    border-radius:12px;
+    background:#fff;
+    color:#052058;
+    text-align:left;
+}
+.resavar-recent-search:hover,
+.resavar-recent-search:focus-visible { background:#052058; color:#fff; }
+.resavar-recent-search strong,
+.resavar-recent-search small { display:block; }
+.resavar-recent-search small { margin-top:3px; opacity:.72; }
+.resavar-recent-viewed__card {
+    flex:0 0 min(260px,78vw);
+    display:grid;
+    grid-template-columns:72px minmax(0,1fr);
+    gap:12px;
+    align-items:center;
+    padding:10px;
+    border:1px solid rgba(5,32,88,.12);
+    border-radius:14px;
+    background:#fff;
+    color:#052058;
+}
+.resavar-recent-viewed__card img {
+    width:72px;
+    height:64px;
+    object-fit:cover;
+    border-radius:10px;
+    background:#f5f6f8;
+}
+.resavar-recent-viewed__card strong,
+.resavar-recent-viewed__card small { display:block; }
+.resavar-recent-viewed__card small { margin-top:4px; opacity:.7; }
+.resavar-compare-button[aria-pressed="true"],
+.resavar-local-favourite[aria-pressed="true"] {
+    border-color:#052058 !important;
+    background:#052058 !important;
+    color:#fff !important;
+}
+.resavar-compare-tray {
+    position:fixed;
+    right:18px;
+    bottom:18px;
+    z-index:9200;
+    width:min(440px,calc(100vw - 36px));
+    padding:14px;
+    border:1px solid rgba(5,32,88,.16);
+    border-radius:16px;
+    background:#fff;
+    box-shadow:0 18px 55px rgba(0,0,0,.18);
+    color:#052058;
+}
+.resavar-compare-tray[hidden] { display:none !important; }
+.resavar-compare-tray__head {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:10px;
+}
+.resavar-compare-tray__items { display:grid; gap:7px; }
+.resavar-compare-tray__item {
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    align-items:center;
+    padding:8px 10px;
+    border-radius:10px;
+    background:rgba(5,32,88,.05);
+}
+.resavar-compare-tray__item a {
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    font-weight:700;
+}
+.resavar-compare-tray__remove {
+    flex:0 0 auto;
+    border:0;
+    background:transparent;
+    color:#052058;
+}
+@media(max-width:620px){
+    .availability-form .reserva-destination-search,
+    .az-book-form .reserva-destination-search { padding-left:3px; }
+    .resavar-compare-tray { right:12px; bottom:84px; width:calc(100vw - 24px); }
+}
+/* RESAVAR_BOOKING_FRONTEND_PARITY_V1_END */
