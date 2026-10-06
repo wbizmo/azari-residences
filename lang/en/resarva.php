@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'brand' => 'Resarva',
+    'brand' => 'Resavar',
     'nav' => [
         'apartments' => 'Apartments',
         'rooms' => 'Rooms',
