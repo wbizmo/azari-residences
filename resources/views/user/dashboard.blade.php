@@ -34,8 +34,8 @@
         </div>
     </article>
     <aside class="az-user-timezone-card">
-        <div><div class="az-user-timezone-icon"><span class="material-symbols-outlined">schedule</span></div><h3>Your local time</h3><p>Dates and times are converted for clarity. Resarva's official operational timezone remains {{ config('azari.timezone','Africa/Lagos') }}.</p></div>
-        <div class="az-user-timezone-value"><span>Showing times in</span><strong data-user-timezone>{{ auth()->user()->timezone ?: config('azari.timezone','Africa/Lagos') }}</strong></div>
+        <div><div class="az-user-timezone-icon"><span class="material-symbols-outlined">schedule</span></div><h3>Your local time</h3><p>Dates and times are converted for clarity. Resarva's official operational timezone remains {{ config('localization.platform_timezone','UTC') }}.</p></div>
+        <div class="az-user-timezone-value"><span>Showing times in</span><strong data-user-timezone>{{ auth()->user()->timezone ?: config('localization.platform_timezone','UTC') }}</strong></div>
     </aside>
 </section>
 

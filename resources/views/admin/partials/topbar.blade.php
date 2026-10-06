@@ -27,7 +27,7 @@
         </div>
     </div>
 
-    <div class="az-topbar-actions"><span class="az-s78-operational-timezone">Resarva operational timezone: {{ config('azari.timezone','Africa/Lagos') }}</span><div class="az-profile-menu" data-profile-menu>
+    <div class="az-topbar-actions"><span class="az-s78-operational-timezone">Resarva operational timezone: {{ config('localization.platform_timezone','UTC') }}</span><div class="az-profile-menu" data-profile-menu>
             <button
                 type="button"
                 class="az-profile-trigger"

@@ -65,6 +65,9 @@ jobs:
       - name: Build frontend
         run: npm run build
 
+      - name: Lightweight release gate
+        run: php artisan azari:release-gate --ci
+
       - name: Package local validation bundle
         run: |
           extension_dir="$(php -r 'echo ini_get("extension_dir");')"

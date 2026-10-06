@@ -62,12 +62,13 @@
     <label>Maximum guests<input name="max_guests" type="number" min="1" value="{{ old('max_guests', $property->max_guests ?? 2) }}" required></label>
     <label>Minimum stay<input name="minimum_stay" type="number" min="1" value="{{ old('minimum_stay', $property->minimum_stay ?? 1) }}"></label>
     <label>Maximum stay<input name="maximum_stay" type="number" min="1" value="{{ old('maximum_stay', $property->maximum_stay) }}"></label>
-    <label>Nightly rate (USD)<input name="nightly_rate" type="number" min="0" step="0.01" value="{{ old('nightly_rate', $property->nightly_rate) }}" required></label>
-    <label>Weekend rate (USD)<input name="weekend_rate" type="number" min="0" step="0.01" value="{{ old('weekend_rate', $property->weekend_rate) }}"></label>
-    <label>Cleaning fee (USD)<input name="cleaning_fee" type="number" min="0" step="0.01" value="{{ old('cleaning_fee', $property->cleaning_fee) }}"></label>
-    <label>Service charge (USD)<input name="service_charge" type="number" min="0" step="0.01" value="{{ old('service_charge', $property->service_charge) }}"></label>
+    <label>Nightly rate<input name="nightly_rate" type="number" min="0" step="0.01" value="{{ old('nightly_rate', $property->nightly_rate) }}" required></label>
+    <label>Weekend rate<input name="weekend_rate" type="number" min="0" step="0.01" value="{{ old('weekend_rate', $property->weekend_rate) }}"></label>
+    <label>Cleaning fee<input name="cleaning_fee" type="number" min="0" step="0.01" value="{{ old('cleaning_fee', $property->cleaning_fee) }}"></label>
+    <label>Service charge<input name="service_charge" type="number" min="0" step="0.01" value="{{ old('service_charge', $property->service_charge) }}"></label>
     <label>Tax rate (%)<input name="tax_rate" type="number" min="0" max="100" step="0.001" value="{{ old('tax_rate', $property->tax_rate) }}"></label>
-    <label>Currency<input value="{{ config('azari.currency', 'USD') }}" readonly disabled><small>Platform currency is locked and cannot be changed.</small></label>
+    <label>Currency<select name="currency" required>@foreach(config('localization.supported_currencies',[]) as $code=>$name)<option value="{{ $code }}" @selected(old('currency',$property->currency ?: config('localization.default_currency'))===$code)>{{ $code }} · {{ $name }}</option>@endforeach</select></label>
+    <label>Property timezone<input name="timezone" value="{{ old('timezone',$property->timezone ?: $property->locationRecord?->timezone) }}" placeholder="Africa/Lagos"><small>Check-in and check-out date boundaries use this timezone.</small></label>
 
     <label class="admin-form-span-2">Short description
         <textarea name="short_description">{{ old('short_description', $property->short_description) }}</textarea>

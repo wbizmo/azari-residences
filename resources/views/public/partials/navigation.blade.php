@@ -18,14 +18,14 @@
         </a>
 
         <nav class="desktop-navigation" aria-label="Primary navigation">
-            <a href="{{ route('public.apartments') }}">Apartments</a>
-            <a href="{{ route('public.rooms') }}">Rooms</a>
-            <a href="{{ route('availability.index') }}">Availability</a>
+            <a href="{{ route('public.apartments') }}">{{ __('resarva.nav.apartments') }}</a>
+            <a href="{{ route('public.rooms') }}">{{ __('resarva.nav.rooms') }}</a>
+            <a href="{{ route('availability.index') }}">{{ __('resarva.nav.availability') }}</a>
 
             <div class="nav-popover" data-popover>
                 <button type="button" class="nav-popover-trigger" data-popover-trigger
                         aria-expanded="false" aria-controls="services-popover">
-                    Services
+                    {{ __('resarva.nav.services') }}
                     <span class="material-symbols-outlined" aria-hidden="true">keyboard_arrow_down</span>
                 </button>
 
@@ -52,24 +52,24 @@
                 </div>
             </div>
 
-            <a href="{{ route('public.local-guide') }}">Local guide</a>
-            <a href="{{ route('public.about') }}">About</a>
+            <a href="{{ route('public.local-guide') }}">{{ __('resarva.nav.local_guide') }}</a>
+            <a href="{{ route('public.about') }}">{{ __('resarva.nav.about') }}</a>
 
-            <a href="{{ route('public.contact') }}">Contact</a>
+            <a href="{{ route('public.contact') }}">{{ __('resarva.nav.contact') }}</a>
 
         </nav>
 
 
         <div class="nav-actions">
-            <a href="{{ route('bookings.verify') }}" class="nav-text-action">Verify booking</a>
+            <a href="{{ route('bookings.verify') }}" class="nav-text-action">{{ __('resarva.nav.verify_booking') }}</a>
 
             @auth
-                <a href="{{ auth()->user()->isStaff() ? route('azari.admin.dashboard') : route('user.dashboard') }}" class="nav-text-action">Dashboard</a>
+                <a href="{{ auth()->user()->isStaff() ? route('azari.admin.dashboard') : route('user.dashboard') }}" class="nav-text-action">{{ __('resarva.nav.dashboard') }}</a>
             @else
-                <a href="{{ route('login') }}" class="nav-text-action">Login</a>
+                <a href="{{ route('login') }}" class="nav-text-action">{{ __('resarva.nav.login') }}</a>
             @endauth
 
-            <a href="{{ route('public.book-now') }}" class="button button-brass">Book now</a>
+            <a href="{{ route('public.book-now') }}" class="button button-brass">{{ __('resarva.nav.book_now') }}</a>
 
             <button
                 type="button"

@@ -24,7 +24,7 @@
         datetime="{{ $localTimeValue->toIso8601String() }}"
         data-user-local-time="{{ $localTimeValue->utc()->toIso8601String() }}"
         data-user-time-format="{{ $mode }}"
-        data-fallback-timezone="{{ config('azari.timezone', 'Africa/Lagos') }}"
+        data-fallback-timezone="{{ config('localization.platform_timezone', 'UTC') }}"
     >{{ $localTimeFallback }}</time>
 @else
     {{ $empty }}

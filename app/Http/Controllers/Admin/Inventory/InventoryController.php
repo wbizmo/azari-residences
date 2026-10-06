@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin\Inventory;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\GenerateResponsiveImageDerivatives;
+use App\Support\ResponsiveImage;
 use App\Models\Amenity;
 use App\Models\Building;
 use App\Models\Location;
@@ -148,10 +150,12 @@ class InventoryController extends Controller
     public function propertyDelete(Property $property): RedirectResponse
     {
         foreach ($property->images as $image) {
+            ResponsiveImage::deleteDerivatives($image->path);
             Storage::disk('public')->delete($image->path);
         }
 
         if ($property->cover_image) {
+            ResponsiveImage::deleteDerivatives($property->cover_image);
             Storage::disk('public')->delete($property->cover_image);
         }
 
@@ -164,6 +168,7 @@ class InventoryController extends Controller
 
     public function imageDelete(PropertyImage $propertyImage): RedirectResponse
     {
+        ResponsiveImage::deleteDerivatives($propertyImage->path);
         Storage::disk('public')->delete($propertyImage->path);
         $propertyImage->delete();
 
@@ -225,6 +230,7 @@ class InventoryController extends Controller
             'buildings' => Building::query()->where('is_active', true)->orderBy('sort_order')->get(),
             'roomTypes' => RoomType::query()->where('is_active', true)->orderBy('sort_order')->get(),
             'amenities' => Amenity::query()->where('is_active', true)->orderBy('sort_order')->get(),
+            'supportedCurrencies' => (array) config('localization.supported_currencies', []),
         ];
     }
 
@@ -257,7 +263,8 @@ class InventoryController extends Controller
             'security_deposit' => ['nullable', 'numeric', 'min:0'],
             'service_charge' => ['nullable', 'numeric', 'min:0'],
             'tax_rate' => ['nullable', 'numeric', 'between:0,100'],
-            'currency' => ['required', 'string', 'size:3'],
+            'currency' => ['required', Rule::in(array_keys((array) config('localization.supported_currencies', [])))],
+            'timezone' => ['nullable', 'timezone'],
             'short_description' => ['nullable', 'string', 'max:600'],
             'description' => ['nullable', 'string', 'max:30000'],
             'video_url' => ['nullable', 'url', 'max:1000'],
@@ -276,6 +283,9 @@ class InventoryController extends Controller
         $data['is_featured'] = $request->boolean('is_featured');
         $data['is_published'] = $request->boolean('is_published');
         $data['currency'] = strtoupper($data['currency']);
+        if (blank($data['timezone'] ?? null) && ! empty($data['location_id'])) {
+            $data['timezone'] = Location::query()->whereKey($data['location_id'])->value('timezone') ?: config('localization.platform_timezone', 'UTC');
+        }
         $data['cleaning_fee'] = $data['cleaning_fee'] ?? 0;
         $data['security_deposit'] = $data['security_deposit'] ?? 0;
         $data['service_charge'] = $data['service_charge'] ?? 0;
@@ -283,10 +293,12 @@ class InventoryController extends Controller
 
         if ($request->hasFile('cover_image')) {
             if ($property?->cover_image) {
-                Storage::disk('public')->delete($property->cover_image);
+                ResponsiveImage::deleteDerivatives($property->cover_image);
+            Storage::disk('public')->delete($property->cover_image);
             }
 
             $data['cover_image'] = $request->file('cover_image')->store('properties/covers', 'public');
+            GenerateResponsiveImageDerivatives::dispatch($data['cover_image']);
         }
 
         unset($data['gallery_images'], $data['amenities']);
@@ -298,11 +310,12 @@ class InventoryController extends Controller
     {
         foreach ($request->file('gallery_images', []) as $index => $file) {
             $property->images()->create([
-                'path' => $file->store('properties/gallery', 'public'),
+                'path' => $path = $file->store('properties/gallery', 'public'),
                 'title' => $property->name,
                 'alt_text' => $property->name.' gallery image',
                 'sort_order' => ((int) $property->images()->max('sort_order')) + (($index + 1) * 10),
             ]);
+            GenerateResponsiveImageDerivatives::dispatch($path);
         }
     }
 }

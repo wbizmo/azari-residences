@@ -8,6 +8,7 @@ use App\Models\BookingHold;
 use App\Models\BookingStatusHistory;
 use App\Models\IdentityVerification;
 use App\Services\Identity\GuestVerificationInvitationService;
+use App\Support\LocalDate;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -179,6 +180,8 @@ class BookingCreationService
                 'status' => 'pending_payment',
                 'verification_status' => 'unverified',
                 'currency' => $quote['currency'],
+                'property_timezone' => LocalDate::propertyTimezone($property),
+                'booking_locale' => $user->locale ?: app()->getLocale(),
                 'nightly_rate' => $quote['nightly_rate'],
                 'nights' => $quote['nights'],
                 'subtotal' => $quote['subtotal'],

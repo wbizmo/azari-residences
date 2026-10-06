@@ -12,6 +12,7 @@
         ['azari.admin.properties.index','apartment','Properties','properties.view'],
         ['azari.admin.inventory.index','inventory_2','Inventory & categories','properties.view'],
         ['azari.admin.locations.index','location_on','Locations','properties.view'],
+        ['azari.admin.channels.index','sync_alt','Channel sync','system-health.view'],
         ['azari.admin.room-types.index','category','Categories','properties.view'],
         ['azari.admin.owner-listings.index','real_estate_agent','Owner listings','property-owners.view'],
         ['azari.admin.owner-withdrawals.index','payments','Owner withdrawals','owner-withdrawals.view'],

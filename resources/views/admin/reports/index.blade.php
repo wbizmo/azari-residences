@@ -8,7 +8,7 @@
         <div>
             <span class="az-eyebrow">Operations intelligence</span>
             <h1>Reports and exports</h1>
-            <p>Resarva operational timezone: {{ config('azari.timezone','Africa/Lagos') }}</p>
+            <p>Resarva operational timezone: {{ config('localization.platform_timezone','UTC') }}</p>
         </div>
     </div>
 

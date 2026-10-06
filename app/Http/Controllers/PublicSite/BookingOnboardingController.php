@@ -125,7 +125,7 @@ class BookingOnboardingController extends Controller
                 'account_type' => 'customer',
                 'status' => 'active',
                 'is_active' => true,
-                'timezone' => config('azari.timezone', 'Africa/Lagos'),
+                'timezone' => config('localization.platform_timezone', 'UTC'),
             ]);
 
             Auth::login($user);

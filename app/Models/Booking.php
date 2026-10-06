@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Support\LocalDate;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -21,7 +23,7 @@ class Booking extends Model
         'guest_first_name', 'guest_last_name', 'guest_email', 'guest_phone',
         'arrival_time', 'country', 'city', 'address', 'nationality', 'check_in',
         'check_out', 'adults', 'children', 'rooms', 'status', 'verification_status',
-        'currency', 'nightly_rate', 'nights', 'subtotal', 'fee_total',
+        'currency', 'property_timezone', 'booking_locale', 'nightly_rate', 'nights', 'subtotal', 'fee_total',
         'add_on_total', 'tax_rate', 'tax_total', 'total', 'pricing_snapshot',
         'property_name_snapshot', 'accommodation_type_name_snapshot', 'rate_plan_name_snapshot', 'policy_snapshot', 'property_formatted_address',
         'property_latitude', 'property_longitude',
@@ -180,7 +182,7 @@ class Booking extends Model
             && $this->balanceDue() <= 0
             && ! $this->cancelled_at
             && ! $this->checked_in_at
-            && now(config('azari.timezone', 'Africa/Lagos'))->toDateString() === optional($this->check_in)->toDateString();
+            && now($this->property_timezone ?: LocalDate::propertyTimezone($this->property))->toDateString() === optional($this->check_in)->toDateString();
 
         if (! $baseEligible || ! Schema::hasTable('identity_verifications')) {
             return false;

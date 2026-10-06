@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\GenerateResponsiveImageDerivatives;
+use App\Support\ResponsiveImage;
 use App\Models\Amenity;
 use App\Models\Location;
 use App\Models\Property;
@@ -11,6 +13,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class PropertyController extends Controller
@@ -99,6 +102,8 @@ class PropertyController extends Controller
             'cleaning_fee' => ['nullable', 'numeric', 'min:0'],
             'service_charge' => ['nullable', 'numeric', 'min:0'],
             'tax_rate' => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'currency' => ['required', Rule::in(array_keys((array) config('localization.supported_currencies', ['USD'=>'US Dollar'])))],
+            'timezone' => ['nullable', 'timezone:all'],
             'short_description' => ['nullable', 'string', 'max:500'],
             'description' => ['nullable', 'string', 'max:20000'],
             'cover_image' => ['nullable', 'image', 'max:8192'],
@@ -120,7 +125,8 @@ class PropertyController extends Controller
         $data['slug'] = filled($data['slug'] ?? null)
             ? Str::slug($data['slug'])
             : Str::slug($data['name']).'-'.Str::lower(Str::random(5));
-        $data['currency'] = (string) config('azari.currency', 'USD');
+        $data['currency'] = strtoupper((string) $data['currency']);
+        $data['timezone'] = $data['timezone'] ?: $location->timezone ?: config('localization.platform_timezone', config('azari.timezone', 'UTC'));
         $data['is_featured'] = $request->boolean('is_featured');
         $data['is_published'] = $request->boolean('is_published');
         $data['same_day_booking'] = $request->boolean('same_day_booking');
@@ -128,9 +134,11 @@ class PropertyController extends Controller
 
         if ($request->hasFile('cover_image')) {
             if ($property?->cover_image) {
+                ResponsiveImage::deleteDerivatives($property->cover_image);
                 Storage::disk('public')->delete($property->cover_image);
             }
             $data['cover_image'] = $request->file('cover_image')->store('properties/covers', 'public');
+            GenerateResponsiveImageDerivatives::dispatch($data['cover_image']);
         } else {
             unset($data['cover_image']);
         }
@@ -138,7 +146,11 @@ class PropertyController extends Controller
         if ($request->hasFile('gallery')) {
             $existing = $property?->gallery ?? [];
             $uploaded = collect($request->file('gallery'))
-                ->map(fn ($image) => $image->store('properties/gallery', 'public'))
+                ->map(function ($image) {
+                    $path = $image->store('properties/gallery', 'public');
+                    GenerateResponsiveImageDerivatives::dispatch($path);
+                    return $path;
+                })
                 ->all();
             $data['gallery'] = array_values([...$existing, ...$uploaded]);
         } else {

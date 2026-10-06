@@ -59,7 +59,7 @@ class PaymentScheduleService
                         ->subDays(max(0, $balanceDueDays))
                         ->startOfDay();
 
-                    $canDefer = now(config('azari.timezone', 'Africa/Lagos'))
+                    $canDefer = now(config('localization.platform_timezone', 'UTC'))
                         ->startOfDay()
                         ->lessThan($dueOn);
                     $requiredNow = $canDefer ? 0.0 : $balance;
@@ -80,7 +80,7 @@ class PaymentScheduleService
                     ->subDays(max(0, $balanceDueDays))
                     ->startOfDay();
 
-                if (now(config('azari.timezone', 'Africa/Lagos'))->startOfDay()->greaterThanOrEqualTo($dueOn)) {
+                if (now(config('localization.platform_timezone', 'UTC'))->startOfDay()->greaterThanOrEqualTo($dueOn)) {
                     $requiredNow = $balance;
                     $canDefer = false;
                 }

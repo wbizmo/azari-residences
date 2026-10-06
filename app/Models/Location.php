@@ -41,6 +41,11 @@ class Location extends Model
         return $this->hasMany(Property::class);
     }
 
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
     protected static function booted(): void
     {
         static::saving(function (self $location): void {

@@ -12,6 +12,12 @@ return [
         'autocomplete_cache_seconds' => (int) env('RESERVA_AUTOCOMPLETE_CACHE_SECONDS', 60),
     ],
 
+    'media' => [
+        'responsive_widths' => [480, 768, 1200],
+        'formats' => ['webp', 'avif'],
+        'node_binary' => env('RESARVA_NODE_BINARY', 'node'),
+    ],
+
     'performance' => [
         // Product budgets used by browser/observability checks.
         'lcp_ms' => 2500,

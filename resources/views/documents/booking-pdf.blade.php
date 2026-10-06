@@ -347,7 +347,7 @@
 
         <p class="meta-line">
             Issued
-            {{ now(config('azari.timezone', 'Africa/Lagos'))->format('j F Y, g:i A') }}
+            {{ now(config('localization.platform_timezone', 'UTC'))->format('j F Y, g:i A') }}
         </p>
     </div>
 </div>
@@ -621,7 +621,7 @@
 
 
 <div class="foot">
-    Times use {{ config('azari.timezone', 'Africa/Lagos') }}.
+    Times use {{ config('localization.platform_timezone', 'UTC') }}.
     This document was generated from Resarva's current authoritative booking record.
 </div>
 

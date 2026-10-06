@@ -162,6 +162,8 @@
         $keywords
         ?? trim($__env->yieldContent('keywords'))
         ?: $defaultSeoKeywords;
+
+    $resolvedRobots = trim($__env->yieldContent('robots')) ?: null;
 @endphp
 
 <x-public.layout
@@ -171,6 +173,7 @@
     :canonical="$canonical ?? null"
     :image="$image ?? null"
     :type="$type ?? 'website'"
+    :robots="$resolvedRobots"
     :body-class="$bodyClass ?? ''"
 >
     @yield('content')
