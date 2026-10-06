@@ -242,6 +242,17 @@ return new class extends Migration
             });
         }
 
+        if (! Schema::hasTable('notifications')) {
+            Schema::create('notifications', function (Blueprint $table): void {
+                $table->uuid('id')->primary();
+                $table->string('type');
+                $table->morphs('notifiable');
+                $table->text('data');
+                $table->timestamp('read_at')->nullable();
+                $table->timestamps();
+            });
+        }
+
         if (! Schema::hasTable('communication_preferences')) {
             Schema::create('communication_preferences', function (Blueprint $table): void {
                 $table->id();
@@ -431,6 +442,7 @@ return new class extends Migration
         }
 
         Schema::dropIfExists('communication_preferences');
+        // The notifications table may predate this migration, so it is intentionally retained on rollback.
         Schema::dropIfExists('analytics_events');
 
         if (Schema::hasTable('reviews')) {
