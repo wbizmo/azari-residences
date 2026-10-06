@@ -347,3 +347,33 @@ html[data-admin-theme="dark"] :is(.az-section-heading__meta,.az-topbar-page__eye
     margin: 0 !important;
 }
 /* RESAVAR_ADMIN_AVATAR_CENTER_V2_END */
+
+
+/* RESAVAR_ADMIN_AVATAR_INITIAL_ABSOLUTE_CENTER_V3 */
+.az-profile-trigger .az-avatar,
+.az-profile-summary .az-avatar {
+    position: relative !important;
+    overflow: hidden !important;
+}
+.az-profile-trigger .az-avatar .az-avatar-initial,
+.az-profile-summary .az-avatar .az-avatar-initial {
+    position: absolute !important;
+    inset: 0 !important;
+    display: grid !important;
+    width: 100% !important;
+    height: 100% !important;
+    place-items: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    font: inherit !important;
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    text-align: center !important;
+    text-indent: 0 !important;
+    white-space: nowrap !important;
+}
+/* RESAVAR_ADMIN_AVATAR_INITIAL_ABSOLUTE_CENTER_V3_END */
