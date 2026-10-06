@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>@yield('title', 'Error') | {{ config('app.name', 'Resavar') }}</title>
+    <title>@yield('title', 'Error') — {{ config('app.name', 'Resavar') }}</title>
     <meta name="robots" content="noindex, nofollow, noarchive">
 
     <style>
