@@ -1,4 +1,4 @@
-<x-public-site.layout title="Complete Flutterwave payment | Resarva">
+<x-public-site.layout title="Complete Flutterwave payment | Resavar">
 <main class="site-container az-checkout-page">
     <section class="az-checkout-shell">
         <div class="az-checkout-main">
@@ -10,14 +10,14 @@
             <div class="az-checkout-heading">
                 <span class="eyebrow">Flutterwave API v4</span>
                 <h1>Complete your payment</h1>
-                <p>Use the instruction below on the phone connected to your bank account. Resarva will confirm the booking only after Flutterwave verifies the charge.</p>
+                <p>Use the instruction below on the phone connected to your bank account. Resavar will confirm the booking only after Flutterwave verifies the charge.</p>
             </div>
 
             <section class="az-checkout-panel">
                 <div class="az-checkout-panel-head">
                     <div>
                         <h2>Payment instruction</h2>
-                        <p>Do not share your PIN, OTP or banking password with Resarva.</p>
+                        <p>Do not share your PIN, OTP or banking password with Resavar.</p>
                     </div>
                     <span class="material-symbols-outlined az-checkout-seal">dialpad</span>
                 </div>
@@ -42,7 +42,7 @@
         <aside class="az-checkout-summary">
             <div class="az-checkout-summary-card">
                 <span class="eyebrow">Payment summary</span>
-                <h2>{{ $booking->property?->name ?? 'Resarva' }}</h2>
+                <h2>{{ $booking->property?->name ?? 'Resavar' }}</h2>
                 <p class="az-checkout-reference">{{ $payment->reference }}</p>
                 <dl>
                     <div><dt>Provider</dt><dd>Flutterwave</dd></div>
