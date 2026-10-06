@@ -1,5 +1,5 @@
 <x-public-site.layout
-    title="Available stays | Resavar"
+    title="Available stays — Resavar"
     description="Compare live Resavar inventory, policies, verified reviews and total stay prices."
 >
     @php
