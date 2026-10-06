@@ -57,7 +57,7 @@ Route::middleware('web')->group(function (): void {
             ->name('azari.booking.onboarding.complete');
 
         // Compatibility endpoint for existing clients that already submit the
-        // booking form directly after authentication/KYC.
+        // booking form directly after authentication.
         Route::post('/booking', [AzariBookingFlowController::class, 'store'])
             ->middleware('throttle:20,1')
             ->name('azari.booking.store');
