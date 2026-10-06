@@ -316,6 +316,18 @@
         </div>
     </section>
 
+    <section class="reserva-discovery-section resavar-recent-viewed" data-resavar-recent-viewed-host hidden aria-labelledby="resavar-recent-viewed-title">
+        <div class="site-container">
+            <div class="resavar-recent-viewed__head">
+                <div>
+                    <span class="eyebrow">Continue exploring</span>
+                    <h2 id="resavar-recent-viewed-title">Recently viewed stays</h2>
+                </div>
+            </div>
+            <div class="resavar-recent-viewed__list" data-resavar-recent-viewed-list></div>
+        </div>
+    </section>
+
     @if(($popularLocations ?? collect())->isNotEmpty() && data_get($homepageSections->get('popular_destinations')?->content, 'enabled', true))
         <section class="reserva-discovery-section" aria-labelledby="reserva-popular-destinations">
             <div class="site-container">
