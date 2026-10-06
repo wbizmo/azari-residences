@@ -42,7 +42,7 @@
             >
                 <span class="brand-logo-slot azari-brand__logo-slot guest-brand-logo-slot">
                     <img
-                        src="{{ asset('images/resavar-logo-dark.png') }}?v=20261004-4"
+                        src="{{ asset('images/resavar-logo-dark.png') }}?v=20261006-1"
                         alt="Resavar"
                         class="brand-image azari-brand__image guest-brand-image"
                         loading="eager"
@@ -119,7 +119,7 @@
                 >
                     <span class="brand-logo-slot azari-brand__logo-slot guest-brand-logo-slot">
                         <img
-                            src="{{ asset('images/resavar-logo-dark.png') }}?v=20261004-4"
+                            src="{{ asset('images/resavar-logo-dark.png') }}?v=20261006-1"
                             alt="Resavar"
                             class="brand-image azari-brand__image guest-brand-image"
                             loading="eager"
