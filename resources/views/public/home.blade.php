@@ -1,8 +1,8 @@
 
 
 <x-public-site.layout
-    title="Resarva | Home"
-    :description="$content['hero_body'] ?? 'Luxury serviced apartments by Resarva.'"
+    title="Resavar | Home"
+    :description="$content['hero_body'] ?? 'Luxury serviced apartments by Resavar.'"
 >
 
     @include('public.partials.promotion-popup')
@@ -10,7 +10,7 @@
     <section class="azari-home-hero" aria-labelledby="azari-home-hero-title">
         <img
             src="{{ asset('images/resavar-hero.png') }}"
-            alt="Luxury Resarva serviced apartment interior"
+            alt="Luxury Resavar serviced apartment interior"
             class="azari-home-hero__image"
             width="2048"
             height="1152"
@@ -321,7 +321,7 @@
             <div class="site-container">
                 <div class="section-heading">
                     <div>
-                        <span class="eyebrow">Explore Resarva</span>
+                        <span class="eyebrow">Explore Resavar</span>
                         <h2 id="reserva-popular-destinations">
                             {{ data_get($homepageSections->get('popular_destinations')?->content, 'title', 'Popular destinations') }}
                         </h2>
@@ -380,7 +380,7 @@
                     <div>
                         <span class="eyebrow">Recently added</span>
                         <h2 id="reserva-new-properties">
-                            {{ data_get($homepageSections->get('new_properties')?->content, 'title', 'New to Resarva') }}
+                            {{ data_get($homepageSections->get('new_properties')?->content, 'title', 'New to Resavar') }}
                         </h2>
                     </div>
                 </div>
@@ -425,7 +425,7 @@
                 </p>
 
                 <p>
-                    Each Resarva residence combines the privacy and comfort of a
+                    Each Resavar residence combines the privacy and comfort of a
                     personal home with the thoughtful service expected from
                     premium hospitality. From carefully furnished interiors and
                     reliable housekeeping to responsive guest support, every
@@ -627,7 +627,7 @@
         </div>
     </section>
 
-    <!-- RESARVA APP DOWNLOAD START -->
+    <!-- RESAVAR APP DOWNLOAD START -->
     <section
         class="azari-app-section"
         aria-labelledby="azari-app-title"
@@ -900,20 +900,20 @@
             <div class="azari-app-card">
                 <div class="azari-app-copy">
                     <span class="azari-app-kicker">
-                        The Resarva App
+                        The Resavar App
                     </span>
 
                     <h2
                         class="azari-app-title"
                         id="azari-app-title"
                     >
-                        Your Resarva experience, wherever you are.
+                        Your Resavar experience, wherever you are.
                     </h2>
 
                     <p class="azari-app-description">
-                        Download the Resarva app on Google Play
+                        Download the Resavar app on Google Play
                         for convenient access to your bookings, guest account
-                        and Resarva experience on Android.
+                        and Resavar experience on Android.
                     </p>
 
                     <div
@@ -935,7 +935,7 @@
                             class="azari-google-play-link"
                             target="_blank"
                             rel="noopener noreferrer"
-                            aria-label="Get Resarva on Google Play"
+                            aria-label="Get Resavar on Google Play"
                         >
                             <img
                                 src="{{ asset('images/google-play-badge.png') }}"
@@ -956,7 +956,7 @@
                 <div class="azari-app-visual">
                     <img
                         src="{{ asset('images/azari-hospitality-welcome.png') }}"
-                        alt="Resarva hospitality experience"
+                        alt="Resavar hospitality experience"
                         loading="lazy"
                         decoding="async"
                     >
@@ -968,7 +968,7 @@
                         >devices</span>
 
                         <div>
-                            <strong>Resarva on Android.</strong>
+                            <strong>Resavar on Android.</strong>
                             <span>Available on Google Play</span>
                         </div>
                     </div>
@@ -976,6 +976,6 @@
             </div>
         </div>
     </section>
-    <!-- RESARVA APP DOWNLOAD END -->
+    <!-- RESAVAR APP DOWNLOAD END -->
 
 </x-public-site.layout>
