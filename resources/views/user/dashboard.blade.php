@@ -1,7 +1,7 @@
 @extends('layouts.user')
-@section('title','Dashboard')
+@section('title','Trips')
 @section('kicker','Guest dashboard')
-@section('page_title','Your Reserva stay')
+@section('page_title','Trips')
 @section('content')
 @php
     $featured = $currentStay ?: $nextBooking;
@@ -71,7 +71,6 @@
 <section class="az-user-panel"><header class="az-user-panel-header"><div><h2 class="az-user-panel-title">Recent receipts</h2><p class="az-user-panel-subtitle">Successful payments associated with your bookings</p></div><a class="az-user-button az-user-button--light" href="{{ route('user.documents.index') }}">Document centre</a></header><div class="az-user-panel-body">
 @if($recentPayments->isEmpty())<div class="az-user-empty"><span class="material-symbols-outlined">receipt_long</span><p>Receipts will appear after a verified successful payment.</p></div>@else<div class="az-user-list">@foreach($recentPayments as $recent)<a class="az-user-list-item" href="{{ route('user.payments.show',$recent) }}"><div><h3>{{ $recent->receipt_number ?? $recent->reference }}</h3><p>{{ $recent->booking?->property?->name }} · {{ $recent->currency }} {{ number_format((float)$recent->amount,2) }}</p></div><span class="az-user-status">{{ ucfirst($recent->provider) }}</span></a>@endforeach</div>@endif
 </div></section>
-@endsection
 
 <section class="az-user-dashboard-grid" style="margin-top:18px">
     <div class="az-user-panel">
@@ -144,3 +143,4 @@
     </div>
 </section>
 @endif
+@endsection
