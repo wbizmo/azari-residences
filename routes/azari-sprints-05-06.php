@@ -22,5 +22,4 @@ Route::prefix('azaridevadmin')->name('azari.admin.')->middleware('azari.staff')-
     Route::post('/bookings/{booking}/notes', [BookingManagementController::class, 'storeNote'])->name('bookings.notes.store');
     Route::get('/bookings/{booking}/receipt', [BookingManagementController::class, 'receipt'])->name('bookings.receipt');
     Route::put('/bookings/{booking}/cancel', AzariBookingCancellationController::class)->name('bookings.cancel');
-    Route::get('/bookings/{booking}/documents/{document}', [BookingManagementController::class, 'document'])->name('bookings.document');
 });
