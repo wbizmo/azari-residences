@@ -7,4 +7,4 @@
 @section('message')
     {{ $message ?? 'We could not complete your request. We are working to identify and resolve the problem.' }}
 @endsection
-@section('support', 'Please try again shortly. If the issue continues, contact Resarva support.')
+@section('support', 'Please try again shortly. If the issue continues, contact Resavar support.')
