@@ -3,12 +3,14 @@
 namespace App\Services\Communications;
 
 use App\Models\Booking;
+use App\Models\BookingModificationRequest;
 use App\Models\CommunicationLog;
 use App\Models\GuestIdentityDocument;
 use App\Models\OwnerLedgerEntry;
 use App\Models\OwnerPayoutProfile;
 use App\Models\Payment;
 use App\Models\PropertyListing;
+use App\Models\Refund;
 use App\Models\ServiceRequest;
 use App\Models\SiteSetting;
 use App\Models\SupportTicket;
@@ -1078,6 +1080,96 @@ class AzariTransactionalMailService
             false,
             'Verified-stay review',
             'review-request:'.$booking->id
+        );
+    }
+
+    public function refundUpdated(Refund $refund, string $event = 'updated'): void
+    {
+        $booking = $refund->booking;
+        if (! $booking) {
+            return;
+        }
+
+        $status = (string) $refund->status;
+        $subject = match ($status) {
+            'successful' => 'Refund completed for booking '.$booking->reference,
+            'failed' => 'Refund update for booking '.$booking->reference,
+            'processing' => 'Refund processing for booking '.$booking->reference,
+            default => 'Refund requested for booking '.$booking->reference,
+        };
+
+        $tone = match ($status) {
+            'successful' => 'success',
+            'failed' => 'danger',
+            default => 'default',
+        };
+
+        $this->sendGuest(
+            $booking,
+            'refund-'.$status,
+            $subject,
+            [
+                'Your refund record has been updated.',
+                'The amount and current status are shown below.',
+            ],
+            'Open booking',
+            $this->guestBookingUrl($booking),
+            [
+                'Booking' => $booking->reference,
+                'Refund reference' => $refund->reference,
+                'Amount' => $this->money($refund->currency, $refund->amount),
+                'Status' => $this->label($status),
+                'Provider reference' => $refund->provider_reference,
+            ],
+            $refund->safe_error,
+            $tone,
+            null,
+            null,
+            true,
+            'Refund update',
+            'refund-'.$refund->id.':'.$status.':'.$event
+        );
+    }
+
+    public function bookingModificationUpdated(
+        BookingModificationRequest $request,
+        string $event = 'updated'
+    ): void {
+        $booking = $request->booking;
+        if (! $booking) {
+            return;
+        }
+
+        $status = (string) $request->status;
+        $subject = $event === 'created'
+            ? 'Trip change request '.$request->reference.' received'
+            : 'Trip change request '.$request->reference.' updated';
+
+        $this->sendGuest(
+            $booking,
+            'booking-modification-'.$status,
+            $subject,
+            [
+                $event === 'created'
+                    ? 'Reserva received your trip change request.'
+                    : 'Reserva updated your trip change request.',
+                'Open the booking to review the current status and any staff response.',
+            ],
+            'Open booking',
+            $this->guestBookingUrl($booking),
+            [
+                'Booking' => $booking->reference,
+                'Request' => $request->reference,
+                'Type' => $this->label($request->type),
+                'Status' => $this->label($status),
+            ],
+            $request->staff_note,
+            in_array($status, ['rejected', 'declined'], true) ? 'danger' : 'default',
+            null,
+            null,
+            false,
+            'Trip change',
+            'booking-modification-'.$request->id.':'.$status.':'.$event
         );
     }
 
