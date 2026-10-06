@@ -4,7 +4,7 @@
     @include('partials.material-symbols-preload')
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Sign in | Resavar</title>
+    <title>Sign in — Resavar</title>
     @vite(['resources/css/app.css','resources/js/app.js'])
 
     <style>
@@ -49,7 +49,7 @@
 <main class="auth">
     <section class="visual">
         <img src="{{ asset('images/azari-guest-auth-suite.png') }}" alt="Luxury Resavar suite">
-        <a class="brand" href="{{ url('/') }}">Resavar</a>
+        <span class="brand">Resavar</span>
     </section>
 
     <section class="panel">
