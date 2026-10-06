@@ -1,4 +1,4 @@
-<x-public-site.layout title="Guest verification | Resarva">
+<x-public-site.layout title="Guest verification | Resavar">
 <main class="site-container az-s56-page">
 <header>
     <span class="eyebrow">Adult guest verification</span>
@@ -25,7 +25,7 @@
 <section class="az-panel">
     <h2>Confirm this invitation</h2>
     <p>
-        For privacy, Resarva does not show the invited guest's name, email or identity status from the booking reference alone.
+        For privacy, Resavar does not show the invited guest's name, email or identity status from the booking reference alone.
         A one-time code will be sent to the email address the booker supplied for this adult.
     </p>
 
@@ -84,7 +84,7 @@
     @else
         <div class="az-notice" style="margin-top:18px">
             <strong>Complete your own Dojah verification.</strong>
-            The secure Dojah flow opens in a new tab. Return here and refresh after completion. Resarva only marks you verified after the signed Dojah result is received.
+            The secure Dojah flow opens in a new tab. Return here and refresh after completion. Resavar only marks you verified after the signed Dojah result is received.
         </div>
 
         <div style="margin-top:18px">
@@ -99,15 +99,15 @@
 </section>
 
 <section class="az-panel">
-    <h2>Optional Resarva account</h2>
+    <h2>Optional Resavar account</h2>
 
     @if($accountState === 'linked')
         <div class="az-notice">
-            <strong>This guest is linked to a Resarva account.</strong>
+            <strong>This guest is linked to a Resavar account.</strong>
             A successful Dojah result on this guest can also establish the account's verified identity, so you can book for yourself later without repeating setup.
         </div>
     @elseif($accountState === 'existing')
-        <p>A Resarva account already uses this email. Sign in to link this guest verification to that account.</p>
+        <p>A Resavar account already uses this email. Sign in to link this guest verification to that account.</p>
 
         <form method="POST" action="{{ route('guest-verification.account.link', [$booking->reference,$position]) }}">
             @csrf
@@ -115,7 +115,7 @@
         </form>
     @else
         <p>
-            You can complete verification only for this booking, or create your own Resarva account now so the verified identity can be linked to you for future bookings.
+            You can complete verification only for this booking, or create your own Resavar account now so the verified identity can be linked to you for future bookings.
         </p>
 
         <form method="POST" action="{{ route('guest-verification.account.create', [$booking->reference,$position]) }}" style="margin-top:16px">
@@ -133,7 +133,7 @@
                 </label>
             </div>
 
-            <button class="button" type="submit" style="margin-top:12px">Create my Resarva account</button>
+            <button class="button" type="submit" style="margin-top:12px">Create my Resavar account</button>
         </form>
 
         <p style="margin-top:12px">Creating an account is optional and is not required to verify for this booking.</p>
