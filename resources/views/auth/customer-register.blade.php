@@ -4,7 +4,7 @@
     @include('partials.material-symbols-preload')
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Create guest account | Resavar</title>
+    <title>Create guest account — Resavar</title>
     @vite(['resources/css/app.css','resources/js/app.js'])
 </head>
 
