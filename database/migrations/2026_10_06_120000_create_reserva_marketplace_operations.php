@@ -329,6 +329,27 @@ return new class extends Migration
             });
         }
 
+        if (Schema::hasTable('bookings') && Schema::hasColumn('bookings', 'hold_token')) {
+            $duplicateHold = DB::table('bookings')
+                ->select('hold_token')
+                ->whereNotNull('hold_token')
+                ->groupBy('hold_token')
+                ->havingRaw('COUNT(*) > 1')
+                ->value('hold_token');
+
+            if ($duplicateHold !== null) {
+                throw new \RuntimeException(
+                    'Cannot enforce booking hold idempotency because duplicate hold_token values already exist.'
+                );
+            }
+
+            if (! Schema::hasIndex('bookings', 'bookings_hold_token_reserva_unique')) {
+                Schema::table('bookings', fn (Blueprint $table) =>
+                    $table->unique('hold_token', 'bookings_hold_token_reserva_unique')
+                );
+            }
+        }
+
         if (Schema::hasTable('bookings') && ! Schema::hasIndex('bookings', 'bookings_inventory_window_idx')) {
             Schema::table('bookings', function (Blueprint $table): void {
                 $table->index(['accommodation_type_id', 'check_in', 'check_out', 'status'], 'bookings_inventory_window_idx');
@@ -379,6 +400,10 @@ return new class extends Migration
         }
 
         if (Schema::hasTable('bookings')) {
+            if (Schema::hasIndex('bookings', 'bookings_hold_token_reserva_unique')) {
+                Schema::table('bookings', fn (Blueprint $table) => $table->dropUnique('bookings_hold_token_reserva_unique'));
+            }
+
             foreach (['bookings_inventory_window_idx', 'bookings_property_stay_idx'] as $index) {
                 if (Schema::hasIndex('bookings', $index)) {
                     Schema::table('bookings', fn (Blueprint $table) => $table->dropIndex($index));
