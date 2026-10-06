@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PropertyPointOfInterest extends Model
 {
+    protected $table = 'property_points_of_interest';
+
     protected $guarded = [];
 
     protected function casts(): array
