@@ -3,7 +3,7 @@
 <header>
     <span class="eyebrow">Booking secured</span>
     <h1>Finishing your booking</h1>
-    <p>Your account, email and identity are verified. We are attaching the saved guest details to this reservation.</p>
+    <p>Your account and email are ready. We are attaching the saved guest details to this reservation.</p>
 </header>
 
 <section class="az-panel">
