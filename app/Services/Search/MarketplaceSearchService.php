@@ -10,6 +10,7 @@ use App\Services\Reviews\ReviewSummaryService;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -35,10 +36,10 @@ class MarketplaceSearchService
                 'locationRecord',
                 'roomType',
                 'amenities:id,name,icon',
-                'publicAccommodationTypes' => fn (Builder $typeQuery) =>
+                'publicAccommodationTypes' => fn ($typeQuery) =>
                     $this->applyTypeFilters($typeQuery, $filters, $checkIn, $checkOut, $rooms, $guests)
                         ->with([
-                            'ratePlans' => fn (Builder $rateQuery) => $rateQuery
+                            'ratePlans' => fn ($rateQuery) => $rateQuery
                                 ->where('is_active', true)
                                 ->where('is_public', true)
                                 ->with(['cancellationPolicy', 'paymentPolicy'])
@@ -56,7 +57,7 @@ class MarketplaceSearchService
                 'favourites as is_favourite' => fn (Builder $fav) => $fav->where('user_id', auth()->id()),
             ]))
             ->withMin([
-                'publicAccommodationTypes as search_min_rate' => fn (Builder $typeQuery) =>
+                'publicAccommodationTypes as search_min_rate' => fn ($typeQuery) =>
                     $this->applyStaticTypeFilters($typeQuery, $filters, $rooms, $guests),
             ], 'base_rate');
 
@@ -261,13 +262,13 @@ class MarketplaceSearchService
     }
 
     private function applyTypeFilters(
-        Builder $query,
+        Builder|Relation $query,
         array $filters,
         CarbonImmutable $checkIn,
         CarbonImmutable $checkOut,
         int $rooms,
         int $guests
-    ): Builder {
+    ): Builder|Relation {
         $this->applyStaticTypeFilters($query, $filters, $rooms, $guests);
 
         $dates = [];
@@ -289,7 +290,7 @@ class MarketplaceSearchService
         return $query;
     }
 
-    private function applyStaticTypeFilters(Builder $query, array $filters, int $rooms, int $guests): Builder
+    private function applyStaticTypeFilters(Builder|Relation $query, array $filters, int $rooms, int $guests): Builder|Relation
     {
         $requiredPerUnit = max(1, (int) ceil($guests / max(1, $rooms)));
 
@@ -326,7 +327,7 @@ class MarketplaceSearchService
         return $query;
     }
 
-    private function applyDateAvailabilityConstraint(Builder $query, string $date, int $rooms): void
+    private function applyDateAvailabilityConstraint(Builder|Relation $query, string $date, int $rooms): void
     {
         $statuses = config('azari.booking.active_statuses', [
             'hold', 'pending', 'pending_payment', 'approved', 'confirmed',
