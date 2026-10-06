@@ -75,7 +75,7 @@
             @forelse($messages as $m)
                 <article class="az-support-message {{ $m->internal ? 'is-internal' : '' }}">
                     <div class="az-support-message__head">
-                        <strong>{{ $m->internal ? 'Internal note' : ($m->user?->name ?: 'Reserva Support') }}</strong>
+                        <strong>{{ $m->internal ? 'Internal note' : ($m->user?->name ?: 'Resarva Support') }}</strong>
                         <span>{{ $m->created_at?->format('j M Y, g:i A') }}</span>
                     </div>
                     <p>{!! nl2br(e($m->body)) !!}</p>

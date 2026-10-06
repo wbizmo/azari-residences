@@ -85,7 +85,7 @@ final class TwilioWhatsAppChannel
                 'delivered_at' => in_array($providerStatus, ['delivered', 'read'], true) ? now() : null,
             ]);
         } catch (\Throwable $exception) {
-            Log::error('Reserva WhatsApp delivery failed', [
+            Log::error('Resarva WhatsApp delivery failed', [
                 'log_id' => $log->id,
                 'exception' => $exception,
             ]);

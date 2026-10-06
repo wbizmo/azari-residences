@@ -112,7 +112,7 @@ test.beforeAll(async () => {
 test('public homepage has readable booking controls and keyboard focus', async ({ page }) => {
     await page.goto(baseURL, { waitUntil: 'networkidle' });
 
-    await expect(page).toHaveTitle(/Reserva/i);
+    await expect(page).toHaveTitle(/Resarva/i);
     await expectReadable(page.locator('.availability-submit').first(), 4.5);
     await expectVisibleFocus(page.locator('.availability-submit').first());
 

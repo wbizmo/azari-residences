@@ -61,7 +61,7 @@ class AzariTransactionalEmailArchitectureTest extends TestCase
             'footerText' => 'Transactional message.',
         ])->render();
 
-        $this->assertStringContainsString('RESERVA', $html);
+        $this->assertStringContainsString('RESARVA', $html);
         $this->assertStringContainsString('Booking reference', $html);
         $this->assertStringContainsString('Exceptional Stays, Everywhere.', $html);
         $this->assertStringNotContainsString('Laravel', $html);
