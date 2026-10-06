@@ -259,6 +259,26 @@ return new class extends Migration
             });
         }
 
+        if (Schema::hasTable('site_settings')) {
+            DB::table('site_settings')
+                ->where('key', 'site_name')
+                ->whereIn('value', ['Azari Residences', 'Resavar'])
+                ->update(['value' => 'Reserva', 'updated_at' => now()]);
+
+            DB::table('site_settings')
+                ->where('key', 'business_name')
+                ->whereIn('value', ['Azari Luxury Properties LTD', 'Resavar Luxury Properties Ltd'])
+                ->update(['value' => 'Reserva Luxury Properties Ltd', 'updated_at' => now()]);
+
+            DB::table('site_settings')
+                ->where('key', 'seo_title')
+                ->whereIn('value', [
+                    'Azari Residences | Exceptional serviced stays',
+                    'Resavar | Exceptional serviced stays',
+                ])
+                ->update(['value' => 'Reserva | Exceptional serviced stays', 'updated_at' => now()]);
+        }
+
         if (Schema::hasTable('communication_logs')) {
             Schema::table('communication_logs', function (Blueprint $table): void {
                 if (! Schema::hasColumn('communication_logs', 'idempotency_key')) {
