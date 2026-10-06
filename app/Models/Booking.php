@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Support\Facades\Schema;
 
 class Booking extends Model
 {
@@ -184,14 +183,7 @@ class Booking extends Model
             && ! $this->checked_in_at
             && now($this->property_timezone ?: LocalDate::propertyTimezone($this->property))->toDateString() === optional($this->check_in)->toDateString();
 
-        if (! $baseEligible || ! Schema::hasTable('identity_verifications')) {
-            return false;
-        }
-
-        $adultIds = $this->guests()->where('type', 'adult')->pluck('id');
-
-        return $adultIds->isNotEmpty()
-            && $adultIds->every(fn ($guestId) => IdentityVerification::guestIsVerified((int) $guestId));
+        return $baseEligible;
     }
 
     public function directionsUrl(): ?string
