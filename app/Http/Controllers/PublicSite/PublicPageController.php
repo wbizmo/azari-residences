@@ -180,13 +180,13 @@ class PublicPageController extends Controller
             'restaurant' => ['Restaurant & dining', 'Curated dining support, local recommendations and memorable table experiences.', 'azari-food.png'],
             'airport-transfers' => ['Airport transfers', 'Reliable pickup and drop-off coordination from arrival to residence.', 'azari-airport.png'],
             'local-guide' => ['Local guide', 'Discover dining, culture, business districts and everyday essentials with local confidence.', 'local-guides-azari.png'],
-            'about' => ['About Resarva', 'A hospitality team creating dependable, private and beautifully managed stays.', 'team-azari.png'],
-            'contact' => ['Contact', 'Speak with the Resarva team about bookings, stays, partnerships or guest support.', 'contact-azari.png'],
+            'about' => ['About Resavar', 'A hospitality team creating dependable, private and beautifully managed stays.', 'team-azari.png'],
+            'contact' => ['Contact', 'Speak with the Resavar team about bookings, stays, partnerships or guest support.', 'contact-azari.png'],
             'support' => ['Guest support', 'Get help with an existing or upcoming stay.', 'contact-azari.png'],
-            'booking-terms' => ['Booking terms', 'The terms applying to Resarva reservations.', 'azari-hub.png'],
+            'booking-terms' => ['Booking terms', 'The terms applying to Resavar reservations.', 'azari-hub.png'],
             'cancellation-policy' => ['Cancellation policy', 'Cancellation conditions are confirmed with each reservation.', 'azari-hub.png'],
-            'privacy-policy' => ['Privacy policy', 'How Resarva handles guest and booking information.', 'azari-hub.png'],
-            'terms' => ['Terms and conditions', 'The general terms governing use of the Resarva website and services.', 'azari-hub.png'],
+            'privacy-policy' => ['Privacy policy', 'How Resavar handles guest and booking information.', 'azari-hub.png'],
+            'terms' => ['Terms and conditions', 'The general terms governing use of the Resavar website and services.', 'azari-hub.png'],
         ];
 
         abort_unless(isset($pages[$key]), 404);
@@ -209,7 +209,7 @@ class PublicPageController extends Controller
 
         Mail::to($recipient)->send(new ContactEnquiry($data));
 
-        return back()->with('success', 'Your message has been sent. The Resarva team will respond as soon as possible.');
+        return back()->with('success', 'Your message has been sent. The Resavar team will respond as soon as possible.');
     }
 
     private function collection(string $title, string $type, string $image, string $intro): View
