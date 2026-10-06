@@ -9,25 +9,11 @@
     $payment = $featured?->payments?->firstWhere('status','successful') ?: $featured?->payments?->first();
 @endphp
 
-@if(!$identityVerified)
-<section class="az-user-panel" style="margin-bottom:18px">
-    <div class="az-user-panel-body">
-        <div class="az-user-alert az-user-alert--danger">
-            <strong>Identity verification required.</strong>
-            <p>Your account is currently unverified. Complete Dojah verification before bookings, payments, property listings or other KYC-protected actions can continue.</p>
-        </div>
-        <div class="az-user-actions" style="margin-top:14px">
-            <a class="az-user-button az-user-button--dark" href="{{ route('user.identity.index') }}">Verify with Dojah</a>
-        </div>
-    </div>
-</section>
-@endif
-
 <section class="az-user-hero-grid">
     <article class="az-user-welcome">
-        <div class="az-user-eyebrow"><span class="material-symbols-outlined">{{ $identityVerified ? 'verified' : 'shield' }}</span> Welcome back</div>
+        <div class="az-user-eyebrow"><span class="material-symbols-outlined">hotel</span> Welcome back</div>
         <h2>{{ $currentStay ? 'Your stay is now underway.' : ($nextBooking ? 'Your next stay is beautifully arranged.' : 'Your next Resavar stay begins here.') }}</h2>
-        <p>{{ $featured ? 'Review your reservation, payment status, identities and documents from one private guest area.' : 'Browse available stays, choose your dates and complete a new booking whenever you are ready.' }}</p>
+        <p>{{ $featured ? 'Review your reservation, payment status and documents from one private guest area.' : 'Browse available stays, choose your dates and complete a new booking whenever you are ready.' }}</p>
         <div class="az-user-actions">
             @if($featured)<a class="az-user-button az-user-button--primary" href="{{ route('user.bookings.show',$featured->reference) }}"><span class="material-symbols-outlined">calendar_month</span>View booking</a>@endif
             <a class="az-user-button az-user-button--ghost" href="{{ route('availability.index') }}"><span class="material-symbols-outlined">search</span>Book another stay</a>
@@ -62,8 +48,7 @@
     </div>
 
     <aside class="az-user-panel"><header class="az-user-panel-header"><div><h2 class="az-user-panel-title">Guest essentials</h2><p class="az-user-panel-subtitle">Complete the items needed for a smooth stay</p></div></header><div class="az-user-panel-body az-user-list">
-        <a class="az-user-list-item" href="{{ route('user.identity.index') }}"><div><h3>My identity</h3><p>{{ $identityVerified ? 'Your Resavar account is verified by Dojah.' : 'Dojah verification is required.' }}</p></div><span class="material-symbols-outlined">chevron_right</span></a>
-        <a class="az-user-list-item" href="{{ route('user.guests.index') }}"><div><h3>Additional adult guests</h3><p>Every additional adult completes their own Dojah verification.</p></div><span class="material-symbols-outlined">chevron_right</span></a>
+        <a class="az-user-list-item" href="{{ route('user.guests.index') }}"><div><h3>Additional guests</h3><p>Review the guests attached to your bookings.</p></div><span class="material-symbols-outlined">chevron_right</span></a>
         <a class="az-user-list-item" href="{{ route('user.contact') }}"><div><h3>Contact Resavar</h3><p>See the dynamically configured phone, email and support hours.</p></div><span class="material-symbols-outlined">chevron_right</span></a>
     </div></aside>
 </section>
