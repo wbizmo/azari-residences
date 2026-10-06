@@ -139,3 +139,128 @@ html[data-admin-theme="dark"] :is(.az-metric-card,.az-panel,.az-profile-dropdown
 html[data-admin-theme="dark"] :is(.az-section-heading__meta,.az-topbar-page__eyebrow,.az-profile-trigger__copy small,.az-metric-card small,.az-metric-card>div:last-child>span) {
     color: var(--az-admin-muted) !important;
 }
+
+
+/* RESAVAR_ADMIN_CONTRAST_ALIGNMENT_V1 */
+/* Explicit Resavar admin hero contrast: white action on navy, white ghost action. */
+.az-dashboard-hero .az-button--brass,
+.az-dashboard-hero .az-button--brass:link,
+.az-dashboard-hero .az-button--brass:visited {
+    background: #FFFFFF !important;
+    border-color: #FFFFFF !important;
+    color: #052058 !important;
+    -webkit-text-fill-color: #052058 !important;
+}
+.az-dashboard-hero .az-button--brass :is(span,strong,.material-symbols-outlined) {
+    color: #052058 !important;
+    -webkit-text-fill-color: #052058 !important;
+}
+.az-dashboard-hero .az-button--ghost-light,
+.az-dashboard-hero .az-button--ghost-light:link,
+.az-dashboard-hero .az-button--ghost-light:visited {
+    background: transparent !important;
+    border-color: rgba(255,255,255,.72) !important;
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+.az-dashboard-hero .az-button--ghost-light :is(span,strong,.material-symbols-outlined) {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+.az-dashboard-hero .az-button--brass:hover,
+.az-dashboard-hero .az-button--brass:focus-visible {
+    background: #FFFFFF !important;
+    border-color: #FFFFFF !important;
+    color: #052058 !important;
+    -webkit-text-fill-color: #052058 !important;
+    box-shadow: 0 0 0 3px rgba(255,255,255,.22) !important;
+}
+.az-dashboard-hero .az-button--ghost-light:hover,
+.az-dashboard-hero .az-button--ghost-light:focus-visible {
+    background: #FFFFFF !important;
+    border-color: #FFFFFF !important;
+    color: #052058 !important;
+    -webkit-text-fill-color: #052058 !important;
+}
+.az-dashboard-hero .az-button--ghost-light:hover :is(span,strong,.material-symbols-outlined),
+.az-dashboard-hero .az-button--ghost-light:focus-visible :is(span,strong,.material-symbols-outlined) {
+    color: #052058 !important;
+    -webkit-text-fill-color: #052058 !important;
+}
+
+/* Keep topbar profile avatar and copy aligned as one stable control. */
+.az-topbar-actions {
+    margin-left: auto !important;
+    min-width: 0 !important;
+    justify-content: flex-end !important;
+}
+.az-profile-menu {
+    position: relative !important;
+    flex: 0 0 auto !important;
+}
+.az-profile-trigger {
+    display: inline-flex !important;
+    min-width: 0 !important;
+    min-height: 50px !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 10px !important;
+    padding: 5px 10px 5px 5px !important;
+    vertical-align: middle !important;
+}
+.az-profile-trigger .az-avatar {
+    display: inline-grid !important;
+    width: 40px !important;
+    height: 40px !important;
+    flex: 0 0 40px !important;
+    place-items: center !important;
+    margin: 0 !important;
+    border-color: rgba(5,32,88,.18) !important;
+    background: #052058 !important;
+    color: #FFFFFF !important;
+    line-height: 1 !important;
+}
+.az-profile-trigger .az-avatar img,
+.az-profile-summary .az-avatar img {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    border-radius: 50% !important;
+}
+.az-profile-trigger__copy {
+    display: flex !important;
+    min-width: 0 !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    gap: 2px !important;
+    margin: 0 !important;
+    line-height: 1.2 !important;
+}
+.az-profile-trigger__copy strong,
+.az-profile-trigger__copy small {
+    display: block !important;
+    margin: 0 !important;
+    line-height: 1.2 !important;
+}
+.az-profile-chevron {
+    flex: 0 0 auto !important;
+    margin: 0 !important;
+}
+.az-profile-dropdown {
+    right: 0 !important;
+    left: auto !important;
+}
+.az-profile-summary {
+    display: grid !important;
+    grid-template-columns: 46px minmax(0,1fr) !important;
+    align-items: center !important;
+    gap: 12px !important;
+}
+.az-profile-summary .az-avatar--large {
+    width: 46px !important;
+    height: 46px !important;
+    margin: 0 !important;
+}
+/* RESAVAR_ADMIN_CONTRAST_ALIGNMENT_V1 */_END
