@@ -44,7 +44,7 @@ const AzariUI = (() => {
                     <header class="az-modal__header">
                         <span class="az-modal__icon material-symbols-outlined" aria-hidden="true">${destructive ? 'warning' : 'help'}</span>
                         <div>
-                            <p class="az-modal__eyebrow">Resavar</p>
+                            <p class="az-modal__eyebrow">Reserva</p>
                             <h2 id="az-confirm-title"></h2>
                         </div>
                         <button type="button" class="az-modal__close" data-az-modal-cancel aria-label="Close confirmation">
