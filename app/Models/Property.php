@@ -171,6 +171,11 @@ class Property extends Model
         return $this->hasMany(InventoryChangeLog::class);
     }
 
+    public function maintenancePeriods(): HasMany
+    {
+        return $this->hasMany(MaintenancePeriod::class);
+    }
+
     public function getRouteKeyName(): string
     {
         return 'slug';
