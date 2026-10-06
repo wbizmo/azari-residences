@@ -12,6 +12,7 @@ use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Schema;
 
 class PremiumMailNotification extends Notification implements ShouldQueue
 {
@@ -45,8 +46,11 @@ class PremiumMailNotification extends Notification implements ShouldQueue
         }
 
         $preference = method_exists($notifiable, 'communicationPreference')
-            ? $notifiable->communicationPreference()->first()
-            : null;
+            && method_exists($notifiable, 'getKey')
+            && $notifiable->getKey()
+            && Schema::hasTable('communication_preferences')
+                ? $notifiable->communicationPreference()->first()
+                : null;
 
         $emailAllowed = $this->forceDelivery
             || (bool) ($preference?->email_transactional ?? $notifiable->email_notifications ?? true);
