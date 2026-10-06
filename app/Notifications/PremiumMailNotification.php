@@ -89,6 +89,15 @@ class PremiumMailNotification extends Notification implements ShouldQueue
             ? (string) $notifiable->routeNotificationFor('mail')
             : (string) ($notifiable->email ?? '');
 
+        $dedupeKey = (string) ($this->context['dedupe_key'] ?? ($this->id ?: $this->template));
+        $idempotencyKey = hash('sha256', 'email|'.strtolower($email).'|'.$dedupeKey);
+        $payloadHash = hash('sha256', json_encode([
+            $this->subject,
+            $this->lines,
+            $this->details,
+            $this->actionUrl,
+        ]));
+
         $attributes = [
             'channel' => 'email',
             'template' => $this->template,
@@ -100,14 +109,25 @@ class PremiumMailNotification extends Notification implements ShouldQueue
             'status' => 'queued',
             'queued_at' => now(),
             'safe_error' => null,
+            'classification' => $this->context['classification'] ?? 'transactional',
+            'locale' => $this->context['locale'] ?? app()->getLocale(),
+            'timezone' => $this->context['timezone'] ?? ($notifiable->timezone ?? config('azari.timezone', 'Africa/Lagos')),
+            'payload_hash' => $payloadHash,
             'meta' => array_merge($this->context, ['notification_id' => $this->id]),
         ];
 
         $logId = (int) ($this->context['communication_log_id'] ?? 0);
+
         if ($logId > 0) {
-            CommunicationLog::query()->whereKey($logId)->update($attributes);
+            CommunicationLog::query()
+                ->whereKey($logId)
+                ->where('channel', 'email')
+                ->update($attributes + ['idempotency_key' => $idempotencyKey]);
         } else {
-            CommunicationLog::query()->create($attributes);
+            CommunicationLog::query()->firstOrCreate(
+                ['idempotency_key' => $idempotencyKey],
+                $attributes
+            );
         }
 
         $supportEmail = SiteSetting::valueFor(
@@ -138,6 +158,31 @@ class PremiumMailNotification extends Notification implements ShouldQueue
 
     public function toDatabase(object $notifiable): array
     {
+        $dedupeKey = (string) ($this->context['dedupe_key'] ?? ($this->id ?: $this->template));
+        $idempotencyKey = hash('sha256', 'in_app|'.($notifiable->id ?? 'anonymous').'|'.$dedupeKey);
+
+        CommunicationLog::query()->firstOrCreate(
+            ['idempotency_key' => $idempotencyKey],
+            [
+                'channel' => 'in_app',
+                'template' => $this->template,
+                'booking_id' => $this->context['booking_id'] ?? null,
+                'user_id' => $notifiable->id ?? null,
+                'recipient' => 'user:'.($notifiable->id ?? 'unknown'),
+                'masked_recipient' => 'in-app',
+                'provider' => 'database',
+                'status' => 'delivered',
+                'queued_at' => now(),
+                'sent_at' => now(),
+                'delivered_at' => now(),
+                'classification' => $this->context['classification'] ?? 'transactional',
+                'locale' => $this->context['locale'] ?? app()->getLocale(),
+                'timezone' => $this->context['timezone'] ?? ($notifiable->timezone ?? config('azari.timezone', 'Africa/Lagos')),
+                'payload_hash' => hash('sha256', json_encode([$this->subject, $this->lines, $this->actionUrl])),
+                'meta' => array_merge($this->context, ['notification_id' => $this->id]),
+            ]
+        );
+
         return [
             'template' => $this->template,
             'subject' => $this->subject,
