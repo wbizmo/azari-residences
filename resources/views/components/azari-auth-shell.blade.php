@@ -18,13 +18,6 @@
 <body class="az-standalone-auth-body az-auth-page">
     <main class="az-standalone-auth-shell az-auth-shell az-auth-main">
         <section class="az-standalone-auth-card az-auth-card" aria-labelledby="az-auth-heading">
-            <a class="az-auth-home-link" href="{{ url('/') }}">
-                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                    <path d="M19 12H5"/>
-                    <path d="m11 18-6-6 6-6"/>
-                </svg>
-                <span>Back to homepage</span>
-            </a>
 
             <span class="eyebrow">{{ $eyebrow }}</span>
             <h1 id="az-auth-heading">{{ $heading }}</h1>
