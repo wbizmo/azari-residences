@@ -67,7 +67,14 @@
 <x-public-site.layout :title="$property->name" :description="$property->short_description">
     <script type="application/ld+json">{!! json_encode($schema, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE) !!}</script>
 
-    <main class="reserva-property-page">
+    <main
+        class="reserva-property-page"
+        data-resavar-property="{{ $property->id }}"
+        data-property-name="{{ $property->name }}"
+        data-property-url="{{ route('properties.show', $property) }}"
+        data-property-location="{{ $property->locationRecord?->name ?? $property->location }}"
+        data-property-image="{{ $property->cover_image ? Storage::url($property->cover_image) : asset('images/azari-residence-fallback.png') }}"
+    >
         <div class="site-container">
             <nav class="reserva-property-breadcrumb" aria-label="Breadcrumb">
                 <a href="{{ route('home') }}">Home</a>
@@ -104,10 +111,17 @@
                             </button>
                         </form>
                     @else
-                        <a class="button button-secondary" href="{{ route('login') }}">
+                        <button
+                            class="button button-secondary resavar-local-favourite"
+                            type="button"
+                            aria-pressed="false"
+                            data-resavar-local-favourite="{{ $property->id }}"
+                            data-property-name="{{ $property->name }}"
+                            data-property-url="{{ route('properties.show', $property) }}"
+                        >
                             <span class="material-symbols-outlined" aria-hidden="true">favorite_border</span>
-                            Save
-                        </a>
+                            <span data-favourite-label>Save</span>
+                        </button>
                     @endauth
 
                     <button
