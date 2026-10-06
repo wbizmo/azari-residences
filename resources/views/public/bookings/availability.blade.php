@@ -258,10 +258,29 @@
                                                     </button>
                                                 </form>
                                             @else
-                                                <a class="reserva-favourite-button" href="{{ route('login') }}" aria-label="Sign in to save this stay">
+                                                <button
+                                                    class="reserva-favourite-button resavar-local-favourite"
+                                                    type="button"
+                                                    aria-label="Save this stay on this device"
+                                                    aria-pressed="false"
+                                                    data-resavar-local-favourite="{{ $property->id }}"
+                                                    data-property-name="{{ $property->name }}"
+                                                    data-property-url="{{ route('properties.show', $property) }}"
+                                                >
                                                     <span class="material-symbols-outlined" aria-hidden="true">favorite_border</span>
-                                                </a>
+                                                </button>
                                             @endauth
+
+                                            <button
+                                                class="button button-secondary resavar-compare-button"
+                                                type="button"
+                                                aria-pressed="false"
+                                                data-resavar-compare="{{ $property->id }}"
+                                                data-property-name="{{ $property->name }}"
+                                                data-property-url="{{ route('properties.show', $property) }}"
+                                            >
+                                                Compare
+                                            </button>
 
                                             <a class="button button-secondary" href="{{ route('properties.show', $property) }}">View details</a>
 
