@@ -9,6 +9,7 @@ use App\Models\Property;
 use App\Models\PropertyListing;
 use App\Models\SiteSetting;
 use App\Models\WithdrawalRequest;
+use App\Services\Owners\ListingCompletenessService;
 use App\Services\Owners\OwnerWithdrawalService;
 use Dompdf\Dompdf;
 use Dompdf\Options;
@@ -58,8 +59,18 @@ class OwnerMarketplaceController extends Controller
         return back()->with('status', 'Listing marked as under review.');
     }
 
-    public function approveListing(Request $request, PropertyListing $listing): RedirectResponse
-    {
+    public function approveListing(
+        Request $request,
+        PropertyListing $listing,
+        ListingCompletenessService $completeness
+    ): RedirectResponse {
+        $completion = $completeness->sync($listing->load('user.ownerPayoutProfile'));
+
+        abort_unless(
+            $completion['publishable'],
+            422,
+            'This listing is incomplete: '.implode(', ', $completion['blockers']).'.'
+        );
         abort_unless(in_array($listing->status, ['submitted', 'under_review'], true), 422);
 
         $data = $request->validate([
