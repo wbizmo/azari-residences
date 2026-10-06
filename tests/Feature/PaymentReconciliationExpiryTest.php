@@ -77,4 +77,46 @@ class PaymentReconciliationExpiryTest extends TestCase
         $this->assertSame(0, $result['abandoned']);
         $this->assertDatabaseCount('payment_verification_attempts', 0);
     }
+
+    public function test_late_provider_success_does_not_reactivate_cancelled_booking(): void
+    {
+        $booking = Booking::factory()->create([
+            'status' => 'cancelled',
+            'currency' => 'USD',
+            'total' => 500,
+            'cancelled_at' => now()->subHour(),
+            'cancellation_reason' => 'Payment window expired',
+        ]);
+
+        $payment = Payment::query()->create([
+            'reference' => 'PAY-LATE-001',
+            'provider' => 'pesapal',
+            'provider_reference' => 'LATE-TRACKING-ID',
+            'booking_id' => $booking->id,
+            'guest_email' => $booking->guest_email,
+            'amount' => 500,
+            'currency' => 'USD',
+            'status' => 'abandoned',
+            'initiated_at' => now()->subHours(2),
+            'abandoned_at' => now()->subHour(),
+        ]);
+
+        app(\App\Services\Payments\PaymentFinalizer::class)->apply($payment, [
+            'status' => 'successful',
+            'provider_status' => 'COMPLETED',
+            'provider_reference' => 'LATE-TRACKING-ID',
+            'merchant_reference' => 'PAY-LATE-001',
+            'amount' => 500,
+            'currency' => 'USD',
+            'payment_method' => 'card',
+            'safe_response' => ['payment_status_description' => 'COMPLETED'],
+        ], 'late-webhook-test');
+
+        $this->assertSame('cancelled', $booking->fresh()->status);
+        $this->assertSame('successful_excess', $payment->fresh()->status);
+        $this->assertStringContainsString(
+            'after the booking had already been cancelled',
+            (string) $payment->fresh()->administrative_note
+        );
+    }
 }
