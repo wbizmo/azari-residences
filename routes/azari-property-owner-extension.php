@@ -33,6 +33,8 @@ Route::prefix('user/property-centre')
             ->name('commercial.accommodations.store');
         Route::put('/properties/{property}/commercial/accommodations/{accommodationType}', [OwnerCommercialInventoryController::class, 'updateAccommodation'])
             ->name('commercial.accommodations.update');
+        Route::post('/properties/{property}/commercial/accommodations/{accommodationType}/calendar', [OwnerCommercialInventoryController::class, 'bulkUpdate'])
+            ->name('commercial.calendar.bulk-update');
         Route::post('/properties/{property}/commercial/accommodations/{accommodationType}/rate-plans', [OwnerCommercialInventoryController::class, 'storeRatePlan'])
             ->name('commercial.rate-plans.store');
         Route::put('/properties/{property}/commercial/accommodations/{accommodationType}/rate-plans/{ratePlan}', [OwnerCommercialInventoryController::class, 'updateRatePlan'])
