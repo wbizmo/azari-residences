@@ -1332,17 +1332,18 @@ class AzariTransactionalMailService
             'eyebrow' => $eyebrow,
         ];
 
-        $dispatchKey = hash('sha256', 'dispatch|'.($user?->id ?: $email).'|'.$dedupeKey);
+        $reservationChannel = $user ? 'dispatch' : 'email';
+        $reservationKey = hash('sha256', $reservationChannel.'|'.($user?->id ?: $email).'|'.$dedupeKey);
         $dispatch = CommunicationLog::query()->firstOrCreate(
-            ['idempotency_key' => $dispatchKey],
+            ['idempotency_key' => $reservationKey],
             [
-                'channel' => 'dispatch',
+                'channel' => $reservationChannel,
                 'template' => $template,
                 'booking_id' => $context['booking_id'] ?? null,
                 'user_id' => $context['user_id'] ?? $user?->id,
                 'recipient' => $email,
                 'masked_recipient' => $this->maskEmail($email),
-                'provider' => 'laravel-notifications',
+                'provider' => $user ? 'laravel-notifications' : config('mail.default'),
                 'status' => 'queued',
                 'queued_at' => now(),
                 'classification' => 'transactional',
@@ -1361,19 +1362,25 @@ class AzariTransactionalMailService
             return;
         }
 
+        $notificationContext = array_merge($context, [
+            'dedupe_key' => $dedupeKey,
+            'classification' => 'transactional',
+            'locale' => app()->getLocale(),
+            'timezone' => $user?->timezone ?: config('azari.timezone', 'Africa/Lagos'),
+            'snapshot' => $snapshot,
+        ]);
+
+        if (! $user) {
+            $notificationContext['communication_log_id'] = $dispatch->getKey();
+        }
+
         $notification = new PremiumMailNotification(
             template: $template,
             subject: $subject,
             lines: $lines,
             actionLabel: $actionLabel,
             actionUrl: $actionUrl,
-            context: array_merge($context, [
-                'dedupe_key' => $dedupeKey,
-                'classification' => 'transactional',
-                'locale' => app()->getLocale(),
-                'timezone' => $user?->timezone ?: config('azari.timezone', 'Africa/Lagos'),
-                'snapshot' => $snapshot,
-            ]),
+            context: $notificationContext,
             details: $details,
             notice: $notice,
             tone: $tone,
@@ -1391,11 +1398,13 @@ class AzariTransactionalMailService
                 Notification::route('mail', $email)->notify($notification);
             }
 
-            $dispatch->update([
-                'status' => 'sent',
-                'sent_at' => now(),
-                'safe_error' => null,
-            ]);
+            if ($user) {
+                $dispatch->update([
+                    'status' => 'sent',
+                    'sent_at' => now(),
+                    'safe_error' => null,
+                ]);
+            }
         } catch (Throwable $exception) {
             $dispatch->update([
                 'status' => 'failed',
