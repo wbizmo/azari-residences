@@ -14,6 +14,7 @@ class PaymentInitiator
     public function __construct(
         private readonly PaymentManager $manager,
         private readonly PaymentEligibilityService $eligibility,
+        private readonly PaymentScheduleService $schedule,
     ) {}
 
     public function create(
@@ -37,9 +38,11 @@ class PaymentInitiator
                 )
                 ->firstOrFail();
             $this->eligibility->assertCanInitiate($lockedBooking);
-            $balance = $lockedBooking->balanceDue();
-            if ($balance <= 0) {
-                throw ValidationException::withMessages(['booking' => 'This booking is already fully paid.']);
+            $schedule = $this->schedule->amountToCollect($lockedBooking);
+            $chargeAmount = (float) $schedule['amount'];
+
+            if ($chargeAmount <= 0) {
+                throw ValidationException::withMessages(['booking' => 'There is no payable balance for this booking.']);
             }
 
             $active = Payment::query()
@@ -50,16 +53,27 @@ class PaymentInitiator
                 ->first();
 
             if ($active) {
+                $matchesCurrentSchedule = abs((float) $active->amount - $chargeAmount) < 0.01
+                    && (string) ($active->payment_kind ?: 'full') === (string) $schedule['payment_kind'];
+
                 if ($active->provider !== $provider) {
                     throw ValidationException::withMessages([
                         'provider' => 'A '.ucfirst($active->provider).' payment is already in progress for this booking. Continue that checkout or wait for it to expire.',
                     ]);
                 }
-                if (blank($active->checkout_url)) {
+
+                if ($matchesCurrentSchedule && filled($active->checkout_url)) {
+                    return [$active, false];
+                }
+
+                if ($matchesCurrentSchedule && blank($active->checkout_url)) {
                     throw ValidationException::withMessages(['provider' => 'Payment initialization is already in progress. Please retry shortly.']);
                 }
 
-                return [$active, false];
+                $active->update([
+                    'status' => 'abandoned',
+                    'abandoned_at' => now(),
+                ]);
             }
 
             Payment::query()
@@ -78,9 +92,11 @@ class PaymentInitiator
                 'booking_id' => $lockedBooking->id,
                 'user_id' => $lockedBooking->user_id,
                 'guest_email' => $lockedBooking->guest_email,
-                'amount' => $balance,
+                'amount' => $chargeAmount,
                 'currency' => strtoupper($lockedBooking->currency),
                 'status' => 'initiated',
+                'payment_kind' => $schedule['payment_kind'],
+                'due_on' => $schedule['due_on'],
                 'initiated_at' => now(),
                 'created_by' => $actorId,
                 'creation_source' => $actorId ? 'administrator' : 'system',
