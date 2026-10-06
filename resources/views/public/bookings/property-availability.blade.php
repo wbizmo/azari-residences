@@ -12,7 +12,7 @@
     <section class="az-inventory-hero">
         <img src="{{ $imageUrl }}" alt="{{ $property->name }}">
         <div>
-            <a href="{{ route('properties.show', $property) }}">← Back to residence</a>
+            <a href="{{ route('properties.show', $property) }}">← Back to stay</a>
             <span class="eyebrow">Live 90-day inventory</span>
             <h1>{{ $property->name }}</h1>
             <p>
@@ -28,7 +28,7 @@
     <section class="az-inventory-panel">
         <div class="az-inventory-copy">
             <span class="eyebrow">Choose your stay</span>
-            <h2>Search this residence only</h2>
+            <h2>Search this stay only</h2>
             <p>Unavailable dates already have a confirmed stay, an active booking hold, or scheduled maintenance. Inventory updates from the database on every request.</p>
         </div>
 
