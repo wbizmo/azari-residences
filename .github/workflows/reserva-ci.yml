@@ -64,3 +64,14 @@ jobs:
 
       - name: Build frontend
         run: npm run build
+
+      - name: Package local validation bundle
+        run: |
+          tar             --exclude=.git             --exclude=node_modules             --exclude=.env             --exclude=database/database.sqlite             --exclude=storage/logs             -czf /tmp/reserva-local-validation.tgz .
+
+      - name: Upload local validation bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: reserva-local-validation
+          path: /tmp/reserva-local-validation.tgz
+          retention-days: 1
