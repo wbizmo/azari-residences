@@ -13,7 +13,6 @@
 </section>
 
 @include('partials.commercial-inventory-manager', ['property' => $property, 'roomTypes' => $roomTypes, 'ownerMode' => true])
-@endsection
 
 @foreach($property->accommodationTypes as $type)
 <section class="az-user-panel" style="margin-top:18px">
@@ -41,3 +40,4 @@
     </div>
 </section>
 @endforeach
+@endsection
