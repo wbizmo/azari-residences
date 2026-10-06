@@ -10066,3 +10066,28 @@ html body .site-header .desktop-navigation .nav-popover .nav-popover-panel a.is-
     -webkit-text-fill-color: #FFFFFF !important;
 }
 /* RESAVAR_SERVICE_SUBMENU_FINAL_CONTRAST_AUTHORITY_END */
+
+
+/* RESARVA_DESKTOP_NAV_CENTERING_V1 */
+@media (min-width: 1081px) {
+    .site-header .nav-shell {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+        align-items: center;
+        gap: 28px;
+    }
+
+    .site-header .brand {
+        justify-self: start;
+    }
+
+    .site-header .desktop-navigation {
+        justify-self: center;
+        margin-left: 0;
+    }
+
+    .site-header .nav-actions {
+        justify-self: end;
+    }
+}
+/* RESARVA_DESKTOP_NAV_CENTERING_V1_END */
