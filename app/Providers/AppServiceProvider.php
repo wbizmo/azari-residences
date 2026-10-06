@@ -4,22 +4,26 @@ namespace App\Providers;
 
 use App\Contracts\Communication\SmsProvider;
 use App\Models\Booking;
+use App\Models\BookingModificationRequest;
 use App\Models\GuestIdentityDocument;
 use App\Models\OwnerLedgerEntry;
 use App\Models\OwnerPayoutProfile;
 use App\Models\Payment;
 use App\Models\PropertyListing;
+use App\Models\Refund;
 use App\Models\ServiceRequest;
 use App\Models\SiteSetting;
 use App\Models\SupportTicket;
 use App\Models\UserIdentityDocument;
 use App\Models\WithdrawalRequest;
+use App\Observers\BookingModificationRequestObserver;
 use App\Observers\BookingObserver;
 use App\Observers\GuestIdentityDocumentObserver;
 use App\Observers\OwnerLedgerEntryObserver;
 use App\Observers\OwnerPayoutProfileObserver;
 use App\Observers\PaymentObserver;
 use App\Observers\PropertyListingObserver;
+use App\Observers\RefundObserver;
 use App\Observers\ServiceRequestObserver;
 use App\Observers\SupportTicketObserver;
 use App\Observers\UserIdentityDocumentObserver;
@@ -44,7 +48,9 @@ class AppServiceProvider extends ServiceProvider
     {
         // AZARI_TRANSACTIONAL_EMAIL_V102
         Booking::observe(BookingObserver::class);
+        BookingModificationRequest::observe(BookingModificationRequestObserver::class);
         Payment::observe(PaymentObserver::class);
+        Refund::observe(RefundObserver::class);
         ServiceRequest::observe(ServiceRequestObserver::class);
         SupportTicket::observe(SupportTicketObserver::class);
         PropertyListing::observe(PropertyListingObserver::class);
@@ -55,10 +61,10 @@ class AppServiceProvider extends ServiceProvider
         GuestIdentityDocument::observe(GuestIdentityDocumentObserver::class);
 
         VerifyEmail::toMailUsing(function (object $notifiable, string $url): MailMessage {
-            return (new MailMessage)->subject('Verify your Resavar email address')->view('emails.premium', [
+            return (new MailMessage)->subject('Verify your Reserva email address')->view('emails.premium', [
                 'title' => 'Verify your email address',
-                'preheader' => 'Complete your Resavar account verification.',
-                'lines' => ['Welcome to Resavar.', 'Confirm this email address to secure your account and access your bookings.'],
+                'preheader' => 'Complete your Reserva account verification.',
+                'lines' => ['Welcome to Reserva.', 'Confirm this email address to secure your account and access your bookings.'],
                 'actionLabel' => 'Verify email address',
                 'actionUrl' => $url,
             ]);
@@ -67,9 +73,9 @@ class AppServiceProvider extends ServiceProvider
         ResetPassword::toMailUsing(function (object $notifiable, string $token): MailMessage {
             $url = url(route('password.reset', ['token' => $token, 'email' => $notifiable->getEmailForPasswordReset()], false));
 
-            return (new MailMessage)->subject('Reset your Resavar password')->view('emails.premium', [
+            return (new MailMessage)->subject('Reset your Reserva password')->view('emails.premium', [
                 'title' => 'Reset your password',
-                'preheader' => 'A password reset was requested for your Resavar account.',
+                'preheader' => 'A password reset was requested for your Reserva account.',
                 'lines' => ['We received a request to reset your password.', 'Use the secure button below. If you did not request this, no action is required.'],
                 'actionLabel' => 'Reset password',
                 'actionUrl' => $url,
@@ -84,7 +90,7 @@ class AppServiceProvider extends ServiceProvider
             'public.partials.drawer-root', 'layouts.user', 'user.*',
         ], function ($view): void {
             $view->with('siteSettings', [
-                'site_name' => SiteSetting::valueFor('site_name', 'Resavar'),
+                'site_name' => SiteSetting::valueFor('site_name', 'Reserva'),
             ]);
         });
 
