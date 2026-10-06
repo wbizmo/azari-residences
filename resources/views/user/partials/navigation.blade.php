@@ -124,7 +124,7 @@ $identityVerified=auth()->user()->hasVerifiedIdentity();
         @if(Route::has('user.contact'))
             <a class="az-user-nav-link {{ request()->routeIs('user.contact')?'is-active':'' }}" href="{{ route('user.contact') }}">
                 <span class="material-symbols-outlined">mail</span>
-                <span>Contact Resarva</span>
+                <span>Contact Resavar</span>
             </a>
         @endif
     </nav>
