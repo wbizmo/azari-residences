@@ -6,12 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\AuditLog;
 use App\Models\BookingOperationalNote;
-use App\Models\GuestIdentityDocument;
 use App\Services\Bookings\AzariBookingLifecycle;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class BookingManagementController extends Controller
 {
@@ -48,7 +45,7 @@ class BookingManagementController extends Controller
             'operationalNotes.author',
         ]);
 
-        $guests = $booking->guests()->with('identityDocument')->orderBy('position')->paginate(10, ['*'], 'guests_page')->withQueryString();
+        $guests = $booking->guests()->orderBy('position')->paginate(10, ['*'], 'guests_page')->withQueryString();
         $payments = $booking->payments()->latest()->paginate(10, ['*'], 'payments_page')->withQueryString();
 
         $statusHistory = $booking->statusHistory()->with('changedBy')->paginate(10, ['*'], 'status_page')->withQueryString();
@@ -111,14 +108,6 @@ class BookingManagementController extends Controller
         $payment = $booking->payments->sortByDesc(fn ($record) => $record->paid_at ?: $record->created_at)->first();
 
         return response()->view('bookings.receipt', compact('booking', 'payment'));
-    }
-
-    public function document(Booking $booking, GuestIdentityDocument $document): StreamedResponse
-    {
-        abort_unless($document->guest()->where('booking_id', $booking->id)->exists(), 404);
-        abort_unless(Storage::disk($document->disk)->exists($document->path), 404);
-
-        return Storage::disk($document->disk)->download($document->path, $document->original_name);
     }
 
     public function calendar()
