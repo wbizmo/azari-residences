@@ -184,14 +184,152 @@
                     <span>Residence data and publication controls are available.</span>
                 </div>
             </div>
-            <div class="is-planned">
-                <span class="material-symbols-outlined" aria-hidden="true">schedule</span>
+            <div>
+                <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
                 <div>
                     <strong>Booking and payment operations</strong>
-                    <span>Scheduled for the remaining delivery sprints.</span>
+                    <span>Live arrivals, departures, balances, payment exceptions and inventory controls are active.</span>
                 </div>
             </div>
         </div>
     </section>
 </div>
+
+<section style="margin-top:28px" aria-labelledby="operations-heading">
+    <div class="az-section-heading">
+        <div><p class="az-eyebrow">Today</p><h2 id="operations-heading">Hospitality command centre</h2></div>
+        @if(Route::has('azari.admin.bookings.index'))<a class="az-button" href="{{ route('azari.admin.bookings.index') }}">Open bookings</a>@endif
+    </div>
+
+    <div class="az-metric-grid">
+        @foreach([
+            'arrivals' => ['Arrivals','login'],
+            'departures' => ['Departures','logout'],
+            'checked_in' => ['Currently checked in','hotel'],
+            'overdue_checkouts' => ['Overdue check-outs','warning'],
+            'pending_payments' => ['Outstanding balances','account_balance_wallet'],
+            'failed_payments' => ['Payment exceptions','error'],
+            'cancellations' => ['Cancellations today','event_busy'],
+            'no_shows' => ['No-shows today','person_off'],
+            'expiring_holds' => ['Holds expiring soon','timer'],
+            'maintenance_inventory' => ['Inventory restrictions','build'],
+            'support_escalations' => ['Support escalations','support_agent'],
+            'owner_approvals' => ['Owner approvals','approval'],
+        ] as $key => [$label,$icon])
+            <article class="az-metric-card">
+                <div class="az-metric-card__icon"><span class="material-symbols-outlined" aria-hidden="true">{{ $icon }}</span></div>
+                <div><span>{{ $label }}</span><strong>{{ number_format($operations[$key] ?? 0) }}</strong></div>
+            </article>
+        @endforeach
+    </div>
+
+    <div class="az-dashboard-grid" style="margin-top:18px">
+        <section class="az-panel">
+            <div class="az-panel__header"><div><p class="az-eyebrow">Front desk</p><h2>Today's arrivals</h2></div></div>
+            <div class="az-readiness-list">
+                @forelse($operationQueues['arrivals'] as $booking)
+                    <div>
+                        <span class="material-symbols-outlined" aria-hidden="true">login</span>
+                        <div>
+                            <strong><a href="{{ route('azari.admin.bookings.show',$booking) }}">{{ $booking->reference }} · {{ $booking->guest_name }}</a></strong>
+                            <span>{{ $booking->property?->name }} · {{ Str::headline($booking->status) }}</span>
+                        </div>
+                    </div>
+                @empty
+                    <p>No arrivals scheduled today.</p>
+                @endforelse
+            </div>
+        </section>
+
+        <section class="az-panel">
+            <div class="az-panel__header"><div><p class="az-eyebrow">Front desk</p><h2>Today's departures</h2></div></div>
+            <div class="az-readiness-list">
+                @forelse($operationQueues['departures'] as $booking)
+                    <div>
+                        <span class="material-symbols-outlined" aria-hidden="true">logout</span>
+                        <div>
+                            <strong><a href="{{ route('azari.admin.bookings.show',$booking) }}">{{ $booking->reference }} · {{ $booking->guest_name }}</a></strong>
+                            <span>{{ $booking->property?->name }} · {{ Str::headline($booking->status) }}</span>
+                        </div>
+                    </div>
+                @empty
+                    <p>No departures scheduled today.</p>
+                @endforelse
+            </div>
+        </section>
+    </div>
+
+    <div class="az-dashboard-grid" style="margin-top:18px">
+        <section class="az-panel">
+            <div class="az-panel__header"><div><p class="az-eyebrow">Finance</p><h2>Payment attention</h2></div>
+                @if(Route::has('azari.admin.payments.index'))<a href="{{ route('azari.admin.payments.index',['attention'=>1]) }}">View all</a>@endif
+            </div>
+            <div class="az-readiness-list">
+                @forelse($operationQueues['payment_attention'] as $payment)
+                    <div>
+                        <span class="material-symbols-outlined" aria-hidden="true">payments</span>
+                        <div>
+                            <strong><a href="{{ route('azari.admin.payments.show',$payment) }}">{{ $payment->reference }}</a></strong>
+                            <span>{{ Str::headline($payment->status) }} · {{ $payment->currency }} {{ number_format((float)$payment->amount,2) }} · {{ $payment->booking?->property?->name }}</span>
+                        </div>
+                    </div>
+                @empty
+                    <p>No payment exceptions require attention.</p>
+                @endforelse
+            </div>
+        </section>
+
+        <section class="az-panel">
+            <div class="az-panel__header"><div><p class="az-eyebrow">Guest care</p><h2>Support attention</h2></div>
+                @if(Route::has('azari.admin.support.index'))<a href="{{ route('azari.admin.support.index') }}">View all</a>@endif
+            </div>
+            <div class="az-readiness-list">
+                @forelse($operationQueues['support_attention'] as $ticket)
+                    <div>
+                        <span class="material-symbols-outlined" aria-hidden="true">support_agent</span>
+                        <div>
+                            <strong>{{ $ticket->reference }} · {{ $ticket->subject }}</strong>
+                            <span>{{ Str::headline($ticket->priority) }} · {{ $ticket->user?->name }}</span>
+                        </div>
+                    </div>
+                @empty
+                    <p>No support escalations require attention.</p>
+                @endforelse
+            </div>
+        </section>
+    </div>
+</section>
+
+<section style="margin-top:28px" aria-labelledby="analytics-heading">
+    <div class="az-section-heading">
+        <div><p class="az-eyebrow">Last 30 days</p><h2 id="analytics-heading">Marketplace performance</h2></div>
+        @if(Route::has('azari.admin.reports.index'))<a class="az-button" href="{{ route('azari.admin.reports.index') }}">Open reports</a>@endif
+    </div>
+
+    <div class="az-metric-grid">
+        @foreach([
+            ['Gross booking value', $analytics['gbv'], config('azari.currency','USD')],
+            ['Net revenue', $analytics['net_revenue'], config('azari.currency','USD')],
+            ['Occupancy', $analytics['occupancy'], '%'],
+            ['ADR', $analytics['adr'], config('azari.currency','USD')],
+            ['RevPAR', $analytics['revpar'], config('azari.currency','USD')],
+            ['Cancellation rate', $analytics['cancellation_rate'], '%'],
+            ['No-show rate', $analytics['no_show_rate'], '%'],
+            ['Payment success', $analytics['payment_success_rate'], '%'],
+        ] as [$label,$value,$suffix])
+            <article class="az-metric-card">
+                <div><span>{{ $label }}</span><strong>{{ $suffix === '%' ? number_format((float)$value,1).'%' : $suffix.' '.number_format((float)$value,2) }}</strong></div>
+            </article>
+        @endforeach
+    </div>
+
+    <section class="az-panel" style="margin-top:18px">
+        <div class="az-panel__header"><div><p class="az-eyebrow">Conversion</p><h2>Booking funnel</h2></div></div>
+        <div class="az-metric-grid">
+            @foreach($analytics['funnel'] as $event => $count)
+                <article class="az-metric-card"><div><span>{{ Str::headline($event) }}</span><strong>{{ number_format($count) }}</strong></div></article>
+            @endforeach
+        </div>
+    </section>
+</section>
 @endsection

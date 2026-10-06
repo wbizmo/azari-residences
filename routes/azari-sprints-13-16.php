@@ -1,4 +1,5 @@
 <?php
+use App\Http\Controllers\Admin\CommunicationController;
 use App\Http\Controllers\Admin\CustomerContentController;
 use App\Http\Controllers\Admin\OperationsController;
 use App\Http\Controllers\Admin\PromotionController;
@@ -43,6 +44,8 @@ Route::prefix('azaridevadmin')->name('azari.admin.')->middleware(['auth.session'
     Route::get('/reports/print',[ReportController::class,'print'])->middleware('azari.permission:reports.view')->name('reports.print');
     Route::get('/audit-logs',[OperationsController::class,'audit'])->middleware('azari.permission:audit-logs.view')->name('audit-logs.index');
     Route::get('/system-health',[OperationsController::class,'index'])->middleware('azari.permission:system-health.view')->name('system-health.index');
+    Route::get('/communications',[CommunicationController::class,'index'])->middleware('azari.permission:system-health.view')->name('communications.index');
+    Route::post('/communications/{communicationLog}/retry',[CommunicationController::class,'retry'])->middleware('azari.permission:system-health.manage')->name('communications.retry');
     Route::post('/system-health/backups',[OperationsController::class,'backup'])->middleware('azari.permission:system-health.manage')->name('system-health.backup');
     Route::post('/system-health/backups/{backupRun}/verify',[OperationsController::class,'verifyBackup'])->middleware('azari.permission:system-health.manage')->name('system-health.backup.verify');
 });

@@ -62,6 +62,10 @@ class Booking extends Model
     public function serviceRequests(): HasMany { return $this->hasMany(ServiceRequest::class)->latest(); }
     public function supportTickets(): HasMany { return $this->hasMany(SupportTicket::class)->latest(); }
     public function review(): HasOne { return $this->hasOne(Review::class); }
+    public function refunds(): HasMany { return $this->hasMany(Refund::class)->latest(); }
+    public function modificationRequests(): HasMany { return $this->hasMany(BookingModificationRequest::class)->latest(); }
+    public function operationalNotes(): HasMany { return $this->hasMany(BookingOperationalNote::class)->latest(); }
+    public function analyticsEvents(): HasMany { return $this->hasMany(AnalyticsEvent::class); }
 
     public function addOns(): BelongsToMany
     {
@@ -132,6 +136,18 @@ class Booking extends Model
         return $total <= 0 && $this->hasLegacyPaidRecord()
             ? (float) $this->total
             : $total;
+    }
+
+    public function successfulRefundsTotal(): float
+    {
+        return (float) $this->refunds()
+            ->where('status', 'successful')
+            ->sum('amount');
+    }
+
+    public function netPaidTotal(): float
+    {
+        return max(0, round($this->successfulPaymentsTotal() - $this->successfulRefundsTotal(), 2));
     }
 
     public function documentPayment(): ?Payment

@@ -3,12 +3,14 @@
 namespace App\Services\Communications;
 
 use App\Models\Booking;
+use App\Models\BookingModificationRequest;
 use App\Models\CommunicationLog;
 use App\Models\GuestIdentityDocument;
 use App\Models\OwnerLedgerEntry;
 use App\Models\OwnerPayoutProfile;
 use App\Models\Payment;
 use App\Models\PropertyListing;
+use App\Models\Refund;
 use App\Models\ServiceRequest;
 use App\Models\SiteSetting;
 use App\Models\SupportTicket;
@@ -1081,6 +1083,96 @@ class AzariTransactionalMailService
         );
     }
 
+    public function refundUpdated(Refund $refund, string $event = 'updated'): void
+    {
+        $booking = $refund->booking;
+        if (! $booking) {
+            return;
+        }
+
+        $status = (string) $refund->status;
+        $subject = match ($status) {
+            'successful' => 'Refund completed for booking '.$booking->reference,
+            'failed' => 'Refund update for booking '.$booking->reference,
+            'processing' => 'Refund processing for booking '.$booking->reference,
+            default => 'Refund requested for booking '.$booking->reference,
+        };
+
+        $tone = match ($status) {
+            'successful' => 'success',
+            'failed' => 'danger',
+            default => 'default',
+        };
+
+        $this->sendGuest(
+            $booking,
+            'refund-'.$status,
+            $subject,
+            [
+                'Your refund record has been updated.',
+                'The amount and current status are shown below.',
+            ],
+            'Open booking',
+            $this->guestBookingUrl($booking),
+            [
+                'Booking' => $booking->reference,
+                'Refund reference' => $refund->reference,
+                'Amount' => $this->money($refund->currency, $refund->amount),
+                'Status' => $this->label($status),
+                'Provider reference' => $refund->provider_reference,
+            ],
+            $refund->safe_error,
+            $tone,
+            null,
+            null,
+            true,
+            'Refund update',
+            'refund-'.$refund->id.':'.$status.':'.$event
+        );
+    }
+
+    public function bookingModificationUpdated(
+        BookingModificationRequest $request,
+        string $event = 'updated'
+    ): void {
+        $booking = $request->booking;
+        if (! $booking) {
+            return;
+        }
+
+        $status = (string) $request->status;
+        $subject = $event === 'created'
+            ? 'Trip change request '.$request->reference.' received'
+            : 'Trip change request '.$request->reference.' updated';
+
+        $this->sendGuest(
+            $booking,
+            'booking-modification-'.$status,
+            $subject,
+            [
+                $event === 'created'
+                    ? 'Reserva received your trip change request.'
+                    : 'Reserva updated your trip change request.',
+                'Open the booking to review the current status and any staff response.',
+            ],
+            'Open booking',
+            $this->guestBookingUrl($booking),
+            [
+                'Booking' => $booking->reference,
+                'Request' => $request->reference,
+                'Type' => $this->label($request->type),
+                'Status' => $this->label($status),
+            ],
+            $request->staff_note,
+            in_array($status, ['rejected', 'declined'], true) ? 'danger' : 'default',
+            null,
+            null,
+            false,
+            'Trip change',
+            'booking-modification-'.$request->id.':'.$status.':'.$event
+        );
+    }
+
     private function sendGuest(
         Booking $booking,
         string $template,
@@ -1116,7 +1208,7 @@ class AzariTransactionalMailService
             $secondaryActionLabel,
             $secondaryActionUrl,
             $critical,
-            true,
+            false,
             $eyebrow,
             ['booking_id' => $booking->id, 'user_id' => $booking->user_id],
             $dedupeKey
@@ -1154,7 +1246,7 @@ class AzariTransactionalMailService
             null,
             null,
             true,
-            true,
+            false,
             $eyebrow,
             ['user_id' => $user->id],
             $dedupeKey
@@ -1219,30 +1311,68 @@ class AzariTransactionalMailService
         string $dedupeKey,
     ): void {
         $email = trim(strtolower($email));
+
         if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return;
         }
 
-        if (! $critical && $user && ! (bool) ($user->email_notifications ?? true)) {
-            return;
-        }
-
-        if ($this->alreadyQueued($template, $email, $dedupeKey)) {
-            return;
-        }
-
-        $log = CommunicationLog::query()->create([
-            'channel' => 'email',
+        $snapshot = [
             'template' => $template,
-            'booking_id' => $context['booking_id'] ?? null,
-            'user_id' => $context['user_id'] ?? $user?->id,
-            'recipient' => $email,
-            'masked_recipient' => $this->maskEmail($email),
-            'provider' => config('mail.default'),
-            'status' => 'queued',
-            'queued_at' => now(),
-            'meta' => array_merge($context, ['dedupe_key' => $dedupeKey, 'reserved' => true]),
+            'subject' => $subject,
+            'lines' => array_values($lines),
+            'action_label' => $actionLabel,
+            'action_url' => $actionUrl,
+            'details' => $details,
+            'notice' => $notice,
+            'tone' => $tone,
+            'secondary_action_label' => $secondaryActionLabel,
+            'secondary_action_url' => $secondaryActionUrl,
+            'critical' => $critical,
+            'mail_only' => $mailOnly,
+            'eyebrow' => $eyebrow,
+        ];
+
+        $reservationChannel = $user ? 'dispatch' : 'email';
+        $reservationKey = hash('sha256', $reservationChannel.'|'.($user?->id ?: $email).'|'.$dedupeKey);
+        $dispatch = CommunicationLog::query()->firstOrCreate(
+            ['idempotency_key' => $reservationKey],
+            [
+                'channel' => $reservationChannel,
+                'template' => $template,
+                'booking_id' => $context['booking_id'] ?? null,
+                'user_id' => $context['user_id'] ?? $user?->id,
+                'recipient' => $email,
+                'masked_recipient' => $this->maskEmail($email),
+                'provider' => $user ? 'laravel-notifications' : config('mail.default'),
+                'status' => 'queued',
+                'queued_at' => now(),
+                'classification' => 'transactional',
+                'locale' => app()->getLocale(),
+                'timezone' => $user?->timezone ?: config('azari.timezone', 'Africa/Lagos'),
+                'payload_hash' => hash('sha256', json_encode($snapshot)),
+                'meta' => array_merge($context, [
+                    'dedupe_key' => $dedupeKey,
+                    'reserved' => true,
+                    'snapshot' => $snapshot,
+                ]),
+            ]
+        );
+
+        if (! $dispatch->wasRecentlyCreated) {
+            return;
+        }
+
+        $notificationContext = array_merge($context, [
+            'dedupe_key' => $dedupeKey,
+            'classification' => 'transactional',
+            'locale' => app()->getLocale(),
+            'timezone' => $user?->timezone ?: config('azari.timezone', 'Africa/Lagos'),
+            'snapshot' => $snapshot,
         ]);
+
+        if (! $user) {
+            $notificationContext['communication_log_id'] = $dispatch->getKey();
+        }
 
         $notification = new PremiumMailNotification(
             template: $template,
@@ -1250,10 +1380,7 @@ class AzariTransactionalMailService
             lines: $lines,
             actionLabel: $actionLabel,
             actionUrl: $actionUrl,
-            context: array_merge($context, [
-                'dedupe_key' => $dedupeKey,
-                'communication_log_id' => $log->id,
-            ]),
+            context: $notificationContext,
             details: $details,
             notice: $notice,
             tone: $tone,
@@ -1270,26 +1397,17 @@ class AzariTransactionalMailService
             } else {
                 Notification::route('mail', $email)->notify($notification);
             }
+
         } catch (Throwable $exception) {
-            $log->update([
+            $dispatch->update([
                 'status' => 'failed',
                 'failed_at' => now(),
+                'next_attempt_at' => now()->addMinutes(5),
                 'safe_error' => 'The notification could not be queued.',
             ]);
+
             report($exception);
         }
-    }
-
-    private function alreadyQueued(string $template, string $email, string $dedupeKey): bool
-    {
-        return CommunicationLog::query()
-            ->where('channel', 'email')
-            ->where('template', $template)
-            ->where('recipient', $email)
-            ->latest('id')
-            ->limit(100)
-            ->get(['meta'])
-            ->contains(fn (CommunicationLog $log): bool => data_get($log->meta, 'dedupe_key') === $dedupeKey);
     }
 
     private function bookingDetails(Booking $booking): array

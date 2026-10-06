@@ -4,7 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
+use App\Models\AuditLog;
+use App\Models\BookingOperationalNote;
 use App\Models\GuestIdentityDocument;
+use App\Services\Bookings\AzariBookingLifecycle;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Response;
@@ -22,7 +25,8 @@ class BookingManagementController extends Controller
                     $q->where('reference', 'like', "%{$search}%")
                         ->orWhere('guest_name', 'like', "%{$search}%")
                         ->orWhere('guest_email', 'like', "%{$search}%")
-                        ->orWhere('guest_phone', 'like', "%{$search}%");
+                        ->orWhere('guest_phone', 'like', "%{$search}%")
+                        ->orWhereHas('property', fn ($property) => $property->where('name', 'like', "%{$search}%"));
                 });
             })
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->string('status')))
@@ -33,14 +37,72 @@ class BookingManagementController extends Controller
         return view('admin.bookings.index', compact('bookings', 'search'));
     }
 
-    public function show(Booking $booking)
+    public function show(Booking $booking, AzariBookingLifecycle $lifecycle)
     {
-        $booking->load('property');
+        $booking->load([
+            'property',
+            'accommodationType',
+            'ratePlan',
+            'refunds',
+            'modificationRequests.user',
+            'operationalNotes.author',
+        ]);
 
         $guests = $booking->guests()->with('identityDocument')->orderBy('position')->paginate(10, ['*'], 'guests_page')->withQueryString();
         $payments = $booking->payments()->latest()->paginate(10, ['*'], 'payments_page')->withQueryString();
 
-        return view('admin.bookings.show', compact('booking', 'guests', 'payments'));
+        $statusHistory = $booking->statusHistory()->with('changedBy')->paginate(10, ['*'], 'status_page')->withQueryString();
+        $allowedTransitions = $lifecycle->allowedTransitions($booking);
+
+        return view('admin.bookings.show', compact(
+            'booking',
+            'guests',
+            'payments',
+            'statusHistory',
+            'allowedTransitions'
+        ));
+    }
+
+    public function storeNote(Request $request, Booking $booking): \Illuminate\Http\RedirectResponse
+    {
+        $data = $request->validate([
+            'body' => ['required', 'string', 'max:3000'],
+            'visibility' => ['required', 'in:staff,guest'],
+        ]);
+
+        $note = BookingOperationalNote::query()->create([
+            'booking_id' => $booking->getKey(),
+            'author_id' => $request->user()?->getKey(),
+            'visibility' => $data['visibility'],
+            'body' => $data['body'],
+        ]);
+
+        AuditLog::record('booking.operational_note_added', $note, [], [
+            'booking_reference' => $booking->reference,
+            'visibility' => $data['visibility'],
+        ]);
+
+        return back()->with('success', 'Operational note added.');
+    }
+
+    public function transition(
+        Request $request,
+        Booking $booking,
+        AzariBookingLifecycle $lifecycle
+    ): \Illuminate\Http\RedirectResponse {
+        $data = $request->validate([
+            'status' => ['required', 'string', 'max:40'],
+            'note' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        $lifecycle->transition(
+            $booking,
+            $data['status'],
+            $request->user()?->getKey(),
+            $data['note'] ?? null
+        );
+
+        return back()->with('success', 'Booking status updated.');
     }
 
     public function receipt(Booking $booking): Response

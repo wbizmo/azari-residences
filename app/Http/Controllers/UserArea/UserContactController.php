@@ -11,7 +11,7 @@ class UserContactController extends Controller
     public function __invoke(string $page = 'contact'): View
     {
         $titles = [
-            'contact' => 'Contact Resavar',
+            'contact' => 'Contact Reserva',
             'service-requests' => 'Service Requests',
             'support-tickets' => 'Support Tickets',
         ];

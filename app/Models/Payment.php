@@ -19,6 +19,8 @@ class Payment extends Model
     {
         return [
             'amount' => 'decimal:2',
+            'refunded_amount' => 'decimal:2',
+            'due_on' => 'date',
             'initiated_at' => 'datetime',
             'paid_at' => 'datetime',
             'verified_at' => 'datetime',
@@ -34,7 +36,21 @@ class Payment extends Model
     public function createdBy(): BelongsTo { return $this->belongsTo(User::class, 'created_by'); }
     public function events(): HasMany { return $this->hasMany(PaymentEvent::class)->latest('received_at'); }
     public function verificationAttempts(): HasMany { return $this->hasMany(PaymentVerificationAttempt::class)->latest('attempted_at'); }
+    public function refunds(): HasMany { return $this->hasMany(Refund::class)->latest(); }
 
     public function isSuccessful(): bool { return $this->status === self::SUCCESSFUL; }
     public function canRetry(): bool { return in_array($this->status, ['failed', 'abandoned', 'pending', 'initiated'], true); }
+
+    public function refundableBalance(): float
+    {
+        if (! $this->isSuccessful()) {
+            return 0.0;
+        }
+
+        $refunded = (float) $this->refunds()
+            ->where('status', 'successful')
+            ->sum('amount');
+
+        return max(0, round((float) $this->amount - $refunded, 2));
+    }
 }

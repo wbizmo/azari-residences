@@ -91,7 +91,7 @@ class PaymentEligibilityService
         $legacyPaid = filled($booking->paid_at)
             || filled($booking->receipt_number)
             || filled($booking->payment_reference)
-            || in_array(strtolower((string) $booking->status), ['paid', 'confirmed'], true);
+            || strtolower((string) $booking->status) === 'paid';
 
         return $legacyPaid || $booking->balanceDue() <= 0;
     }

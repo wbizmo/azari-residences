@@ -10,6 +10,8 @@ use App\Models\Property;
 use App\Models\RatePlan;
 use App\Models\RoomType;
 use App\Services\Bookings\CommercialInventoryManager;
+use App\Services\Bookings\InventoryBulkUpdateService;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -84,6 +86,54 @@ class OwnerCommercialInventoryController extends Controller
         $manager->saveRatePlan($accommodationType, $request->validated(), $ratePlan);
 
         return back()->with('status', 'Rate plan updated.');
+    }
+
+    public function bulkUpdate(
+        Request $request,
+        Property $property,
+        AccommodationType $accommodationType,
+        InventoryBulkUpdateService $inventory
+    ): RedirectResponse {
+        $this->authorizeOwner($request, $property);
+        $this->assertTypeBelongsToProperty($property, $accommodationType);
+
+        $data = $request->validate([
+            'from_date' => ['required', 'date'],
+            'to_date' => ['required', 'date', 'after_or_equal:from_date'],
+            'sellable_inventory' => ['nullable', 'integer', 'min:0'],
+            'maintenance_inventory' => ['nullable', 'integer', 'min:0'],
+            'stop_sell' => ['nullable', 'boolean'],
+            'closed_to_arrival' => ['nullable', 'boolean'],
+            'closed_to_departure' => ['nullable', 'boolean'],
+            'minimum_stay' => ['nullable', 'integer', 'min:1', 'max:730'],
+            'maximum_stay' => ['nullable', 'integer', 'min:1', 'max:730'],
+            'price_override' => ['nullable', 'numeric', 'min:0'],
+        ]);
+
+        $changes = collect($data)->only([
+            'sellable_inventory',
+            'maintenance_inventory',
+            'minimum_stay',
+            'maximum_stay',
+            'price_override',
+        ])->filter(fn ($value) => $value !== null && $value !== '')->all();
+
+        foreach (['stop_sell', 'closed_to_arrival', 'closed_to_departure'] as $boolean) {
+            if ($request->has($boolean)) {
+                $changes[$boolean] = $request->boolean($boolean);
+            }
+        }
+
+        $inventory->apply(
+            $accommodationType,
+            CarbonImmutable::parse($data['from_date']),
+            CarbonImmutable::parse($data['to_date']),
+            $changes,
+            $request->user()->getKey(),
+            'owner'
+        );
+
+        return back()->with('status', 'Inventory calendar updated and audited.');
     }
 
     private function authorizeOwner(Request $request, Property $property): void

@@ -12,6 +12,7 @@ use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Schema;
 
 class PremiumMailNotification extends Notification implements ShouldQueue
 {
@@ -35,36 +36,55 @@ class PremiumMailNotification extends Notification implements ShouldQueue
         public bool $forceDelivery = false,
         public bool $mailOnly = false,
         public ?string $eyebrow = null,
+        public ?string $onlyChannel = null,
     ) {}
 
     public function via(object $notifiable): array
     {
         if ($notifiable instanceof AnonymousNotifiable) {
-            return ['mail'];
+            return $this->onlyChannel && $this->onlyChannel !== 'email' ? [] : ['mail'];
         }
 
-        $channels = [];
+        $preference = method_exists($notifiable, 'communicationPreference')
+            && method_exists($notifiable, 'getKey')
+            && $notifiable->getKey()
+            && Schema::hasTable('communication_preferences')
+                ? $notifiable->communicationPreference()->first()
+                : null;
 
-        if (
-            ($this->forceDelivery || (bool) ($notifiable->email_notifications ?? true))
-            && filled($notifiable->email ?? null)
-        ) {
-            $channels[] = 'mail';
+        $emailAllowed = $this->forceDelivery
+            || (bool) ($preference?->email_transactional ?? $notifiable->email_notifications ?? true);
+        $smsAllowed = (bool) ($preference?->sms_transactional ?? $notifiable->sms_notifications ?? false);
+        $whatsappAllowed = (bool) ($preference?->whatsapp_transactional ?? $notifiable->whatsapp_notifications ?? false);
+        $inAppAllowed = (bool) ($preference?->in_app_transactional ?? true);
+
+        $available = [];
+
+        if ($emailAllowed && filled($notifiable->email ?? null)) {
+            $available['email'] = 'mail';
         }
 
-        if ($this->mailOnly) {
-            return $channels;
+        if (! $this->mailOnly) {
+            if ($smsAllowed && filled($notifiable->phone ?? null)) {
+                $available['sms'] = TwilioSmsChannel::class;
+            }
+
+            if ($whatsappAllowed && filled($notifiable->phone ?? null)) {
+                $available['whatsapp'] = TwilioWhatsAppChannel::class;
+            }
+
+            if ($inAppAllowed) {
+                $available['database'] = 'database';
+            }
         }
 
-        if ((bool) ($notifiable->sms_notifications ?? false) && filled($notifiable->phone ?? null)) {
-            $channels[] = TwilioSmsChannel::class;
+        if ($this->onlyChannel) {
+            return isset($available[$this->onlyChannel])
+                ? [$available[$this->onlyChannel]]
+                : [];
         }
 
-        if ((bool) ($notifiable->whatsapp_notifications ?? false) && filled($notifiable->phone ?? null)) {
-            $channels[] = TwilioWhatsAppChannel::class;
-        }
-
-        return $channels;
+        return array_values($available);
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -72,6 +92,15 @@ class PremiumMailNotification extends Notification implements ShouldQueue
         $email = $notifiable instanceof AnonymousNotifiable
             ? (string) $notifiable->routeNotificationFor('mail')
             : (string) ($notifiable->email ?? '');
+
+        $dedupeKey = (string) ($this->context['dedupe_key'] ?? ($this->id ?: $this->template));
+        $idempotencyKey = hash('sha256', 'email|'.strtolower($email).'|'.$dedupeKey);
+        $payloadHash = hash('sha256', json_encode([
+            $this->subject,
+            $this->lines,
+            $this->details,
+            $this->actionUrl,
+        ]));
 
         $attributes = [
             'channel' => 'email',
@@ -84,14 +113,25 @@ class PremiumMailNotification extends Notification implements ShouldQueue
             'status' => 'queued',
             'queued_at' => now(),
             'safe_error' => null,
+            'classification' => $this->context['classification'] ?? 'transactional',
+            'locale' => $this->context['locale'] ?? app()->getLocale(),
+            'timezone' => $this->context['timezone'] ?? ($notifiable->timezone ?? config('azari.timezone', 'Africa/Lagos')),
+            'payload_hash' => $payloadHash,
             'meta' => array_merge($this->context, ['notification_id' => $this->id]),
         ];
 
         $logId = (int) ($this->context['communication_log_id'] ?? 0);
+
         if ($logId > 0) {
-            CommunicationLog::query()->whereKey($logId)->update($attributes);
+            CommunicationLog::query()
+                ->whereKey($logId)
+                ->where('channel', 'email')
+                ->update($attributes + ['idempotency_key' => $idempotencyKey]);
         } else {
-            CommunicationLog::query()->create($attributes);
+            CommunicationLog::query()->firstOrCreate(
+                ['idempotency_key' => $idempotencyKey],
+                $attributes
+            );
         }
 
         $supportEmail = SiteSetting::valueFor(
@@ -118,6 +158,47 @@ class PremiumMailNotification extends Notification implements ShouldQueue
                 'This is a transactional message from Reserva. Keep booking, payment and account links private.'
             ),
         ]);
+    }
+
+    public function toDatabase(object $notifiable): array
+    {
+        $dedupeKey = (string) ($this->context['dedupe_key'] ?? ($this->id ?: $this->template));
+        $idempotencyKey = hash('sha256', 'in_app|'.($notifiable->id ?? 'anonymous').'|'.$dedupeKey);
+
+        CommunicationLog::query()->firstOrCreate(
+            ['idempotency_key' => $idempotencyKey],
+            [
+                'channel' => 'in_app',
+                'template' => $this->template,
+                'booking_id' => $this->context['booking_id'] ?? null,
+                'user_id' => $notifiable->id ?? null,
+                'recipient' => 'user:'.($notifiable->id ?? 'unknown'),
+                'masked_recipient' => 'in-app',
+                'provider' => 'database',
+                'status' => 'delivered',
+                'queued_at' => now(),
+                'sent_at' => now(),
+                'delivered_at' => now(),
+                'classification' => $this->context['classification'] ?? 'transactional',
+                'locale' => $this->context['locale'] ?? app()->getLocale(),
+                'timezone' => $this->context['timezone'] ?? ($notifiable->timezone ?? config('azari.timezone', 'Africa/Lagos')),
+                'payload_hash' => hash('sha256', json_encode([$this->subject, $this->lines, $this->actionUrl])),
+                'meta' => array_merge($this->context, ['notification_id' => $this->id]),
+            ]
+        );
+
+        return [
+            'template' => $this->template,
+            'subject' => $this->subject,
+            'lines' => array_values(array_map(
+                fn ($line) => Str::limit(strip_tags((string) $line), 300),
+                array_slice($this->lines, 0, 4)
+            )),
+            'action_label' => $this->actionLabel,
+            'action_url' => $this->actionUrl,
+            'booking_id' => $this->context['booking_id'] ?? null,
+            'classification' => $this->context['classification'] ?? 'transactional',
+        ];
     }
 
     public function toSms(object $notifiable): string

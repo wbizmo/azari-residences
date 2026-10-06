@@ -119,7 +119,7 @@ class PaymentFinalizer
                     'failed_at' => null,
                     'provider_response_summary' => $verification['safe_response'] ?? null,
                     'receipt_number' => $receipt,
-                    'administrative_note' => trim(($locked->administrative_note ? $locked->administrative_note."\n" : '').'Provider reported success after the booking balance had already been satisfied. Review externally; no refund workflow exists in Azari.'),
+                    'administrative_note' => trim(($locked->administrative_note ? $locked->administrative_note."\n" : '').'Provider reported success after the booking balance had already been satisfied. Review the excess payment and process any required refund through the Reserva refund workflow.'),
                 ]);
                 AuditLog::record('payment.successful_excess_detected', $locked, [], ['status' => 'successful_excess'], ['source' => $source, 'remaining_before_payment' => $remainingBeforeThisPayment]);
                 return $locked->refresh();
@@ -137,14 +137,23 @@ class PaymentFinalizer
                 'receipt_number' => $receipt,
             ]);
 
-            $remaining = max(0, round((float) $booking->total - (float) $booking->payments()->where('status', Payment::SUCCESSFUL)->sum('amount'), 2));
-            if ($remaining <= 0 && ! in_array($booking->status, ['cancelled', 'completed', 'checked_out', 'no_show'], true)) {
+            $booking->refresh();
+            $schedule = app(PaymentScheduleService::class)->forBooking($booking);
+
+            if (
+                $schedule['confirmation_threshold_met']
+                && ! in_array($booking->status, ['cancelled', 'completed', 'checked_out', 'no_show'], true)
+            ) {
                 $from = $booking->status;
                 $booking->update([
                     'status' => 'confirmed',
-                    'paid_at' => $booking->paid_at ?: $paidAt,
+                    'paid_at' => $schedule['fully_paid']
+                        ? ($booking->paid_at ?: $paidAt)
+                        : $booking->paid_at,
                     'payment_reference' => $locked->reference,
-                    'receipt_number' => $booking->receipt_number ?: $receipt,
+                    'receipt_number' => $schedule['fully_paid']
+                        ? ($booking->receipt_number ?: $receipt)
+                        : $booking->receipt_number,
                     'expires_at' => null,
                     'payment_transfer_locked_at' => now(),
                 ]);
@@ -186,9 +195,35 @@ class PaymentFinalizer
                         'changed_by' => null,
                         'from_status' => $from,
                         'to_status' => 'confirmed',
-                        'note' => 'Booking confirmed automatically after verified payment success.',
-                        'metadata' => ['provider' => $locked->provider, 'payment_reference' => $locked->reference, 'source' => $source],
+                        'note' => $schedule['fully_paid']
+                            ? 'Booking confirmed automatically after verified full payment.'
+                            : 'Booking confirmed after the required payment threshold was verified.',
+                        'metadata' => [
+                            'provider' => $locked->provider,
+                            'payment_reference' => $locked->reference,
+                            'source' => $source,
+                            'payment_type' => $schedule['payment_type'],
+                            'paid' => $schedule['paid'],
+                            'balance' => $schedule['balance'],
+                        ],
                     ]);
+
+                    app(\App\Services\Analytics\AnalyticsTracker::class)->track(
+                        'booking_confirmed',
+                        [
+                            'user_id' => $booking->user_id,
+                            'booking_id' => $booking->getKey(),
+                            'property_id' => $booking->property_id,
+                            'accommodation_type_id' => $booking->accommodation_type_id,
+                            'rate_plan_id' => $booking->rate_plan_id,
+                            'source' => 'payment_finalizer',
+                            'payload' => [
+                                'payment_type' => $schedule['payment_type'],
+                                'fully_paid' => $schedule['fully_paid'],
+                            ],
+                        ],
+                        hash('sha256', 'booking-confirmed|'.$booking->getKey())
+                    );
                 }
             }
 

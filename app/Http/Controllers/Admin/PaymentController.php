@@ -33,7 +33,11 @@ class PaymentController extends Controller
             ->when($request->filled('date_from'), fn ($q) => $q->whereDate('created_at', '>=', $request->date('date_from')))
             ->when($request->filled('date_to'), fn ($q) => $q->whereDate('created_at', '<=', $request->date('date_to')))
             ->when($request->filled('amount_min'), fn ($q) => $q->where('amount', '>=', $request->input('amount_min')))
-            ->when($request->filled('amount_max'), fn ($q) => $q->where('amount', '<=', $request->input('amount_max')));
+            ->when($request->filled('amount_max'), fn ($q) => $q->where('amount', '<=', $request->input('amount_max')))
+            ->when($request->boolean('attention'), fn ($q) => $q->where(function ($attention): void {
+                $attention->whereIn('status', ['failed', 'invalid', 'successful_excess'])
+                    ->orWhereHas('refunds', fn ($refunds) => $refunds->whereIn('status', ['requested', 'processing', 'failed']));
+            }));
         return view('admin.payments.index', ['payments' => $query->latest()->paginate(10)->withQueryString()]);
     }
 
@@ -42,6 +46,7 @@ class PaymentController extends Controller
         $payment->load(['booking.property', 'booking.user', 'user', 'createdBy']);
         $verificationAttempts = $payment->verificationAttempts()->paginate(10, ['*'], 'verifications')->withQueryString();
         $events = $payment->events()->paginate(10, ['*'], 'events')->withQueryString();
+        $refunds = $payment->refunds()->with(['requestedBy', 'processedBy'])->paginate(10, ['*'], 'refunds')->withQueryString();
         $auditLogs = AuditLog::query()
             ->with('actor')
             ->where('subject_type', $payment->getMorphClass())
@@ -50,7 +55,7 @@ class PaymentController extends Controller
             ->paginate(10, ['*'], 'audit')
             ->withQueryString();
 
-        return view('admin.payments.show', compact('payment', 'verificationAttempts', 'events', 'auditLogs'));
+        return view('admin.payments.show', compact('payment', 'verificationAttempts', 'events', 'refunds', 'auditLogs'));
     }
 
     public function create(Request $request): View

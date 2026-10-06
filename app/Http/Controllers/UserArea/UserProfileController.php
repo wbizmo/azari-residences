@@ -4,6 +4,7 @@ namespace App\Http\Controllers\UserArea;
 
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
+use App\Models\CommunicationPreference;
 use App\Services\Communication\PhoneNumberNormalizer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -57,12 +58,35 @@ class UserProfileController extends Controller
             'whatsapp_notifications' => ['nullable', 'boolean'],
             'marketing_consent' => ['nullable', 'boolean'],
         ]);
-        $request->user()->update([
-            'email_notifications' => $request->boolean('email_notifications'),
-            'sms_notifications' => $request->boolean('sms_notifications'),
-            'whatsapp_notifications' => $request->boolean('whatsapp_notifications'),
-            'marketing_consent' => $request->boolean('marketing_consent'),
+        $user = $request->user();
+
+        $email = $request->boolean('email_notifications');
+        $sms = $request->boolean('sms_notifications');
+        $whatsapp = $request->boolean('whatsapp_notifications');
+        $marketing = $request->boolean('marketing_consent');
+
+        $user->update([
+            'email_notifications' => $email,
+            'sms_notifications' => $sms,
+            'whatsapp_notifications' => $whatsapp,
+            'marketing_consent' => $marketing,
         ]);
+
+        CommunicationPreference::query()->updateOrCreate(
+            ['user_id' => $user->getKey()],
+            [
+                'email_transactional' => $email,
+                'sms_transactional' => $sms,
+                'whatsapp_transactional' => $whatsapp,
+                'in_app_transactional' => true,
+                'email_marketing' => $marketing && $email,
+                'sms_marketing' => $marketing && $sms,
+                'whatsapp_marketing' => $marketing && $whatsapp,
+                'locale' => app()->getLocale(),
+                'timezone' => $user->timezone,
+            ]
+        );
+
         return back()->with('success', 'Notification preferences updated.');
     }
 }

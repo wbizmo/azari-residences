@@ -1,29 +1,47 @@
 <x-public-site.layout
     title="Available hotels & residences | Reserva"
-    description="Review live Reserva inventory and refine your stay request."
+    description="Compare live Reserva inventory, policies, verified reviews and total stay prices."
 >
     @php
-        $checkIn = \Carbon\CarbonImmutable::parse($filters['check_in']);
-        $checkOut = \Carbon\CarbonImmutable::parse($filters['check_out']);
+        $checkIn = Carbon\CarbonImmutable::parse($filters['check_in']);
+        $checkOut = Carbon\CarbonImmutable::parse($filters['check_out']);
         $nightCount = max(1, $checkIn->diffInDays($checkOut));
         $guestCount = (int) $filters['adults'] + (int) ($filters['children'] ?? 0);
+        $queryWithoutPage = collect(request()->query())->except('page')->all();
     @endphp
 
     <main class="az-results-page">
         <section class="site-container az-results-shell">
             <header class="az-results-heading">
-                <span class="sr-only">Your stay request</span>
                 <div>
                     <span class="eyebrow">Live inventory</span>
-                    <h1>Available hotels & residences</h1>
+                    <h1>Available stays</h1>
                     <p>
                         {{ $checkIn->format('j M Y') }} to {{ $checkOut->format('j M Y') }}
                         <span aria-hidden="true">·</span>
-                        {{ $nightCount }} {{ \Illuminate\Support\Str::plural('night', $nightCount) }}
+                        {{ $nightCount }} {{ Str::plural('night', $nightCount) }}
                         <span aria-hidden="true">·</span>
-                        {{ $guestCount }} {{ \Illuminate\Support\Str::plural('guest', $guestCount) }}
+                        {{ $guestCount }} {{ Str::plural('guest', $guestCount) }}
+                        <span aria-hidden="true">·</span>
+                        {{ $filters['rooms'] ?? 1 }} {{ Str::plural('room', $filters['rooms'] ?? 1) }}
                     </p>
                 </div>
+
+                @auth
+                    <form method="POST" action="{{ route('user.saved-searches.store') }}">
+                        @csrf
+                        @foreach(collect($filters)->except(['page'])->filter(fn ($value) => !is_array($value) && $value !== null && $value !== '') as $name => $value)
+                            <input type="hidden" name="{{ $name }}" value="{{ $value }}">
+                        @endforeach
+                        @foreach($filters['amenities'] ?? [] as $amenityId)
+                            <input type="hidden" name="amenities[]" value="{{ $amenityId }}">
+                        @endforeach
+                        <button class="button button-secondary" type="submit">
+                            <span class="material-symbols-outlined" aria-hidden="true">bookmark_add</span>
+                            Save search
+                        </button>
+                    </form>
+                @endauth
             </header>
 
             <form class="az-results-search" method="GET" action="{{ route('availability.results') }}">
@@ -47,7 +65,7 @@
                     <span>Adults</span>
                     <span class="az-results-input">
                         <span class="material-symbols-outlined" aria-hidden="true">person</span>
-                        <input type="number" name="adults" min="1" max="40" value="{{ $filters['adults'] }}" required>
+                        <input type="number" name="adults" min="1" max="12" value="{{ $filters['adults'] }}" required>
                     </span>
                 </label>
 
@@ -55,41 +73,30 @@
                     <span>Children</span>
                     <span class="az-results-input">
                         <span class="material-symbols-outlined" aria-hidden="true">child_care</span>
-                        <input type="number" name="children" min="0" max="40" value="{{ $filters['children'] ?? 0 }}">
+                        <input type="number" name="children" min="0" max="8" value="{{ $filters['children'] ?? 0 }}">
                     </span>
                 </label>
 
                 <label class="az-results-control">
-                    <span>Location</span>
-                    <span class="az-results-input az-results-select">
-                        <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
-                        <select name="location_id">
-                            <option value="">All available locations</option>
-                            @foreach($locations as $location)
-                                <option value="{{ $location->id }}" @selected((string) ($filters['location_id'] ?? '') === (string) $location->id)>
-                                    {{ $location->name }}, {{ $location->city }}
-                                </option>
-                            @endforeach
-                        </select>
+                    <span>Rooms</span>
+                    <span class="az-results-input">
+                        <span class="material-symbols-outlined" aria-hidden="true">meeting_room</span>
+                        <input type="number" name="rooms" min="1" max="20" value="{{ $filters['rooms'] ?? 1 }}">
                     </span>
                 </label>
 
-                <label class="az-results-control">
-                    <span>Category</span>
-                    <span class="az-results-input az-results-select">
-                        <span class="material-symbols-outlined" aria-hidden="true">apartment</span>
-                        <select name="room_type_id">
-                            <option value="">Any category</option>
-                            @foreach($roomTypes as $roomType)
-                                <option value="{{ $roomType->id }}" @selected((string) ($filters['room_type_id'] ?? '') === (string) $roomType->id)>
-                                    {{ $roomType->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </span>
-                </label>
-
-                <input type="hidden" name="rooms" value="{{ $filters['rooms'] ?? 1 }}">
+                @if(!empty($filters['destination']))
+                    <input type="hidden" name="destination" value="{{ $filters['destination'] }}">
+                @endif
+                @if(!empty($filters['destination_type']))
+                    <input type="hidden" name="destination_type" value="{{ $filters['destination_type'] }}">
+                @endif
+                @if(!empty($filters['destination_id']))
+                    <input type="hidden" name="destination_id" value="{{ $filters['destination_id'] }}">
+                @endif
+                @if(!empty($filters['location_id']))
+                    <input type="hidden" name="location_id" value="{{ $filters['location_id'] }}">
+                @endif
 
                 <button class="az-results-submit" type="submit">
                     <span class="material-symbols-outlined" aria-hidden="true">search</span>
@@ -97,121 +104,237 @@
                 </button>
             </form>
 
-            @if($availableLocations->isNotEmpty())
-                <p class="az-results-locations">
-                    <strong>Available locations:</strong>
-                    {{ $availableLocations->map(fn ($location) => $location->name)->join(', ') }}
-                </p>
-            @endif
+            <div class="reserva-results-toolbar">
+                <div>
+                    <strong>{{ number_format($results->total()) }} {{ Str::plural('stay', $results->total()) }}</strong>
+                    @if($availableLocations->isNotEmpty())
+                        <span> in {{ $availableLocations->pluck('name')->unique()->join(', ') }}</span>
+                    @endif
+                </div>
 
-            <section class="az-results-grid" aria-label="Available hotels & residences">
-                @forelse($results as $result)
-                    @php($property = $result['property'])
-                    @php($type = $result['accommodation_type'] ?? null)
-                    @php($ratePlan = $result['rate_plan'] ?? null)
-                    @php($remaining = $result['remaining'] ?? null)
-                    @php($quote = $result['quote'])
-                    <article class="az-results-card">
-                        <div class="az-results-card__image">
-                            @if($property->cover_image)
-                                <img src="{{ Storage::url($property->cover_image) }}" alt="{{ $property->name }}" loading="lazy" decoding="async">
-                            @else
-                                <img src="{{ asset('images/azari-residence-fallback.png') }}" alt="{{ $property->name }}" loading="lazy" decoding="async">
-                            @endif
-                        </div>
-                        <div class="az-results-card__body">
-                            <span class="eyebrow">{{ $property->locationRecord?->name ?? $property->location }}</span>
-                            <h2>{{ $property->name }}</h2>
-                            <p>{{ $property->short_description }}</p>
-                            @if($type)
-                                <p class="az-results-accommodation">
-                                    <strong>{{ $type->name }}</strong>
-                                    @if($ratePlan)
-                                        <span aria-hidden="true">·</span>
-                                        {{ $ratePlan->name }}
-                                    @endif
-                                    @if($remaining !== null && $remaining <= 5)
-                                        <span aria-hidden="true">·</span>
-                                        {{ $remaining }} {{ \Illuminate\Support\Str::plural('unit', $remaining) }} left
-                                    @endif
-                                </p>
-                            @endif
-                            <div class="az-results-meta">
-                                <span><span class="material-symbols-outlined">group</span>Up to {{ $property->max_guests }}</span>
-                                <span><span class="material-symbols-outlined">bed</span>{{ $property->bedrooms }} bedrooms</span>
-                                <span><span class="material-symbols-outlined">bathtub</span>{{ $property->bathrooms }} bathrooms</span>
-                            </div>
-                            <div class="az-results-card__footer">
-                                <div class="az-results-price">
-                                    <small>Total for {{ $quote['nights'] }} {{ \Illuminate\Support\Str::plural('night', $quote['nights']) }}</small>
-                                    <strong>{{ $quote['currency'] }} {{ number_format((float) $quote['total'], 2) }}</strong>
-                                </div>
-                                <form method="POST" action="{{ route('azari.availability.hold', $property) }}">
-                                    @csrf
-                                    <input type="hidden" name="check_in" value="{{ $filters['check_in'] }}">
-                                    <input type="hidden" name="check_out" value="{{ $filters['check_out'] }}">
-                                    <input type="hidden" name="adults" value="{{ $filters['adults'] }}">
-                                    <input type="hidden" name="children" value="{{ $filters['children'] ?? 0 }}">
-                                    <input type="hidden" name="rooms" value="{{ $filters['rooms'] ?? 1 }}">
-                                    @if($type)
-                                        <input type="hidden" name="accommodation_type_id" value="{{ $type->id }}">
-                                    @endif
-                                    @if($ratePlan)
-                                        <input type="hidden" name="rate_plan_id" value="{{ $ratePlan->id }}">
-                                    @endif
-                                    <button class="button button-brass" type="submit">Reserve stay</button>
-                                </form>
-                            </div>
-                        </div>
-                    </article>
-                @empty
-                    <article class="az-results-empty">
-                        <span class="az-results-empty__icon material-symbols-outlined" aria-hidden="true">event_busy</span>
-                        <div>
-                            <span class="eyebrow">No exact availability</span>
-                            <h2>No exact match for those dates</h2>
-                            <p>Adjust your dates, location or guest count, or choose one of the next available ranges below.</p>
-                        </div>
-                    </article>
-                @endforelse
-            </section>
+                <div class="reserva-results-toolbar__actions">
+                    <button
+                        class="button button-secondary reserva-mobile-filter-trigger"
+                        type="button"
+                        data-drawer-open="reserva-search-filter-drawer"
+                    >
+                        <span class="material-symbols-outlined" aria-hidden="true">tune</span>
+                        Filters
+                    </button>
 
-            @if($alternatives->isNotEmpty())
-                <section class="az-results-alternatives">
-                    <div class="section-heading">
-                        <span class="eyebrow">Next availability</span>
-                        <h2>Nearby available dates</h2>
+                    <label>
+                        <span class="sr-only">Sort results</span>
+                        <select name="sort" form="reserva-filter-form" data-search-sort>
+                            @foreach([
+                                'recommended' => 'Recommended',
+                                'price_asc' => 'Price: low to high',
+                                'price_desc' => 'Price: high to low',
+                                'rating' => 'Guest rating',
+                                'distance' => 'Distance',
+                                'popularity' => 'Popularity',
+                            ] as $value => $label)
+                                <option value="{{ $value }}" @selected(($filters['sort'] ?? 'recommended') === $value)>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </label>
+
+                    <div class="reserva-results-view-toggle" aria-label="Results view">
+                        <button type="button" class="is-active" data-results-view="list" aria-pressed="true">List</button>
+                        <button type="button" data-results-view="map" aria-pressed="false">Map</button>
                     </div>
-                    <div class="az-results-grid">
-                        @foreach($alternatives as $alternative)
-                            @php($property = $alternative['property'])
-                            <article class="az-results-card az-results-card--compact">
-                                <div class="az-results-card__body">
-                                    <span class="eyebrow">{{ $property->locationRecord?->name ?? $property->location }}</span>
-                                    <h3>{{ $property->name }}</h3>
-                                    <p>{{ $alternative['check_in']->format('j M Y') }} to {{ $alternative['check_out']->format('j M Y') }}</p>
-                                    <strong class="az-results-alt-price">{{ $alternative['quote']['currency'] }} {{ number_format((float) $alternative['quote']['total'], 2) }}</strong>
-                                    <form method="POST" action="{{ route('azari.availability.hold', $property) }}">
-                                        @csrf
-                                        <input type="hidden" name="check_in" value="{{ $alternative['check_in']->toDateString() }}">
-                                        <input type="hidden" name="check_out" value="{{ $alternative['check_out']->toDateString() }}">
-                                        <input type="hidden" name="adults" value="{{ $filters['adults'] }}">
-                                        <input type="hidden" name="children" value="{{ $filters['children'] ?? 0 }}">
-                                        <input type="hidden" name="rooms" value="{{ $filters['rooms'] ?? 1 }}">
-                                        @if($alternative['accommodation_type'] ?? null)
-                                            <input type="hidden" name="accommodation_type_id" value="{{ $alternative['accommodation_type']->id }}">
+                </div>
+            </div>
+
+            <div class="reserva-search-layout">
+                <aside class="reserva-search-sidebar">
+                    <form id="reserva-filter-form" method="GET" action="{{ route('availability.results') }}">
+                        <h2>Filter stays</h2>
+                        @include('public.bookings.partials.search-filters')
+                    </form>
+                </aside>
+
+                <div>
+                    <section data-results-pane="list" aria-label="Available stays">
+                        @forelse($results as $result)
+                            @php
+                                $property = $result['property'];
+                                $type = $result['accommodation_type'];
+                                $ratePlan = $result['rate_plan'];
+                                $remaining = $result['remaining'];
+                                $quote = $result['quote'];
+                                $review = $result['reviews'];
+                            @endphp
+
+                            <article class="reserva-results-card" data-property-card="{{ $property->id }}">
+                                <div class="reserva-results-card__image">
+                                    <a href="{{ route('properties.show', $property) }}" aria-label="View {{ $property->name }}">
+                                        @if($property->cover_image)
+                                            <img src="{{ Storage::url($property->cover_image) }}" alt="{{ $property->name }}" loading="lazy" decoding="async">
+                                        @else
+                                            <img src="{{ asset('images/azari-residence-fallback.png') }}" alt="{{ $property->name }}" loading="lazy" decoding="async">
                                         @endif
-                                        @if($alternative['rate_plan'] ?? null)
-                                            <input type="hidden" name="rate_plan_id" value="{{ $alternative['rate_plan']->id }}">
+                                    </a>
+                                </div>
+
+                                <div class="reserva-results-card__body">
+                                    <div class="reserva-results-card__top">
+                                        <div>
+                                            <span class="eyebrow">
+                                                {{ Str::headline($property->property_type) }}
+                                                · {{ $property->locationRecord?->name ?? $property->location }}
+                                            </span>
+                                            <h2><a href="{{ route('properties.show', $property) }}">{{ $property->name }}</a></h2>
+                                            <p>{{ $property->short_description }}</p>
+                                        </div>
+
+                                        @if($review['count'] > 0)
+                                            <div class="reserva-review-score" aria-label="{{ $review['overall'] }} out of 5 from {{ $review['count'] }} verified reviews">
+                                                <span>{{ $review['count'] }} {{ Str::plural('review', $review['count']) }}</span>
+                                                <strong>{{ number_format($review['overall'], 1) }}</strong>
+                                            </div>
                                         @endif
-                                        <button class="button button-brass" type="submit">Choose these dates</button>
-                                    </form>
+                                    </div>
+
+                                    <p class="az-results-accommodation">
+                                        <strong>{{ $type->name }}</strong>
+                                        @if($type->bed_configuration)
+                                            <span aria-hidden="true">·</span> {{ $type->bed_configuration }}
+                                        @endif
+                                        <span aria-hidden="true">·</span> Sleeps {{ $type->max_guests }}
+                                    </p>
+
+                                    <div class="reserva-result-badges">
+                                        @if($ratePlan?->is_refundable)
+                                            <span class="is-positive">{{ $ratePlan->cancellationPolicy?->name ?? 'Refundable' }}</span>
+                                        @else
+                                            <span>Non-refundable</span>
+                                        @endif
+
+                                        @if($ratePlan?->paymentPolicy)
+                                            <span>{{ $ratePlan->paymentPolicy->name }}</span>
+                                        @endif
+
+                                        @if(($quote['discount_total'] ?? 0) > 0)
+                                            <span class="is-positive">Deal: save {{ $quote['currency'] }} {{ number_format((float) $quote['discount_total'], 2) }}</span>
+                                        @endif
+
+                                        @if($remaining <= 5)
+                                            <span>{{ $remaining }} {{ Str::plural('unit', $remaining) }} left</span>
+                                        @endif
+                                    </div>
+
+                                    <div class="reserva-result-amenities" aria-label="Top amenities">
+                                        @foreach($property->amenities->take(5) as $amenity)
+                                            <span>{{ $amenity->name }}</span>
+                                        @endforeach
+                                    </div>
+
+                                    <div class="reserva-results-card__footer">
+                                        <div class="reserva-results-price">
+                                            <small>
+                                                Total for {{ $quote['nights'] }} {{ Str::plural('night', $quote['nights']) }}
+                                                @if(($quote['tax_total'] ?? 0) > 0 || ($quote['fee_total'] ?? 0) > 0)
+                                                    · includes displayed taxes/fees
+                                                @endif
+                                            </small>
+                                            <strong>{{ $quote['currency'] }} {{ number_format((float) $quote['total'], 2) }}</strong>
+                                            @if(($quote['tax_total'] ?? 0) > 0 || ($quote['fee_total'] ?? 0) > 0)
+                                                <small>Taxes {{ number_format((float) ($quote['tax_total'] ?? 0), 2) }} · Fees {{ number_format((float) ($quote['fee_total'] ?? 0), 2) }}</small>
+                                            @endif
+                                        </div>
+
+                                        <div class="reserva-results-actions">
+                                            @auth
+                                                <form method="POST" action="{{ route('user.favourites.toggle', $property) }}">
+                                                    @csrf
+                                                    <button
+                                                        class="reserva-favourite-button"
+                                                        type="submit"
+                                                        aria-label="{{ $result['is_favourite'] ? 'Remove from favourites' : 'Save to favourites' }}"
+                                                    >
+                                                        <span class="material-symbols-outlined" aria-hidden="true">
+                                                            {{ $result['is_favourite'] ? 'favorite' : 'favorite_border' }}
+                                                        </span>
+                                                    </button>
+                                                </form>
+                                            @else
+                                                <a class="reserva-favourite-button" href="{{ route('login') }}" aria-label="Sign in to save this stay">
+                                                    <span class="material-symbols-outlined" aria-hidden="true">favorite_border</span>
+                                                </a>
+                                            @endauth
+
+                                            <a class="button button-secondary" href="{{ route('properties.show', $property) }}">View details</a>
+
+                                            <form method="POST" action="{{ route('azari.availability.hold', $property) }}">
+                                                @csrf
+                                                <input type="hidden" name="check_in" value="{{ $filters['check_in'] }}">
+                                                <input type="hidden" name="check_out" value="{{ $filters['check_out'] }}">
+                                                <input type="hidden" name="adults" value="{{ $filters['adults'] }}">
+                                                <input type="hidden" name="children" value="{{ $filters['children'] ?? 0 }}">
+                                                <input type="hidden" name="rooms" value="{{ $filters['rooms'] ?? 1 }}">
+                                                <input type="hidden" name="accommodation_type_id" value="{{ $type->id }}">
+                                                @if($ratePlan)
+                                                    <input type="hidden" name="rate_plan_id" value="{{ $ratePlan->id }}">
+                                                @endif
+                                                <button class="button button-primary" type="submit">Reserve</button>
+                                            </form>
+                                        </div>
+                                    </div>
                                 </div>
                             </article>
-                        @endforeach
-                    </div>
-                </section>
-            @endif
+                        @empty
+                            <article class="az-results-empty">
+                                <span class="az-results-empty__icon material-symbols-outlined" aria-hidden="true">event_busy</span>
+                                <div>
+                                    <span class="eyebrow">No exact availability</span>
+                                    <h2>No exact match for those dates and filters</h2>
+                                    <p>Remove a filter, change your dates, or broaden the destination to see more stays.</p>
+                                </div>
+                            </article>
+                        @endforelse
+
+                        @if($results->hasPages())
+                            <nav class="reserva-search-pagination" aria-label="Search result pages">
+                                {{ $results->links() }}
+                            </nav>
+                        @endif
+                    </section>
+
+                    <section data-results-pane="map" hidden>
+                        <div
+                            class="reserva-map-shell"
+                            data-reserva-results-map
+                            role="region"
+                            aria-label="Relative location map for the current result page"
+                        ></div>
+                        <p class="az-user-panel-subtitle">Pins show relative coordinates for properties on this result page. Open a property for full directions and map context.</p>
+                    </section>
+                </div>
+            </div>
         </section>
     </main>
+
+    <div
+        id="reserva-search-filter-drawer"
+        class="reserva-filter-drawer"
+        data-drawer
+        hidden
+        aria-hidden="true"
+        aria-labelledby="reserva-filter-drawer-title"
+    >
+        <div class="reserva-filter-drawer__panel">
+            <header>
+                <h2 id="reserva-filter-drawer-title">Filter stays</h2>
+                <button type="button" class="reserva-favourite-button" data-drawer-close aria-label="Close filters">
+                    <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                </button>
+            </header>
+            <form method="GET" action="{{ route('availability.results') }}">
+                <input type="hidden" name="sort" value="{{ $filters['sort'] ?? 'recommended' }}">
+                @include('public.bookings.partials.search-filters')
+            </form>
+        </div>
+    </div>
+
+    <script type="application/json" data-map-points>@json($mapPoints)</script>
 </x-public-site.layout>

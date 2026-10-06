@@ -65,7 +65,15 @@ class BookingOnboardingController extends Controller
 
         return view('public.bookings.checkout', [
             'hold' => $hold,
-            'quote' => $pricing->quote($hold->property, $hold->check_in, $hold->check_out),
+            'quote' => $pricing->quote(
+                $hold->property,
+                $hold->check_in,
+                $hold->check_out,
+                [],
+                $hold->accommodationType,
+                $hold->ratePlan,
+                max(1, (int) $hold->rooms)
+            ),
             'draft' => (array) ($hold->guest_draft ?? []),
             'creatingAccount' => ! $user,
         ]);

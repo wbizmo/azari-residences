@@ -8,6 +8,7 @@ use App\Models\BookingHold;
 use App\Models\IdentityVerification;
 use App\Services\Bookings\AzariPricingEngine;
 use App\Services\Bookings\BookingCreationService;
+use App\Services\Payments\PaymentScheduleService;
 use Illuminate\Http\Request;
 
 class AzariBookingFlowController extends Controller
@@ -67,8 +68,11 @@ class AzariBookingFlowController extends Controller
         return view('public.bookings.review', compact('booking'));
     }
 
-    public function confirm(Request $request, string $reference)
-    {
+    public function confirm(
+        Request $request,
+        string $reference,
+        PaymentScheduleService $payments
+    ) {
         $booking = Booking::query()
             ->with('guests.latestIdentityVerification')
             ->where('reference', $reference)
@@ -85,6 +89,23 @@ class AzariBookingFlowController extends Controller
             return redirect()
                 ->route('user.guests.index')
                 ->with('warning', 'Every adult on this booking must complete Dojah identity verification before payment.');
+        }
+
+        $schedule = $payments->forBooking($booking);
+
+        if (
+            in_array($schedule['payment_type'], ['pay_later', 'pay_at_property'], true)
+            && $schedule['can_defer']
+            && $schedule['required_now'] <= 0
+        ) {
+            $confirmed = $payments->confirmDeferredBooking(
+                $booking,
+                $request->user()?->getKey()
+            );
+
+            return redirect()
+                ->route('azari.booking.summary', $confirmed->reference)
+                ->with('success', 'Booking confirmed. Your outstanding balance remains due under the selected payment terms.');
         }
 
         return redirect()->route('public.payment.select', $booking->reference);
