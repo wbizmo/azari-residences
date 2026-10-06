@@ -27,7 +27,7 @@
     <article class="az-user-welcome">
         <div class="az-user-eyebrow"><span class="material-symbols-outlined">{{ $identityVerified ? 'verified' : 'shield' }}</span> Welcome back</div>
         <h2>{{ $currentStay ? 'Your stay is now underway.' : ($nextBooking ? 'Your next stay is beautifully arranged.' : 'Your next Resavar stay begins here.') }}</h2>
-        <p>{{ $featured ? 'Review your reservation, payment status, identities and documents from one private guest area.' : 'Browse hotels & residences, choose your dates and complete a new booking whenever you are ready.' }}</p>
+        <p>{{ $featured ? 'Review your reservation, payment status, identities and documents from one private guest area.' : 'Browse available stays, choose your dates and complete a new booking whenever you are ready.' }}</p>
         <div class="az-user-actions">
             @if($featured)<a class="az-user-button az-user-button--primary" href="{{ route('user.bookings.show',$featured->reference) }}"><span class="material-symbols-outlined">calendar_month</span>View booking</a>@endif
             <a class="az-user-button az-user-button--ghost" href="{{ route('availability.index') }}"><span class="material-symbols-outlined">search</span>Book another stay</a>
@@ -51,13 +51,13 @@
         <header class="az-user-panel-header"><div><h2 class="az-user-panel-title">{{ $currentStay ? 'Current stay' : 'Next booking' }}</h2><p class="az-user-panel-subtitle">Live reservation and payment status</p></div><a class="az-user-button az-user-button--light" href="{{ route('user.bookings.index') }}">All bookings</a></header>
         @if($featured)
         <article class="az-user-booking-card">
-            <div class="az-user-booking-image" style="--az-booking-image:url('{{ $image }}')"><span class="az-user-booking-status"><span class="material-symbols-outlined">check_circle</span>{{ str_replace('_',' ',$featured->status) }}</span><span class="az-user-booking-reference">{{ $featured->reference }}</span><div class="az-user-booking-image-copy"><h3>{{ $featured->property?->name ?? 'Resavar Residence' }}</h3><p>{{ $featured->property?->location ?? $featured->property?->locationRecord?->name ?? 'Resavar' }}</p></div></div>
+            <div class="az-user-booking-image" style="--az-booking-image:url('{{ $image }}')"><span class="az-user-booking-status"><span class="material-symbols-outlined">check_circle</span>{{ str_replace('_',' ',$featured->status) }}</span><span class="az-user-booking-reference">{{ $featured->reference }}</span><div class="az-user-booking-image-copy"><h3>{{ $featured->property?->name ?? 'Resavar Stay' }}</h3><p>{{ $featured->property?->location ?? $featured->property?->locationRecord?->name ?? 'Resavar' }}</p></div></div>
             <div class="az-user-booking-body"><div class="az-user-date-grid"><div><div class="az-user-data-label">{{ $featured->checked_in_at ? 'Checked in at' : 'Scheduled arrival' }}</div><div class="az-user-data-value">@if($featured->checked_in_at)<x-user-local-time :value="$featured->checked_in_at" />@else{{ $featured->check_in?->format('j F Y') }}@endif</div></div><span class="material-symbols-outlined">east</span><div><div class="az-user-data-label">Departure</div><div class="az-user-data-value">{{ $featured->check_out?->format('j F Y') }}</div></div></div>
             <div class="az-user-meta-grid"><div class="az-user-meta-item"><span>Guests</span><strong>{{ $featured->adults }} adults · {{ $featured->children }} children</strong></div><div class="az-user-meta-item"><span>Payment</span><strong>{{ $payment ? ucfirst($payment->status).' · '.ucfirst($payment->provider) : 'No payment yet' }}</strong></div><div class="az-user-meta-item"><span>Total</span><strong>{{ $featured->currency }} {{ number_format((float)$featured->total,2) }}</strong></div></div>
             <div class="az-user-actions"><a class="az-user-button az-user-button--dark" href="{{ route('user.bookings.show',$featured->reference) }}"><span class="material-symbols-outlined">visibility</span>View details</a>@if($featured->balanceDue()>0)<a class="az-user-button az-user-button--primary" href="{{ route('public.payment.select',$featured->reference) }}"><span class="material-symbols-outlined">account_balance_wallet</span>Pay balance</a>@endif</div></div>
         </article>
         @else
-        <div class="az-user-empty"><span class="material-symbols-outlined">hotel</span><h3>No upcoming booking</h3><p>Your future reservations will appear here.</p><a class="az-user-button az-user-button--dark" href="{{ route('availability.index') }}">Search hotels & residences</a></div>
+        <div class="az-user-empty"><span class="material-symbols-outlined">hotel</span><h3>No upcoming booking</h3><p>Your future reservations will appear here.</p><a class="az-user-button az-user-button--dark" href="{{ route('availability.index') }}">Search stays</a></div>
         @endif
     </div>
 
