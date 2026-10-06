@@ -30,8 +30,8 @@
     <section class="az-collection-section" id="collection">
         <div class="site-container">
             <header class="az-section-heading az-section-heading--split">
-                <div><span class="eyebrow">Available hotels & residences</span><h2>Designed around the way you stay.</h2></div>
-                <p>Explore available Resavar hotels & residences.</p>
+                <div><span class="eyebrow">Available stays</span><h2>Designed around the way you stay.</h2></div>
+                <p>Explore available Resavar stays.</p>
             </header>
 
             <div class="az-luxury-property-grid">
@@ -44,7 +44,7 @@
                         <div class="az-luxury-property-card__body">
                             <span class="eyebrow">{{ $property->locationRecord?->name ?? $property->location }}</span>
                             <h2>{{ $property->name }}</h2>
-                            <p>{{ $property->short_description ?: 'A carefully prepared Resavar residence with dependable guest support.' }}</p>
+                            <p>{{ $property->short_description ?: 'A carefully prepared Resavar stay with dependable guest support.' }}</p>
                             <div class="az-property-facts">
                                 <span><span class="material-symbols-outlined">bed</span>{{ $property->bedrooms }} bedrooms</span>
                                 <span><span class="material-symbols-outlined">bathtub</span>{{ $property->bathrooms }} bathrooms</span>
@@ -58,7 +58,7 @@
                     </article>
                 @empty
                     <div class="az-visual-empty-state">
-                        <div><h2>No hotels & residences available</h2><p>Check availability for other dates or contact the Resavar team.</p><a class="button button-primary" href="{{ route('availability.index') }}">Search availability</a></div>
+                        <div><h2>No stays available</h2><p>Check availability for other dates or contact the Resavar team.</p><a class="button button-primary" href="{{ route('availability.index') }}">Search availability</a></div>
                     </div>
                 @endforelse
             </div>
