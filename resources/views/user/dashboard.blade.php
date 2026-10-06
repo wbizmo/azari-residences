@@ -39,10 +39,11 @@
     </aside>
 </section>
 
-<section class="az-user-summary-grid" aria-label="Account summary">
-    <article class="az-user-summary-card"><div class="az-user-summary-icon"><span class="material-symbols-outlined">calendar_today</span></div><div class="az-user-summary-value">{{ $upcomingCount }}</div><div class="az-user-summary-label">Upcoming {{ Str::plural('booking',$upcomingCount) }}</div></article>
-    <article class="az-user-summary-card"><div class="az-user-summary-icon"><span class="material-symbols-outlined">account_balance_wallet</span></div><div class="az-user-summary-value">{{ $pendingPaymentCount }}</div><div class="az-user-summary-label">Pending {{ Str::plural('payment',$pendingPaymentCount) }}</div></article>
-    <article class="az-user-summary-card"><div class="az-user-summary-icon"><span class="material-symbols-outlined">badge</span></div><div class="az-user-summary-value">{{ $identityVerified ? 'Verified' : 'Required' }}</div><div class="az-user-summary-label">Dojah identity status</div></article>
+<section class="az-user-summary-grid" aria-label="Trip summary">
+    <article class="az-user-summary-card"><div class="az-user-summary-icon"><span class="material-symbols-outlined">hotel</span></div><div class="az-user-summary-value">{{ $tripCounts['current'] }}</div><div class="az-user-summary-label">Current {{ Str::plural('stay',$tripCounts['current']) }}</div></article>
+    <article class="az-user-summary-card"><div class="az-user-summary-icon"><span class="material-symbols-outlined">calendar_today</span></div><div class="az-user-summary-value">{{ $tripCounts['upcoming'] }}</div><div class="az-user-summary-label">Upcoming {{ Str::plural('trip',$tripCounts['upcoming']) }}</div></article>
+    <article class="az-user-summary-card"><div class="az-user-summary-icon"><span class="material-symbols-outlined">account_balance_wallet</span></div><div class="az-user-summary-value">{{ $pendingPaymentCount }}</div><div class="az-user-summary-label">Bookings with balance due</div></article>
+    <article class="az-user-summary-card"><div class="az-user-summary-icon"><span class="material-symbols-outlined">history</span></div><div class="az-user-summary-value">{{ $tripCounts['past'] }}</div><div class="az-user-summary-label">Past {{ Str::plural('trip',$tripCounts['past']) }}</div></article>
 </section>
 
 <section class="az-user-dashboard-grid">
@@ -71,3 +72,75 @@
 @if($recentPayments->isEmpty())<div class="az-user-empty"><span class="material-symbols-outlined">receipt_long</span><p>Receipts will appear after a verified successful payment.</p></div>@else<div class="az-user-list">@foreach($recentPayments as $recent)<a class="az-user-list-item" href="{{ route('user.payments.show',$recent) }}"><div><h3>{{ $recent->receipt_number ?? $recent->reference }}</h3><p>{{ $recent->booking?->property?->name }} · {{ $recent->currency }} {{ number_format((float)$recent->amount,2) }}</p></div><span class="az-user-status">{{ ucfirst($recent->provider) }}</span></a>@endforeach</div>@endif
 </div></section>
 @endsection
+
+<section class="az-user-dashboard-grid" style="margin-top:18px">
+    <div class="az-user-panel">
+        <header class="az-user-panel-header">
+            <div><h2 class="az-user-panel-title">Saved stays</h2><p class="az-user-panel-subtitle">Your favourite Reserva properties</p></div>
+        </header>
+        <div class="az-user-panel-body az-user-list">
+            @forelse($favourites as $favourite)
+                @if($favourite->property)
+                    <a class="az-user-list-item" href="{{ route('properties.show',$favourite->property) }}">
+                        <div><h3>{{ $favourite->property->name }}</h3><p>{{ $favourite->property->locationRecord?->name ?? $favourite->property->location }}</p></div>
+                        <span class="material-symbols-outlined">favorite</span>
+                    </a>
+                @endif
+            @empty
+                <div class="az-user-empty"><p>No saved stays yet.</p></div>
+            @endforelse
+        </div>
+    </div>
+
+    <div class="az-user-panel">
+        <header class="az-user-panel-header">
+            <div><h2 class="az-user-panel-title">Saved searches</h2><p class="az-user-panel-subtitle">Continue a previous search with the same filters</p></div>
+        </header>
+        <div class="az-user-panel-body az-user-list">
+            @forelse($savedSearches as $saved)
+                <div class="az-user-list-item">
+                    <div>
+                        <h3>{{ $saved->name ?: ($saved->parameters['destination'] ?? 'Saved search') }}</h3>
+                        <p>{{ $saved->parameters['check_in'] ?? 'Dates' }} to {{ $saved->parameters['check_out'] ?? 'flexible' }}</p>
+                    </div>
+                    <div class="az-user-actions">
+                        <a class="az-user-button az-user-button--light" href="{{ route('availability.results',$saved->parameters) }}">Continue</a>
+                        <form method="POST" action="{{ route('user.saved-searches.destroy',$saved) }}">@csrf @method('DELETE')<button class="az-user-button az-user-button--light" type="submit">Remove</button></form>
+                    </div>
+                </div>
+            @empty
+                <div class="az-user-empty"><p>No saved searches yet.</p></div>
+            @endforelse
+        </div>
+    </div>
+</section>
+
+@if($recentlyViewed->isNotEmpty())
+<section class="az-user-panel" style="margin-top:18px">
+    <header class="az-user-panel-header"><div><h2 class="az-user-panel-title">Recently viewed</h2><p class="az-user-panel-subtitle">Continue exploring stays you opened recently</p></div></header>
+    <div class="az-user-panel-body az-user-list">
+        @foreach($recentlyViewed as $recent)
+            @if($recent->property)
+                <a class="az-user-list-item" href="{{ route('properties.show',$recent->property) }}">
+                    <div><h3>{{ $recent->property->name }}</h3><p>{{ $recent->property->locationRecord?->name ?? $recent->property->location }}</p></div>
+                    <span class="material-symbols-outlined">history</span>
+                </a>
+            @endif
+        @endforeach
+    </div>
+</section>
+@endif
+
+@if($pendingModifications->isNotEmpty())
+<section class="az-user-panel" style="margin-top:18px">
+    <header class="az-user-panel-header"><div><h2 class="az-user-panel-title">Pending trip changes</h2><p class="az-user-panel-subtitle">Requests awaiting review</p></div></header>
+    <div class="az-user-panel-body az-user-list">
+        @foreach($pendingModifications as $modification)
+            <a class="az-user-list-item" href="{{ route('user.bookings.show',$modification->booking->reference) }}">
+                <div><h3>{{ Str::headline($modification->type) }}</h3><p>{{ $modification->booking?->property?->name }} · {{ $modification->reference }}</p></div>
+                <span class="az-user-status az-user-status--warning">Pending</span>
+            </a>
+        @endforeach
+    </div>
+</section>
+@endif
