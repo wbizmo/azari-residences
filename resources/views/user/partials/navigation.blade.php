@@ -1,7 +1,6 @@
 @php
 $unread=auth()->user()->unreadNotifications()->count();
 $contactEmail=\App\Models\SiteSetting::valueFor('customer_dashboard_contact_email',\App\Models\SiteSetting::valueFor('public_contact_email',config('mail.from.address')));
-$identityVerified=auth()->user()->hasVerifiedIdentity();
 @endphp
 
 <section class="az-user-nav-group">
@@ -12,16 +11,12 @@ $identityVerified=auth()->user()->hasVerifiedIdentity();
             ['user.bookings.index','calendar_month','My bookings'],
             ['user.payments.index','account_balance_wallet','Payments'],
             ['user.documents.index','description','Receipts & invoices'],
-            ['user.identity.index','badge','My identity'],
             ['user.guests.index','group','Additional guests']
         ] as [$route,$icon,$label])
             @if(Route::has($route))
                 <a class="az-user-nav-link {{ request()->routeIs(str_replace('.index','.*',$route))?'is-active':'' }}" href="{{ route($route) }}">
                     <span class="material-symbols-outlined">{{ $icon }}</span>
                     <span>{{ $label }}</span>
-                    @if($route === 'user.identity.index')
-                        <span class="az-user-nav-badge">{{ $identityVerified ? 'Verified' : 'Required' }}</span>
-                    @endif
                 </a>
             @endif
         @endforeach
