@@ -97,20 +97,12 @@
 </div>
 
 <section class="az-panel">
-    <h2>Guests and identity documents</h2>
+    <h2>Guests</h2>
     <div class="az-booking-grid">
         @forelse($guests as $guest)
             <article class="az-booking-card">
                 <span>{{ ucfirst($guest->type) }} {{ $guest->position }}</span>
                 <h3>{{ $guest->full_name }}</h3>
-                @if($guest->identityDocument)
-                    <p>{{ ucwords(str_replace('_', ' ', $guest->identityDocument->document_type)) }}</p>
-                    <a class="az-button" href="{{ route('azari.admin.bookings.document', [$booking, $guest->identityDocument]) }}">Open identity document</a>
-                @elseif($guest->type === 'adult')
-                    <p>No identity document stored.</p>
-                @else
-                    <p>No identity document attached.</p>
-                @endif
             </article>
         @empty
             <p>No additional guests.</p>
