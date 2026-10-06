@@ -1398,13 +1398,6 @@ class AzariTransactionalMailService
                 Notification::route('mail', $email)->notify($notification);
             }
 
-            if ($user) {
-                $dispatch->update([
-                    'status' => 'sent',
-                    'sent_at' => now(),
-                    'safe_error' => null,
-                ]);
-            }
         } catch (Throwable $exception) {
             $dispatch->update([
                 'status' => 'failed',
