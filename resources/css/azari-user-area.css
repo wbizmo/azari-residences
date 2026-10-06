@@ -672,3 +672,58 @@ body.az-user-body {
     }
 }
 /* AZARI_GLOBAL_RESPONSIVE_TOPBAR_CARDS_V1_END */
+
+
+/* RESARVA_USER_CONTRAST_AUTHORITY_V1 */
+/* Dark guest surfaces: always white artwork/text. Light surfaces: navy text. */
+.az-user-sidebar .guest-brand-image,
+.az-user-mobile-drawer .guest-brand-image {
+    filter: none !important;
+}
+
+.az-user-sidebar .az-user-nav-link,
+.az-user-mobile-drawer .az-user-nav-link,
+.az-user-sidebar .az-user-nav-link .material-symbols-outlined,
+.az-user-mobile-drawer .az-user-nav-link .material-symbols-outlined {
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.az-user-sidebar .az-user-nav-link:hover,
+.az-user-sidebar .az-user-nav-link.is-active,
+.az-user-mobile-drawer .az-user-nav-link:hover,
+.az-user-mobile-drawer .az-user-nav-link.is-active,
+.az-user-sidebar .az-user-nav-link:hover .material-symbols-outlined,
+.az-user-sidebar .az-user-nav-link.is-active .material-symbols-outlined,
+.az-user-mobile-drawer .az-user-nav-link:hover .material-symbols-outlined,
+.az-user-mobile-drawer .az-user-nav-link.is-active .material-symbols-outlined {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+
+.az-user-support-card a,
+.az-user-support-card a:hover,
+.az-user-support-card a:focus-visible {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+
+.az-user-avatar,
+.az-user-avatar * {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+
+.az-user-profile-chip:hover,
+.az-user-profile-chip:focus-visible {
+    background: #052058 !important;
+    border-color: #052058 !important;
+}
+
+.az-user-profile-chip:hover .az-user-profile-meta strong,
+.az-user-profile-chip:hover .az-user-profile-meta span,
+.az-user-profile-chip:focus-visible .az-user-profile-meta strong,
+.az-user-profile-chip:focus-visible .az-user-profile-meta span {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+/* RESARVA_USER_CONTRAST_AUTHORITY_V1_END */
