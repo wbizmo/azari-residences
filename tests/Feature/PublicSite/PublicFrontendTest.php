@@ -46,14 +46,18 @@ class PublicFrontendTest extends TestCase
             ->assertSessionHasErrors(['check_out']);
     }
 
-    public function test_valid_availability_search_renders_the_search_shell(): void
+    public function test_valid_availability_search_redirects_to_the_canonical_results_route(): void
     {
-        $this->get('/availability/search?check_in=2030-08-10&check_out=2030-08-14&adults=2&children=1&location=Ikoyi&property_type=apartment')
-            ->assertOk()
-            ->assertSee('Your stay request')
-            ->assertSee('4 nights')
-            ->assertSee('3 guests')
-            ->assertSee('All available locations');
+        $response = $this->get('/availability/search?check_in=2030-08-10&check_out=2030-08-14&adults=2&children=1&location=Ikoyi&property_type=apartment');
+
+        $response->assertRedirect();
+
+        $location = $response->headers->get('Location');
+        $this->assertStringContainsString('/availability/results', $location);
+        $this->assertStringContainsString('check_in=2030-08-10', $location);
+        $this->assertStringContainsString('check_out=2030-08-14', $location);
+        $this->assertStringContainsString('adults=2', $location);
+        $this->assertStringContainsString('children=1', $location);
     }
 
     public function test_guest_limits_are_enforced(): void
