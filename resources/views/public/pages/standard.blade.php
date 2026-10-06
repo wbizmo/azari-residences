@@ -1,13 +1,13 @@
 @extends('components.public.layout')
 
-@section('title', $title.' | Resarva')
+@section('title', $title.' | Resavar')
 
 @section('content')
 <main class="az-editorial-page az-standard-page az-standard-page--{{ $key }}">
     <section class="az-editorial-hero">
         <div class="site-container az-editorial-hero__grid">
             <div class="az-editorial-hero__copy">
-                <span class="eyebrow">Resarva</span>
+                <span class="eyebrow">Resavar</span>
                 <h1 class="az-editorial-title">{{ $title }}</h1>
                 <p>{{ $intro }}</p>
 
@@ -23,7 +23,7 @@
             </div>
 
             <figure class="az-editorial-hero__media">
-                <img src="{{ asset('images/'.$image) }}" alt="{{ $title }} at Resarva">
+                <img src="{{ asset('images/'.$image) }}" alt="{{ $title }} at Resavar">
             </figure>
         </div>
     </section>
@@ -37,7 +37,7 @@
                 </div>
 
                 <div>
-                    <p>Resarva brings together carefully selected homes, consistent preparation and responsive guest support. Our focus is not simply where guests sleep, but how confidently they can arrive, settle in and move through every day of their stay.</p>
+                    <p>Resavar brings together carefully selected homes, consistent preparation and responsive guest support. Our focus is not simply where guests sleep, but how confidently they can arrive, settle in and move through every day of their stay.</p>
                     <p>From business travel and relocation to longer visits and private city breaks, each residence is managed around comfort, discretion and thoughtful service.</p>
                 </div>
             </div>
@@ -238,7 +238,7 @@
                     <span class="eyebrow">Guest information</span>
                     <h2>{{ $title }}</h2>
                     <p>{{ $intro }}</p>
-                    <p>For assistance, contact the Resarva guest-support team through an official channel.</p>
+                    <p>For assistance, contact the Resavar guest-support team through an official channel.</p>
                 </div>
             </div>
         </section>
