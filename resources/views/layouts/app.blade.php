@@ -5,7 +5,7 @@
         @include('partials.azari-head-assets')
 
         @php
-            $seoTitle = 'Resarva | Luxury Hotels & Residences, Apartments, Rooms and Hospitality';
+            $seoTitle = 'Resavar — Luxury Stays, Hotels, Apartments, Rooms and Hospitality';
             $seoDescription = 'Discover Resarva, a premium hospitality and accommodation platform owned by Resarva Luxury Properties Ltd. Explore hotels & residences, apartments, rooms, concierge services, dining, housekeeping, airport transfers and secure online booking.';
             $seoUrl = url()->current();
             $seoImage = asset('images/resavar-logo-light.png');
@@ -181,7 +181,7 @@
         <meta name="keywords" content="{{ $seoKeywords }}">
         <meta name="author" content="Resarva Luxury Properties Ltd">
         <meta name="publisher" content="Resarva Luxury Properties Ltd">
-        <meta name="application-name" content="Resarva Residences">
+        <meta name="application-name" content="Resavar">
         <meta name="apple-mobile-web-app-title" content="Resarva Residences">
         <meta name="theme-color" content="#052058">
         <meta name="color-scheme" content="light">
