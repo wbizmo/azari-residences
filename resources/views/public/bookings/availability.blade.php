@@ -328,6 +328,7 @@
                 </button>
             </header>
             <form method="GET" action="{{ route('availability.results') }}">
+                <input type="hidden" name="sort" value="{{ $filters['sort'] ?? 'recommended' }}">
                 @include('public.bookings.partials.search-filters')
             </form>
         </div>
