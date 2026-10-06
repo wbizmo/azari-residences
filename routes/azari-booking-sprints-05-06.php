@@ -4,7 +4,6 @@ use App\Http\Controllers\Admin\AzariBookingOperationsController;
 use App\Http\Controllers\PublicSite\AzariAvailabilityController;
 use App\Http\Controllers\PublicSite\AzariBookingFlowController;
 use App\Http\Controllers\PublicSite\BookingOnboardingController;
-use App\Http\Controllers\PublicSite\PublicGuestVerificationController;
 use App\Http\Controllers\PublicSite\BookingVoucherController;
 use Illuminate\Support\Facades\Route;
 
@@ -24,7 +23,7 @@ Route::middleware('web')->group(function (): void {
     | The checkout entry point is intentionally public. An unregistered guest
     | can enter booking details first. The hold is then bound to either an
     | existing account or a newly-created account, email is verified with a
-    | path-based OTP flow, Dojah KYC runs, and the same hold resumes.
+    | path-based OTP flow resumes the same hold after email verification.
     |
     */
     Route::get('/booking/checkout/{token}', [BookingOnboardingController::class, 'show'])
@@ -52,7 +51,6 @@ Route::middleware('web')->group(function (): void {
         'auth.session',
         'verified',
         'azari.customer',
-        'azari.identity.verified',
     ])->group(function (): void {
         Route::post('/booking/checkout/{token}/complete', [BookingOnboardingController::class, 'complete'])
             ->middleware('throttle:10,1')
@@ -76,49 +74,8 @@ Route::middleware('web')->group(function (): void {
     });
 
 
-    /*
-    |--------------------------------------------------------------------------
-    | External adult guest verification
-    |--------------------------------------------------------------------------
-    |
-    | URLs are path-only by design:
-    | /guest-verification/{booking-reference}/{adult-position}
-    |
-    | The route itself never reveals the guest's personal details. The invited
-    | adult must prove control of the email supplied by the booker before KYC
-    | or optional account linking/creation is exposed.
-    */
-    Route::get('/guest-verification/{reference}/{position}', [PublicGuestVerificationController::class, 'show'])
-        ->whereNumber('position')
-        ->name('guest-verification.show');
 
-    Route::post('/guest-verification/{reference}/{position}/code/send', [PublicGuestVerificationController::class, 'sendCode'])
-        ->whereNumber('position')
-        ->middleware('throttle:5,1')
-        ->name('guest-verification.code.send');
-
-    Route::post('/guest-verification/{reference}/{position}/code/verify', [PublicGuestVerificationController::class, 'verifyCode'])
-        ->whereNumber('position')
-        ->middleware('throttle:10,1')
-        ->name('guest-verification.code.verify');
-
-    Route::get('/guest-verification/{reference}/{position}/status', [PublicGuestVerificationController::class, 'status'])
-        ->whereNumber('position')
-        ->middleware('throttle:60,1')
-        ->name('guest-verification.status');
-
-    Route::post('/guest-verification/{reference}/{position}/account/create', [PublicGuestVerificationController::class, 'createAccount'])
-        ->whereNumber('position')
-        ->middleware('throttle:5,1')
-        ->name('guest-verification.account.create');
-
-    Route::post('/guest-verification/{reference}/{position}/account/link', [PublicGuestVerificationController::class, 'linkAccount'])
-        ->whereNumber('position')
-        ->middleware('throttle:10,1')
-        ->name('guest-verification.account.link');
-
-    // Read-only review and summary remain reachable for already-created
-    // bookings. New booking/payment progression is authenticated and KYC-gated.
+    // Read-only review and summary remain reachable for already-created bookings.
     Route::get('/booking/{reference}/review', [AzariBookingFlowController::class, 'review'])
         ->name('azari.booking.review');
 
