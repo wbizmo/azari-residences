@@ -22,7 +22,7 @@
         <div class="site-container azari-home-hero__container">
             <div class="azari-home-hero__content">
                 <span class="azari-home-hero__eyebrow">
-                    {{ $content['hero_eyebrow'] ?? 'Premium serviced hotels & residences' }}
+                    {{ $content['hero_eyebrow'] ?? 'Premium serviced stays' }}
                 </span>
 
                 <h1 id="azari-home-hero-title">
@@ -30,7 +30,7 @@
                 </h1>
 
                 <p>
-                    {{ $content['hero_body'] ?? 'Discover carefully selected serviced apartments and private hotels & residences designed around comfort, privacy and dependable hospitality.' }}
+                    {{ $content['hero_body'] ?? 'Discover carefully selected serviced apartments, hotels and private stays designed around comfort, privacy and dependable hospitality.' }}
                 </p>
 
                 <div class="azari-home-hero__actions">
@@ -62,9 +62,9 @@
             <div class="availability-card">
                 <div class="availability-heading">
                     <span class="eyebrow">Direct booking</span>
-                    <h2>Find your residence</h2>
+                    <h2>Find your stay</h2>
                     <p>
-                        Search by dates, guests and residence type.
+                        Search by dates, guests and stay type.
                     </p>
                 </div>
 
@@ -280,7 +280,7 @@
                     </div>
 
                     <div class="search-field">
-                        <label for="room_type_id">Residence type</label>
+                        <label for="room_type_id">Stay type</label>
 
                         <div class="input-shell select-shell">
                             <span
@@ -425,7 +425,7 @@
                 <span class="eyebrow">Across Our Locations</span>
 
                 <h2>
-                    A considered collection of hotels & residences.
+                    A considered collection of exceptional stays.
                 </h2>
             </div>
 
@@ -437,7 +437,7 @@
                 </p>
 
                 <p>
-                    Each Resavar residence combines the privacy and comfort of a
+                    Each Resavar stay combines the privacy and comfort of a
                     personal home with the thoughtful service expected from
                     premium hospitality. From carefully furnished interiors and
                     reliable housekeeping to responsive guest support, every
@@ -448,7 +448,7 @@
                 <p>
                     Whether you are travelling for business, relocating,
                     planning an extended visit or simply seeking a refined place
-                    to stay, our hotels & residences are prepared to provide comfort,
+                    to stay, our properties are prepared to provide comfort,
                     confidence and a dependable experience from check-in through
                     departure.
                 </p>
@@ -463,7 +463,7 @@
                     <span class="eyebrow">The collection</span>
 
                     <h2>
-                        {{ $content['featured_title'] ?? 'Featured Hotels & Residences' }}
+                        {{ $content['featured_title'] ?? 'Featured Stays' }}
                     </h2>
                 </div>
 
@@ -471,7 +471,7 @@
                     href="{{ url('/residences') }}"
                     class="azari-view-all-residences"
                 >
-                    <span>View all hotels & residences</span>
+                    <span>View all stays</span>
 </a>
             </div>
 
@@ -568,7 +568,7 @@
                     </article>
                 @empty
                     <div class="production-empty-state">
-                        No featured hotels & residences are currently published.
+                        No featured stays are currently published.
                     </div>
                 @endforelse
             </div>
@@ -578,7 +578,7 @@
                     href="{{ route('public.apartments') }}"
                     class="azari-view-all-residences"
                 >
-                    <span>View all hotels & residences</span>
+                    <span>View all stays</span>
 
                     <span
                         class="material-symbols-outlined"
@@ -611,7 +611,7 @@
                     [
                         'cleaning_services',
                         'Housekeeping',
-                        'Professional housekeeping services maintain every residence to hotel-quality standards. Fresh linens, meticulous cleaning and scheduled servicing help every stay remain comfortable from the first night to the last.',
+                        'Professional housekeeping services maintain every stay to hotel-quality standards. Fresh linens, meticulous cleaning and scheduled servicing help every stay remain comfortable from the first night to the last.',
                     ],
                     [
                         'restaurant',
@@ -621,7 +621,7 @@
                     [
                         'airport_shuttle',
                         'Airport transfers',
-                        'Reliable airport pickup and drop-off services arranged through trusted transportation partners, providing a comfortable journey between the airport and your residence.',
+                        'Reliable airport pickup and drop-off services arranged through trusted transportation partners, providing a comfortable journey between the airport and your stay.',
                     ],
                 ] as [$icon, $title, $description])
                     <article class="service-card">
