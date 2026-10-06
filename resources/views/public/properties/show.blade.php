@@ -170,16 +170,18 @@
                                 <h2>{{ $hasStayDates ? 'Choose your accommodation and rate' : 'Accommodation and rate options' }}</h2>
                             </div>
                             @if($hasStayDates)
-                                <p>{{ CarbonCarbonImmutable::parse($searchState['check_in'])->format('j M Y') }} to {{ CarbonCarbonImmutable::parse($searchState['check_out'])->format('j M Y') }}</p>
+                                <p>{{ Carbon\CarbonImmutable::parse($searchState['check_in'])->format('j M Y') }} to {{ Carbon\CarbonImmutable::parse($searchState['check_out'])->format('j M Y') }}</p>
                             @endif
                         </div>
 
                         @if($rateOptions->isNotEmpty())
                             <div class="reserva-rate-table">
                                 @foreach($rateOptions as $option)
-                                    @php($type = $option['type'])
-                                    @php($plan = $option['plan'])
-                                    @php($quote = $option['quote'] ?? null)
+                                    @php
+                                        $type = $option['type'];
+                                        $plan = $option['plan'];
+                                        $quote = $option['quote'] ?? null;
+                                    @endphp
 
                                     <article class="reserva-rate-row">
                                         <div class="reserva-rate-row__name">
