@@ -18,7 +18,7 @@
 
     <section class="grid">
         <div class="card"><h2>Guest</h2><p><strong>{{ $booking->guest_name }}</strong><br>{{ $booking->guest_email }}<br>{{ $booking->guest_phone ?: 'Phone not supplied' }}<br>{{ collect([$booking->address, $booking->city, $booking->country])->filter()->implode(', ') }}</p></div>
-        <div class="card"><h2>Stay</h2><p><strong>{{ $booking->property?->name ?? 'Resavar Residence' }}</strong><br>{{ $booking->property?->unit_number ?: $booking->property?->code }}<br>{{ $booking->check_in?->format('d M Y') }} to {{ $booking->check_out?->format('d M Y') }}<br>{{ $booking->nights }} night{{ $booking->nights == 1 ? '' : 's' }}</p></div>
+        <div class="card"><h2>Stay</h2><p><strong>{{ $booking->property?->name ?? 'Resavar Stay' }}</strong><br>{{ $booking->property?->unit_number ?: $booking->property?->code }}<br>{{ $booking->check_in?->format('d M Y') }} to {{ $booking->check_out?->format('d M Y') }}<br>{{ $booking->nights }} night{{ $booking->nights == 1 ? '' : 's' }}</p></div>
     </section>
 
     <section class="section"><h2>Booking statistics</h2><div class="stats"><div class="stat"><span>Adults</span><strong>{{ $booking->adults }}</strong></div><div class="stat"><span>Children</span><strong>{{ $booking->children }}</strong></div><div class="stat"><span>Rooms</span><strong>{{ $booking->rooms }}</strong></div><div class="stat"><span>Status</span><strong>{{ ucwords(str_replace('_', ' ', $booking->status)) }}</strong></div></div></section>
