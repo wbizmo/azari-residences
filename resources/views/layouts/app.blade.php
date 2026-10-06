@@ -6,63 +6,63 @@
 
         @php
             $seoTitle = 'Resavar — Luxury Stays, Hotels, Apartments, Rooms and Hospitality';
-            $seoDescription = 'Discover Resarva, a premium hospitality and accommodation platform owned by Resarva Luxury Properties Ltd. Explore hotels & residences, apartments, rooms, concierge services, dining, housekeeping, airport transfers and secure online booking.';
+            $seoDescription = 'Discover Resavar, a premium hospitality and accommodation platform owned by Resavar Luxury Properties Ltd. Explore hotels & residences, apartments, rooms, concierge services, dining, housekeeping, airport transfers and secure online booking.';
             $seoUrl = url()->current();
             $seoImage = asset('images/resavar-logo-light.png');
 
             $seoLongDescription = <<<'DESCRIPTION'
-    Resarva Residences is a premium hospitality and accommodation brand owned and operated by Resarva Luxury Properties Ltd, providing thoughtfully managed residences, apartments, rooms, and guest services for business travellers, families, couples, groups, and leisure guests. The platform makes discovering suitable accommodation simple by presenting detailed property information, room features, photographs, locations, guest capacities, amenities, policies, pricing, and date-based availability in one accessible experience.
+    Resavar Residences is a premium hospitality and accommodation brand owned and operated by Resavar Luxury Properties Ltd, providing thoughtfully managed residences, apartments, rooms, and guest services for business travellers, families, couples, groups, and leisure guests. The platform makes discovering suitable accommodation simple by presenting detailed property information, room features, photographs, locations, guest capacities, amenities, policies, pricing, and date-based availability in one accessible experience.
 
-    Guests can explore Resarva Residences properties, compare accommodation options, check available dates, select their preferred stay period, provide guest information, submit required identification, review booking details, and proceed securely to payment. The booking system is designed to reduce uncertainty by checking existing reservations, active booking holds, maintenance periods, property capacity, and applicable stay requirements before confirming availability.
+    Guests can explore Resavar Residences properties, compare accommodation options, check available dates, select their preferred stay period, provide guest information, submit required identification, review booking details, and proceed securely to payment. The booking system is designed to reduce uncertainty by checking existing reservations, active booking holds, maintenance periods, property capacity, and applicable stay requirements before confirming availability.
 
-    Beyond accommodation, Resarva Residences supports a complete hospitality experience through concierge assistance, housekeeping requests, airport transfer arrangements, restaurant and dining information, local guides, service requests, customer support, booking verification, notifications, invoices, receipts, and guest account management. Registered guests can manage bookings, payments, identity documents, additional guests, service requests, support tickets, notifications, profiles, and account security from a dedicated customer area.
+    Beyond accommodation, Resavar Residences supports a complete hospitality experience through concierge assistance, housekeeping requests, airport transfer arrangements, restaurant and dining information, local guides, service requests, customer support, booking verification, notifications, invoices, receipts, and guest account management. Registered guests can manage bookings, payments, identity documents, additional guests, service requests, support tickets, notifications, profiles, and account security from a dedicated customer area.
 
-    Resarva Residences also enables eligible property owners to submit properties for professional review and possible listing within the platform. Approved properties can be managed through structured booking, revenue, balance, and withdrawal processes while remaining subject to Resarva standards and administrative oversight.
+    Resavar Residences also enables eligible property owners to submit properties for professional review and possible listing within the platform. Approved properties can be managed through structured booking, revenue, balance, and withdrawal processes while remaining subject to Resavar standards and administrative oversight.
 
-    Resarva Luxury Properties Ltd maintains the platform as part of the wider Resarva ecosystem associated with Resarva Group and Resarva Holdings. Its objective is to combine dependable property management, refined hospitality, secure digital booking, responsive guest support, and carefully selected accommodation. Whether a guest requires a short stay, an extended residence, a private apartment, a comfortable room, or coordinated hospitality services, Resarva Residences provides a convenient starting point for planning and managing the complete stay.
+    Resavar Luxury Properties Ltd maintains the platform as part of the wider Resavar ecosystem associated with Resavar Group and Resavar Holdings. Its objective is to combine dependable property management, refined hospitality, secure digital booking, responsive guest support, and carefully selected accommodation. Whether a guest requires a short stay, an extended residence, a private apartment, a comfortable room, or coordinated hospitality services, Resavar Residences provides a convenient starting point for planning and managing the complete stay.
     DESCRIPTION;
 
             $nameKeywords = [
-                'Resarva', 'Resarva', 'The Resarva', 'The Resarva',
-                'Resarva Residence', 'Resarva Luxury Hotels & Residences', 'Resarva Luxury Properties',
-                'Resarva Luxury Properties Ltd', 'Resarva Luxury Properties Limited',
-                'Resarva Group', 'The Resarva Group', 'Resarva Holdings', 'Resarva Holdings Ltd',
-                'Resarva Holdings Limited', 'Resarva Hospitality', 'Resarva Hospitality Group',
-                'Resarva Hospitality Services', 'Resarva Accommodation', 'Resarva Apartments',
-                'Resarva Rooms', 'Resarva Properties', 'Resarva Property', 'Resarva Property Booking',
-                'Resarva Residence Booking', 'Resarva Booking', 'Resarva Hotel',
-                'Resarva Hotels', 'Resarva Guest House', 'Resarva Guest Accommodation',
-                'Resarva Serviced Apartments', 'Resarva Short Stay', 'Resarva Extended Stay',
-                'Resarva Holiday Hotels & Residences', 'Resarva Vacation Hotels & Residences',
-                'Resarva Premium Hotels & Residences', 'Resarva Private Hotels & Residences',
-                'Resarva Executive Hotels & Residences', 'Resarva Corporate Accommodation',
-                'Resarva Family Accommodation', 'Resarva Luxury Accommodation',
-                'Resarva Property Management', 'Resarva Residence Management',
-                'Resarva Resort Management', 'Resarva Guest Services', 'Resarva Concierge',
-                'Resarva Housekeeping', 'Resarva Airport Transfers', 'Resarva Dining',
-                'Resarva Restaurant', 'Resarva Local Guide', 'Resarva Booking Platform',
-                'Resarva Reservation Platform', 'Resarva Online Booking',
-                'Resarva Secure Booking', 'Resarva Availability', 'Resarva Property Owners',
-                'Resarva Property Listings', 'Resarva Guest Portal', 'Resarva Website',
-                'Resarva Luxury Properties Website',
+                'Resavar', 'Resavar', 'The Resavar', 'The Resavar',
+                'Resavar Residence', 'Resavar Luxury Hotels & Residences', 'Resavar Luxury Properties',
+                'Resavar Luxury Properties Ltd', 'Resavar Luxury Properties Limited',
+                'Resavar Group', 'The Resavar Group', 'Resavar Holdings', 'Resavar Holdings Ltd',
+                'Resavar Holdings Limited', 'Resavar Hospitality', 'Resavar Hospitality Group',
+                'Resavar Hospitality Services', 'Resavar Accommodation', 'Resavar Apartments',
+                'Resavar Rooms', 'Resavar Properties', 'Resavar Property', 'Resavar Property Booking',
+                'Resavar Residence Booking', 'Resavar Booking', 'Resavar Hotel',
+                'Resavar Hotels', 'Resavar Guest House', 'Resavar Guest Accommodation',
+                'Resavar Serviced Apartments', 'Resavar Short Stay', 'Resavar Extended Stay',
+                'Resavar Holiday Hotels & Residences', 'Resavar Vacation Hotels & Residences',
+                'Resavar Premium Hotels & Residences', 'Resavar Private Hotels & Residences',
+                'Resavar Executive Hotels & Residences', 'Resavar Corporate Accommodation',
+                'Resavar Family Accommodation', 'Resavar Luxury Accommodation',
+                'Resavar Property Management', 'Resavar Residence Management',
+                'Resavar Resort Management', 'Resavar Guest Services', 'Resavar Concierge',
+                'Resavar Housekeeping', 'Resavar Airport Transfers', 'Resavar Dining',
+                'Resavar Restaurant', 'Resavar Local Guide', 'Resavar Booking Platform',
+                'Resavar Reservation Platform', 'Resavar Online Booking',
+                'Resavar Secure Booking', 'Resavar Availability', 'Resavar Property Owners',
+                'Resavar Property Listings', 'Resavar Guest Portal', 'Resavar Website',
+                'Resavar Luxury Properties Website',
             ];
 
             $searchKeywords = [
-                'Resarva website', 'Resarva website', 'Resarva booking',
-                'Resarva booking', 'book Resarva',
-                'how to book Resarva', 'where is Resarva',
-                'what is Resarva', 'who owns Resarva',
-                'Resarva availability', 'check Resarva availability',
-                'check Resarva availability', 'Resarva available rooms',
-                'Resarva available apartments', 'Resarva room booking',
-                'Resarva apartment booking', 'Resarva residence prices',
-                'Resarva accommodation prices', 'Resarva booking confirmation',
-                'verify Resarva booking', 'Resarva booking payment',
-                'Resarva guest login', 'Resarva customer portal',
-                'Resarva property owner registration', 'list property with Resarva',
-                'Resarva concierge booking', 'Resarva airport pickup',
-                'Resarva housekeeping request', 'Resarva contact information',
-                'contact Resarva','Resarva','Resarva luxury','Resarva group',
+                'Resavar website', 'Resavar website', 'Resavar booking',
+                'Resavar booking', 'book Resavar',
+                'how to book Resavar', 'where is Resavar',
+                'what is Resavar', 'who owns Resavar',
+                'Resavar availability', 'check Resavar availability',
+                'check Resavar availability', 'Resavar available rooms',
+                'Resavar available apartments', 'Resavar room booking',
+                'Resavar apartment booking', 'Resavar residence prices',
+                'Resavar accommodation prices', 'Resavar booking confirmation',
+                'verify Resavar booking', 'Resavar booking payment',
+                'Resavar guest login', 'Resavar customer portal',
+                'Resavar property owner registration', 'list property with Resavar',
+                'Resavar concierge booking', 'Resavar airport pickup',
+                'Resavar housekeeping request', 'Resavar contact information',
+                'contact Resavar','Resavar','Resavar luxury','Resavar group',
             ];
 
             $generalKeywords = [
@@ -89,11 +89,11 @@
             $organizationSchema = array_filter([
                 '@type' => 'Organization',
                 '@id' => url('/').'#reserva',
-                'name' => 'Resarva Luxury Properties Ltd',
+                'name' => 'Resavar Luxury Properties Ltd',
                 'alternateName' => [
-                    'Resarva Luxury Properties Limited',
-                    'Resarva Group',
-                    'Resarva Holdings',
+                    'Resavar Luxury Properties Limited',
+                    'Resavar Group',
+                    'Resavar Holdings',
                 ],
                 'url' => url('/'),
                 'logo' => [
@@ -127,10 +127,10 @@
                     [
                         '@type' => ['WebSite', 'LodgingBusiness'],
                         '@id' => url('/').'#reserva-platform',
-                        'name' => 'Resarva',
+                        'name' => 'Resavar',
                         'alternateName' => [
-                            'The Resarva',
-                            'Resarva Luxury Hotels & Residences',
+                            'The Resavar',
+                            'Resavar Luxury Hotels & Residences',
                         ],
                         'url' => url('/'),
                         'description' => $seoLongDescription,
@@ -179,10 +179,10 @@
 
         <meta name="description" content="{{ $seoDescription }}">
         <meta name="keywords" content="{{ $seoKeywords }}">
-        <meta name="author" content="Resarva Luxury Properties Ltd">
-        <meta name="publisher" content="Resarva Luxury Properties Ltd">
+        <meta name="author" content="Resavar Luxury Properties Ltd">
+        <meta name="publisher" content="Resavar Luxury Properties Ltd">
         <meta name="application-name" content="Resavar">
-        <meta name="apple-mobile-web-app-title" content="Resarva Residences">
+        <meta name="apple-mobile-web-app-title" content="Resavar Residences">
         <meta name="theme-color" content="#052058">
         <meta name="color-scheme" content="light">
         <meta name="format-detection" content="telephone=yes">
@@ -197,21 +197,21 @@
 
 
         <meta property="og:type" content="website">
-        <meta property="og:site_name" content="Resarva Residences">
+        <meta property="og:site_name" content="Resavar Residences">
         <meta property="og:title" content="{{ $seoTitle }}">
         <meta property="og:description" content="{{ $seoDescription }}">
         <meta property="og:url" content="{{ $seoUrl }}">
         <meta property="og:image" content="{{ $seoImage }}">
         <meta property="og:image:secure_url" content="{{ $seoImage }}">
         <meta property="og:image:type" content="image/png">
-        <meta property="og:image:alt" content="Resarva Residences">
+        <meta property="og:image:alt" content="Resavar Residences">
         <meta property="og:locale" content="en_US">
 
         <meta name="twitter:card" content="summary">
         <meta name="twitter:title" content="{{ $seoTitle }}">
         <meta name="twitter:description" content="{{ $seoDescription }}">
         <meta name="twitter:image" content="{{ $seoImage }}">
-        <meta name="twitter:image:alt" content="Resarva Residences">
+        <meta name="twitter:image:alt" content="Resavar Residences">
 
         <script type="application/ld+json">
             {!! json_encode(
