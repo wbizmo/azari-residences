@@ -36,13 +36,13 @@
                             <tr>
                                 <td valign="middle">
                                     @if(!empty($logoUrl))
-                                        <img src="{{ $logoUrl }}" width="174" alt="Resarva" style="display:block;width:174px;max-width:100%;height:auto;border:0">
+                                        <img src="{{ $logoUrl }}" width="174" alt="Resavar" style="display:block;width:174px;max-width:100%;height:auto;border:0">
                                     @else
-                                        <div style="color:#FFFFFF;font-family:Montserrat,Arial,sans-serif;font-size:22px;letter-spacing:1px">RESARVA</div>
+                                        <div style="color:#FFFFFF;font-family:Montserrat,Arial,sans-serif;font-size:22px;letter-spacing:1px">RESAVAR</div>
                                     @endif
                                 </td>
                                 <td align="right" valign="middle" style="color:#FFFFFF;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase">
-                                    {{ $eyebrow ?? 'Resarva' }}
+                                    {{ $eyebrow ?? 'Resavar' }}
                                 </td>
                             </tr>
                         </table>
@@ -118,8 +118,8 @@
 
                 <tr>
                     <td style="padding:22px 30px;background:#052058;border-top:1px solid #052058;color:#FFFFFF;font-size:11px;line-height:1.65">
-                        <div style="margin-bottom:7px;color:#FFFFFF;font-weight:700">Resarva</div>
-                        <div>{{ $footerText ?? 'This is a transactional message from Resarva.' }}</div>
+                        <div style="margin-bottom:7px;color:#FFFFFF;font-weight:700">Resavar</div>
+                        <div>{{ $footerText ?? 'This is a transactional message from Resavar.' }}</div>
                         @if(!empty($supportEmail))
                             <div style="margin-top:7px">Need assistance? Contact <a href="mailto:{{ $supportEmail }}" style="color:#FFFFFF">{{ $supportEmail }}</a>.</div>
                         @endif
