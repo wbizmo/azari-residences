@@ -5,21 +5,17 @@ namespace App\Http\Controllers\PublicSite;
 use App\Http\Controllers\Controller;
 use App\Models\Location;
 use App\Models\Property;
-use App\Services\Bookings\AzariAvailabilityEngine;
-use App\Services\Bookings\AzariPricingEngine;
 use App\Services\Search\DestinationSearchService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use Illuminate\View\View;
 
 class AvailabilitySearchController extends Controller
 {
     public function __invoke(
         Request $request,
-        AzariAvailabilityEngine $availability,
-        AzariPricingEngine $pricing,
         DestinationSearchService $destinations
-    ): View {
+    ): RedirectResponse {
         $validated = $request->validate([
             'check_in' => ['required', 'date', 'after_or_equal:today'],
             'check_out' => ['required', 'date', 'after:check_in'],
@@ -80,16 +76,12 @@ class AvailabilitySearchController extends Controller
             $validated['destination'] = $typedDestination;
         }
 
-        $request->merge([
-            ...$validated,
-            'children' => (int) ($validated['children'] ?? 0),
-            'rooms' => (int) ($validated['rooms'] ?? 1),
-        ]);
+        $validated['children'] = (int) ($validated['children'] ?? 0);
+        $validated['rooms'] = (int) ($validated['rooms'] ?? 1);
 
-        return app(AzariAvailabilityController::class)->index(
-            $request,
-            $availability,
-            $pricing
-        );
+        return redirect()->route('availability.results', array_filter(
+            $validated,
+            fn ($value) => $value !== null && $value !== ''
+        ));
     }
 }
