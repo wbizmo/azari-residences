@@ -54,6 +54,7 @@ return [
         'http_timeout' => max(5, (int) env('AZARI_INTEGRATION_HTTP_TIMEOUT', 20)),
         'connect_timeout' => max(2, (int) env('AZARI_INTEGRATION_CONNECT_TIMEOUT', 8)),
         'reconcile_limit' => max(1, min(500, (int) env('AZARI_PAYMENT_RECONCILE_LIMIT', 100))),
+        'reconcile_window_minutes' => max(10, min(10080, (int) env('AZARI_PAYMENT_RECONCILE_WINDOW_MINUTES', 1440))),
         'webhook_queue' => env('AZARI_WEBHOOK_QUEUE', 'integrations'),
     ],
 
