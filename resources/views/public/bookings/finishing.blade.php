@@ -1,4 +1,4 @@
-<x-public-site.layout title="Finishing booking | Reserva">
+<x-public-site.layout title="Finishing booking | Resarva">
 <main class="site-container az-s56-page">
 <header>
     <span class="eyebrow">Booking secured</span>

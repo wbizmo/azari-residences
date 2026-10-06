@@ -117,7 +117,7 @@ class AzariTransactionalMailService
             'Continue payment',
             $payment->checkout_url ?: $this->route('public.payment.select', [$booking->reference]),
             $details,
-            'Your booking is not confirmed until Reserva verifies the payment successfully.',
+            'Your booking is not confirmed until Resarva verifies the payment successfully.',
             'warning',
             null,
             null,
@@ -145,7 +145,7 @@ class AzariTransactionalMailService
             'payment-successful',
             'Payment confirmed for booking '.$booking->reference,
             [
-                'Reserva has verified your payment successfully.',
+                'Resarva has verified your payment successfully.',
                 'Your payment reference and amount are shown below.',
             ],
             'View payment receipt',
@@ -175,7 +175,7 @@ class AzariTransactionalMailService
             'Open booking confirmation',
             $confirmationUrl,
             $this->bookingDetails($booking),
-            'Contact Reserva promptly if any confirmed booking detail is incorrect.',
+            'Contact Resarva promptly if any confirmed booking detail is incorrect.',
             'success',
             null,
             null,
@@ -245,7 +245,7 @@ class AzariTransactionalMailService
             'Try payment again',
             $this->route('public.payment.select', [$booking->reference]),
             $details,
-            'Use a fresh checkout attempt. Contact Reserva if your account was debited but the booking remains unpaid.',
+            'Use a fresh checkout attempt. Contact Resarva if your account was debited but the booking remains unpaid.',
             'danger',
             null,
             null,
@@ -285,7 +285,7 @@ class AzariTransactionalMailService
             'Excess successful payment requires review '.$payment->reference,
             [
                 'The provider reported a successful payment after the booking balance had already been satisfied.',
-                'Review this payment externally. Reserva does not perform an automatic refund.',
+                'Review this payment externally. Resarva does not perform an automatic refund.',
             ],
             'Open payment',
             $this->route('azari.admin.payments.show', [$payment->id]),
@@ -318,7 +318,7 @@ class AzariTransactionalMailService
             'View booking status',
             $this->route('bookings.verify', ['reference' => $booking->reference]),
             $this->bookingDetails($booking),
-            $booking->cancellation_reason ?: 'Contact Reserva if you require clarification about this cancellation.',
+            $booking->cancellation_reason ?: 'Contact Resarva if you require clarification about this cancellation.',
             'danger',
             null,
             null,
@@ -352,7 +352,7 @@ class AzariTransactionalMailService
             'Check-in recorded for booking '.$booking->reference,
             [
                 'Your check-in has been recorded successfully.',
-                'The Reserva team can now manage active-stay requests against this booking.',
+                'The Resarva team can now manage active-stay requests against this booking.',
             ],
             'Open your booking',
             $this->guestBookingUrl($booking),
@@ -389,7 +389,7 @@ class AzariTransactionalMailService
             'service-request-received',
             'Service request '.$request->reference.' received',
             [
-                'Your request has been sent to the Reserva team.',
+                'Your request has been sent to the Resarva team.',
                 'Updates and guest-visible responses will appear in your account.',
             ],
             'View service request',
@@ -401,7 +401,7 @@ class AzariTransactionalMailService
                 'Status' => $this->label($request->status ?: 'submitted'),
                 'Requested time' => $this->dateTime($request->requested_at),
             ],
-            'Reserva may contact you if additional information is required.',
+            'Resarva may contact you if additional information is required.',
             'default',
             null,
             null,
@@ -429,7 +429,7 @@ class AzariTransactionalMailService
             'service-request-updated',
             'Service request '.$request->reference.' updated',
             [
-                'The Reserva team updated your service request.',
+                'The Resarva team updated your service request.',
                 $request->guest_reply ?: 'Open the request to review its latest status.',
             ],
             'View service request',
@@ -462,10 +462,10 @@ class AzariTransactionalMailService
             $user->email,
             $user,
             'account-password-changed',
-            'Your Reserva account password was changed',
+            'Your Resarva account password was changed',
             [
-                'The password for your Reserva account was changed successfully.',
-                'If you did not make this change, reset your password immediately and contact Reserva support.',
+                'The password for your Resarva account was changed successfully.',
+                'If you did not make this change, reset your password immediately and contact Resarva support.',
             ],
             'Review account security',
             $this->route('profile.edit'),
@@ -473,7 +473,7 @@ class AzariTransactionalMailService
                 'Account' => $this->maskEmail((string) $user->email),
                 'Changed' => $this->dateTime(now()),
             ],
-            'Reserva will never ask you to send your password by email.',
+            'Resarva will never ask you to send your password by email.',
             'warning',
             null,
             null,
@@ -501,9 +501,9 @@ class AzariTransactionalMailService
             $previousEmail,
             $user,
             'account-email-changed',
-            'Your Reserva account email address was changed',
+            'Your Resarva account email address was changed',
             [
-                'The email address connected to your Reserva account was changed.',
+                'The email address connected to your Resarva account was changed.',
                 'If you did not make this change, secure the account immediately.',
             ],
             'Reset your password',
@@ -545,8 +545,8 @@ class AzariTransactionalMailService
             'Support ticket '.$ticket->reference.' has been '.($resolved ? 'resolved' : 'closed'),
             [
                 $resolved
-                    ? 'The Reserva team has marked your support request as resolved.'
-                    : 'Your Reserva support request has been closed.',
+                    ? 'The Resarva team has marked your support request as resolved.'
+                    : 'Your Resarva support request has been closed.',
                 'Open the ticket to review the conversation and recorded outcome.',
             ],
             'View support ticket',
@@ -584,7 +584,7 @@ class AzariTransactionalMailService
             'owner-payout-destination-changed',
             'Your payout destination was changed',
             [
-                'The payout destination saved for your Reserva property-owner account was changed.',
+                'The payout destination saved for your Resarva property-owner account was changed.',
                 'For security, only a masked destination is shown in this email.',
             ],
             'Review withdrawal settings',
@@ -595,8 +595,8 @@ class AzariTransactionalMailService
                 'Verification' => $profile->is_verified ? 'Verified' : 'Verification required',
             ],
             $profile->is_verified
-                ? 'Contact Reserva immediately if you did not make this change.'
-                : 'Withdrawals remain unavailable until Reserva verifies the updated destination.',
+                ? 'Contact Resarva immediately if you did not make this change.'
+                : 'Withdrawals remain unavailable until Resarva verifies the updated destination.',
             'warning',
             null,
             null,
@@ -623,7 +623,7 @@ class AzariTransactionalMailService
             'owner-listing-submitted',
             'Property listing '.$listing->reference.' submitted',
             [
-                'Reserva has received your property listing for review.',
+                'Resarva has received your property listing for review.',
                 'The listing will not appear publicly until it has been approved.',
             ],
             'View listing',
@@ -634,7 +634,7 @@ class AzariTransactionalMailService
                 'Status' => $this->label($listing->status),
                 'Submitted' => $this->dateTime($listing->submitted_at),
             ],
-            'Reserva may contact you for verification or additional property information.',
+            'Resarva may contact you for verification or additional property information.',
             'default',
             'Owner listing',
             'owner-listing-submitted:'.$listing->id
@@ -645,7 +645,7 @@ class AzariTransactionalMailService
             'owner-listing-admin-alert',
             'New owner listing '.$listing->reference,
             [
-                'A property owner submitted a listing for Reserva review.',
+                'A property owner submitted a listing for Resarva review.',
             ],
             'Review listing',
             $this->route('azari.admin.owner-listings.show', [$listing->id]),
@@ -671,28 +671,28 @@ class AzariTransactionalMailService
             'under_review' => [
                 'owner-listing-under-review',
                 'Property listing '.$listing->reference.' is under review',
-                ['Reserva has started reviewing your property submission.', 'You will receive another update when a decision is recorded.'],
+                ['Resarva has started reviewing your property submission.', 'You will receive another update when a decision is recorded.'],
                 'default',
                 null,
             ],
             'approved' => [
                 'owner-listing-approved',
                 'Property listing '.$listing->reference.' approved',
-                ['Your property listing has been approved and added to Reserva property inventory.', 'Publication depends on the visibility selected by Reserva during approval.'],
+                ['Your property listing has been approved and added to Resarva property inventory.', 'Publication depends on the visibility selected by Resarva during approval.'],
                 'success',
                 null,
             ],
             'declined' => [
                 'owner-listing-declined',
                 'Property listing '.$listing->reference.' requires changes',
-                ['Reserva could not approve the current submission.', 'Review the reason below, update the listing and resubmit it when ready.'],
+                ['Resarva could not approve the current submission.', 'Review the reason below, update the listing and resubmit it when ready.'],
                 'danger',
                 $listing->decline_reason,
             ],
             'submitted' => [
                 'owner-listing-resubmitted',
                 'Property listing '.$listing->reference.' resubmitted',
-                ['Reserva has received your revised property listing.', 'The updated submission is awaiting another review.'],
+                ['Resarva has received your revised property listing.', 'The updated submission is awaiting another review.'],
                 'default',
                 null,
             ],
@@ -736,8 +736,8 @@ class AzariTransactionalMailService
             $verified ? 'owner-payout-profile-verified' : 'owner-payout-profile-unverified',
             $verified ? 'Your payout destination has been verified' : 'Your payout destination requires verification',
             $verified
-                ? ['Reserva has verified your saved payout destination.', 'Eligible withdrawals may now be requested during configured withdrawal windows.']
-                : ['Your payout destination is no longer verified.', 'Withdrawals remain unavailable until Reserva verifies the destination again.'],
+                ? ['Resarva has verified your saved payout destination.', 'Eligible withdrawals may now be requested during configured withdrawal windows.']
+                : ['Your payout destination is no longer verified.', 'Withdrawals remain unavailable until Resarva verifies the destination again.'],
             'Open withdrawal settings',
             $this->route('user.owner.withdrawals'),
             [
@@ -761,7 +761,7 @@ class AzariTransactionalMailService
             'owner-withdrawal-requested',
             'Withdrawal '.$withdrawal->reference.' received',
             [
-                'Reserva has received your withdrawal request and reserved the requested amount.',
+                'Resarva has received your withdrawal request and reserved the requested amount.',
                 'The request will be processed through your verified payout destination.',
             ],
             'View withdrawal',
@@ -795,13 +795,13 @@ class AzariTransactionalMailService
         $status = (string) $withdrawal->status;
 
         $copy = match ($status) {
-            'processing' => ['owner-withdrawal-processing', 'Withdrawal '.$withdrawal->reference.' is processing', ['Reserva has started processing your withdrawal.'], 'default', null],
+            'processing' => ['owner-withdrawal-processing', 'Withdrawal '.$withdrawal->reference.' is processing', ['Resarva has started processing your withdrawal.'], 'default', null],
             'provider_sent' => ['owner-withdrawal-provider-sent', 'Withdrawal '.$withdrawal->reference.' sent to provider', ['The payout instruction has been accepted by the configured provider and is being finalised.'], 'default', null],
             'processed' => ['owner-withdrawal-paid', 'Withdrawal '.$withdrawal->reference.' completed', ['Your withdrawal has been processed successfully.'], 'success', null],
             'failed' => ['owner-withdrawal-failed', 'Withdrawal '.$withdrawal->reference.' was not completed', ['The payout could not be confirmed successfully.', 'The reserved balance remains subject to the recorded withdrawal state and reconciliation outcome.'], 'danger', $withdrawal->last_error],
-            'reconciliation_required' => ['owner-withdrawal-reconciliation', 'Withdrawal '.$withdrawal->reference.' requires reconciliation', ['The provider may have sent the payout, but Reserva could not finish recording it automatically.', 'Reserva will reconcile the provider outcome before any retry or release.'], 'warning', null],
-            'rejected' => ['owner-withdrawal-rejected', 'Withdrawal '.$withdrawal->reference.' was rejected', ['Reserva rejected the withdrawal request.'], 'danger', $withdrawal->rejection_reason ?? $withdrawal->admin_note],
-            'pending' => ['owner-withdrawal-retried', 'Withdrawal '.$withdrawal->reference.' returned to pending', ['Reserva has safely returned the withdrawal to the processing queue.'], 'default', null],
+            'reconciliation_required' => ['owner-withdrawal-reconciliation', 'Withdrawal '.$withdrawal->reference.' requires reconciliation', ['The provider may have sent the payout, but Resarva could not finish recording it automatically.', 'Resarva will reconcile the provider outcome before any retry or release.'], 'warning', null],
+            'rejected' => ['owner-withdrawal-rejected', 'Withdrawal '.$withdrawal->reference.' was rejected', ['Resarva rejected the withdrawal request.'], 'danger', $withdrawal->rejection_reason ?? $withdrawal->admin_note],
+            'pending' => ['owner-withdrawal-retried', 'Withdrawal '.$withdrawal->reference.' returned to pending', ['Resarva has safely returned the withdrawal to the processing queue.'], 'default', null],
             default => [null, null, [], 'default', null],
         };
 
@@ -848,7 +848,7 @@ class AzariTransactionalMailService
             'owner-earning-credited',
             'Owner earning '.$entry->reference.' credited',
             [
-                'Your owner share from a successful Reserva booking has been credited to your account balance.',
+                'Your owner share from a successful Resarva booking has been credited to your account balance.',
             ],
             'View earnings',
             $this->route('user.owner.earnings'),
@@ -861,7 +861,7 @@ class AzariTransactionalMailService
                     ? number_format((float) $entry->owner_share_percentage, 2).'%'
                     : null,
             ],
-            'Available withdrawal balance remains subject to Reserva withdrawal settings and existing reserved requests.',
+            'Available withdrawal balance remains subject to Resarva withdrawal settings and existing reserved requests.',
             'success',
             'Owner earnings',
             'owner-earning-credited:'.$entry->id
@@ -883,8 +883,8 @@ class AzariTransactionalMailService
             $needsReplacement ? 'identity-replacement-required' : 'identity-reviewed',
             $needsReplacement ? 'Your identity document needs replacement' : 'Your identity document has been reviewed',
             $needsReplacement
-                ? ['Reserva reviewed your identity document and requires a replacement before it can be accepted.']
-                : ['Reserva has completed the review of your identity document.'],
+                ? ['Resarva reviewed your identity document and requires a replacement before it can be accepted.']
+                : ['Resarva has completed the review of your identity document.'],
             'Open identity documents',
             $this->route('user.identity.index'),
             [
@@ -918,8 +918,8 @@ class AzariTransactionalMailService
             $needsReplacement ? 'guest-identity-replacement-required' : 'guest-identity-reviewed',
             $needsReplacement ? 'A guest identity document needs replacement' : 'A guest identity document has been reviewed',
             $needsReplacement
-                ? ['Reserva reviewed an adult guest identity document and requires a replacement.']
-                : ['Reserva completed the review of an adult guest identity document.'],
+                ? ['Resarva reviewed an adult guest identity document and requires a replacement.']
+                : ['Resarva completed the review of an adult guest identity document.'],
             'Open booking',
             $this->guestBookingUrl($booking),
             [
@@ -942,7 +942,7 @@ class AzariTransactionalMailService
         $this->sendGuest(
             $booking,
             'arrival-reminder',
-            'Your Reserva stay begins tomorrow',
+            'Your Resarva stay begins tomorrow',
             [
                 'Your confirmed stay begins tomorrow.',
                 'Review the booking details and ensure every adult guest identity requirement has been completed.',
@@ -950,7 +950,7 @@ class AzariTransactionalMailService
             'Review booking',
             $this->guestBookingUrl($booking),
             $this->bookingDetails($booking),
-            'Contact Reserva before arrival if your arrival time or guest information has changed.',
+            'Contact Resarva before arrival if your arrival time or guest information has changed.',
             'default',
             null,
             null,
@@ -965,7 +965,7 @@ class AzariTransactionalMailService
         $this->sendGuest(
             $booking,
             'check-in-notice',
-            'Your Reserva check-in date is today',
+            'Your Resarva check-in date is today',
             [
                 'Today is the confirmed check-in date for your reservation.',
                 'Open your booking for the current status and available arrival actions.',
@@ -988,15 +988,15 @@ class AzariTransactionalMailService
         $this->sendGuest(
             $booking,
             'stay-extension-reminder',
-            'Would you like to extend your Reserva stay?',
+            'Would you like to extend your Resarva stay?',
             [
                 'Your scheduled checkout is approaching.',
                 'Any extension remains subject to residence availability and current pricing.',
             ],
-            'Contact Reserva',
+            'Contact Resarva',
             $this->route('user.contact'),
             $this->bookingDetails($booking),
-            'Request an extension early so the Reserva team can confirm availability.',
+            'Request an extension early so the Resarva team can confirm availability.',
             'default',
             null,
             null,
@@ -1014,7 +1014,7 @@ class AzariTransactionalMailService
             'Checkout for booking '.$booking->reference.' is tomorrow',
             [
                 'Your scheduled checkout date is tomorrow.',
-                'Review any outstanding service requests and contact Reserva if you require assistance.',
+                'Review any outstanding service requests and contact Resarva if you require assistance.',
             ],
             'Open booking',
             $this->guestBookingUrl($booking),
@@ -1034,7 +1034,7 @@ class AzariTransactionalMailService
         $this->sendGuest(
             $booking,
             'post-stay-thank-you',
-            'Thank you for staying with Reserva',
+            'Thank you for staying with Resarva',
             [
                 'We appreciate the opportunity to host your stay.',
                 'Your completed booking remains available in your account for records and support.',
@@ -1064,7 +1064,7 @@ class AzariTransactionalMailService
             'Share your experience from booking '.$booking->reference,
             [
                 'Your verified stay is eligible for a review.',
-                'Your feedback helps Reserva improve the guest experience while keeping reviews tied to completed stays.',
+                'Your feedback helps Resarva improve the guest experience while keeping reviews tied to completed stays.',
             ],
             'Leave a review',
             $this->route('user.bookings.show', [$booking->reference]),
@@ -1151,8 +1151,8 @@ class AzariTransactionalMailService
             $subject,
             [
                 $event === 'created'
-                    ? 'Reserva received your trip change request.'
-                    : 'Reserva updated your trip change request.',
+                    ? 'Resarva received your trip change request.'
+                    : 'Resarva updated your trip change request.',
                 'Open the booking to review the current status and any staff response.',
             ],
             'Open booking',
@@ -1285,7 +1285,7 @@ class AzariTransactionalMailService
             null,
             true,
             true,
-            'Reserva operations',
+            'Resarva operations',
             $context,
             $dedupeKey
         );

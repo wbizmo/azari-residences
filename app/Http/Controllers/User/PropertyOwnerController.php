@@ -70,7 +70,7 @@ class PropertyOwnerController extends Controller
         $signedName = Str::of($data['legal_name'])->lower()->squish()->value();
 
         if (! hash_equals($accountName, $signedName)) {
-            return back()->withErrors(['legal_name' => 'The typed legal name must match the full name on your Reserva account.'])->withInput();
+            return back()->withErrors(['legal_name' => 'The typed legal name must match the full name on your Resarva account.'])->withInput();
         }
 
         $version = (string) SiteSetting::valueFor('owner_listing_agreement_version', '1.0');
@@ -147,7 +147,7 @@ class PropertyOwnerController extends Controller
 
         $completeness->sync($listing->load('user.ownerPayoutProfile'));
 
-        return redirect()->route('user.owner.listings.show', $listing)->with('status', 'Property submitted for Reserva review.');
+        return redirect()->route('user.owner.listings.show', $listing)->with('status', 'Property submitted for Resarva review.');
     }
 
     public function show(
@@ -248,7 +248,7 @@ class PropertyOwnerController extends Controller
         $profile = $request->user()->ownerPayoutProfile;
 
         abort_unless($profile, 422, 'Configure your payout destination first.');
-        abort_unless($profile->is_verified, 422, 'Your payout destination is awaiting Reserva verification.');
+        abort_unless($profile->is_verified, 422, 'Your payout destination is awaiting Resarva verification.');
 
         $gatewayEnabled = $profile->preferred_gateway === 'paypal'
             ? filter_var(SiteSetting::valueFor('owner_paypal_enabled', '0'), FILTER_VALIDATE_BOOL)
@@ -368,7 +368,7 @@ class PropertyOwnerController extends Controller
     private function agreementText(): string
     {
         return <<<'TEXT'
-By submitting a property to Reserva, I confirm that I am legally authorised to offer the property for accommodation and management. I authorise Reserva to review the property, contact me for verification, approve or decline the listing, receive guest payments, credit the applicable owner-property booking revenue to my account balance, and process eligible withdrawals through the payout destination I provide. I confirm that all information and documents supplied are accurate and understand that approval is not guaranteed. I agree to keep property availability, pricing, safety information, ownership authority, and payout details accurate at all times.
+By submitting a property to Resarva, I confirm that I am legally authorised to offer the property for accommodation and management. I authorise Resarva to review the property, contact me for verification, approve or decline the listing, receive guest payments, credit the applicable owner-property booking revenue to my account balance, and process eligible withdrawals through the payout destination I provide. I confirm that all information and documents supplied are accurate and understand that approval is not guaranteed. I agree to keep property availability, pricing, safety information, ownership authority, and payout details accurate at all times.
 TEXT;
     }
 

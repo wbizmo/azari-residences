@@ -378,7 +378,7 @@
                                         <p>{{ $review->body }}</p>
                                         @if($review->admin_reply)
                                             <div class="reserva-management-reply">
-                                                <strong>Reserva response</strong>
+                                                <strong>Resarva response</strong>
                                                 <p>{{ $review->admin_reply }}</p>
                                             </div>
                                         @endif

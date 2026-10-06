@@ -1,13 +1,13 @@
 @extends('components.public.layout')
 
-@section('title', $title.' | Reserva')
+@section('title', $title.' | Resarva')
 
 @section('content')
 <main class="az-editorial-page az-collection-page">
     <section class="az-editorial-hero">
         <div class="site-container az-editorial-hero__grid">
             <div class="az-editorial-hero__copy">
-                <span class="eyebrow">The Reserva collection</span>
+                <span class="eyebrow">The Resarva collection</span>
                 <h1 class="az-editorial-title{{ strtolower($title) === 'apartments' ? ' az-editorial-title--apartments' : '' }}">
                     @if(strtolower($title) === 'apartments')
                         Apartm<br>ents
@@ -22,7 +22,7 @@
                 </div>
             </div>
             <figure class="az-editorial-hero__media">
-                <img src="{{ asset('images/'.$image) }}" alt="Reserva {{ strtolower($title) }} experience">
+                <img src="{{ asset('images/'.$image) }}" alt="Resarva {{ strtolower($title) }} experience">
             </figure>
         </div>
     </section>
@@ -31,7 +31,7 @@
         <div class="site-container">
             <header class="az-section-heading az-section-heading--split">
                 <div><span class="eyebrow">Available hotels & residences</span><h2>Designed around the way you stay.</h2></div>
-                <p>Explore available Reserva hotels & residences.</p>
+                <p>Explore available Resarva hotels & residences.</p>
             </header>
 
             <div class="az-luxury-property-grid">
@@ -44,7 +44,7 @@
                         <div class="az-luxury-property-card__body">
                             <span class="eyebrow">{{ $property->locationRecord?->name ?? $property->location }}</span>
                             <h2>{{ $property->name }}</h2>
-                            <p>{{ $property->short_description ?: 'A carefully prepared Reserva residence with dependable guest support.' }}</p>
+                            <p>{{ $property->short_description ?: 'A carefully prepared Resarva residence with dependable guest support.' }}</p>
                             <div class="az-property-facts">
                                 <span><span class="material-symbols-outlined">bed</span>{{ $property->bedrooms }} bedrooms</span>
                                 <span><span class="material-symbols-outlined">bathtub</span>{{ $property->bathrooms }} bathrooms</span>
@@ -58,7 +58,7 @@
                     </article>
                 @empty
                     <div class="az-visual-empty-state">
-                        <div><h2>No hotels & residences available</h2><p>Check availability for other dates or contact the Reserva team.</p><a class="button button-primary" href="{{ route('availability.index') }}">Search availability</a></div>
+                        <div><h2>No hotels & residences available</h2><p>Check availability for other dates or contact the Resarva team.</p><a class="button button-primary" href="{{ route('availability.index') }}">Search availability</a></div>
                     </div>
                 @endforelse
             </div>

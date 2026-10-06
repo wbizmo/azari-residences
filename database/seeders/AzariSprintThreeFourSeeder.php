@@ -28,11 +28,11 @@ class AzariSprintThreeFourSeeder extends Seeder
         );
 
         foreach ([
-            'site_name' => 'Reserva',
-            'business_name' => 'Reserva Luxury Properties Ltd',
+            'site_name' => 'Resarva',
+            'business_name' => 'Resarva Luxury Properties Ltd',
             'site_tagline' => 'Private serviced residences',
-            'seo_title' => 'Reserva | Exceptional serviced stays',
-            'seo_description' => 'Discover private, fully serviced Reserva stays designed around comfort, privacy and dependable hospitality.',
+            'seo_title' => 'Resarva | Exceptional serviced stays',
+            'seo_description' => 'Discover private, fully serviced Resarva stays designed around comfort, privacy and dependable hospitality.',
             'theme_primary' => '#12211b',
             'theme_secondary' => '#f3ecdd',
             'theme_accent' => '#bb8a3e',

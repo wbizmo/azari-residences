@@ -37,7 +37,7 @@ class CanonicalAdminAndBrandRegressionTest extends TestCase
     {
         $brand = file_get_contents(resource_path('views/components/brand-logo.blade.php'));
 
-        $this->assertStringContainsString("siteName = 'Reserva'", $brand);
+        $this->assertStringContainsString("siteName = 'Resarva'", $brand);
         $this->assertStringContainsString('logo-light.png', $brand);
         $this->assertStringContainsString('logo-dark.png', $brand);
         $this->assertStringNotContainsString('azari-logo-mask', $brand);
@@ -45,11 +45,11 @@ class CanonicalAdminAndBrandRegressionTest extends TestCase
 
     public function test_primary_brand_matches_reserva_identity(): void
     {
-        $this->assertSame('Reserva', config('app.name'));
+        $this->assertSame('Resarva', config('app.name'));
 
         $email = file_get_contents(resource_path('views/emails/premium.blade.php'));
         $this->assertStringContainsString('#0577F5', $email);
-        $this->assertStringContainsString('Reserva', $email);
+        $this->assertStringContainsString('Resarva', $email);
         $this->assertStringNotContainsString('Resavar', $email);
         $this->assertStringContainsString('#052058', $email);
         $this->assertStringContainsString('#F58F07', $email);
@@ -73,8 +73,8 @@ class CanonicalAdminAndBrandRegressionTest extends TestCase
     {
         $layout = file_get_contents(resource_path('views/layouts/public.blade.php'));
 
-        $this->assertStringContainsString('Reserva | Luxury Hotels, Residences, Apartments, Rooms and Hospitality', $layout);
-        $this->assertStringContainsString('Reserva Luxury Properties Ltd', $layout);
+        $this->assertStringContainsString('Resarva | Luxury Hotels, Residences, Apartments, Rooms and Hospitality', $layout);
+        $this->assertStringContainsString('Resarva Luxury Properties Ltd', $layout);
         $this->assertStringNotContainsString('Azari Hotels & Residences', $layout);
         $this->assertStringNotContainsString('Resavar', $layout);
     }

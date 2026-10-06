@@ -29,7 +29,7 @@ class UnpaidBookingReminderNotification extends Notification implements ShouldQu
             ->subject(
                 'Payment reminder for booking '.$this->bookingReference
             )
-            ->greeting('Complete your Reserva reservation')
+            ->greeting('Complete your Resarva reservation')
             ->line(
                 'Your booking '.$this->bookingReference.' is still awaiting payment.'
             )
@@ -45,7 +45,7 @@ class UnpaidBookingReminderNotification extends Notification implements ShouldQu
                 $this->paymentUrl
             )
             ->line(
-                'If you have already completed payment, no further action is required while Reserva verifies the transaction.'
+                'If you have already completed payment, no further action is required while Resarva verifies the transaction.'
             );
     }
 }

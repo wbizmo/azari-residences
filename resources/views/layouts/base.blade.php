@@ -9,7 +9,7 @@
 
     
                 
-            <title>{{ $title ?? 'Reserva' }}</title>
+            <title>{{ $title ?? 'Resarva' }}</title>
         
             
 

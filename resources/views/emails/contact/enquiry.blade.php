@@ -1,6 +1,6 @@
 @include('emails.premium', [
     'title' => 'New guest enquiry',
-    'preheader' => 'A new message was submitted through the Reserva website.',
+    'preheader' => 'A new message was submitted through the Resarva website.',
     'lines' => [
         'Name: '.$enquiry['name'],
         'Email: '.$enquiry['email'],
