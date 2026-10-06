@@ -19,9 +19,9 @@
     <div class="az-notice">
         <strong>Your place is being held while you finish.</strong>
         @if($creatingAccount)
-            Enter the booking details first. Resavar will create your account as part of this booking, verify your email, then send you through secure Dojah identity verification without making you restart.
+            Enter the booking details first. Resavar will create your account as part of this booking and verify your email without making you restart.
         @else
-            Your signed-in account will stay attached to this hold. If identity verification is needed, Resavar will return you to this same booking afterward.
+            Your signed-in account will stay attached to this hold while you complete the booking.
         @endif
     </div>
 </section>
@@ -135,13 +135,6 @@
 <section class="az-panel">
     <h2>Adult guests</h2>
 
-    @if($hold->adults > 1)
-        <div class="az-notice">
-            <strong>Each additional adult verifies themselves.</strong>
-            Add a separate email address for every additional adult. After the booking is created, Resavar emails each person their own private verification link. You can also resend or copy those links from your account.
-        </div>
-    @endif
-
     @for($i=0;$i<$hold->adults;$i++)
         <article class="az-guest-card">
             <h3>Adult {{ $i+1 }}{{ $i===0?' · Lead guest':'' }}</h3>
@@ -165,18 +158,6 @@
                     >
                 </label>
 
-                @if($i > 0)
-                    <label class="wide">
-                        <span>Email for this adult</span>
-                        <input
-                            type="email"
-                            name="adults[{{ $i }}][email]"
-                            value="{{ old("adults.$i.email", data_get($draft,"adults.$i.email")) }}"
-                            required
-                        >
-                        <small>This address receives only this person's verification link. It cannot be the lead guest's email or another adult's email.</small>
-                    </label>
-                @endif
             </div>
         </article>
     @endfor
@@ -185,7 +166,6 @@
 @if($hold->children>0)
 <section class="az-panel">
     <h2>Children</h2>
-    <p>Children do not require identity verification under the current Resavar rules.</p>
 
     @for($i=0;$i<$hold->children;$i++)
         <article class="az-guest-card">
