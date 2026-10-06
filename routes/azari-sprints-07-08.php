@@ -6,6 +6,8 @@ use App\Http\Controllers\Admin\SystemSettingsController;
 use App\Http\Controllers\Location\AddressLookupController;
 use App\Http\Controllers\PublicSite\PaymentCheckoutController;
 use App\Http\Controllers\UserArea\AdditionalGuestController;
+use App\Http\Controllers\UserArea\BookingSelfServiceController;
+use App\Http\Controllers\UserArea\UserDiscoveryController;
 use App\Http\Controllers\UserArea\DojahVerificationController;
 use App\Http\Controllers\UserArea\PhoneVerificationController;
 use App\Http\Controllers\UserArea\UserBookingController;
@@ -26,10 +28,20 @@ Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer', 'azari.
     ->group(function (): void {
         Route::get('/', UserDashboardController::class)->name('dashboard');
 
+        Route::post('/favourites/{property}', [UserDiscoveryController::class, 'toggleFavourite'])
+            ->name('favourites.toggle');
+        Route::post('/saved-searches', [UserDiscoveryController::class, 'storeSearch'])
+            ->name('saved-searches.store');
+        Route::delete('/saved-searches/{savedSearch}', [UserDiscoveryController::class, 'destroySearch'])
+            ->name('saved-searches.destroy');
+
         Route::middleware('azari.identity.verified')->group(function (): void {
             Route::get('/bookings', [UserBookingController::class, 'index'])->name('bookings.index');
             Route::get('/bookings/{reference}', [UserBookingController::class, 'show'])->name('bookings.show');
             Route::get('/bookings/{reference}/receipt', [UserBookingController::class, 'receipt'])->name('bookings.receipt');
+            Route::post('/bookings/{reference}/modifications', [BookingSelfServiceController::class, 'storeModification'])
+                ->middleware('throttle:20,1')
+                ->name('bookings.modifications.store');
             Route::get('/payments', [UserPaymentController::class, 'index'])->name('payments.index');
             Route::get('/payments/{payment}', [UserPaymentController::class, 'show'])->name('payments.show');
             Route::post('/payments/{payment}/retry', [UserPaymentController::class, 'retry'])->name('payments.retry');
