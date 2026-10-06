@@ -161,3 +161,67 @@
         </div>
     </div>
 </section>
+
+@if(
+    !$booking->review
+    && (in_array($booking->status,['completed','checked_out'],true) || $booking->checked_out_at || $booking->completed_at)
+)
+<section class="az-user-panel" style="margin-top:18px">
+    <header class="az-user-panel-header">
+        <div><h2 class="az-user-panel-title">Review your stay</h2><p class="az-user-panel-subtitle">Only completed verified stays can submit one review.</p></div>
+    </header>
+    <div class="az-user-panel-body">
+        <form method="POST" action="{{ route('user.reviews.store',$booking) }}" class="az-form-grid">
+            @csrf
+            @foreach([
+                'rating' => 'Overall',
+                'cleanliness' => 'Cleanliness',
+                'comfort' => 'Comfort',
+                'facilities' => 'Facilities',
+                'location_score' => 'Location',
+                'staff_service' => 'Staff/service',
+                'value_score' => 'Value',
+                'wifi_score' => 'Wi-Fi',
+            ] as $name => $label)
+                <label>
+                    <span>{{ $label }}</span>
+                    <select name="{{ $name }}" {{ $name==='wifi_score' ? '' : 'required' }}>
+                        <option value="">Choose</option>
+                        @foreach([5,4,3,2,1] as $score)
+                            <option value="{{ $score }}">{{ $score }}/5</option>
+                        @endforeach
+                    </select>
+                </label>
+            @endforeach
+            <label>
+                <span>Trip type</span>
+                <select name="trip_type">
+                    <option value="">Prefer not to say</option>
+                    @foreach(['business','couple','family','friends','solo','other'] as $tripType)
+                        <option value="{{ $tripType }}">{{ Str::headline($tripType) }}</option>
+                    @endforeach
+                </select>
+            </label>
+            <label class="wide"><span>Review title</span><input name="title" maxlength="120"></label>
+            <label class="wide"><span>What did you like?</span><textarea name="positive_feedback" maxlength="1500"></textarea></label>
+            <label class="wide"><span>What could be better?</span><textarea name="negative_feedback" maxlength="1500"></textarea></label>
+            <label class="wide"><span>Your review</span><textarea name="body" minlength="20" maxlength="3000" required></textarea></label>
+            <button class="az-user-button az-user-button--dark" type="submit">Submit verified review</button>
+        </form>
+    </div>
+</section>
+@elseif($booking->review)
+<section class="az-user-panel" style="margin-top:18px">
+    <header class="az-user-panel-header">
+        <div><h2 class="az-user-panel-title">Your stay review</h2><p class="az-user-panel-subtitle">Review status: {{ Str::headline($booking->review->status) }}</p></div>
+    </header>
+    <div class="az-user-panel-body">
+        <strong>{{ $booking->review->rating }}/5</strong>
+        @if($booking->review->title)<h3>{{ $booking->review->title }}</h3>@endif
+        <p>{{ $booking->review->body }}</p>
+        @if($booking->review->admin_reply)
+            <div class="az-user-alert"><strong>Reserva response</strong><p>{{ $booking->review->admin_reply }}</p></div>
+        @endif
+    </div>
+</section>
+@endif
