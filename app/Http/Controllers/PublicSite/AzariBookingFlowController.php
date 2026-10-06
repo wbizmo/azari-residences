@@ -5,7 +5,6 @@ namespace App\Http\Controllers\PublicSite;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\BookingHold;
-use App\Models\IdentityVerification;
 use App\Services\Bookings\AzariPricingEngine;
 use App\Services\Bookings\BookingCreationService;
 use App\Services\Payments\PaymentScheduleService;
@@ -21,11 +20,7 @@ class AzariBookingFlowController extends Controller
             ->where('token', $token)
             ->firstOrFail();
 
-        abort_unless(
-            $request->user() && IdentityVerification::userIsVerified((int) $request->user()->id),
-            403,
-            'Complete Dojah identity verification before booking.'
-        );
+        abort_unless($request->user(), 403);
 
         if ($hold->user_id !== null) {
             abort_unless((int) $hold->user_id === (int) $request->user()->id, 403);
@@ -53,13 +48,13 @@ class AzariBookingFlowController extends Controller
 
         return redirect()
             ->route('azari.booking.review', $booking->reference)
-            ->with('success', 'Guest details saved. Every adult must complete Dojah verification before payment.');
+            ->with('success', 'Guest details saved. Review the booking and continue to payment.');
     }
 
     public function review(Request $request, string $reference)
     {
         $booking = Booking::query()
-            ->with(['property', 'guests.latestIdentityVerification'])
+            ->with(['property', 'guests'])
             ->where('reference', $reference)
             ->firstOrFail();
 
@@ -74,22 +69,12 @@ class AzariBookingFlowController extends Controller
         PaymentScheduleService $payments
     ) {
         $booking = Booking::query()
-            ->with('guests.latestIdentityVerification')
+            ->with('guests')
             ->where('reference', $reference)
             ->firstOrFail();
 
         $this->authorizeBooking($request, $booking);
         abort_unless(in_array($booking->status, ['pending', 'pending_payment'], true), 422);
-
-        $unverifiedAdults = $booking->guests
-            ->where('type', 'adult')
-            ->filter(fn ($guest) => ! $guest->latestIdentityVerification?->isVerified());
-
-        if ($unverifiedAdults->isNotEmpty()) {
-            return redirect()
-                ->route('user.guests.index')
-                ->with('warning', 'Every adult on this booking must complete Dojah identity verification before payment.');
-        }
 
         $schedule = $payments->forBooking($booking);
 
@@ -113,7 +98,7 @@ class AzariBookingFlowController extends Controller
 
     public function summary(Request $request, string $reference)
     {
-        $booking = Booking::query()->with(['property', 'guests.latestIdentityVerification', 'payments'])->where('reference', $reference)->firstOrFail();
+        $booking = Booking::query()->with(['property', 'guests', 'payments'])->where('reference', $reference)->firstOrFail();
         $this->authorizeBooking($request, $booking);
 
         return view('public.bookings.summary', compact('booking'));
