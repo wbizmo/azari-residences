@@ -279,6 +279,12 @@ return new class extends Migration
                 if (! Schema::hasColumn('communication_logs', 'next_attempt_at')) {
                     $table->timestamp('next_attempt_at')->nullable()->index();
                 }
+                if (! Schema::hasColumn('communication_logs', 'provider_status')) {
+                    $table->string('provider_status')->nullable()->index();
+                }
+                if (! Schema::hasColumn('communication_logs', 'status_updated_at')) {
+                    $table->timestamp('status_updated_at')->nullable();
+                }
             });
         }
 
