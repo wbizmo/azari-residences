@@ -6,8 +6,6 @@ use App\Models\Booking;
 use App\Models\BookingGuest;
 use App\Models\BookingHold;
 use App\Models\BookingStatusHistory;
-use App\Models\IdentityVerification;
-use App\Services\Identity\GuestVerificationInvitationService;
 use App\Support\LocalDate;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -20,7 +18,6 @@ class BookingCreationService
     public function __construct(
         private readonly AzariAvailabilityEngine $availability,
         private readonly AzariPricingEngine $pricing,
-        private readonly GuestVerificationInvitationService $guestInvitations,
     ) {}
 
     public function create(Request $request): Booking
@@ -28,10 +25,8 @@ class BookingCreationService
         $user = $request->user();
         $holdToken = (string) $request->input('hold_token');
 
-        if (! $user || ! IdentityVerification::userIsVerified((int) $user->id)) {
-            throw ValidationException::withMessages([
-                'identity' => 'Complete Dojah identity verification before creating a booking.',
-            ]);
+        if (! $user) {
+            abort(403);
         }
 
         $existingBooking = Booking::query()
@@ -203,19 +198,6 @@ class BookingCreationService
                 ),
             ]);
 
-            $verifiedUserIdentity = IdentityVerification::query()
-                ->where('provider', IdentityVerification::PROVIDER_DOJAH)
-                ->where('user_id', $user->id)
-                ->whereNull('booking_guest_id')
-                ->latest('id')
-                ->first();
-
-            if (! $verifiedUserIdentity?->isVerified()) {
-                throw ValidationException::withMessages([
-                    'identity' => 'Your Dojah verification is no longer valid. Verify again before continuing.',
-                ]);
-            }
-
             foreach ($data['adults'] as $index => $adult) {
                 $guest = BookingGuest::query()->create([
                     'booking_id' => $booking->id,
@@ -224,29 +206,10 @@ class BookingCreationService
                     'position' => $index + 1,
                     'first_name' => $adult['first_name'],
                     'last_name' => $adult['last_name'],
-                    'email' => $index === 0
-                        ? $data['guest_email']
-                        : mb_strtolower((string) $adult['email']),
+                    'email' => $index === 0 ? $data['guest_email'] : null,
                     'is_lead' => $index === 0,
                 ]);
 
-                if ($index === 0) {
-                    IdentityVerification::query()->create([
-                        'user_id' => $user->id,
-                        'booking_guest_id' => $guest->id,
-                        'provider' => IdentityVerification::PROVIDER_DOJAH,
-                        'reference' => (string) Str::uuid(),
-                        'widget_id' => $verifiedUserIdentity->widget_id,
-                        'status' => IdentityVerification::STATUS_VERIFIED,
-                        'provider_status' => $verifiedUserIdentity->provider_status,
-                        'verification_type' => $verifiedUserIdentity->verification_type,
-                        'verification_mode' => $verifiedUserIdentity->verification_mode,
-                        'verified_at' => $verifiedUserIdentity->verified_at ?: now(),
-                        'metadata' => [
-                            'source_user_verification_id' => $verifiedUserIdentity->id,
-                        ],
-                    ]);
-                }
             }
 
             foreach (($data['children'] ?? []) as $index => $child) {
@@ -274,10 +237,6 @@ class BookingCreationService
             return $booking->refresh();
         }, 5);
 
-        $this->guestInvitations->sendForBooking(
-            $booking,
-            $request->getSchemeAndHttpHost()
-        );
 
         return $booking;
     }
@@ -286,33 +245,7 @@ class BookingCreationService
     {
         $data = $request->validate($this->rules($hold));
 
-        $leadEmail = mb_strtolower((string) $data['guest_email']);
-        $seen = [];
-
-        foreach (($data['adults'] ?? []) as $index => $adult) {
-            if ($index === 0) {
-                continue;
-            }
-
-            $email = mb_strtolower((string) ($adult['email'] ?? ''));
-
-            if ($email === $leadEmail) {
-                throw ValidationException::withMessages([
-                    "adults.$index.email" => 'An additional adult must use their own email address.',
-                ]);
-            }
-
-            if (isset($seen[$email])) {
-                throw ValidationException::withMessages([
-                    "adults.$index.email" => 'Each additional adult must use a different email address.',
-                ]);
-            }
-
-            $seen[$email] = true;
-            $data['adults'][$index]['email'] = $email;
-        }
-
-        $data['guest_email'] = $leadEmail;
+        $data['guest_email'] = mb_strtolower((string) $data['guest_email']);
 
         return $data;
     }
@@ -340,14 +273,6 @@ class BookingCreationService
             $rules["adults.$index.first_name"] = ['required', 'string', 'max:80'];
             $rules["adults.$index.last_name"] = ['required', 'string', 'max:80'];
 
-            if ($index > 0) {
-                $rules["adults.$index.email"] = [
-                    'required',
-                    'email:rfc',
-                    'max:190',
-                    'distinct',
-                ];
-            }
         }
 
         for ($index = 0; $index < $hold->children; $index++) {
