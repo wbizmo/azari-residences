@@ -25,6 +25,7 @@ class BookingCreationService
     public function create(Request $request): Booking
     {
         $user = $request->user();
+        $holdToken = (string) $request->input('hold_token');
 
         if (! $user || ! IdentityVerification::userIsVerified((int) $user->id)) {
             throw ValidationException::withMessages([
@@ -32,13 +33,33 @@ class BookingCreationService
             ]);
         }
 
+        $existingBooking = Booking::query()
+            ->where('hold_token', $holdToken)
+            ->first();
+
+        if ($existingBooking) {
+            abort_unless((int) $existingBooking->user_id === (int) $user->id, 403);
+
+            return $existingBooking;
+        }
+
         $hold = BookingHold::query()
             ->with(['property', 'accommodationType', 'ratePlan.cancellationPolicy', 'ratePlan.paymentPolicy'])
             ->active()
-            ->where('token', $request->input('hold_token'))
+            ->where('token', $holdToken)
             ->first();
 
         if (! $hold) {
+            $existingBooking = Booking::query()
+                ->where('hold_token', $holdToken)
+                ->first();
+
+            if ($existingBooking) {
+                abort_unless((int) $existingBooking->user_id === (int) $user->id, 403);
+
+                return $existingBooking;
+            }
+
             throw ValidationException::withMessages([
                 'hold_token' => 'Your reservation hold expired. Please search again.',
             ]);
@@ -62,6 +83,16 @@ class BookingCreationService
                 ->first();
 
             if (! $lockedHold) {
+                $existing = Booking::query()
+                    ->where('hold_token', $hold->token)
+                    ->first();
+
+                if ($existing) {
+                    abort_unless((int) $existing->user_id === (int) $user->id, 403);
+
+                    return $existing;
+                }
+
                 throw ValidationException::withMessages([
                     'hold_token' => 'Your reservation hold expired. Please search again.',
                 ]);
