@@ -6,10 +6,10 @@
 @section('content')
 <section class="az-dashboard-hero">
     <div class="az-dashboard-hero__content">
-        <p class="az-eyebrow">Resarva Residence Operations</p>
+        <p class="az-eyebrow">Resavar Stay Operations</p>
         <h1>Welcome back, {{ auth()->user()->name ?: auth()->user()->username }}.</h1>
         <p>
-            Manage the residence portfolio, content and operational foundation from one considered workspace.
+            Manage the property portfolio, content and operational foundation from one considered workspace.
         </p>
 
         <div class="az-dashboard-hero__actions">
@@ -73,7 +73,7 @@
             <div>
                 <span>Properties</span>
                 <strong>{{ number_format($propertyCount ?? 0) }}</strong>
-                <small>Residences in inventory</small>
+                <small>Stays in inventory</small>
             </div>
         </article>
 
@@ -181,7 +181,7 @@
                 <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
                 <div>
                     <strong>Inventory foundation</strong>
-                    <span>Residence data and publication controls are available.</span>
+                    <span>Stay data and publication controls are available.</span>
                 </div>
             </div>
             <div>
