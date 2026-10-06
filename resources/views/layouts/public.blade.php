@@ -3,7 +3,7 @@
         'Resavar | Luxury Hotels, Residences, Apartments, Rooms and Hospitality';
 
     $defaultSeoDescription =
-        'Discover Resavar, a premium hospitality and accommodation platform owned by Azari Luxury Properties Limited Explore hotels, residences, serviced apartments, rooms, concierge services, housekeeping, dining, airport transfers, guest services and secure online booking across Resavar locations.';
+        'Discover Resavar, a premium hospitality and accommodation platform owned by Azari Luxury Properties Limited. Explore hotels, residences, serviced apartments, rooms, concierge services, housekeeping, dining, airport transfers, guest services and secure online booking across Resavar locations.';
 
     $defaultSeoKeywords = implode(', ', [
         /*
@@ -20,7 +20,7 @@
         'Resavar Hotel',
         'Resavar Hotels',
         'Resavar Luxury Hotels & Residences',
-        'Resavar Luxury Properties',
+        'Azari Luxury Properties Limited',
         'Azari Luxury Properties Limited',
         'Azari Luxury Properties Limited',
         'Resavar Group',
