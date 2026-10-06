@@ -9,6 +9,13 @@
 @if($errors->any())<div class="az-admin-alert az-admin-alert--danger"><ul>@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
 
 <div class="az-admin-card">
+    <p><strong>Listing completeness:</strong> {{ $completion['score'] }}%</p>
+    @if(!$completion['publishable'])
+        <div class="az-admin-alert az-admin-alert--danger">
+            <strong>Publication blocked.</strong>
+            <p>Missing: {{ collect($completion['blockers'])->map(fn($item)=>Str::headline($item))->join(', ') }}.</p>
+        </div>
+    @endif
     @if($listing->cover_image)<img class="az-owner-cover" src="{{ Storage::disk('public')->url($listing->cover_image) }}" alt="{{ data_get($listing->property_data,'name','Property cover') }}">@endif
     <dl class="az-admin-detail-list">@foreach($listing->property_data as $key=>$value)@unless(is_array($value))<dt>{{ ucfirst(str_replace('_',' ',$key)) }}</dt><dd>{{ $value }}</dd>@endunless @endforeach</dl>
     <p><strong>Amenities:</strong> {{ $amenities->join(', ') ?: 'None selected' }}</p>
