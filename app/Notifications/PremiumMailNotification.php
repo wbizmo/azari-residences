@@ -35,36 +35,52 @@ class PremiumMailNotification extends Notification implements ShouldQueue
         public bool $forceDelivery = false,
         public bool $mailOnly = false,
         public ?string $eyebrow = null,
+        public ?string $onlyChannel = null,
     ) {}
 
     public function via(object $notifiable): array
     {
         if ($notifiable instanceof AnonymousNotifiable) {
-            return ['mail'];
+            return $this->onlyChannel && $this->onlyChannel !== 'email' ? [] : ['mail'];
         }
 
-        $channels = [];
+        $preference = method_exists($notifiable, 'communicationPreference')
+            ? $notifiable->communicationPreference()->first()
+            : null;
 
-        if (
-            ($this->forceDelivery || (bool) ($notifiable->email_notifications ?? true))
-            && filled($notifiable->email ?? null)
-        ) {
-            $channels[] = 'mail';
+        $emailAllowed = $this->forceDelivery
+            || (bool) ($preference?->email_transactional ?? $notifiable->email_notifications ?? true);
+        $smsAllowed = (bool) ($preference?->sms_transactional ?? $notifiable->sms_notifications ?? false);
+        $whatsappAllowed = (bool) ($preference?->whatsapp_transactional ?? $notifiable->whatsapp_notifications ?? false);
+        $inAppAllowed = (bool) ($preference?->in_app_transactional ?? true);
+
+        $available = [];
+
+        if ($emailAllowed && filled($notifiable->email ?? null)) {
+            $available['email'] = 'mail';
         }
 
-        if ($this->mailOnly) {
-            return $channels;
+        if (! $this->mailOnly) {
+            if ($smsAllowed && filled($notifiable->phone ?? null)) {
+                $available['sms'] = TwilioSmsChannel::class;
+            }
+
+            if ($whatsappAllowed && filled($notifiable->phone ?? null)) {
+                $available['whatsapp'] = TwilioWhatsAppChannel::class;
+            }
+
+            if ($inAppAllowed) {
+                $available['database'] = 'database';
+            }
         }
 
-        if ((bool) ($notifiable->sms_notifications ?? false) && filled($notifiable->phone ?? null)) {
-            $channels[] = TwilioSmsChannel::class;
+        if ($this->onlyChannel) {
+            return isset($available[$this->onlyChannel])
+                ? [$available[$this->onlyChannel]]
+                : [];
         }
 
-        if ((bool) ($notifiable->whatsapp_notifications ?? false) && filled($notifiable->phone ?? null)) {
-            $channels[] = TwilioWhatsAppChannel::class;
-        }
-
-        return $channels;
+        return array_values($available);
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -118,6 +134,22 @@ class PremiumMailNotification extends Notification implements ShouldQueue
                 'This is a transactional message from Reserva. Keep booking, payment and account links private.'
             ),
         ]);
+    }
+
+    public function toDatabase(object $notifiable): array
+    {
+        return [
+            'template' => $this->template,
+            'subject' => $this->subject,
+            'lines' => array_values(array_map(
+                fn ($line) => Str::limit(strip_tags((string) $line), 300),
+                array_slice($this->lines, 0, 4)
+            )),
+            'action_label' => $this->actionLabel,
+            'action_url' => $this->actionUrl,
+            'booking_id' => $this->context['booking_id'] ?? null,
+            'classification' => $this->context['classification'] ?? 'transactional',
+        ];
     }
 
     public function toSms(object $notifiable): string
