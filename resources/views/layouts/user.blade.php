@@ -248,11 +248,7 @@
                     </strong>
 
                     <span>
-                        {{
-                            auth()->user()->currentIdentity()->exists()
-                                ? 'Identity on file'
-                                : 'Guest account'
-                        }}
+                        Guest account
                     </span>
                 </span>
             </a>
@@ -378,19 +374,6 @@
             <span>Payments</span>
         </a>
 
-        <a
-            class="{{ request()->routeIs('user.identity.*') ? 'is-active' : '' }}"
-            href="{{ route('user.identity.index') }}"
-        >
-            <span
-                class="material-symbols-outlined"
-                aria-hidden="true"
-            >
-                badge
-            </span>
-
-            <span>Identity</span>
-        </a>
 
         <a
             class="{{ request()->routeIs('user.profile.*') ? 'is-active' : '' }}"
