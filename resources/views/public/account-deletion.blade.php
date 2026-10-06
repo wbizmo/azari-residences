@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'Account & Data Deletion | Resavar')
+@section('title', 'Account & Data Deletion — Resavar')
 @section('description', 'Request deletion of your Resavar account and associated personal data.')
 
 @section('content')
