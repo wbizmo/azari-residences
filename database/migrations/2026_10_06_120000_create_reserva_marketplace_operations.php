@@ -9,6 +9,49 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('properties')) {
+            Schema::table('properties', function (Blueprint $table): void {
+                foreach ([
+                    'accessibility_notes',
+                    'children_policy',
+                    'pet_policy',
+                    'smoking_policy',
+                    'party_policy',
+                    'check_in_instructions',
+                    'check_out_instructions',
+                    'host_description',
+                ] as $column) {
+                    if (! Schema::hasColumn('properties', $column)) {
+                        $table->text($column)->nullable();
+                    }
+                }
+                if (! Schema::hasColumn('properties', 'host_name')) {
+                    $table->string('host_name')->nullable();
+                }
+                if (! Schema::hasColumn('properties', 'house_rules')) {
+                    $table->json('house_rules')->nullable();
+                }
+                if (! Schema::hasColumn('properties', 'faqs')) {
+                    $table->json('faqs')->nullable();
+                }
+            });
+        }
+
+        if (! Schema::hasTable('property_points_of_interest')) {
+            Schema::create('property_points_of_interest', function (Blueprint $table): void {
+                $table->id();
+                $table->foreignId('property_id')->constrained()->cascadeOnDelete();
+                $table->string('name');
+                $table->string('category')->nullable();
+                $table->decimal('distance_km', 8, 2)->nullable();
+                $table->unsignedSmallInteger('walking_minutes')->nullable();
+                $table->unsignedInteger('sort_order')->default(0);
+                $table->timestamps();
+
+                $table->index(['property_id', 'sort_order'], 'property_poi_sort_idx');
+            });
+        }
+
         if (Schema::hasTable('payments')) {
             Schema::table('payments', function (Blueprint $table): void {
                 if (! Schema::hasColumn('payments', 'payment_kind')) {
@@ -309,6 +352,20 @@ return new class extends Migration
 
     public function down(): void
     {
+        Schema::dropIfExists('property_points_of_interest');
+
+        if (Schema::hasTable('properties')) {
+            foreach ([
+                'faqs', 'house_rules', 'host_name', 'host_description',
+                'check_out_instructions', 'check_in_instructions', 'party_policy',
+                'smoking_policy', 'pet_policy', 'children_policy', 'accessibility_notes',
+            ] as $column) {
+                if (Schema::hasColumn('properties', $column)) {
+                    Schema::table('properties', fn (Blueprint $table) => $table->dropColumn($column));
+                }
+            }
+        }
+
         if (Schema::hasTable('accommodation_types')) {
             foreach (['acc_types_search_rate_idx', 'acc_types_capacity_idx'] as $index) {
                 if (Schema::hasIndex('accommodation_types', $index)) {
