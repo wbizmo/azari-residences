@@ -27,6 +27,10 @@ final class StaffPermissionResolver
         'settings' => 'settings',
         'reports' => 'reports',
         'audit-logs' => 'audit-logs',
+        'reviews' => 'reviews',
+        'promotions' => 'promotions',
+        'vouchers' => 'vouchers',
+        'channels' => 'system-health',
 
         'system' => 'system-health',
         'owner-listings' => 'property-owners',
