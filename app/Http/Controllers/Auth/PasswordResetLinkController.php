@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
+use App\Support\AuthAbuseGuard;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
@@ -14,9 +16,11 @@ class PasswordResetLinkController extends Controller
     /**
      * Display the password reset link request view.
      */
-    public function create(): View
+    public function create(AuthAbuseGuard $abuse): View
     {
-        return view('auth.forgot-password');
+        return view('auth.forgot-password', [
+            'authFormToken' => $abuse->formToken('password-reset-request'),
+        ]);
     }
 
     /**
@@ -24,22 +28,30 @@ class PasswordResetLinkController extends Controller
      *
      * @throws ValidationException
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, AuthAbuseGuard $abuse): RedirectResponse
     {
-        $request->validate([
-            'email' => ['required', 'email'],
-        ]);
-
-        // We will send the password reset link to this user. Once we have attempted
-        // to send the link, we will examine the response then see the message we
-        // need to show to the user. Finally, we'll send out a proper response.
-        $status = Password::sendResetLink(
-            $request->only('email')
+        $abuse->assertHumanForm(
+            $request,
+            'password-reset-request',
+            (string) $request->input('email'),
+            4,
+            900,
+            2
         );
 
-        return $status == Password::RESET_LINK_SENT
-                    ? back()->with('status', __($status))
-                    : back()->withInput($request->only('email'))
-                        ->withErrors(['email' => __($status)]);
+        $data = $request->validate([
+            'email' => ['required', 'email:rfc', 'max:190'],
+        ]);
+
+        $user = User::query()
+            ->whereRaw('LOWER(email) = ?', [mb_strtolower((string) $data['email'])])
+            ->first();
+
+        if ($user && ! $user->isSuspended()) {
+            Password::sendResetLink(['email' => $user->email]);
+        }
+
+        // Do not reveal whether an email address exists in the database.
+        return back()->with('status', 'If that address belongs to an eligible Resavar account, a password reset link has been sent.');
     }
 }
