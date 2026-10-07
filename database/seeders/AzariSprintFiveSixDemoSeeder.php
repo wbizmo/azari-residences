@@ -14,17 +14,19 @@ class AzariSprintFiveSixDemoSeeder extends Seeder
 {
     public function run(): void
     {
-        $admin = User::updateOrCreate(['email' => 'user@example.com'], [
+        $admin = User::query()->firstOrNew(['email' => 'user@example.com']);
+        $admin->forceFill([
             'name' => 'Azari Demo Administrator', 'password' => Hash::make('12345678'),
             'is_admin' => true, 'staff_role' => 'administrator', 'account_type' => 'staff',
             'status' => 'active', 'is_active' => true, 'email_verified_at' => now(),
-        ]);
+        ])->save();
 
-        $customer = User::updateOrCreate(['email' => 'customer@example.com'], [
+        $customer = User::query()->firstOrNew(['email' => 'customer@example.com']);
+        $customer->forceFill([
             'name' => 'Demo Customer', 'password' => Hash::make('12345678'),
             'is_admin' => false, 'staff_role' => null, 'account_type' => 'customer',
             'status' => 'active', 'is_active' => true, 'email_verified_at' => now(),
-        ]);
+        ])->save();
 
         $properties = Property::query()->where('is_published', true)->take(4)->get();
         foreach ($properties as $index => $property) {
