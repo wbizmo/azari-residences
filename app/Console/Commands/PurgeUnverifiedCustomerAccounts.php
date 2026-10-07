@@ -29,7 +29,7 @@ class PurgeUnverifiedCustomerAccounts extends Command
             ->whereNull('staff_role')
             ->where('is_admin', false)
             ->where('created_at', '<=', now()->subDays(7))
-            ->whereNotIn('status', ['verification_expired', 'suspended'])
+            ->whereNotIn('status', ['verification_expired', 'suspended', 'deleted'])
             ->orderBy('id')
             ->chunkById(100, function ($users) use ($dryRun, &$closed): void {
                 foreach ($users as $user) {
@@ -66,6 +66,7 @@ class PurgeUnverifiedCustomerAccounts extends Command
             ->whereNull('staff_role')
             ->where('is_admin', false)
             ->where('created_at', '<=', now()->subDays(30))
+            ->where('status', '!=', 'deleted')
             ->orderBy('id')
             ->chunkById(50, function ($users) use ($dryRun, &$deleted, &$anonymized, &$failed): void {
                 foreach ($users as $user) {
