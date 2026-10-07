@@ -11,6 +11,21 @@ use Throwable;
 
 final class AuthAbuseGuard
 {
+    private const DISPOSABLE_DOMAINS = [
+        '10minutemail.com',
+        '123mails.org',
+        'dispostable.com',
+        'getnada.com',
+        'grr.la',
+        'guerrillamail.com',
+        'guerrillamailblock.com',
+        'maildrop.cc',
+        'mailinator.com',
+        'sharklasers.com',
+        'temp-mail.org',
+        'tempmail.com',
+        'yopmail.com',
+    ];
     public function formToken(string $context): string
     {
         return Crypt::encryptString($context.'|'.now()->timestamp.'|'.Str::random(32));
@@ -27,6 +42,18 @@ final class AuthAbuseGuard
         $this->assertHoneypot($request, $context);
         $this->assertTimedToken($request, $context, $minimumAgeSeconds);
         $this->assertRateLimits($request, $context, $identity, $maxPerWindow, $decaySeconds);
+    }
+
+    public function assertEmailAllowed(string $email): void
+    {
+        $email = Str::lower(trim($email));
+        $domain = Str::after($email, '@');
+
+        if ($domain === '' || in_array($domain, self::DISPOSABLE_DOMAINS, true)) {
+            throw ValidationException::withMessages([
+                'email' => 'Please use a permanent email address.',
+            ]);
+        }
     }
 
     public function assertHoneypot(Request $request, string $context): void
