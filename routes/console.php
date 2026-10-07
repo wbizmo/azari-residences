@@ -12,6 +12,7 @@ Schedule::command('azari:expire-unpaid-bookings')->everyFiveMinutes()->name('exp
 Schedule::command('azari:sitemap')->dailyAt('04:15')->name('public-sitemap')->withoutOverlapping();
 Schedule::command('azari:heartbeat')->everyMinute()->name('system-heartbeat')->withoutOverlapping();
 Schedule::command('azari:sync-channels')->everyTenMinutes()->name('channel-sync')->withoutOverlapping();
+Schedule::command('resavar:purge-unverified-accounts')->dailyAt('03:35')->name('purge-unverified-accounts')->withoutOverlapping();
 
 
 require __DIR__.'/azari-final-schedule.php';
