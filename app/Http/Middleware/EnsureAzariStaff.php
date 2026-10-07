@@ -28,7 +28,28 @@ class EnsureAzariStaff
 
         if (! $user->isAdministrator()) {
             $permission = StaffPermissionResolver::permissionFor($request);
-            abort_unless(! $permission || $user->hasPermission($permission), 404);
+
+            if ($permission) {
+                abort_unless($user->hasPermission($permission), 404);
+            } else {
+                $routeName = (string) optional($request->route())->getName();
+                $middleware = collect($request->route()?->gatherMiddleware() ?? []);
+
+                $safeUnmappedRoute = in_array($routeName, [
+                    'azari.admin.dashboard',
+                    'azari.admin.logout',
+                ], true);
+
+                $explicitlyProtected = $middleware->contains(
+                    fn ($entry): bool => is_string($entry) && (
+                        str_starts_with($entry, 'azari.permission:')
+                        || $entry === 'azari.admin'
+                        || str_starts_with($entry, 'azari.staff:administrator')
+                    )
+                );
+
+                abort_unless($safeUnmappedRoute || $explicitlyProtected, 404);
+            }
         }
 
         $user->forceFill(['last_active_at' => now()])->saveQuietly();
