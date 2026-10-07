@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\CommunicationPreference;
 use App\Services\Communication\PhoneNumberNormalizer;
+use App\Support\AuthAbuseGuard;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -17,7 +18,7 @@ class UserProfileController extends Controller
 {
     public function edit(Request $request): View { return view('user.profile.edit', ['user' => $request->user()]); }
 
-    public function update(Request $request, PhoneNumberNormalizer $numbers): RedirectResponse
+    public function update(Request $request, PhoneNumberNormalizer $numbers, AuthAbuseGuard $abuse): RedirectResponse
     {
         $user = $request->user();
         $data = $request->validate([
@@ -31,6 +32,8 @@ class UserProfileController extends Controller
             'emergency_contact_phone' => ['nullable', 'string', 'max:50'],
             'profile_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
         ]);
+
+        $abuse->assertEmailAllowed((string) $data['email']);
 
         try {
             $data['phone'] = $numbers->normalize($data['phone'] ?? null);
