@@ -29,18 +29,6 @@ class BookingOnboardingController extends Controller
         $hold = $this->hold($token);
         $user = $request->user();
 
-        if (! $user) {
-            $abuse->assertHumanForm(
-                $request,
-                'booking-account-create',
-                (string) $request->input('guest_email'),
-                4,
-                600,
-                2
-            );
-            $abuse->assertEmailAllowed((string) $request->input('guest_email'));
-        }
-
         if ($hold->user_id) {
             if (! $user) {
                 $request->session()->put('url.intended', route('azari.booking.checkout', $hold->token));
@@ -94,6 +82,18 @@ class BookingOnboardingController extends Controller
     ): RedirectResponse {
         $hold = $this->hold($token);
         $user = $request->user();
+
+        if (! $user) {
+            $abuse->assertHumanForm(
+                $request,
+                'booking-account-create',
+                (string) $request->input('guest_email'),
+                4,
+                600,
+                2
+            );
+            $abuse->assertEmailAllowed((string) $request->input('guest_email'));
+        }
 
         if ($hold->user_id && (! $user || (int) $hold->user_id !== (int) $user->id)) {
             abort(403);
