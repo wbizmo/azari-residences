@@ -38,11 +38,11 @@ Route::middleware('web')->group(function (): void {
             ->name('azari.booking.onboarding.email');
 
         Route::post('/booking/checkout/{token}/email/send', [BookingOnboardingController::class, 'sendEmailCode'])
-            ->middleware('throttle:5,1')
+            ->middleware('throttle:3,10')
             ->name('azari.booking.onboarding.email.send');
 
         Route::post('/booking/checkout/{token}/email/verify', [BookingOnboardingController::class, 'verifyEmailCode'])
-            ->middleware('throttle:10,1')
+            ->middleware('throttle:6,10')
             ->name('azari.booking.onboarding.email.verify');
     });
 
