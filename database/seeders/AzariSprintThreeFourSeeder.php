@@ -15,17 +15,18 @@ class AzariSprintThreeFourSeeder extends Seeder
 {
     public function run(): void
     {
-        User::query()->updateOrCreate(
-            ['email' => 'admin@azariadmin.com'],
-            [
-                'name' => 'Admin',
-                'username' => 'admin',
-                'password' => Hash::make('12345678'),
-                'staff_role' => 'administrator',
-                'is_active' => true,
-                'email_verified_at' => now(),
-            ]
-        );
+        $admin = User::query()->firstOrNew(['email' => 'admin@azariadmin.com']);
+        $admin->forceFill([
+            'name' => 'Admin',
+            'username' => 'admin',
+            'password' => Hash::make('12345678'),
+            'account_type' => 'staff',
+            'staff_role' => 'administrator',
+            'is_admin' => true,
+            'status' => 'active',
+            'is_active' => true,
+            'email_verified_at' => now(),
+        ])->save();
 
         foreach ([
             'site_name' => 'Resarva',
