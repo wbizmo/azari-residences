@@ -61,10 +61,10 @@ class AppServiceProvider extends ServiceProvider
         GuestIdentityDocument::observe(GuestIdentityDocumentObserver::class);
 
         VerifyEmail::toMailUsing(function (object $notifiable, string $url): MailMessage {
-            return (new MailMessage)->subject('Verify your Resarva email address')->view('emails.premium', [
+            return (new MailMessage)->subject('Verify your Resavar email address')->view('emails.premium', [
                 'title' => 'Verify your email address',
-                'preheader' => 'Complete your Resarva account verification.',
-                'lines' => ['Welcome to Resarva.', 'Confirm this email address to secure your account and access your bookings.'],
+                'preheader' => 'Complete your Resavar account verification.',
+                'lines' => ['Welcome to Resavar.', 'Confirm this email address to secure your account and access your bookings. Unverified accounts are closed after 7 days and removed after 30 days.'],
                 'actionLabel' => 'Verify email address',
                 'actionUrl' => $url,
             ]);
@@ -73,9 +73,9 @@ class AppServiceProvider extends ServiceProvider
         ResetPassword::toMailUsing(function (object $notifiable, string $token): MailMessage {
             $url = url(route('password.reset', ['token' => $token, 'email' => $notifiable->getEmailForPasswordReset()], false));
 
-            return (new MailMessage)->subject('Reset your Resarva password')->view('emails.premium', [
+            return (new MailMessage)->subject('Reset your Resavar password')->view('emails.premium', [
                 'title' => 'Reset your password',
-                'preheader' => 'A password reset was requested for your Resarva account.',
+                'preheader' => 'A password reset was requested for your Resavar account.',
                 'lines' => ['We received a request to reset your password.', 'Use the secure button below. If you did not request this, no action is required.'],
                 'actionLabel' => 'Reset password',
                 'actionUrl' => $url,
