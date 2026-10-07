@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Auth;
 
 use App\Http\Requests\AzariFormRequest;
+use App\Support\AuthAbuseGuard;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Facades\Auth;
@@ -29,6 +30,10 @@ class LoginRequest extends AzariFormRequest
     /** @throws ValidationException */
     public function authenticate(): void
     {
+        $abuse = app(AuthAbuseGuard::class);
+        $abuse->assertHoneypot($this, 'customer-login');
+        $abuse->assertRateLimits($this, 'customer-login', (string) $this->input('email'), 20, 60);
+
         $this->ensureIsNotRateLimited();
 
         if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
