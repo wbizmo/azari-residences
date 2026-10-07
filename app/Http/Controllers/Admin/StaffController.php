@@ -43,7 +43,8 @@ class StaffController extends Controller
             ? $request->file('profile_photo')->store('profiles/staff', 'public')
             : null;
 
-        $staff = User::query()->create([
+        $staff = new User;
+        $staff->forceFill([
             'name' => $data['name'],
             'username' => $data['username'],
             'email' => $data['email'],
@@ -55,7 +56,7 @@ class StaffController extends Controller
             'profile_photo_path' => $photo,
             'password' => Hash::make($plainPassword),
             'email_verified_at' => now(),
-        ]);
+        ])->save();
 
         $this->syncPermissions(
             $staff,
@@ -107,7 +108,7 @@ class StaffController extends Controller
             if ($user->profile_photo_path) Storage::disk('public')->delete($user->profile_photo_path);
             $updates['profile_photo_path'] = $request->file('profile_photo')->store('profiles/staff', 'public');
         }
-        $user->update($updates);
+        $user->forceFill($updates)->save();
         $this->syncPermissions($user, $data['permissions'] ?? [], $request->user()->id);
         AuditLog::record('staff.updated', $user, $old, $updates, ['permissions' => $data['permissions'] ?? []]);
         return redirect()->route('azari.admin.staff.index')->with('success', 'Staff account updated.');
@@ -127,7 +128,7 @@ class StaffController extends Controller
         abort_unless($user->isStaff(), 404);
         abort_if($user->id === $request->user()->id, 422, 'You cannot suspend your own account.');
         $data = $request->validate(['reason' => ['nullable', 'string', 'max:2000']]);
-        $user->update(['is_active' => false, 'status' => 'suspended', 'suspended_at' => now(), 'suspension_reason' => $data['reason'] ?? 'Suspended by administrator']);
+        $user->forceFill(['is_active' => false, 'status' => 'suspended', 'suspended_at' => now(), 'suspension_reason' => $data['reason'] ?? 'Suspended by administrator'])->save();
         AuditLog::record('staff.suspended', $user, [], ['reason' => $data['reason'] ?? null]);
         return back()->with('success', 'Staff account suspended.');
     }
@@ -135,7 +136,7 @@ class StaffController extends Controller
     public function reactivate(User $user): RedirectResponse
     {
         abort_unless($user->isStaff(), 404);
-        $user->update(['is_active' => true, 'status' => 'active', 'suspended_at' => null, 'suspension_reason' => null]);
+        $user->forceFill(['is_active' => true, 'status' => 'active', 'suspended_at' => null, 'suspension_reason' => null])->save();
         AuditLog::record('staff.reactivated', $user);
         return back()->with('success', 'Staff account reactivated.');
     }
