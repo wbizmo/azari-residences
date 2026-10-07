@@ -51,6 +51,12 @@ class PurgeUnverifiedCustomerAccounts extends Command
                                 ->where('user_id', $user->getKey())
                                 ->delete();
                         }
+
+                        if (Schema::hasTable('password_reset_tokens')) {
+                            DB::table('password_reset_tokens')
+                                ->where('email', $user->email)
+                                ->delete();
+                        }
                     });
                 }
             });
@@ -120,10 +126,16 @@ class PurgeUnverifiedCustomerAccounts extends Command
                 'saved_searches',
                 'recently_viewed_properties',
                 'analytics_events',
-                'notifications',
                 'permission_user',
                 'role_user',
             ], $userId);
+
+            if (Schema::hasTable('notifications')) {
+                DB::table('notifications')
+                    ->where('notifiable_type', User::class)
+                    ->where('notifiable_id', $userId)
+                    ->delete();
+            }
 
             if (Schema::hasTable(config('session.table', 'sessions'))) {
                 DB::table(config('session.table', 'sessions'))->where('user_id', $userId)->delete();
@@ -151,10 +163,16 @@ class PurgeUnverifiedCustomerAccounts extends Command
                 'saved_searches',
                 'recently_viewed_properties',
                 'analytics_events',
-                'notifications',
                 'permission_user',
                 'role_user',
             ], $userId);
+
+            if (Schema::hasTable('notifications')) {
+                DB::table('notifications')
+                    ->where('notifiable_type', User::class)
+                    ->where('notifiable_id', $userId)
+                    ->delete();
+            }
 
             if (Schema::hasTable(config('session.table', 'sessions'))) {
                 DB::table(config('session.table', 'sessions'))->where('user_id', $userId)->delete();
