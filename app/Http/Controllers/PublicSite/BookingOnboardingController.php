@@ -7,6 +7,7 @@ use App\Models\BookingHold;
 use App\Models\User;
 use App\Services\Bookings\AzariPricingEngine;
 use App\Services\Bookings\BookingCreationService;
+use App\Support\AuthAbuseGuard;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -22,10 +23,23 @@ class BookingOnboardingController extends Controller
     public function show(
         Request $request,
         string $token,
-        AzariPricingEngine $pricing
+        AzariPricingEngine $pricing,
+        AuthAbuseGuard $abuse
     ): View|RedirectResponse {
         $hold = $this->hold($token);
         $user = $request->user();
+
+        if (! $user) {
+            $abuse->assertHumanForm(
+                $request,
+                'booking-account-create',
+                (string) $request->input('guest_email'),
+                4,
+                600,
+                2
+            );
+            $abuse->assertEmailAllowed((string) $request->input('guest_email'));
+        }
 
         if ($hold->user_id) {
             if (! $user) {
@@ -68,13 +82,15 @@ class BookingOnboardingController extends Controller
             ),
             'draft' => (array) ($hold->guest_draft ?? []),
             'creatingAccount' => ! $user,
+            'authFormToken' => $abuse->formToken('booking-account-create'),
         ]);
     }
 
     public function begin(
         Request $request,
         string $token,
-        BookingCreationService $bookings
+        BookingCreationService $bookings,
+        AuthAbuseGuard $abuse
     ): RedirectResponse {
         $hold = $this->hold($token);
         $user = $request->user();
@@ -156,19 +172,21 @@ class BookingOnboardingController extends Controller
         ]);
     }
 
-    public function sendEmailCode(Request $request, string $token): RedirectResponse
+    public function sendEmailCode(Request $request, string $token, AuthAbuseGuard $abuse): RedirectResponse
     {
         $hold = $this->ownedHold($request, $token);
+        $abuse->assertRateLimits($request, 'booking-email-resend', (string) $request->user()->email, 3, 900);
 
         $this->issueEmailCode($hold, $request->user(), true);
 
         return back()->with('success', 'A fresh six-digit verification code has been sent.');
     }
 
-    public function verifyEmailCode(Request $request, string $token): RedirectResponse
+    public function verifyEmailCode(Request $request, string $token, AuthAbuseGuard $abuse): RedirectResponse
     {
         $hold = $this->ownedHold($request, $token);
         $user = $request->user();
+        $abuse->assertRateLimits($request, 'booking-email-verify', (string) $user->email, 6, 900);
 
         $data = $request->validate([
             'code' => ['required', 'digits:6'],
