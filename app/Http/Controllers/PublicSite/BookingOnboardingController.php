@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
@@ -105,19 +106,23 @@ class BookingOnboardingController extends Controller
             }
 
             $credentials = $request->validate([
-                'password' => ['required', 'string', 'min:8', 'max:255', 'confirmed'],
+                'password' => ['required', 'confirmed', Password::min(12)->letters()->mixedCase()->numbers()],
             ]);
 
-            $user = User::query()->create([
+            $user = new User;
+            $user->fill([
                 'name' => trim($draft['first_name'].' '.$draft['last_name']),
                 'email' => mb_strtolower((string) $draft['guest_email']),
                 'phone' => $draft['guest_phone'],
                 'password' => Hash::make($credentials['password']),
-                'account_type' => 'customer',
-                'status' => 'active',
-                'is_active' => true,
                 'timezone' => config('localization.platform_timezone', 'UTC'),
             ]);
+            $user->forceFill([
+                'account_type' => 'customer',
+                'status' => 'pending_verification',
+                'is_active' => true,
+                'email_verified_at' => null,
+            ])->save();
 
             Auth::login($user);
             $request->session()->regenerate();
@@ -199,6 +204,7 @@ class BookingOnboardingController extends Controller
         }
 
         if ($user->markEmailAsVerified()) {
+            $user->forceFill(['status' => 'active', 'is_active' => true])->saveQuietly();
             event(new Verified($user));
         }
 
