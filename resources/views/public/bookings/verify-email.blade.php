@@ -9,7 +9,7 @@
 <section class="az-panel">
     <div class="az-notice">
         <strong>We sent a six-digit code.</strong>
-        Enter it below. The booking hold stays attached to this Resavar account while you complete email verification.
+        Enter it below. The booking hold stays attached to this Resavar account while you complete email verification. Unverified accounts are closed after 7 days and permanently scrubbed after 30 days.
     </div>
 
     <form method="POST" action="{{ route('azari.booking.onboarding.email.verify', $hold->token) }}" style="margin-top:18px">
