@@ -71,28 +71,20 @@ class SuccessfulBookingAccountService
             }
 
             try {
-                $user = User::query()->create([
+                $user = new User;
+                $user->fill([
                     'name' => $name,
                     'email' => $email,
-                    'password' => Hash::make(
-                        Str::random(64)
-                    ),
-                    'phone' =>
-                        $booking->guest_phone,
-                    'account_type' =>
-                        'customer',
-                    'status' =>
-                        'active',
-                    'is_active' =>
-                        true,
-                    'timezone' =>
-                        config(
-                            'azari.timezone',
-                            'Africa/Lagos'
-                        ),
-                    'email_verified_at' =>
-                        null,
+                    'password' => Hash::make(Str::random(64)),
+                    'phone' => $booking->guest_phone,
+                    'timezone' => config('azari.timezone', 'Africa/Lagos'),
                 ]);
+                $user->forceFill([
+                    'account_type' => 'customer',
+                    'status' => 'pending_verification',
+                    'is_active' => true,
+                    'email_verified_at' => null,
+                ])->save();
 
                 $created = true;
             } catch (QueryException $exception) {
