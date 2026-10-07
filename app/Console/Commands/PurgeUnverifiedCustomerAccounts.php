@@ -81,8 +81,14 @@ class PurgeUnverifiedCustomerAccounts extends Command
                             continue;
                         }
 
-                        $this->deleteAccount($user);
-                        $deleted++;
+                        try {
+                            $this->deleteAccount($user);
+                            $deleted++;
+                        } catch (Throwable $deleteException) {
+                            report($deleteException);
+                            $this->anonymizeRetainedAccount($user->fresh() ?: $user);
+                            $anonymized++;
+                        }
                     } catch (Throwable $exception) {
                         report($exception);
                         $failed++;
