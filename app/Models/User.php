@@ -19,11 +19,10 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $perPage = 10;
 
     protected $fillable = [
-        'name', 'username', 'email', 'password', 'phone', 'timezone', 'locale', 'display_currency', 'account_type', 'status',
-        'is_admin', 'staff_role', 'is_active', 'avatar_path', 'profile_photo_path',
-        'email_verified_at', 'phone_verified_at', 'last_login_at', 'last_active_at',
-        'suspended_at', 'suspension_reason', 'emergency_contact_name',
-        'emergency_contact_phone', 'email_notifications', 'sms_notifications',
+        'name', 'username', 'email', 'password', 'phone', 'timezone', 'locale',
+        'display_currency', 'avatar_path', 'profile_photo_path',
+        'emergency_contact_name', 'emergency_contact_phone',
+        'email_notifications', 'sms_notifications',
         'whatsapp_notifications', 'marketing_consent',
     ];
 
