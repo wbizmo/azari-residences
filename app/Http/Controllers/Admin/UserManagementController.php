@@ -35,14 +35,14 @@ class UserManagementController extends Controller
     public function suspend(Request $request, User $user): RedirectResponse
     {
         abort_if($user->isStaff(), 404);
-        $user->update(['status' => 'suspended', 'is_active' => false, 'suspended_at' => now(), 'suspension_reason' => $request->input('reason', 'Suspended by administrator')]);
+        $user->forceFill(['status' => 'suspended', 'is_active' => false, 'suspended_at' => now(), 'suspension_reason' => $request->input('reason', 'Suspended by administrator')])->save();
         return back()->with('success', 'Customer suspended.');
     }
 
     public function reactivate(User $user): RedirectResponse
     {
         abort_if($user->isStaff(), 404);
-        $user->update(['status' => 'active', 'is_active' => true, 'suspended_at' => null, 'suspension_reason' => null]);
+        $user->forceFill(['status' => 'active', 'is_active' => true, 'suspended_at' => null, 'suspension_reason' => null])->save();
         return back()->with('success', 'Customer reactivated.');
     }
 }
