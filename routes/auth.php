@@ -13,29 +13,30 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])
+        ->middleware('throttle:30,1')
         ->name('register');
 
     Route::post('register', [RegisteredUserController::class, 'store'])
-        ->middleware('throttle:5,1');
+        ->middleware('throttle:5,10');
 
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
         ->name('login');
 
     Route::post('login', [AuthenticatedSessionController::class, 'store'])
-        ->middleware('throttle:10,1');
+        ->middleware('throttle:20,1');
 
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
         ->name('password.request');
 
     Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])
-        ->middleware('throttle:5,1')
+        ->middleware('throttle:5,15')
         ->name('password.email');
 
     Route::get('reset-password/{token}', [NewPasswordController::class, 'create'])
         ->name('password.reset');
 
     Route::post('reset-password', [NewPasswordController::class, 'store'])
-        ->middleware('throttle:5,1')
+        ->middleware('throttle:5,10')
         ->name('password.store');
 });
 
@@ -48,17 +49,17 @@ Route::middleware(['auth', 'auth.session'])->group(function () {
         ->name('verification.verify');
 
     Route::post('email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
-        ->middleware('throttle:6,1')
+        ->middleware('throttle:3,10')
         ->name('verification.send');
 
     Route::get('confirm-password', [ConfirmablePasswordController::class, 'show'])
         ->name('password.confirm');
 
     Route::post('confirm-password', [ConfirmablePasswordController::class, 'store'])
-        ->middleware('throttle:5,1');
+        ->middleware('throttle:5,10');
 
     Route::put('password', [PasswordController::class, 'update'])
-        ->middleware('throttle:5,1')
+        ->middleware('throttle:5,10')
         ->name('password.update');
 
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
