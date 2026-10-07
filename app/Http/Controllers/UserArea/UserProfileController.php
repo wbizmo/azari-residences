@@ -45,9 +45,12 @@ class UserProfileController extends Controller
             $data['profile_photo_path'] = $request->file('profile_image')->store('profiles/customers', 'public');
         }
         unset($data['profile_image']);
-        if ($data['email'] !== $user->email) $data['email_verified_at'] = null;
-        if (($data['phone'] ?? null) !== $user->phone) $data['phone_verified_at'] = null;
-        $user->update($data);
+        $emailChanged = $data['email'] !== $user->email;
+        $phoneChanged = ($data['phone'] ?? null) !== $user->phone;
+        $user->fill($data);
+        if ($emailChanged) $user->forceFill(['email_verified_at' => null, 'status' => 'pending_verification']);
+        if ($phoneChanged) $user->forceFill(['phone_verified_at' => null]);
+        $user->save();
         AuditLog::record('user.profile_updated', $user, $old, $user->only(array_keys($old)));
         return back()->with('success', __('resarva.account.profile_updated'));
     }
