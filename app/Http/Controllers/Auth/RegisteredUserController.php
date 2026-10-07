@@ -48,6 +48,8 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Password::min(12)->letters()->mixedCase()->numbers()],
         ]);
 
+        $abuse->assertEmailAllowed((string) $request->email);
+
         $user = new User;
         $user->fill([
             'name' => trim((string) $request->name),
