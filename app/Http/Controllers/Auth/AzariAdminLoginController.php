@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\StaffLoginHistory;
+use App\Support\AuthAbuseGuard;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -28,8 +29,11 @@ class AzariAdminLoginController extends Controller
         return view('admin.auth.login');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, AuthAbuseGuard $abuse): RedirectResponse
     {
+        $abuse->assertHoneypot($request, 'staff-login');
+        $abuse->assertRateLimits($request, 'staff-login', (string) $request->input('login'), 10, 300);
+
         if ($request->user() && ! $request->user()->isStaff()) {
             abort(404);
         }
