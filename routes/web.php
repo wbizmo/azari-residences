@@ -33,7 +33,7 @@ Route::post('/account-deletion', [AccountDeletionRequestController::class, 'stor
 
 Route::prefix('azaridevadmin')->group(function (): void {
     Route::get('/login', [AzariAdminLoginController::class, 'create'])
-        ->middleware('throttle:30,1')
+        ->middleware('throttle:20,1')
         ->name('azari.admin.login');
     Route::post('/login', [AzariAdminLoginController::class, 'store'])
         ->middleware('throttle:5,1')
