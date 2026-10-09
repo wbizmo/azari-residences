@@ -169,6 +169,22 @@
             <strong>{{ $requestItem->reference }} · {{ Str::headline($requestItem->type) }} · {{ Str::headline($requestItem->status) }}</strong>
             <p>{{ $requestItem->guest_note ?: 'No guest note.' }}</p>
             <pre style="white-space:pre-wrap">{{ json_encode($requestItem->requested_changes, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES) }}</pre>
+            @if($requestItem->status === 'pending' && auth()->user()?->hasPermission('bookings.edit'))
+                <form method="POST" action="{{ route('azari.admin.bookings.modifications.review', [$booking, $requestItem]) }}" class="az-form-grid az-contained-form">
+                    @csrf
+                    @method('PUT')
+                    <label class="az-field az-span-2"><span>Staff review note</span><textarea name="staff_note" maxlength="2000"></textarea></label>
+                    <div class="az-form-actions az-span-2">
+                        @if(in_array($requestItem->type, ['contact_details', 'arrival_time'], true))
+                            <button type="submit" name="decision" value="approve" class="az-button az-button--primary">Approve and apply</button>
+                        @endif
+                        <button type="submit" name="decision" value="decline" class="az-button az-button--secondary">Decline request</button>
+                    </div>
+                    @unless(in_array($requestItem->type, ['contact_details', 'arrival_time'], true))
+                        <p>Inventory-changing or financial modifications require a separate repricing and confirmation workflow; they cannot be applied from this panel.</p>
+                    @endunless
+                </form>
+            @endif
         </article>
     @endforeach
 </section>
