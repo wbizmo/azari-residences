@@ -252,7 +252,7 @@
                                                     <small>Includes taxes: {{ \App\Support\Money::format($quote['tax_total'], $quote['currency']) }}</small>
                                                 @endif
                                                 @if(($quote['security_deposit'] ?? 0) > 0)
-                                                    <small>Security deposit included: {{ \App\Support\Money::format($quote['security_deposit'], $quote['currency']) }}</small>
+                                                    <small>Security deposit (separate from booking total; check property's collection terms): {{ \App\Support\Money::format($quote['security_deposit'], $quote['currency']) }}</small>
                                                 @endif
                                                 @if(($quote['policy']['cancellation']['free_cancel_hours'] ?? null) !== null && $plan->is_refundable)
                                                     <small>Free cancellation up to {{ (int) $quote['policy']['cancellation']['free_cancel_hours'] }} hours before arrival, subject to the full policy</small>
