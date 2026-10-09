@@ -91,7 +91,12 @@ class ResarvaReleaseGate extends Command
         $path = public_path('service-worker.js');
         if (! is_file($path)) return false;
         $source = (string) file_get_contents($path);
-        return str_contains($source, "request.mode === 'navigate'") && str_contains($source, "url.pathname.startsWith('/build/')");
+        return str_contains($source, "request.mode === 'navigate'")
+            && str_contains($source, "fetch(request).catch")
+            && str_contains($source, "caches.match('/offline.html')")
+            && str_contains($source, "url.pathname")
+            && str_contains($source, "request.headers.has('Authorization')")
+            && ! str_contains($source, "cache.put(request, response)");
     }
 
     private function safe(callable $fn): bool { try { $fn(); return true; } catch (\Throwable) { return false; } }
