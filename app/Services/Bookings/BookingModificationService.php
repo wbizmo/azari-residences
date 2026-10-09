@@ -212,7 +212,7 @@ class BookingModificationService
     {
         $allowed = [
             'check_in', 'check_out', 'arrival_time', 'guest_count', 'adult_count',
-            'child_count', 'room_preference', 'email', 'phone', 'add_on_ids',
+            'child_count', 'new_adults', 'new_children', 'room_preference', 'email', 'phone', 'add_on_ids',
             'cancellation_reason',
         ];
 

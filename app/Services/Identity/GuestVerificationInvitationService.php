@@ -53,7 +53,7 @@ class GuestVerificationInvitationService
         ], function ($message) use ($guest): void {
             $message
                 ->to($guest->email)
-                ->subject('Verify your identity for your Azari booking');
+                ->subject('Verify your identity for your Resavar booking');
         });
     }
 
@@ -97,7 +97,7 @@ class GuestVerificationInvitationService
             ], function ($message) use ($guest): void {
                 $message
                     ->to($guest->email)
-                    ->subject('Your Azari guest verification code');
+                    ->subject('Your Resavar guest verification code');
             });
         } catch (\Throwable $exception) {
             report($exception);
