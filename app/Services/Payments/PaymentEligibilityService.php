@@ -82,18 +82,10 @@ class PaymentEligibilityService
 
     public function isFullyPaid(Booking $booking): bool
     {
-        /*
-         * Supports both:
-         * 1. Current verified Payment rows.
-         * 2. Legacy/seeded paid bookings such as AZR-DEMO-001 that carry
-         *    paid state directly on the booking record.
-         */
-        $legacyPaid = filled($booking->paid_at)
-            || filled($booking->receipt_number)
-            || filled($booking->payment_reference)
-            || strtolower((string) $booking->status) === 'paid';
-
-        return $legacyPaid || $booking->balanceDue() <= 0;
+        // Booking::balanceDue() applies the legacy payment fallback only
+        // when no successful Payment row exists. Receipt number or paid_at
+        // alone must never suppress a newly owed amendment balance.
+        return $booking->balanceDue() <= 0;
     }
 
     private function assertAdultsVerified(Booking $booking, bool $conflict = false): void

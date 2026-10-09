@@ -102,10 +102,14 @@ class Booking extends Model
 
     public function hasLegacyPaidRecord(): bool
     {
+        // Only *legacy* bookings without verified Payment rows may use old
+        // receipt fields as evidence of full settlement. Modern bookings must
+        // use the actual sum of verified payments, including after amendments.
         return ! $this->isCancelled()
             && in_array($this->status, ['paid', 'confirmed', 'check_in', 'checked_in', 'checked_out', 'completed'], true)
             && $this->paid_at !== null
-            && (filled($this->payment_reference) || filled($this->receipt_number));
+            && (filled($this->payment_reference) || filled($this->receipt_number))
+            && ! $this->payments()->where('status', Payment::SUCCESSFUL)->exists();
     }
 
     public function isPaid(): bool
