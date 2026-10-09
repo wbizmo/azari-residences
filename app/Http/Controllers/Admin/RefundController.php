@@ -79,6 +79,20 @@ class RefundController extends Controller
             }
         }
 
+        if (strtolower((string) $payment->provider) !== 'manual' && $data['action'] === 'processing') {
+            throw ValidationException::withMessages([
+                'action' => 'Provider refunds must be dispatched through the verified gateway workflow.',
+            ]);
+        }
+
+        if (strtolower((string) $payment->provider) !== 'manual'
+            && $data['action'] === 'failed'
+            && in_array($refund->status, ['processing', 'reconciliation_required'], true)) {
+            throw ValidationException::withMessages([
+                'action' => 'This refund can only be failed after independently verified provider reconciliation.',
+            ]);
+        }
+
         $actorId = $request->user()->getKey();
 
         $updated = match ($data['action']) {
