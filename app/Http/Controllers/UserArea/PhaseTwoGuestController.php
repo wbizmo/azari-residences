@@ -215,7 +215,7 @@ class PhaseTwoGuestController extends Controller
         // or loopback fetch target for future queued web-push delivery.
         $forbidden = $scheme !== 'https'
             || $hostname === ''
-            || isset($parts['user'], $parts['pass'])
+            || isset($parts['user']) || isset($parts['pass'])
             || isset($parts['port']) && (int) $parts['port'] !== 443
             || $hostname === 'localhost'
             || str_ends_with($hostname, '.localhost')
