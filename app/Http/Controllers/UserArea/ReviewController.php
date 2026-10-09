@@ -8,6 +8,7 @@ use App\Models\Booking;
 use App\Models\Review;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class ReviewController extends Controller
@@ -39,14 +40,28 @@ class ReviewController extends Controller
             'trip_type' => ['nullable', Rule::in(['business', 'couple', 'family', 'friends', 'solo', 'other'])],
         ]);
 
-        $review = Review::query()->create([
-            ...$data,
-            'booking_id' => $booking->id,
-            'property_id' => $booking->property_id,
-            'user_id' => $request->user()->id,
-            'verified_stay' => true,
-            'status' => 'pending',
-        ]);
+        // Serialize attempts for one booking before checking eligibility.
+        // The database unique constraint is the final defence for retries.
+        $review = DB::transaction(function () use ($booking, $request, $data): Review {
+            $locked = Booking::query()->whereKey($booking->id)->lockForUpdate()->firstOrFail();
+            abort_unless((int) $locked->user_id === (int) $request->user()->id, 403);
+            abort_unless(
+                in_array($locked->status, ['completed', 'checked_out'], true)
+                || filled($locked->checked_out_at)
+                || filled($locked->completed_at),
+                422
+            );
+            abort_if(Review::query()->where('booking_id', $locked->id)->exists(), 422);
+
+            return Review::query()->create([
+                ...$data,
+                'booking_id' => $locked->id,
+                'property_id' => $locked->property_id,
+                'user_id' => $request->user()->id,
+                'verified_stay' => true,
+                'status' => 'pending',
+            ]);
+        }, 3);
 
         AuditLog::record('review.submitted', $review, [], [
             'booking_reference' => $booking->reference,
