@@ -271,6 +271,8 @@ class BookingCreationService
             'address' => (string) $booking->address,
             'city' => (string) $booking->city,
             'country' => (string) $booking->country,
+            'guest_notes' => (string) ($booking->guest_notes ?? ''),
+            'arrival_time' => (string) ($booking->arrival_time?->format('H:i') ?? ''),
         ];
         foreach ($inputs as $field => $original) {
             $submitted = (string) $request->input($field);
@@ -285,7 +287,7 @@ class BookingCreationService
         }
 
         $adultInputs = $request->input('adults');
-        $childInputs = $request->input('children', []);
+        $childInputs = $request->input('children') ?: [];
         if (! is_array($adultInputs) || ! is_array($childInputs)
             || ! $request->boolean('terms')) {
             throw ValidationException::withMessages([
