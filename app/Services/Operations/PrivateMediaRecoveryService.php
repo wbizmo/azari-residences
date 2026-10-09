@@ -147,7 +147,9 @@ class PrivateMediaRecoveryService
         }
 
         $destination = Storage::disk('resavar_media_restore');
-        if ($destination->allFiles() !== []) {
+        // A directory containing symlinks or empty subdirectories is not a
+        // clean restore target either; reject any existing child entry.
+        if (array_diff(scandir($targetRoot) ?: [], ['.', '..']) !== []) {
             throw new \RuntimeException('Isolated media restore target must be empty.');
         }
 
@@ -237,8 +239,8 @@ class PrivateMediaRecoveryService
 
     private function assertOffsite(string $disk): void
     {
-        if ($disk === '' || in_array($disk, ['local', 'private', 'public', 'resavar_media_restore'], true)
-            || ! is_array(config('filesystems.disks.'.$disk))) {
+        if ($disk !== 'resavar_offsite'
+            || ! is_array(config('filesystems.disks.resavar_offsite'))) {
             throw new \RuntimeException('Explicit independent offsite storage is required.');
         }
     }
