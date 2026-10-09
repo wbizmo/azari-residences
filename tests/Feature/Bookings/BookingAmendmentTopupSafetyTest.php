@@ -91,6 +91,12 @@ class BookingAmendmentTopupSafetyTest extends TestCase
         $this->assertSame($oldDate->toDateString(), $booking->fresh()->check_in->toDateString());
         $this->assertNull($service->requestRecovery($offer->fresh()));
         $this->assertSame(1, $topup->refunds()->count());
+
+        // Provider-verified recovery must NOT deduct unallocated money from
+        // the original booking's paid balance or mark it as outstanding.
+        app(\App\Services\Payments\RefundService::class)->markSuccessful($refund);
+        $this->assertEqualsWithDelta((float) $booking->total, $booking->fresh()->netPaidTotal(), 0.01);
+        $this->assertSame(0.0, $booking->fresh()->balanceDue());
     }
 
     public function test_reserved_refund_cannot_be_reused_to_confirm_new_dates(): void
