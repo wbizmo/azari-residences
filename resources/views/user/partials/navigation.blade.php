@@ -116,11 +116,7 @@ $contactEmail=\App\Models\SiteSetting::valueFor('customer_dashboard_contact_emai
             </a>
         @endif
 
-        @if(Route::has('user.contact'))
-            <a class="az-user-nav-link {{ request()->routeIs('user.contact')?'is-active':'' }}" href="{{ route('user.contact') }}">
-                <span class="material-symbols-outlined">mail</span>
-                <span>Contact Resavar</span>
-            </a>
-        @endif
+        {{-- Contact page remains accessible via support and booking links,
+             but is removed from both desktop and mobile navigation. --}}
     </nav>
 </section>
