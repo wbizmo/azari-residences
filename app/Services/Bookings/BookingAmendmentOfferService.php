@@ -171,6 +171,12 @@ class BookingAmendmentOfferService
                         'payment' => 'The exact additional payment must be independently verified before changing dates.',
                     ]);
                 }
+                if (\App\Models\Refund::query()->where('payment_id', $topup->getKey())
+                    ->whereIn('status', ['requested', 'processing', 'reconciliation_required', 'successful'])->exists()) {
+                    throw ValidationException::withMessages([
+                        'payment' => 'The additional payment is already in a refund workflow and cannot be allocated to this change.',
+                    ]);
+                }
             }
 
             $refundDue = max(0.0, round($locked->netPaidTotal() - (float) $quote['total'], 2));
