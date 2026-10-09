@@ -3,6 +3,7 @@
 use App\Http\Controllers\User\OwnerBookingMessageController;
 use App\Http\Controllers\User\OwnerPhaseTwoController;
 use App\Http\Controllers\UserArea\PhaseTwoGuestController;
+use App\Http\Controllers\UserArea\ReviewController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer'])->group(function (): void {
@@ -39,6 +40,8 @@ Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer'])->group
         Route::post('/arrival/check-in', [PhaseTwoGuestController::class, 'selfCheckIn'])
             ->middleware('throttle:5,10')->name('arrival.check-in');
     });
+
+    Route::patch('/account/bookings/{booking}/review', [ReviewController::class, 'update'])->name('user.reviews.update');
 
     Route::post('/account/push-subscriptions', [PhaseTwoGuestController::class, 'subscribePush'])
         ->middleware('throttle:20,1')->name('user.push.subscribe');
