@@ -41,6 +41,7 @@ Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer'])->group
         Route::get('/messages', [PhaseTwoGuestController::class, 'messages'])->name('messages');
         Route::post('/messages', [PhaseTwoGuestController::class, 'sendMessage'])
             ->middleware('throttle:30,1')->name('messages.store');
+        Route::get('/messages/poll', [PhaseTwoGuestController::class, 'pollMessages'])->name('messages.poll');
         Route::get('/messages/attachments/{message}', [PhaseTwoGuestController::class, 'messageAttachment'])->name('messages.attachment');
 
         Route::get('/arrival', [PhaseTwoGuestController::class, 'arrival'])->name('arrival');
