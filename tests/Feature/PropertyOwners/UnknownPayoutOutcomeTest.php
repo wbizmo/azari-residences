@@ -4,6 +4,7 @@ namespace Tests\Feature\PropertyOwners;
 
 use App\Models\User;
 use App\Models\WithdrawalRequest;
+use App\Models\OwnerPayoutProfile;
 use App\Services\Owners\OwnerBalanceService;
 use App\Services\Owners\OwnerWithdrawalService;
 use App\Services\Withdrawals\WithdrawalGatewayManager;
@@ -44,5 +45,30 @@ class UnknownPayoutOutcomeTest extends TestCase
         $this->assertSame('reconciliation_required', $withdrawal->status);
         $this->assertNotNull($withdrawal->reconciliation_required_at);
         $this->assertFalse($withdrawal->isSafelyRetryable());
+    }
+
+    public function test_owner_cannot_request_withdrawal_to_another_owners_verified_profile(): void
+    {
+        $owner = User::factory()->create();
+        $otherOwner = User::factory()->create();
+        $foreignProfile = OwnerPayoutProfile::query()->create([
+            'user_id' => $otherOwner->id,
+            'preferred_gateway' => 'paypal',
+            'paypal_recipient' => 'someone-else@example.test',
+            'paypal_recipient_type' => 'EMAIL',
+            'is_verified' => true,
+            'verified_at' => now(),
+        ]);
+        $gateway = Mockery::mock(WithdrawalGatewayManager::class);
+        $service = new OwnerWithdrawalService(app(OwnerBalanceService::class), $gateway);
+
+        try {
+            $service->request($owner, $foreignProfile, 'USD', 50);
+            $this->fail('The owner must not send funds to a foreign verified payout profile.');
+        } catch (RuntimeException $exception) {
+            $this->assertStringContainsString('not authorized', $exception->getMessage());
+        }
+
+        $this->assertSame(0, WithdrawalRequest::query()->where('user_id', $owner->id)->count());
     }
 }
