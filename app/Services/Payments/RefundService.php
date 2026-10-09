@@ -29,6 +29,13 @@ class RefundService
             if ($idempotencyKey) {
                 $existing = Refund::query()->where('idempotency_key', $idempotencyKey)->first();
                 if ($existing) {
+                    if ((int) $existing->payment_id !== (int) $payment->getKey()
+                        || abs(round((float) $existing->amount, 2) - $amount) >= 0.005) {
+                        throw ValidationException::withMessages([
+                            'idempotency_key' => 'This refund request key was already used for a different payment or amount.',
+                        ]);
+                    }
+
                     return $existing;
                 }
             }
