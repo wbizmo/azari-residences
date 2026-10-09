@@ -116,10 +116,13 @@ class OwnerPhaseTwoController extends Controller
             // Re-check account verification and the existence of the property
             // before granting any access, even if its state changed after the invite.
             abort_unless($request->user()->hasVerifiedEmail(), 403);
+            $property = Property::query()->whereKey($invite->property_id)
+                ->whereNotNull('owner_id')->firstOrFail();
+            $inviter = User::query()->find($invite->invited_by);
             abort_unless(
-                Property::query()->whereKey($invite->property_id)
-                    ->whereNotNull('owner_id')->exists(),
-                404
+                $inviter && app(PropertyAccessService::class)->can($inviter, $property, 'operations.manage'),
+                403,
+                'The invitation issuer no longer has property management access.'
             );
 
             PropertyStaffMembership::query()->updateOrCreate(
@@ -150,8 +153,22 @@ class OwnerPhaseTwoController extends Controller
         abort_unless((int) $membership->property_id === (int) $property->id, 404);
         abort_if((int) $membership->user_id === (int) $property->owner_id, 422);
 
-        $membership->update(['revoked_at' => now()]);
-        AuditLog::record('property_staff.revoked', $property, [], ['user_id' => $membership->user_id]);
+        DB::transaction(function () use ($property, $membership): void {
+            $membership->update(['revoked_at' => now()]);
+            $staffEmail = User::query()->whereKey($membership->user_id)->value('email');
+            if ($staffEmail) {
+                DB::table('property_staff_invitations')
+                    ->where('property_id', $property->getKey())
+                    ->where('email', $staffEmail)
+                    ->whereNull('accepted_at')
+                    ->delete();
+            }
+
+            AuditLog::record('property_staff.revoked', $property, [], [
+                'user_id' => $membership->user_id,
+                'pending_invitations_revoked' => true,
+            ]);
+        }, 3);
 
         return back()->with('success', 'Collaborator access revoked.');
     }
