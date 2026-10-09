@@ -1,0 +1,50 @@
+# Phase One completion: GitHub implementation versus operator acceptance
+
+**Epic:** #38 | **Production/staging acceptance:** #123
+
+Phase One has two separate gates. GitHub PRs and lightweight CI prove code was integrated and syntax/build checks passed; they do **not** demonstrate correct behavior under live contention or across real payment providers. Conversely, an operator test failure creates a new code issue and blocks final acceptance. Do not close the parent epic until both gates pass.
+
+## GitHub and local development responsibility
+
+| Issue | Required code/deliverables | GitHub status / outstanding code acceptance |
+| --- | --- | --- |
+| #42 inventory | One authoritative availability projection; all caller parity; 7/30/365-day profiling and migration map | Inventory engine shipped earlier. Caller-map completeness and local date-boundary parity tests require final signoff. |
+| #43 booking holds | Idempotent state machine, atomic booking/hold consumption, indexed uniqueness, deadlock-safe lock order | Base protections shipped earlier. Local concurrent DB test harness and crash-recovery coverage must be verified. |
+| #44 pricing/docs | Immutable quote snapshot, discount/tax rounding parity and receipt/PDF reconciliation | Snapshot safeguards shipped earlier. Admin receipt cannot select a newer failed payment (PR #122). Full surface-by-surface PDF parity remains for validation. |
+| #45 booking amendments | Date/guest/room/extras consent, repricing, idempotency | **Issue closed**, implementation merged in #110–#117; subject to overall final runtime acceptance. |
+| #46 cancellation | Frozen policy, deposits, no-shows, retried refunds, late/early-stay exceptions, maker/checker override | Refund entitlement and duplicate external settlement safety (PR #122) repaired. High-risk override approval and early-departure policy still require separate acceptance. |
+| #47 provider refund | Actual adapter dispatch, callback validation, durable idempotency, verified settlement and exception queue | Provider foundations and fail-closed guards #112/#121, cancellation replay #122. Multi-provider daily reconciliation report and local duplicate callback regression coverage remain acceptance criteria. |
+| #48 owner accounting | Owner credit/debit ledger, payout reservation, chargeback, statement/reconciliation | Existing ledger and dispute reversal. Manual uncertain payout recovery now requires independent reviewer (ops PR). Full daily owner settlement parity remains acceptance. |
+| #49 calendars | Safe parser, single-flight sync, stale/fail-closed sellability, missing-event grace, restricted URLs | PR #122 improves truncation protection, single-flight sync and no-silent-inventory-release. Local concurrency and channel export interoperability remain to verify. |
+| #50 queues | Durable worker, bounded retry/dead-letter, operator controls, heartbeat and incident response | Existing health/heartbeat; restricted operator failed-job replay and route audit (ops PR). Local simulated crash/restart test remains. |
+| #51 security | Guest/owner/staff ownership, privileged workflows, file privacy, audit and threat model | Middleware/audit baseline earlier; added dangerous-route expectations (ops PR). Full privileged step-up/privacy signoff remains outstanding. |
+| #52 capacity | Search/checkout reproducible dataset, query plans, percentile metrics and backpressure | Search benchmark now reports p50/p95/p99, query distribution and memory (ops PR). Production-sized dataset and checkout load test still needed. |
+| #53 backups | Encrypted DB/private media, verified isolated restore, offsite, safe rollback and smoke | Encrypted archive and guarded restore command #118–#120. Private-media backup/offsite capability still requires implementation/verification. |
+
+**Important:** "Requires final signoff" above is not proof of completion. When a capability has unfinished code scope, it remains a GitHub responsibility, even though #123 captures external acceptance separately.
+
+## Local validation (must remain outside lightweight GitHub Actions)
+
+Run on an isolated development database with a deliberately non-production APP_KEY and test payment credentials:
+
+~~~bash
+php artisan test --filter="CancellationQuotePolicyTest|CancellationSettlementFlowTest|ChannelImportReliabilityTest|AdminVerifiedReceiptTest"
+php artisan test --filter="FailedJobRetryAuthorizationTest|UnknownPayoutOutcomeTest|SearchBenchmarkSmokeTest|PhaseOneBCAuthorizationOwnershipTest"
+php artisan azari:authorization-audit --strict
+php artisan resavar:benchmark-search --runs=50 --json
+~~~
+
+Then run the full project PHP feature suite and the existing local Playwright workflow before asserting no regressions. Run true MySQL parallel contention tests against a disposable target database, not Hostinger production. A passing SQLite suite cannot establish MySQL deadlock or oversell guarantees.
+
+## Operator responsibility
+
+Use [Phase One production/staging acceptance issue #123](https://github.com/wbizmo/azari-residences/issues/123). It tracks **only** environment-dependent exercises: MySQL parallel contention and realistic load, actual provider callbacks/refund settlement, persistent worker crash recovery, channel-provider failures, privileges and IDOR in staging, offsite DB/private-media restoration, deployment rollback and final smoke.
+
+Attach redacted evidence (commands, expected/observed invariants, date, environment, measured RPO/RTO, signoff) against each checkbox. File regressions as new GitHub code issues.
+
+## Release discipline
+
+- GitHub Actions remains syntax, frontend build and lightweight release gates. **No PHPUnit or Playwright in Actions.**
+- Merge reviewed, passing code PRs into main; **do not deploy or change the live database automatically**.
+- Never mark a provider refund successful on local request acceptance alone, or a backup "restored" merely because its checksum passes.
+- Only close #38 when repository functionality is code-complete **and** the production/staging evidence in #123 is complete.

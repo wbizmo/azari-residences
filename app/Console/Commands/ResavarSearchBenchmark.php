@@ -21,6 +21,10 @@ class ResavarSearchBenchmark extends Command
         $in = (string) ($this->option('check-in') ?: today()->addDays(14)->toDateString());
         $out = (string) ($this->option('check-out') ?: today()->addDays(17)->toDateString());
         try {
+            if (! preg_match('/^\d{4}-\d{2}-\d{2}$/', $in)
+                || ! preg_match('/^\d{4}-\d{2}-\d{2}$/', $out)) {
+                throw new \InvalidArgumentException('Benchmark dates must be ISO dates.');
+            }
             $start = \Carbon\CarbonImmutable::parse($in);
             $end = \Carbon\CarbonImmutable::parse($out);
             if ($end->lessThanOrEqualTo($start) || $end->diffInDays($start) > 30) {
@@ -46,11 +50,16 @@ class ResavarSearchBenchmark extends Command
         sort($latencies, SORT_NUMERIC);
         sort($counts, SORT_NUMERIC);
         $p95 = max(0, (int) ceil(count($latencies) * 0.95) - 1);
+        $p99 = max(0, (int) ceil(count($latencies) * 0.99) - 1);
         $metrics = [
             'runs' => $runs,
             'p50_ms' => $latencies[(int) floor(($runs - 1) / 2)],
             'p95_ms' => $latencies[$p95],
+            'p99_ms' => $latencies[$p99],
+            'min_queries' => min($counts),
+            'p95_queries' => $counts[$p95],
             'max_queries' => max($counts),
+            'process_peak_memory_mb' => round(memory_get_peak_usage(true) / 1048576, 2),
             'environment' => app()->environment(),
             'database_driver' => config('database.default'),
             'note' => 'Synthetic/read-only benchmark; not a production SLA or a concurrency benchmark.',

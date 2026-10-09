@@ -227,6 +227,9 @@ class OwnerWithdrawalService
             if ($locked->status !== 'reconciliation_required') {
                 throw new RuntimeException('Only reconciliation-required withdrawals can be confirmed manually.');
             }
+            if (! $locked->processed_by || (int) $locked->processed_by === (int) $processor->getKey()) {
+                throw new RuntimeException('Independent finance approval is required for an ambiguous payout outcome.');
+            }
 
             $providerReference = trim($providerReference);
             if ($providerReference === '') {
@@ -263,6 +266,9 @@ class OwnerWithdrawalService
 
             if ($locked->status !== 'reconciliation_required') {
                 throw new RuntimeException('Only reconciliation-required withdrawals can be released manually.');
+            }
+            if (! $locked->processed_by || (int) $locked->processed_by === (int) $processor->getKey()) {
+                throw new RuntimeException('Independent finance approval is required before releasing reserved funds.');
             }
 
             if (OwnerLedgerEntry::query()->where('withdrawal_request_id', $locked->id)->exists()) {

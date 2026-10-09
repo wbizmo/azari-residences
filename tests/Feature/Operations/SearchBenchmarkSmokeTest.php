@@ -16,7 +16,17 @@ class SearchBenchmarkSmokeTest extends TestCase
         $data = json_decode(Artisan::output(), true, flags: JSON_THROW_ON_ERROR);
         $this->assertSame(2, $data['runs']);
         $this->assertGreaterThanOrEqual(0, $data['p95_ms']);
+        $this->assertGreaterThanOrEqual($data['p95_ms'], $data['p99_ms']);
+        $this->assertGreaterThanOrEqual(0, $data['p95_queries']);
+        $this->assertGreaterThan(0, $data['process_peak_memory_mb']);
         $this->assertGreaterThanOrEqual(0, $data['max_queries']);
+    }
+
+    public function test_rejects_natural_language_dates_instead_of_iso_dates(): void
+    {
+        $this->assertSame(1, Artisan::call('resavar:benchmark-search', [
+            '--runs' => 1, '--check-in' => 'tomorrow', '--check-out' => 'next Friday',
+        ]));
     }
 
     public function test_rejects_unbounded_benchmark_runs(): void
