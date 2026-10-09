@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\BookingModificationRequest;
+use App\Models\BookingCancellationOverride;
+use App\Services\Bookings\BookingCancellationOverrideService;
 use App\Services\Bookings\BookingModificationService;
 use App\Models\AuditLog;
 use App\Models\BookingOperationalNote;
@@ -43,6 +45,8 @@ class BookingManagementController extends Controller
             'accommodationType',
             'ratePlan',
             'refunds',
+            'cancellationOverrides.requester',
+            'cancellationOverrides.reviewer',
             'modificationRequests.user',
             'operationalNotes.author',
         ]);
@@ -161,6 +165,34 @@ class BookingManagementController extends Controller
         abort_unless(auth()->user()?->hasPermission('bookings.view'), 403);
 
         return response()->json(app(\App\Services\Bookings\BookingCancellationQuoteService::class)->quote($booking));
+    }
+
+    public function requestCancellationOverride(
+        Request $request,
+        Booking $booking,
+        BookingCancellationOverrideService $service
+    ): \Illuminate\Http\RedirectResponse {
+        $data = $request->validate([
+            'amount' => ['required', 'numeric', 'gt:0', 'decimal:0,2'],
+            'reason' => ['required', 'string', 'min:10', 'max:2000'],
+        ]);
+        $service->request($booking, $request->user(), (float) $data['amount'], $data['reason']);
+
+        return back()->with('success', 'Refund exception submitted for independent review. No funds have been sent.');
+    }
+
+    public function reviewCancellationOverride(
+        Request $request,
+        Booking $booking,
+        BookingCancellationOverride $override,
+        BookingCancellationOverrideService $service
+    ): \Illuminate\Http\RedirectResponse {
+        $data = $request->validate(['decision' => ['required', 'in:approve,decline']]);
+        $result = $service->review($booking, $override, $request->user(), $data['decision']);
+
+        return back()->with('success', $result->status === 'applied'
+            ? 'Exception approved and refund requests reserved. Provider settlement remains pending.'
+            : 'Refund exception declined without moving funds.');
     }
 
     public function receipt(Booking $booking): Response
