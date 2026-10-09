@@ -34,6 +34,18 @@ class CompleteEncryptedBackupTest extends TestCase
         $this->assertSame(0, Artisan::call('azari:backup-restore-check', ['backupRun' => $run->getKey()]));
     }
 
+    public function test_backup_without_structural_check_is_not_marked_verified(): void
+    {
+        Storage::fake('private');
+        $this->assertSame(0, Artisan::call('azari:backup'));
+        $run = BackupRun::query()->latest('id')->firstOrFail();
+        $this->assertSame('completed', $run->status);
+        $this->assertNull($run->verified_at);
+        $this->assertTrue(Storage::disk('private')->exists($run->path));
+        $this->assertSame(0, Artisan::call('azari:backup-restore-check', ['backupRun' => $run->getKey()]));
+        $this->assertNull($run->fresh()->verified_at);
+    }
+
     public function test_modified_archive_fails_integrity_validation(): void
     {
         Storage::fake('private');
