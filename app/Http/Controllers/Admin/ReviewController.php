@@ -15,7 +15,8 @@ class ReviewController extends Controller
     public function index(Request $request): View
     {
         $query = Review::query()
-            ->with(['user', 'booking.property', 'property'])
+            ->with(['user', 'booking.property', 'property', 'reports' => fn ($query) => $query->latest()])
+            ->withCount(['helpfulVotes', 'reports', 'reports as pending_reports_count' => fn ($query) => $query->where('status', 'pending')])
             ->latest();
 
         if ($request->filled('status')) {
@@ -65,6 +66,13 @@ class ReviewController extends Controller
             'moderated_at' => now(),
             'hidden_at' => $willBeHidden ? ($review->hidden_at ?: now()) : null,
             'restored_at' => $wasHidden && ! $willBeHidden ? now() : $review->restored_at,
+        ]);
+
+        $review->reports()->where('status', 'pending')->update([
+            'status' => $willBeHidden ? 'actioned' : 'reviewed',
+            'reviewed_by' => $request->user()->id,
+            'reviewed_at' => now(),
+            'updated_at' => now(),
         ]);
 
         AuditLog::record(
