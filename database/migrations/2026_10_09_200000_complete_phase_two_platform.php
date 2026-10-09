@@ -90,6 +90,18 @@ return new class extends Migration
             $table->unique(['user_id', 'endpoint']);
         });
 
+        Schema::table('inventory_change_logs', function (Blueprint $table): void {
+            if (! Schema::hasColumn('inventory_change_logs', 'before_snapshot')) {
+                $table->json('before_snapshot')->nullable();
+            }
+            if (! Schema::hasColumn('inventory_change_logs', 'reverted_at')) {
+                $table->timestamp('reverted_at')->nullable();
+            }
+            if (! Schema::hasColumn('inventory_change_logs', 'reverted_by')) {
+                $table->foreignId('reverted_by')->nullable()->constrained('users')->nullOnDelete();
+            }
+        });
+
         Schema::table('support_tickets', function (Blueprint $table): void {
             if (! Schema::hasColumn('support_tickets', 'severity')) {
                 $table->string('severity', 30)->default('general')->after('status');
@@ -134,6 +146,11 @@ return new class extends Migration
         Schema::table('reviews', function (Blueprint $table): void {
             foreach (['edited_at', 'owner_reply', 'owner_replied_at'] as $column) {
                 if (Schema::hasColumn('reviews', $column)) $table->dropColumn($column);
+            }
+        });
+        Schema::table('inventory_change_logs', function (Blueprint $table): void {
+            foreach (['before_snapshot', 'reverted_at', 'reverted_by'] as $column) {
+                if (Schema::hasColumn('inventory_change_logs', $column)) $table->dropColumn($column);
             }
         });
         Schema::table('support_tickets', function (Blueprint $table): void {
