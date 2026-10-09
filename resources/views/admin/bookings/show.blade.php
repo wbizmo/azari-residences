@@ -7,10 +7,15 @@
         <h1>{{ $booking->reference }}</h1>
         <p>{{ $booking->property?->name }} · {{ $booking->accommodationType?->name ?? $booking->accommodation_type_name_snapshot }}</p>
     </div>
-    <div class="az-actions">
-        <a class="az-button" href="{{ route('azari.admin.bookings.receipt', $booking) }}" target="_blank">
-            <span class="material-symbols-outlined">description</span> Print invoice
+    <div class="az-actions" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+        <a class="az-button" href="{{ route('azari.admin.bookings.receipt', $booking) }}" target="_blank" rel="noopener noreferrer">
+            <span class="material-symbols-outlined" aria-hidden="true">print</span> Print invoice
         </a>
+        <a class="az-button" href="{{ route('azari.admin.bookings.documents', [$booking, 'confirmation']) }}" target="_blank" rel="noopener noreferrer">Confirmation PDF</a>
+        <a class="az-button" href="{{ route('azari.admin.bookings.documents', [$booking, 'invoice']) }}" target="_blank" rel="noopener noreferrer">Invoice PDF</a>
+        @if($booking->receiptAvailable())
+            <a class="az-button" href="{{ route('azari.admin.bookings.documents', [$booking, 'receipt']) }}" target="_blank" rel="noopener noreferrer">Receipt PDF</a>
+        @endif
         <a class="az-button" href="{{ route('azari.admin.bookings.index') }}">Back to bookings</a>
     </div>
 </section>
