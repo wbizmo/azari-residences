@@ -4,7 +4,6 @@ namespace App\Services\Payments;
 
 use App\Models\Payment;
 use App\Models\Refund;
-use Illuminate\Support\Facades\DB;
 
 /**
  * External provider statement reconciliation: independent evidence in,
@@ -132,8 +131,12 @@ class ProviderStatementReconciliationService
 
     private function minor(string $amount): int
     {
-        $normalized = number_format((float) $amount, 2, '.', '');
-        [$whole, $fraction] = explode('.', $normalized, 2);
+        // Decimal strings are compared in integer minor units, without
+        // float rounding or FX conversions in financial reconciliation.
+        if (! preg_match('/^(?:0|[1-9][0-9]{0,11})\.[0-9]{2}$/', $amount)) {
+            throw new \InvalidArgumentException('Unparseable normalized settlement amount.');
+        }
+        [$whole, $fraction] = explode('.', $amount, 2);
         return ((int) $whole * 100) + (int) $fraction;
     }
 }
