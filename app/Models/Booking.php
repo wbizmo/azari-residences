@@ -64,6 +64,7 @@ class Booking extends Model
     public function supportTickets(): HasMany { return $this->hasMany(SupportTicket::class)->latest(); }
     public function review(): HasOne { return $this->hasOne(Review::class); }
     public function refunds(): HasMany { return $this->hasMany(Refund::class)->latest(); }
+    public function cancellationOverrides(): HasMany { return $this->hasMany(BookingCancellationOverride::class)->latest(); }
     public function modificationRequests(): HasMany { return $this->hasMany(BookingModificationRequest::class)->latest(); }
     public function operationalNotes(): HasMany { return $this->hasMany(BookingOperationalNote::class)->latest(); }
     public function analyticsEvents(): HasMany { return $this->hasMany(AnalyticsEvent::class); }
