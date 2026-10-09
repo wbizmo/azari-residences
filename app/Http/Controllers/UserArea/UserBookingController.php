@@ -121,9 +121,11 @@ class UserBookingController extends Controller
 
         abort_unless($booking, 403);
 
-        $payment = $booking->payments
-            ->sortByDesc(fn ($record) => $record->paid_at ?: $record->created_at)
-            ->first();
+        // A failed, pending or abandoned checkout is not receipt evidence.
+        // Mirror the admin and PDF receipt rules, including legacy records.
+        abort_unless($booking->receiptAvailable(), 404);
+        $payment = $booking->documentPayment();
+        abort_unless($payment !== null, 404);
 
         return response()->view('bookings.receipt', compact('booking', 'payment'));
     }
