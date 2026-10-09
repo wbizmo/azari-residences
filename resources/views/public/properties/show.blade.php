@@ -36,13 +36,8 @@
         'checkoutTime' => $property->check_out_time,
         'image' => $images->map(fn ($image) => \App\Support\ResponsiveImage::originalUrl($image))->values()->all(),
         'amenityFeature' => $property->amenities->map(fn ($amenity) => ['@type'=>'LocationFeatureSpecification','name'=>$amenity->name,'value'=>true])->values()->all(),
-        'offers' => [
-            '@type' => 'Offer',
-            'priceCurrency' => $property->currency,
-            'price' => (float) $property->nightly_rate,
-            'availability' => 'https://schema.org/InStock',
-            'url' => route('properties.show', $property),
-        ],
+        // Only issue price/availability offers after canonical stay dates and
+        // occupancy are quoted. A base nightly rate is not a bookable offer.
     ];
 
     if ($property->latitude !== null && $property->longitude !== null) {
@@ -171,6 +166,7 @@
                     @if($property->amenities->isNotEmpty())
                         <section class="reserva-property-section">
                             <h2>Amenities</h2>
+                            <p class="reserva-property-fact-disclosure">These amenities are listed by the property. Details that are not independently verified should be confirmed before booking.</p>
                             <div class="reserva-amenity-list">
                                 @foreach($property->amenities as $amenity)
                                     <span>
