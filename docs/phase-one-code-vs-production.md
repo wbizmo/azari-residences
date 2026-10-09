@@ -56,3 +56,13 @@ Local regression: \`php artisan test --filter='PhaseOnePrivilegedStepUpTest'\`. 
 - Merge reviewed, passing code PRs into main; **do not deploy or change the live database automatically**.
 - Never mark a provider refund successful on local request acceptance alone, or a backup "restored" merely because its checksum passes.
 - Only close #38 when repository functionality is code-complete **and** the production/staging evidence in #123 is complete.
+
+
+## Local operational fault-injection and synthetic capacity fixtures
+
+Both scripts require `APP_ENV=testing` and a separately named disposable database containing `test`, `sandbox` or `isolat` in the resolved DB name. They refuse `:memory:` or a production/default database. Do not run them against Resavar production.
+
+1. **Queue crash/retry:** configure database queue and `DB_QUEUE_RETRY_AFTER=4`. Run `php tests/local/phase1-queue-worker-crash.php` (optionally `RESAVAR_TEST_PHP=/path/to/php`). This dispatches a **synthetic** idempotent database effect into `system_heartbeats`, starts a subprocess worker, kills only that worker after the DB commit but before the queue ACK, then starts a second worker after visibility expiration. The invariant is exactly one unique effect and zero pending copies of that test job. This does not call live payment providers or prove external exactly-once delivery.
+2. **Synthetic capacity data:** with a freshly migrated disposable DB, set `RESAVAR_ALLOW_SYNTHETIC_SEED=I_ACCEPT_DISPOSABLE_DB`, `RESAVAR_SYNTH_LISTINGS` (1–100000), `RESAVAR_SYNTH_BOOKINGS` (0–1000000) and `RESAVAR_SYNTH_DAYS` (7, 30 or 365). Run `php tests/local/phase1-synthetic-capacity.php`. It inserts batch-capped nightly inventory and historical completed bookings, with no remote provider calls. The 100k × 365 case can exceed storage resources; operators must assess disk/DB capacity first. Then benchmark `php artisan resavar:benchmark-inventory TYPE_ID --runs=20 --json` and attach actual explain plans and measured p50/p95/p99 to #123.
+
+Neither script is invoked by GitHub Actions. They are for local or isolated development testing only; external production/staging, provider settlement and offsite restore evidence remains with the operator under #123.
