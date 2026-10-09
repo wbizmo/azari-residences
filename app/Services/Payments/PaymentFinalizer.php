@@ -51,34 +51,40 @@ class PaymentFinalizer
                 AuditLog::record('payment.verification_conflict_after_success', $payment, [], [], ['result' => $result, 'source' => $source]);
                 return $payment->refresh();
             }
-            $payment->update([
-                'status' => 'invalid',
-                'provider_reference' => $verification['provider_reference'] ?? $payment->provider_reference,
-                'provider_response_summary' => $verification['safe_response'] ?? null,
-            ]);
+            Payment::query()->whereKey($payment->getKey())
+                ->whereNotIn('status', [Payment::SUCCESSFUL, 'successful_excess'])
+                ->update([
+                    'status' => 'invalid',
+                    'provider_reference' => $verification['provider_reference'] ?? $payment->provider_reference,
+                    'provider_response_summary' => $verification['safe_response'] ?? null,
+                ]);
             AuditLog::record('payment.verification_rejected', $payment, [], [], ['result' => $result, 'source' => $source]);
             return $payment->refresh();
         }
 
         if ($result === 'pending') {
             if (! $payment->isSuccessful() && $payment->status !== 'successful_excess') {
-                $payment->update([
-                    'status' => 'pending',
-                    'provider_reference' => $verification['provider_reference'] ?? $payment->provider_reference,
-                    'provider_response_summary' => $verification['safe_response'] ?? null,
-                ]);
+                Payment::query()->whereKey($payment->getKey())
+                    ->whereNotIn('status', [Payment::SUCCESSFUL, 'successful_excess'])
+                    ->update([
+                        'status' => 'pending',
+                        'provider_reference' => $verification['provider_reference'] ?? $payment->provider_reference,
+                        'provider_response_summary' => $verification['safe_response'] ?? null,
+                    ]);
             }
             return $payment->refresh();
         }
 
         if ($result === 'failed') {
             if (! $payment->isSuccessful() && $payment->status !== 'successful_excess') {
-                $payment->update([
-                    'status' => 'failed',
-                    'failed_at' => now(),
-                    'provider_reference' => $verification['provider_reference'] ?? $payment->provider_reference,
-                    'provider_response_summary' => $verification['safe_response'] ?? null,
-                ]);
+                Payment::query()->whereKey($payment->getKey())
+                    ->whereNotIn('status', [Payment::SUCCESSFUL, 'successful_excess'])
+                    ->update([
+                        'status' => 'failed',
+                        'failed_at' => now(),
+                        'provider_reference' => $verification['provider_reference'] ?? $payment->provider_reference,
+                        'provider_response_summary' => $verification['safe_response'] ?? null,
+                    ]);
             }
             AuditLog::record('payment.failed', $payment, [], [], ['source' => $source]);
             return $payment->refresh();
