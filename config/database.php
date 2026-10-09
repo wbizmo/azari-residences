@@ -84,6 +84,25 @@ return [
             ]) : [],
         ],
 
+
+        // Intentionally opt-in; never inherits DB_DATABASE, DB_URL or DB_USERNAME.
+        // Populate RESAVAR_RESTORE_* ONLY for a disposable, isolated recovery DB.
+        'resavar_restore' => [
+            'driver' => 'mysql',
+            'host' => env('RESAVAR_RESTORE_DB_HOST'),
+            'port' => env('RESAVAR_RESTORE_DB_PORT', '3306'),
+            'database' => env('RESAVAR_RESTORE_DB_DATABASE'),
+            'username' => env('RESAVAR_RESTORE_DB_USERNAME'),
+            'password' => env('RESAVAR_RESTORE_DB_PASSWORD'),
+            'unix_socket' => env('RESAVAR_RESTORE_DB_SOCKET', ''),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+        ],
+
         'pgsql' => [
             'driver' => 'pgsql',
             'url' => env('DB_URL'),
