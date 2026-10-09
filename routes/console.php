@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Schedule;
 Schedule::command('azari:sync-bookings')->hourly()->withoutOverlapping();
 Schedule::command('azari:reconcile-payments --limit=100')->everyTenMinutes()->withoutOverlapping();
 Schedule::command('resavar:reconcile-provider-refunds --limit=50')->everyTenMinutes()->name('provider-refunds')->withoutOverlapping();
+Schedule::command('resavar:reconcile-cancellation-refunds --limit=100')->everyTenMinutes()->name('cancellation-refund-recovery')->withoutOverlapping();
 Schedule::command('resavar:recover-amendment-payments --limit=50')->everyFiveMinutes()->name('expired-amendments')->withoutOverlapping();
 Schedule::command('azari:send-transactional-reminders')->hourly()->withoutOverlapping();
 Schedule::command('azari:send-unpaid-booking-reminders')->everyFiveMinutes()->withoutOverlapping();

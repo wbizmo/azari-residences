@@ -140,6 +140,17 @@ class BookingManagementController extends Controller
         return back()->with('success', 'A 15-minute date-change quotation was sent to the guest for approval.');
     }
 
+    public function markNoShow(
+        Request $request,
+        Booking $booking,
+        \App\Services\Bookings\BookingCancellationSettlementService $settlement
+    ): \Illuminate\Http\RedirectResponse {
+        $data = $request->validate(['reason' => ['required', 'string', 'min:4', 'max:1000']]);
+        $settlement->markNoShow($booking, $request->user(), $data['reason']);
+
+        return back()->with('success', 'No-show recorded. Applicable policy refunds have been requested for reconciliation.');
+    }
+
     public function cancellationQuote(Booking $booking): \Illuminate\Http\JsonResponse
     {
         abort_unless(auth()->user()?->hasPermission('bookings.view'), 403);

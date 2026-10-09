@@ -31,6 +31,9 @@ class AzariBookingCancellationController extends Controller
             $data['external_refund_reference'] ?? null
         );
 
+        app(\App\Services\Bookings\BookingCancellationSettlementService::class)
+            ->reserveEligibleRefunds($booking->fresh());
+
         return back()->with('success',
             'Booking cancelled and availability released. Any due refund is a separate tracked financial action.');
     }

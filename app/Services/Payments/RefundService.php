@@ -63,7 +63,7 @@ class RefundService
 
             $alreadyCommitted = (float) Refund::query()
                 ->where('payment_id', $lockedPayment->getKey())
-                ->whereIn('status', ['requested', 'processing', 'successful'])
+                ->whereIn('status', ['requested', 'processing', 'reconciliation_required', 'successful'])
                 ->sum('amount');
 
             $remaining = max(0, round((float) $lockedPayment->amount - $alreadyCommitted, 2));
