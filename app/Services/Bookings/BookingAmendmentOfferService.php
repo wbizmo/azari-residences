@@ -37,7 +37,7 @@ class BookingAmendmentOfferService
         return DB::transaction(function () use ($booking, $request, $staff): BookingModificationRequest {
             [$locked, $change, $type] = $this->lock($booking, $request);
 
-            if ($change->status !== 'pending' || ! in_array($change->type, ['date_change', 'add_extras'], true)) {
+            if ($change->status !== 'pending' || ! in_array($change->type, ['date_change', 'add_extras', 'room_change'], true)) {
                 throw ValidationException::withMessages(['change' => 'Only pending date or extras changes can be offered a quote.']);
             }
             $this->assertEligible($locked);
@@ -51,8 +51,30 @@ class BookingAmendmentOfferService
             $newEnd = $change->type === 'date_change'
                 ? $this->parseDate((string) data_get($change->requested_changes, 'check_out'))
                 : $this->parseDate($locked->check_out->toDateString());
-            $ratePlan = $locked->rate_plan_id ? RatePlan::query()
-                ->whereKey($locked->rate_plan_id)->where('accommodation_type_id', $type->getKey())->firstOrFail() : null;
+            if ($change->type === 'room_change') {
+                $targetId = (int) data_get($change->requested_changes, 'accommodation_type_id', 0);
+                if ($targetId < 1 || $targetId === (int) $type->getKey()) {
+                    throw ValidationException::withMessages(['accommodation_type_id' => 'Choose a different room type.']);
+                }
+                $type = AccommodationType::query()
+                    ->whereKey($targetId)->where('property_id', $locked->property_id)
+                    ->where('is_active', true)->where('is_published', true)
+                    ->when(DB::connection()->getDriverName() !== 'sqlite',
+                        fn (Builder $q) => $q->lockForUpdate())->first();
+                if (! $type) {
+                    throw ValidationException::withMessages(['accommodation_type_id' => 'This room type is not available at the property.']);
+                }
+                $selection = $this->pricing->quote($locked->property, $newStart, $newEnd,
+                    [], $type, null, (int) $locked->rooms);
+                $ratePlan = ($selection['rate_plan_id'] ?? null)
+                    ? RatePlan::query()->whereKey($selection['rate_plan_id'])
+                        ->where('accommodation_type_id', $type->getKey())
+                        ->where('is_active', true)->where('is_public', true)->firstOrFail()
+                    : null;
+            } else {
+                $ratePlan = $locked->rate_plan_id ? RatePlan::query()
+                    ->whereKey($locked->rate_plan_id)->where('accommodation_type_id', $type->getKey())->firstOrFail() : null;
+            }
 
             $this->availability->assertRules($locked->property, $newStart, $newEnd,
                 (int) $locked->adults, (int) $locked->children, (int) $locked->rooms, $type, $ratePlan);
@@ -106,6 +128,9 @@ class BookingAmendmentOfferService
                 'booking_updated_at' => $locked->updated_at?->toIso8601String(),
                 'net_paid' => $locked->netPaidTotal(),
                 'change_type' => $change->type,
+                'old_accommodation_type_id' => (int) $locked->accommodation_type_id,
+                'new_accommodation_type_id' => (int) $type->getKey(),
+                'new_rate_plan_id' => $quote['rate_plan_id'] ?? null,
                 'selected_add_ons' => $selectedAddOns,
                 'quote' => $quote,
             ];
@@ -144,7 +169,7 @@ class BookingAmendmentOfferService
                 throw ValidationException::withMessages(['change' => 'This offer has expired or was already used. Request a fresh quotation.']);
             }
             $this->assertEligible($locked);
-            if (! in_array($change->type, ['date_change', 'add_extras'], true)
+            if (! in_array($change->type, ['date_change', 'add_extras', 'room_change'], true)
                 || ! $this->modifications->policyAllows($locked, $change->type)) {
                 throw ValidationException::withMessages(['change' => 'This booking is no longer eligible for changes.']);
             }
@@ -154,14 +179,41 @@ class BookingAmendmentOfferService
                 || round((float) $locked->total, 2) !== round((float) ($snapshot['old_total'] ?? -1), 2)
                 || round($locked->netPaidTotal(), 2) !== round((float) ($snapshot['net_paid'] ?? -1), 2)
                 || $locked->check_in->toDateString() !== ($snapshot['old_check_in'] ?? null)
-                || $locked->check_out->toDateString() !== ($snapshot['old_check_out'] ?? null)) {
+                || $locked->check_out->toDateString() !== ($snapshot['old_check_out'] ?? null)
+                || (int) $locked->accommodation_type_id !== (int) ($snapshot['old_accommodation_type_id'] ?? $locked->accommodation_type_id)) {
                 throw ValidationException::withMessages(['change' => 'The original booking has changed. Request a fresh quotation.']);
             }
 
             $start = $this->parseDate((string) ($snapshot['new_check_in'] ?? ''));
             $end = $this->parseDate((string) ($snapshot['new_check_out'] ?? ''));
-            $ratePlan = $locked->rate_plan_id ? RatePlan::query()
-                ->whereKey($locked->rate_plan_id)->where('accommodation_type_id', $type->getKey())->firstOrFail() : null;
+            if ($change->type === 'room_change') {
+                $id = (int) ($snapshot['new_accommodation_type_id'] ?? 0);
+                if ($id === (int) $locked->accommodation_type_id
+                    || $id !== (int) data_get($change->requested_changes, 'accommodation_type_id', 0)) {
+                    throw ValidationException::withMessages(['change' => 'Room selection changed since quotation.']);
+                }
+                $type = AccommodationType::query()->whereKey($id)
+                    ->where('property_id', $locked->property_id)
+                    ->where('is_active', true)->where('is_published', true)
+                    ->when(DB::connection()->getDriverName() !== 'sqlite',
+                        fn (Builder $q) => $q->lockForUpdate())->first();
+                if (! $type) {
+                    throw ValidationException::withMessages(['change' => 'The selected room type is no longer offered.']);
+                }
+                $selection = $this->pricing->quote($locked->property, $start, $end,
+                    [], $type, null, (int) $locked->rooms);
+                if ((int) ($selection['rate_plan_id'] ?? 0) !== (int) ($snapshot['new_rate_plan_id'] ?? 0)) {
+                    throw ValidationException::withMessages(['change' => 'The room rate plan changed. Request a new quotation.']);
+                }
+                $ratePlan = ($selection['rate_plan_id'] ?? null)
+                    ? RatePlan::query()->whereKey($selection['rate_plan_id'])
+                        ->where('accommodation_type_id', $type->getKey())
+                        ->where('is_active', true)->where('is_public', true)->firstOrFail()
+                    : null;
+            } else {
+                $ratePlan = $locked->rate_plan_id ? RatePlan::query()
+                    ->whereKey($locked->rate_plan_id)->where('accommodation_type_id', $type->getKey())->firstOrFail() : null;
+            }
             $this->availability->assertRules($locked->property, $start, $end,
                 (int) $locked->adults, (int) $locked->children, (int) $locked->rooms, $type, $ratePlan);
             $this->availability->lockInventoryRange($type, $start, $end);
@@ -193,7 +245,11 @@ class BookingAmendmentOfferService
             $quote = $this->pricing->quote($locked->property, $start, $end,
                 $selectedAddOns, $type, $ratePlan, (int) $locked->rooms);
             if (round((float) $quote['total'], 2) !== round((float) $snapshot['new_total'], 2)
-                || strtoupper((string) $quote['currency']) !== ($snapshot['currency'] ?? '')) {
+                || strtoupper((string) $quote['currency']) !== ($snapshot['currency'] ?? '')
+                || (int) ($quote['accommodation_type_id'] ?? 0) !== (int) ($snapshot['new_accommodation_type_id'] ?? $locked->accommodation_type_id)
+                || (int) ($quote['rate_plan_id'] ?? 0) !== (int) ($snapshot['new_rate_plan_id'] ?? $locked->rate_plan_id)
+                || ($change->type === 'room_change'
+                    && ($quote['policy'] ?? null) !== data_get($snapshot, 'quote.policy'))) {
                 throw ValidationException::withMessages(['change' => 'Rates changed since the offer. Request a new quotation.']);
             }
             $difference = round((float) $quote['total'] - (float) $locked->total, 2);
@@ -251,7 +307,14 @@ class BookingAmendmentOfferService
                 'subtotal' => $quote['subtotal'], 'fee_total' => $quote['fee_total'],
                 'add_on_total' => $quote['add_on_total'], 'discount_total' => $quote['discount_total'],
                 'tax_rate' => $quote['tax_rate'], 'tax_total' => $quote['tax_total'],
-                'total' => $quote['total'], 'pricing_snapshot' => $quote, 'modified_at' => now(),
+                'total' => $quote['total'], 'pricing_snapshot' => $quote,
+                'accommodation_type_id' => $type->getKey(),
+                'accommodation_type_name_snapshot' => $quote['accommodation_type_name'] ?? $type->name,
+                'rate_plan_id' => $quote['rate_plan_id'] ?? null,
+                'rate_plan_name_snapshot' => $quote['rate_plan_name'] ?? null,
+                'policy_snapshot' => $change->type === 'room_change'
+                    ? ($quote['policy'] ?? []) : ($locked->policy_snapshot ?? []),
+                'modified_at' => now(),
             ])->save();
 
             // Pivot line totals must follow the new quote, particularly for
@@ -277,7 +340,8 @@ class BookingAmendmentOfferService
             $change->forceFill(['status' => 'approved', 'accepted_at' => now()])->save();
             AuditLog::record('booking.modification_applied', $change,
                 ['old_dates' => [$snapshot['old_check_in'], $snapshot['old_check_out']]],
-                ['new_dates' => [$start->toDateString(), $end->toDateString()]],
+                ['new_dates' => [$start->toDateString(), $end->toDateString()],
+                 'new_accommodation_type_id' => $type->getKey()],
                 ['old_total' => $snapshot['old_total'], 'new_total' => $quote['total'],
                  'refund_requested' => $refundDue, 'currency' => $quote['currency']],
                 $guest->getKey());
