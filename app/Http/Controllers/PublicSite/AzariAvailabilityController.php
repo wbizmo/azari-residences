@@ -218,6 +218,12 @@ class AzariAvailabilityController extends Controller
         AzariAvailabilityEngine $availability,
         AzariPricingEngine $pricing
     ) {
+        abort_unless(
+            $property->is_published
+            && ! in_array($property->status, ['inactive', 'unavailable', 'maintenance', 'archived'], true),
+            404
+        );
+
         $data = $request->validate([
             'check_in' => ['required', 'date', 'after_or_equal:today'],
             'check_out' => ['required', 'date', 'after:check_in'],
