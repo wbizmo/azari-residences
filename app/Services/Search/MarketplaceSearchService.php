@@ -50,8 +50,10 @@ class MarketplaceSearchService
                         ->orderBy('sort_order')
                         ->orderBy('id'),
             ])
-            ->withCount('reviews as verified_review_count')
-            ->withAvg('reviews as verified_review_score', 'rating')
+            ->withCount(['reviews as verified_review_count' => fn (Builder $reviews) => $reviews
+                ->where('verified_stay', true)->where('status', 'approved')])
+            ->withAvg(['reviews as verified_review_score' => fn (Builder $reviews) => $reviews
+                ->where('verified_stay', true)->where('status', 'approved')], 'rating')
             ->withCount('favourites as favourites_count')
             ->when(auth()->check(), fn (Builder $q) => $q->withExists([
                 'favourites as is_favourite' => fn (Builder $fav) => $fav->where('user_id', auth()->id()),
