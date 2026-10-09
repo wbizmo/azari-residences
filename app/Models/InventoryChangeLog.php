@@ -16,6 +16,7 @@ class InventoryChangeLog extends Model
             'to_date' => 'date',
             'changes' => 'array',
             'before_snapshot' => 'array',
+            'after_snapshot' => 'array',
             'reverted_at' => 'datetime',
         ];
     }
