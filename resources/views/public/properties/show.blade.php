@@ -166,6 +166,19 @@
                     @if($property->amenities->isNotEmpty())
                         <section class="reserva-property-section">
                             <h2>Amenities</h2>
+                            @if($property->publicVerifiedClaims->isNotEmpty())
+                                <div class="reserva-verified-property-claims" aria-label="Staff-verified property facts">
+                                    <h3>Independently verified details</h3>
+                                    <p>These specific property claims have been checked by Resavar staff and are currently within their verification period.</p>
+                                    <ul>
+                                        @foreach($property->publicVerifiedClaims as $verifiedClaim)
+                                            <li>{{ \App\Models\PropertyVerifiedClaim::TYPES[$verifiedClaim->claim_type] ?? 'Verified property detail' }}
+                                                <small>Checked {{ $verifiedClaim->verified_at->format('M Y') }}</small>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
                             <p class="reserva-property-fact-disclosure">These amenities are listed by the property. Details that are not independently verified should be confirmed before booking.</p>
                             <div class="reserva-amenity-list">
                                 @foreach($property->amenities as $amenity)
