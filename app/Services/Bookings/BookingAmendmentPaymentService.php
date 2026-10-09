@@ -116,6 +116,10 @@ class BookingAmendmentPaymentService
             if ($url === '' || ! filter_var($url, FILTER_VALIDATE_URL)) {
                 throw new \UnexpectedValueException('Provider returned an invalid checkout address.');
             }
+            // Grant a bounded checkout window while still requiring a fresh
+            // inventory and price check at eventual guest acceptance.
+            BookingModificationRequest::query()->where('payment_id', $payment->getKey())
+                ->where('status', 'quoted')->update(['quote_expires_at' => now()->addMinutes(30)]);
             $payment->forceFill([
                 'checkout_url' => $url, 'status' => 'pending',
                 'provider_reference' => $result['provider_reference'] ?? null,
