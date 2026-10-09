@@ -29,7 +29,7 @@
                             <p>{{ $booking->property?->name ?? 'Resavar Stay' }}</p>
                             <p>
                                 {{ $booking->status === 'cancelled' ? 'Cancelled booking' : 'Booking record available' }}
-                                · Receipt: {{ $payment?->receipt_number ?: 'Not yet available' }}
+                                · Receipt: {{ $receiptAvailable ? ($payment?->receipt_number ?: 'Available to download') : 'Not yet available' }}
                             </p>
                         </div>
                         <div class="az-user-actions" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
