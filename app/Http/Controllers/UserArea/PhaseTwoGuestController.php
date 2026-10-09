@@ -78,7 +78,7 @@ class PhaseTwoGuestController extends Controller
         $attachmentPath = $file?->store('booking-messages', 'private');
 
         try {
-            $created = DB::transaction(function () use ($conversation, $request, $data, $file, $attachmentPath): bool {
+            $created = DB::transaction(function () use ($conversation, $request, $data, $file, $attachmentPath, $safeAttachmentName): bool {
                 $locked = BookingConversation::query()->whereKey($conversation->id)->lockForUpdate()->firstOrFail();
                 abort_if($locked->closed_at, 422, 'This booking conversation is closed.');
 
