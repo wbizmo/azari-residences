@@ -241,7 +241,7 @@
 }
 
 .reserva-map-shell::before {
-    content: "Relative property locations";
+    content: "Interactive property map";
     position: absolute;
     top: 12px;
     left: 12px;
@@ -386,4 +386,23 @@
     .reserva-mobile-filter-trigger {
         display: inline-flex;
     }
+}
+
+
+/* Phase Two: real geographic map, with an accessible list available at all times. */
+.reserva-map-shell--geographic { background: #dbe6ed; isolation: isolate; }
+.reserva-map-canvas { position: absolute; inset: 0; touch-action: none; cursor: grab; }
+.reserva-map-canvas:active { cursor: grabbing; }
+.reserva-map-tiles, .reserva-map-markers { position: absolute; inset: 0; }
+.reserva-map-tiles { overflow: hidden; pointer-events: none; }
+.reserva-map-tiles img { position: absolute; display: block; width: 256px; height: 256px; object-fit: cover; }
+.reserva-map-pin { z-index: 2; }
+.reserva-map-controls { position: absolute; z-index: 4; display: flex; gap: 6px; top: 12px; right: 12px; max-width: calc(100% - 24px); }
+.reserva-map-controls button { min-height: 44px; padding: 0 12px; background: #fff; border: 1px solid #052058; border-radius: 8px; color: #052058; font: inherit; font-weight: 750; cursor: pointer; }
+.reserva-map-controls button:focus-visible { outline: 3px solid #195ee6; outline-offset: 3px; }
+.reserva-map-attribution { position: absolute; z-index: 4; right: 6px; bottom: 6px; border-radius: 4px; padding: 3px 6px; background: rgba(255,255,255,.94); color: #052058; font-size: 11px; }
+.reserva-map-shell--geographic::before { display: none; }
+@media(max-width: 500px) {
+  .reserva-map-shell { min-height: 430px; }
+  .reserva-map-controls { flex-wrap: wrap; justify-content: end; }
 }

@@ -351,9 +351,9 @@
                             class="reserva-map-shell"
                             data-reserva-results-map
                             role="region"
-                            aria-label="Relative location map for the current result page"
+                            aria-label="Interactive geographic map of the current result page"
                         ></div>
-                        <p class="az-user-panel-subtitle">Pins show relative coordinates for properties on this result page. Open a property for full directions and map context.</p>
+                        <p class="az-user-panel-subtitle">Pins show known property coordinates for this result page. Pan to explore, zoom with the controls and select Search this area to update results. Map tiles are provided by OpenStreetMap; the list remains available without the map.</p>
                     </section>
                 </div>
             </div>
