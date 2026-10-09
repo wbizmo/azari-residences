@@ -21,6 +21,7 @@ class VerifiedReviewUniquenessTest extends TestCase
             'property_id' => $booking->property_id,
             'user_id' => $guest->id,
             'rating' => 4,
+            'body' => 'An excellent and reliable stay with attentive staff.',
             'status' => 'pending',
             'verified_stay' => true,
         ]);
@@ -32,6 +33,7 @@ class VerifiedReviewUniquenessTest extends TestCase
             'property_id' => $booking->property_id,
             'user_id' => $guest->id,
             'rating' => 5,
+            'body' => 'A second duplicate review that must be rejected.',
             'status' => 'pending',
             'verified_stay' => true,
         ]);
