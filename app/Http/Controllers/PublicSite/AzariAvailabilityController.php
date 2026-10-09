@@ -53,7 +53,7 @@ class AzariAvailabilityController extends Controller
         $alternatives = collect();
         $flexDays = (int) ($filters['flex_days'] ?? 0);
         if ($flexDays > 0) {
-            $offsets = collect([-$flexDays, -1, 1, $flexDays])->unique()->filter(fn ($offset) => $offset !== 0);
+            $offsets = collect(range(-$flexDays, $flexDays))->reject(fn (int $offset) => $offset === 0);
             $baseCheckIn = CarbonImmutable::parse($filters['check_in']);
             $baseCheckOut = CarbonImmutable::parse($filters['check_out']);
 
@@ -73,21 +73,21 @@ class AzariAvailabilityController extends Controller
                     ];
                     unset($candidateFilters['flex_days']);
 
-                    $candidate = $marketplace->search($candidateFilters);
+                    $candidate = $marketplace->search($candidateFilters, false);
                     $first = $candidate['results']->getCollection()->first();
 
                     return [
                         'check_in' => $candidateIn->toDateString(),
                         'check_out' => $candidateOut->toDateString(),
                         'count' => $candidate['results']->total(),
-                        'from_total' => $first['quote']['total'] ?? null,
+                        'example_total' => $first['quote']['total'] ?? null,
                         'currency' => $first['quote']['currency'] ?? null,
                     ];
                 } catch (\Throwable $exception) {
                     report($exception);
                     return null;
                 }
-            })->filter(fn ($item) => $item && $item['count'] > 0)->values();
+            })->filter(fn ($item) => $item && $item['example_total'] !== null)->values();
         }
 
         $locations = Location::query()
