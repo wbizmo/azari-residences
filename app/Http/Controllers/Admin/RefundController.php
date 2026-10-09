@@ -105,4 +105,32 @@ class RefundController extends Controller
             'Refund '.$updated->reference.' is now '.$updated->status.'.'
         );
     }
+    public function dispatchProvider(
+        Request $request,
+        Payment $payment,
+        Refund $refund,
+        \App\Services\Payments\ProviderRefundExecutionService $executor
+    ): RedirectResponse {
+        abort_unless($request->user()?->isAdministrator(), 403);
+        abort_unless((int) $refund->payment_id === (int) $payment->getKey(), 404);
+        $updated = $executor->dispatch($refund, $request->user()->getKey());
+
+        return back()->with('warning',
+            'Provider accepted refund '.$updated->reference.'. Settlement is still pending independent verification.');
+    }
+
+    public function reconcileProvider(
+        Request $request,
+        Payment $payment,
+        Refund $refund,
+        \App\Services\Payments\ProviderRefundExecutionService $executor
+    ): RedirectResponse {
+        abort_unless($request->user()?->isAdministrator(), 403);
+        abort_unless((int) $refund->payment_id === (int) $payment->getKey(), 404);
+        $updated = $executor->reconcile($refund, $request->user()->getKey());
+
+        return back()->with($updated->status === 'successful' ? 'success' : 'warning',
+            'Provider reports refund status: '.$updated->status.'.');
+    }
+
 }

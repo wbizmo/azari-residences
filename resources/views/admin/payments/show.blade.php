@@ -28,13 +28,29 @@
 @method('PATCH')
 <select name="action" required>
 <option value="processing">Mark processing</option>
-<option value="successful">Mark successful</option>
+@if($payment->provider === 'manual' && auth()->user()?->isAdministrator())
+<option value="successful">Successful (verified manual payment only)</option>
+@endif
 <option value="failed">Mark failed</option>
 </select>
 <input name="provider_reference" maxlength="190" placeholder="Provider refund reference">
 <input name="safe_error" maxlength="500" placeholder="Failure note if applicable">
 <button class="az-button az-button--secondary" type="submit">Update refund</button>
 </form>
+@endif
+@if($payment->provider === 'flutterwave' && auth()->user()?->isAdministrator())
+    @if($refund->status === 'requested')
+        <form method="POST" action="{{ route('azari.admin.payments.refunds.dispatch', [$payment, $refund]) }}" class="az-s78-actions">
+            @csrf
+            <button class="az-button" type="submit">Submit Flutterwave refund</button>
+        </form>
+        <p>Submitting does not mean the customer has received the refund.</p>
+    @elseif(in_array($refund->status, ['processing', 'reconciliation_required'], true) && $refund->provider_reference)
+        <form method="POST" action="{{ route('azari.admin.payments.refunds.reconcile', [$payment, $refund]) }}" class="az-s78-actions">
+            @csrf
+            <button class="az-button az-button--secondary" type="submit">Verify provider refund settlement</button>
+        </form>
+    @endif
 @endif
 </article>
 @empty
