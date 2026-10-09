@@ -1,11 +1,22 @@
 <?php
+
 namespace App\Services\Bookings;
+
 use App\Models\Property;
 use Carbon\CarbonInterface;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Validation\ValidationException;
+
+/**
+ * Backward-compatible facade. All stay pricing, even legacy callers, uses
+ * the same authority as public search, holds and checkout.
+ */
 class AvailabilityService
 {
-    public function __construct(private readonly AzariAvailabilityEngine $engine) {}
+    public function __construct(
+        private readonly AzariAvailabilityEngine $engine,
+        private readonly AzariPricingEngine $pricing,
+    ) {}
 
     public function isAvailable(int $propertyId, CarbonInterface $checkIn, CarbonInterface $checkOut, ?int $ignoreBookingId = null): bool
     {
@@ -17,12 +28,28 @@ class AvailabilityService
 
     public function quote(int $propertyId, CarbonInterface $checkIn, CarbonInterface $checkOut): array
     {
-        $nights = max(1, $checkIn->diffInDays($checkOut));
-        $season = DB::table('seasonal_prices')->where('property_id', $propertyId)
-            ->whereDate('starts_on', '<=', $checkIn)
-            ->whereDate('ends_on', '>=', $checkOut->copy()->subDay())
-            ->orderByDesc('starts_on')->first();
-        $rate = (float)($season->nightly_rate ?? 0);
-        return ['available'=>$this->isAvailable($propertyId,$checkIn,$checkOut),'nights'=>$nights,'nightly_rate'=>$rate,'subtotal'=>$rate*$nights,'currency'=>'USD','minimum_stay'=>(int)($season->minimum_stay ?? 1),'maximum_stay'=>$season?->maximum_stay];
+        $property = Property::query()->findOrFail($propertyId);
+        $type = $this->engine->resolveAccommodationType($property);
+        $ratePlan = $type ? $this->engine->resolveRatePlan($type) : null;
+
+        $available = $this->engine->availableForProperty($property, $checkIn, $checkOut);
+        if ($available) {
+            try {
+                $this->engine->assertRules($property, $checkIn, $checkOut, 1, 0, 1, $type, $ratePlan);
+            } catch (ValidationException) {
+                $available = false;
+            }
+        }
+
+        // No independent "USD seasonal quote" with a different tax/fee
+        // contract: this matches the authoritative public and checkout quote.
+        $quote = $this->pricing->quote($property, $checkIn, $checkOut, [], $type, $ratePlan, 1);
+
+        return [
+            ...$quote,
+            'available' => $available,
+            'minimum_stay' => (int) ($ratePlan?->minimum_stay ?? $type?->minimum_stay ?? $property->minimum_stay ?? 1),
+            'maximum_stay' => $ratePlan?->maximum_stay ?? $type?->maximum_stay ?? $property->maximum_stay,
+        ];
     }
 }
