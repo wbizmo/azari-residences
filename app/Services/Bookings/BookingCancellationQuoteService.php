@@ -14,6 +14,10 @@ class BookingCancellationQuoteService
         $policy = data_get($booking->policy_snapshot, 'cancellation');
         $refundable = data_get($booking->policy_snapshot, 'rate_plan.is_refundable');
         $total = round(max(0, (float) $booking->total), 2);
+        // Refund entitlement is calculated from the original verified gross
+        // payments, never from a shrinking net balance. Subtract already
+        // reserved/settled refunds in the settlement service exactly once.
+        $grossPaid = round(max(0, $booking->successfulPaymentsTotal()), 2);
         $paid = round(max(0, $booking->netPaidTotal()), 2);
         $manualReview = ! is_array($policy) && $refundable === null;
         $asOf ??= now();
@@ -21,7 +25,9 @@ class BookingCancellationQuoteService
         $propertyNow = CarbonImmutable::parse($asOf)->setTimezone(
             (string) ($booking->property_timezone ?: config('localization.platform_timezone', 'UTC'))
         );
-        $checkIn = $booking->check_in?->startOfDay();
+        $checkIn = $booking->check_in
+            ? CarbonImmutable::parse($booking->check_in->toDateString(), $propertyNow->timezone)->startOfDay()
+            : null;
         $hoursBeforeArrival = $checkIn ? $propertyNow->diffInRealHours($checkIn, false) : null;
         $freeHours = is_array($policy) ? data_get($policy, 'free_cancel_hours') : null;
         $withinFreeWindow = $freeHours !== null && $hoursBeforeArrival !== null
@@ -51,7 +57,10 @@ class BookingCancellationQuoteService
             'free_cancellation' => $withinFreeWindow,
             'cancellation_fee' => $fee,
             'net_paid' => $paid,
-            'maximum_refund_due' => $fee === null ? null : (float) min($paid, max(0, round($total - $fee, 2))),
+            'gross_verified_paid' => $grossPaid,
+            // A deposit smaller than the cancellation penalty earns no
+            // refund. For example: 20 paid on a 100 stay with a 40 fee.
+            'maximum_refund_due' => $fee === null ? null : (float) max(0, round($grossPaid - $fee, 2)),
             'refund_status' => 'not_initiated',
         ];
     }
