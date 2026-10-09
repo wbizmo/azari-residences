@@ -22,9 +22,10 @@ class PhaseTwoCompletionArchitectureTest extends TestCase
 
         $this->assertSame('standalone', $manifest['display']);
         $this->assertSame('#052058', $manifest['theme_color']);
-        $this->assertStringContainsString('booking\\/.*payment', $serviceWorker);
-        $this->assertStringContainsString('identity', $serviceWorker);
-        $this->assertStringContainsString('documents?', $serviceWorker);
+        $this->assertStringContainsString("request.mode === 'navigate'", $serviceWorker);
+        $this->assertStringContainsString("caches.match('/offline.html')", $serviceWorker);
+        $this->assertStringContainsString('SAFE_SHELL', $serviceWorker);
+        $this->assertStringNotContainsString("SAFE_SHELL = ['/']", $serviceWorker);
         $this->assertStringContainsString('cannot confirm live availability', $serviceWorker);
     }
 
