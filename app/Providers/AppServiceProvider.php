@@ -90,7 +90,7 @@ class AppServiceProvider extends ServiceProvider
             'public.partials.drawer-root', 'layouts.user', 'user.*',
         ], function ($view): void {
             $view->with('siteSettings', [
-                'site_name' => SiteSetting::valueFor('site_name', 'Resarva'),
+                'site_name' => SiteSetting::valueFor('site_name', 'Resavar'),
             ]);
         });
 

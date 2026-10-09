@@ -50,7 +50,8 @@ async function effectiveColors(locator) {
             ];
         };
 
-        const foreground = getComputedStyle(element).color;
+        const style = getComputedStyle(element);
+        const foreground = style.webkitTextFillColor || style.color;
         let node = element;
         let background = null;
 
@@ -112,7 +113,7 @@ test.beforeAll(async () => {
 test('public homepage has readable booking controls and keyboard focus', async ({ page }) => {
     await page.goto(baseURL, { waitUntil: 'networkidle' });
 
-    await expect(page).toHaveTitle(/Resarva/i);
+    await expect(page).toHaveTitle(/Resavar/i);
     await expectReadable(page.locator('.availability-submit').first(), 4.5);
     await expectVisibleFocus(page.locator('.availability-submit').first());
 
@@ -150,6 +151,10 @@ test('customer dashboard icons and inverse hero remain readable', async ({ page 
     await page.goto(`${baseURL}/account`, { waitUntil: 'networkidle' });
 
     await expectReadable(page.locator('.az-user-welcome .az-user-eyebrow').first(), 4.5);
+    // WebKit -webkit-text-fill-color overrides CSS color; these must
+    // stay legible after the legacy guest-area styles are loaded.
+    await expectReadable(page.locator('.az-user-welcome .az-user-button--primary').first(), 4.5);
+    await expectReadable(page.locator('.az-user-welcome .az-user-button--ghost').first(), 4.5);
     await expectReadable(page.locator('.az-user-summary-icon').first(), 3.0);
     await expectReadable(page.locator('.az-user-sidebar .az-user-nav-link').first(), 4.5);
     await expectVisibleFocus(page.locator('.az-user-sidebar .az-user-nav-link').first());

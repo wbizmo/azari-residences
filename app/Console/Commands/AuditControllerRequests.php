@@ -11,7 +11,7 @@ class AuditControllerRequests extends Command
     protected $signature = 'azari:controller-audit
         {--strict : Fail for unsafe request payload access and missing Phase 3A infrastructure}';
 
-    protected $description = 'Audit Resarva controllers and Form Requests for request-validation and response-boundary risks.';
+    protected $description = 'Audit Resavar controllers and Form Requests for request-validation and response-boundary risks.';
 
     public function handle(): int
     {

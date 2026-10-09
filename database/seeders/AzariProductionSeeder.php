@@ -19,7 +19,7 @@ class AzariProductionSeeder extends Seeder
             return;
         }
 
-        SiteSetting::put('site_name', 'Resarva', 'text', 'branding');
+        SiteSetting::put('site_name', 'Resavar', 'text', 'branding');
         SiteSetting::put('site_tagline', 'Private serviced residences', 'text', 'branding');
         SiteSetting::put('operating_regions', 'Nigeria and Rwanda', 'text', 'branding');
 
@@ -84,7 +84,7 @@ class AzariProductionSeeder extends Seeder
                     'max_guests' => $guests,
                     'nightly_rate' => $rate,
                     'currency' => 'USD',
-                    'short_description' => 'A fully serviced residence managed by Resarva.',
+                    'short_description' => 'A fully serviced residence managed by Resavar.',
                     'description' => 'A private, fully serviced residence prepared for business and leisure stays.',
                     'is_featured' => true,
                     'is_published' => true,

@@ -8,7 +8,7 @@ class AuditAzariIntegrations extends Command
 {
     protected $signature = 'azari:integrations-audit {--strict : Fail when enabled integrations are incomplete}';
 
-    protected $description = 'Audit Resarva payment, messaging, webhook and production environment configuration.';
+    protected $description = 'Audit Resavar payment, messaging, webhook and production environment configuration.';
 
     public function handle(): int
     {
@@ -31,7 +31,7 @@ class AuditAzariIntegrations extends Command
         }
 
         if ($issues === []) {
-            $this->info('Resarva integration configuration audit passed.');
+            $this->info('Resavar integration configuration audit passed.');
 
             return self::SUCCESS;
         }
