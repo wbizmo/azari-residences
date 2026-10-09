@@ -331,6 +331,29 @@
         @if($booking->review->admin_reply)
             <div class="az-user-alert"><strong>Resavar response</strong><p>{{ $booking->review->admin_reply }}</p></div>
         @endif
+        @if(in_array($booking->review->status, ['hidden', 'flagged', 'archived'], true))
+            <div class="az-user-alert" style="margin-top:14px">
+                <strong>Review moderation decision</strong>
+                <p>Your review is not currently public. You can submit one appeal for moderator review.</p>
+                @if($booking->review->moderation_reason)
+                    <p>Reason: {{ $booking->review->moderation_reason }}</p>
+                @endif
+                @if($booking->review->appeal)
+                    <p role="status">Appeal status: {{ Str::headline($booking->review->appeal->status) }}</p>
+                    @if($booking->review->appeal->decision_note)
+                        <p>Moderator response: {{ $booking->review->appeal->decision_note }}</p>
+                    @endif
+                @else
+                    <form method="POST" action="{{ route('user.reviews.appeal', $booking) }}" class="az-form-grid">
+                        @csrf
+                        <label class="wide"><span>Why do you disagree with this moderation decision?</span>
+                            <textarea name="reason" required minlength="20" maxlength="2000" rows="4"></textarea>
+                        </label>
+                        <button type="submit" class="az-user-button az-user-button--dark">Submit appeal</button>
+                    </form>
+                @endif
+            </div>
+        @endif
     </div>
 </section>
 @endif

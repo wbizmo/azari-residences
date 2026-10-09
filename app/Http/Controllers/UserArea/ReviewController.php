@@ -6,9 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\Booking;
 use App\Models\Review;
+use App\Models\ReviewAppeal;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class ReviewController extends Controller
@@ -113,6 +114,41 @@ class ReviewController extends Controller
         ]);
 
         return back()->with('success', 'Your review was updated and returned to moderation.');
+    }
+
+    public function appeal(Request $request, Booking $booking): RedirectResponse
+    {
+        abort_unless((int) $booking->user_id === (int) $request->user()->id, 403);
+
+        $data = $request->validate([
+            'reason' => ['required', 'string', 'min:20', 'max:2000'],
+        ]);
+
+        DB::transaction(function () use ($request, $booking, $data): void {
+            $review = Review::query()
+                ->where('booking_id', $booking->id)
+                ->where('user_id', $request->user()->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            abort_unless(in_array($review->status, ['hidden', 'flagged', 'archived'], true), 422);
+            abort_if(ReviewAppeal::query()->where('review_id', $review->id)->exists(), 422,
+                'A moderation appeal has already been submitted for this review.');
+
+            $appeal = ReviewAppeal::query()->create([
+                'review_id' => $review->id,
+                'user_id' => $request->user()->id,
+                'reason' => $data['reason'],
+                'status' => 'pending',
+            ]);
+
+            AuditLog::record('review.appeal_submitted', $review, [], [
+                'appeal_id' => $appeal->id,
+                'booking_id' => $booking->id,
+            ]);
+        }, 3);
+
+        return back()->with('success', 'Your review moderation appeal was submitted.');
     }
 
 }
