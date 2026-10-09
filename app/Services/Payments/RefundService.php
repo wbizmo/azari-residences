@@ -49,6 +49,23 @@ class RefundService
                 )
                 ->firstOrFail();
 
+            // Another worker may have inserted this key while we waited for
+            // the payment row lock. Re-read after acquiring the lock, not only
+            // before the transaction; the unique index remains the final guard.
+            if ($idempotencyKey) {
+                $existingAfterLock = Refund::query()
+                    ->where('idempotency_key', $idempotencyKey)->first();
+                if ($existingAfterLock) {
+                    if ((int) $existingAfterLock->payment_id !== (int) $lockedPayment->getKey()
+                        || abs(round((float) $existingAfterLock->amount, 2) - $amount) >= 0.005) {
+                        throw ValidationException::withMessages([
+                            'idempotency_key' => 'This refund request key was already used for a different payment or amount.',
+                        ]);
+                    }
+                    return $existingAfterLock;
+                }
+            }
+
             if (! $lockedPayment->isSuccessful()
                 && ! ($lockedPayment->status === 'successful_excess' && $lockedPayment->verified_at !== null)) {
                 throw ValidationException::withMessages(['payment' => 'Only verified successful payments can be refunded.']);
