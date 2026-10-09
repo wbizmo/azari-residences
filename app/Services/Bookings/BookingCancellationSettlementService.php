@@ -95,50 +95,66 @@ class BookingCancellationSettlementService
      */
     public function reserveEligibleRefunds(Booking $booking): array
     {
-        $fresh = $booking->fresh();
-        if (! in_array($fresh->status, ['cancelled', 'no_show'], true)) {
-            throw ValidationException::withMessages(['booking' => 'Refunds require a terminal cancellation or no-show.']);
-        }
-        $quote = $this->quotes->quote($fresh, $fresh->cancelled_at ?: $fresh->no_show_at ?: now(),
-            noShow: $fresh->status === 'no_show');
-        if ($quote['manual_review_required'] || $quote['maximum_refund_due'] === null) {
-            return ['refunds_requested' => 0, 'manual_review' => true];
-        }
+        // Serialize the entire entitlement assessment per booking, not just
+        // individual payment requests. Without this lock, two reconciliation
+        // workers can each reserve the same remainder against different
+        // successful payment rows.
+        return DB::transaction(function () use ($booking): array {
+            $fresh = Booking::query()->whereKey($booking->getKey())
+                ->when(DB::connection()->getDriverName() !== 'sqlite',
+                    fn (Builder $q) => $q->lockForUpdate())->firstOrFail();
+            if (! in_array($fresh->status, ['cancelled', 'no_show'], true)) {
+                throw ValidationException::withMessages([
+                    'booking' => 'Refunds require a terminal cancellation or no-show.',
+                ]);
+            }
+            $quote = $this->quotes->quote(
+                $fresh,
+                $fresh->cancelled_at ?: $fresh->no_show_at ?: now(),
+                noShow: $fresh->status === 'no_show'
+            );
+            if ($quote['manual_review_required'] || $quote['maximum_refund_due'] === null) {
+                return ['refunds_requested' => 0, 'manual_review' => true];
+            }
 
-        // Maximum eligible refund is based on verified paid amounts, minus
-        // already-settled refunds. Subtract all reserved-but-unsettled refunds
-        // too, to prevent multiple requests from claiming the same charge.
-        $remaining = round(max(0, (float) $quote['maximum_refund_due']), 2);
-        $alreadyPending = (float) $fresh->refunds()
-            ->whereIn('status', ['requested', 'processing', 'reconciliation_required'])
-            ->sum('amount');
-        $remaining = round(max(0, $remaining - $alreadyPending), 2);
-        $count = 0;
-        foreach ($fresh->payments()->where('status', Payment::SUCCESSFUL)->orderBy('id')->get() as $payment) {
-            if ($remaining < 0.01) {
-                break;
-            }
-            $key = hash('sha256', 'policy-refund|'.$fresh->getKey().'|'.$payment->getKey().'|'.$fresh->status);
-            if (Refund::query()->where('idempotency_key', $key)->exists()) {
-                continue;
-            }
-            $reserved = (float) $payment->refunds()
+            // Both successful refunds and in-flight reservations consume
+            // entitlement. Replaying after settlement must never issue a
+            // second refund against a later payment.
+            $alreadyReserved = (float) $fresh->refunds()
                 ->whereIn('status', ['requested', 'processing', 'reconciliation_required', 'successful'])
                 ->sum('amount');
-            $available = max(0, round((float) $payment->amount - $reserved, 2));
-            $amount = min($remaining, $available);
-            if ($amount < 0.01) {
-                continue;
+            $remaining = round(max(0, (float) $quote['maximum_refund_due'] - $alreadyReserved), 2);
+            $count = 0;
+
+            foreach ($fresh->payments()->where('status', Payment::SUCCESSFUL)->orderBy('id')->get() as $payment) {
+                if ($remaining < 0.01) {
+                    break;
+                }
+                $key = hash('sha256', 'policy-refund|'.$fresh->getKey().'|'.$payment->getKey().'|'.$fresh->status);
+                if (Refund::query()->where('idempotency_key', $key)->exists()) {
+                    continue;
+                }
+                $paymentReserved = (float) $payment->refunds()
+                    ->whereIn('status', ['requested', 'processing', 'reconciliation_required', 'successful'])
+                    ->sum('amount');
+                $available = max(0, round((float) $payment->amount - $paymentReserved, 2));
+                $amount = min($remaining, $available);
+                if ($amount < 0.01) {
+                    continue;
+                }
+
+                $this->refunds->request(
+                    $payment, $amount, $fresh->cancelled_by,
+                    'Policy refund for '.($fresh->status === 'no_show' ? 'no-show' : 'cancellation')
+                        .' '.$fresh->reference,
+                    $key
+                );
+                $count++;
+                $remaining = round($remaining - $amount, 2);
             }
 
-            $this->refunds->request($payment, $amount, $fresh->cancelled_by,
-                'Policy refund for '.($fresh->status === 'no_show' ? 'no-show' : 'cancellation')
-                .' '.$fresh->reference, $key);
-            $count++;
-            $remaining = round($remaining - $amount, 2);
-        }
-
-        return ['refunds_requested' => $count, 'manual_review' => false];
+            return ['refunds_requested' => $count, 'manual_review' => false];
+        }, 5);
     }
 
     private function beforeArrival(Booking $booking): bool
