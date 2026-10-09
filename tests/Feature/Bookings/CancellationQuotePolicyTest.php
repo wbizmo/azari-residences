@@ -45,7 +45,7 @@ class CancellationQuotePolicyTest extends TestCase
             'check_in' => now()->addDays(7),
             'policy_snapshot' => [
                 'rate_plan' => ['is_refundable' => true],
-                'cancellation' => ['fee_amount' => 40, 'free_cancel_hours' => 0],
+                'cancellation' => ['fee_amount' => 40],
             ],
         ]);
         Payment::query()->create([
@@ -65,7 +65,7 @@ class CancellationQuotePolicyTest extends TestCase
             'check_in' => now()->addDays(7),
             'policy_snapshot' => [
                 'rate_plan' => ['is_refundable' => true],
-                'cancellation' => ['fee_amount' => 40, 'free_cancel_hours' => 0],
+                'cancellation' => ['fee_amount' => 40],
             ],
         ]);
         $payment = Payment::query()->create([
