@@ -142,9 +142,12 @@ class PhaseTwoGuestController extends Controller
             'keys.auth' => ['required', 'string', 'max:1000'],
         ]);
 
+        $endpointHash = hash('sha256', $data['endpoint']);
+
         DB::table('web_push_subscriptions')->updateOrInsert(
-            ['user_id' => $request->user()->id, 'endpoint' => $data['endpoint']],
+            ['user_id' => $request->user()->id, 'endpoint_hash' => $endpointHash],
             [
+                'endpoint' => $data['endpoint'],
                 'public_key' => $data['keys']['p256dh'],
                 'auth_token' => $data['keys']['auth'],
                 'user_agent' => mb_substr((string) $request->userAgent(), 0, 1000),
@@ -163,7 +166,7 @@ class PhaseTwoGuestController extends Controller
 
         DB::table('web_push_subscriptions')
             ->where('user_id', $request->user()->id)
-            ->where('endpoint', $data['endpoint'])
+            ->where('endpoint_hash', hash('sha256', $data['endpoint']))
             ->update(['revoked_at' => now(), 'updated_at' => now()]);
 
         return response()->json(['ok' => true]);
