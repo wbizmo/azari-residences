@@ -84,6 +84,19 @@ class OwnerWithdrawalService
                 throw new RuntimeException('This withdrawal is no longer pending and cannot be processed again.');
             }
 
+            // An owner may have requested this transfer before a subsequent
+            // chargeback froze funds. Re-check under the same owner account
+            // lock instead of treating an old pending request as payable.
+            $owner = User::query()->whereKey($locked->user_id)
+                ->when(DB::connection()->getDriverName() !== 'sqlite',
+                    fn ($q) => $q->lockForUpdate())->firstOrFail();
+            $pendingOthers = max(0, $this->balances->pending($owner, $locked->currency) - (float) $locked->amount);
+            $availableForThisTransfer = $this->balances->balance($owner, $locked->currency)
+                - $pendingOthers - $this->balances->disputeHeld($owner, $locked->currency);
+            if ($availableForThisTransfer + 0.001 < (float) $locked->amount) {
+                throw new RuntimeException('Withdrawal is on hold because a new dispute or balance reversal reduced settled owner funds.');
+            }
+
             $locked->update([
                 'status' => 'processing',
                 'processing_started_at' => now(),
