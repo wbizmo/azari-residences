@@ -155,6 +155,10 @@ Route::prefix('azaridevadmin')
         Route::patch('/payments/{payment}/refunds/{refund}', [RefundController::class, 'update'])
             ->middleware('azari.permission:payments.manage')
             ->name('payments.refunds.update');
+        Route::post('/payments/{payment}/refunds/{refund}/dispatch', [RefundController::class, 'dispatchProvider'])
+            ->middleware('azari.permission:payments.manage')->name('payments.refunds.dispatch');
+        Route::post('/payments/{payment}/refunds/{refund}/reconcile', [RefundController::class, 'reconcileProvider'])
+            ->middleware('azari.permission:payments.manage')->name('payments.refunds.reconcile');
         Route::get('/payments/{payment}/proof', [AdminPaymentController::class, 'proof'])->name('payments.proof');
     });
 
