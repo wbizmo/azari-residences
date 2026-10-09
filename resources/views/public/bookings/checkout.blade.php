@@ -221,7 +221,7 @@
             <div class="az-user-detail-row"><dt>{{ $fee['name'] }}</dt><dd>{{ \App\Support\Money::format($fee['amount'], $quote['currency']) }}</dd></div>
         @endforeach
         @foreach(($quote['add_ons'] ?? []) as $addon)
-            <div class="az-user-detail-row"><dt>{{ $addon['name'] ?? 'Optional add-on' }}</dt><dd>{{ \App\Support\Money::format($addon['total'] ?? $addon['amount'] ?? 0, $quote['currency']) }}</dd></div>
+            <div class="az-user-detail-row"><dt>{{ $addon['name'] ?? 'Optional add-on' }}</dt><dd>{{ \App\Support\Money::format($addon['line_total'] ?? 0, $quote['currency']) }}</dd></div>
         @endforeach
         <div class="az-user-detail-row"><dt>Taxes ({{ $quote['tax_rate'] }}%)</dt><dd>{{ \App\Support\Money::format($quote['tax_total'], $quote['currency']) }}</dd></div>
         <div class="az-user-detail-row"><dt><strong>Total for this booking</strong></dt><dd><strong>{{ \App\Support\Money::format($quote['total'], $quote['currency']) }}</strong></dd></div>
