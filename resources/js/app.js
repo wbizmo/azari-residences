@@ -2,6 +2,7 @@ import './azari-user-area.js';
 import './azari-frontend-ux.js';
 import './reserva-marketplace.js';
 import './reserva-property.js';
+import './resavar-voucher-code.js';
 // import './bootstrap';
 
 const body = document.body;
