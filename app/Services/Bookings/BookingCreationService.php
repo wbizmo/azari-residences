@@ -149,6 +149,18 @@ class BookingCreationService
                 max(1, (int) $lockedHold->rooms)
             );
 
+            $heldPrice = $lockedHold->pricing_snapshot;
+            if (is_array($heldPrice) && isset($heldPrice['total'], $heldPrice['currency'])) {
+                if (strtoupper((string) $heldPrice['currency']) !== strtoupper((string) $quote['currency'])
+                    || abs(round((float) $heldPrice['total'], 2) - round((float) $quote['total'], 2)) >= 0.005
+                    || (int) ($heldPrice['quantity'] ?? 1) !== max(1, (int) $lockedHold->rooms)
+                    || (int) ($heldPrice['rate_plan_id'] ?? 0) !== (int) ($ratePlan?->getKey() ?? 0)) {
+                    throw ValidationException::withMessages([
+                        'hold_token' => 'The price or selected rate has changed. Please search again to review and accept the current amount.',
+                    ]);
+                }
+            }
+
             $booking = Booking::query()->create([
                 'reference' => $this->reference(),
                 'user_id' => $user->id,
