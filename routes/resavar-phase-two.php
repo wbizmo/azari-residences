@@ -51,9 +51,4 @@ Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer'])->group
     });
 
     Route::patch('/account/bookings/{booking}/review', [ReviewController::class, 'update'])->name('user.reviews.update');
-
-    Route::post('/account/push-subscriptions', [PhaseTwoGuestController::class, 'subscribePush'])
-        ->middleware('throttle:20,1')->name('user.push.subscribe');
-    Route::delete('/account/push-subscriptions', [PhaseTwoGuestController::class, 'unsubscribePush'])
-        ->middleware('throttle:20,1')->name('user.push.unsubscribe');
 });

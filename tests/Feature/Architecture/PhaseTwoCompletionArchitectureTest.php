@@ -16,7 +16,7 @@ class PhaseTwoCompletionArchitectureTest extends TestCase
         $this->assertStringContainsString('/operations/tasks', $routes);
         $this->assertStringContainsString('/messages', $routes);
         $this->assertStringContainsString('/arrival/check-in', $routes);
-        $this->assertStringContainsString('push-subscriptions', $routes);
+        $this->assertStringNotContainsString('push-subscriptions', $routes);
         $this->assertStringContainsString('calendar/preview', $routes);
         $this->assertStringContainsString('calendar-changes/{log}/undo', $routes);
 
