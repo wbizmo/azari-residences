@@ -10,8 +10,8 @@ class SafeBookingAttachmentNameTest extends TestCase
 {
     public function test_untrusted_uploaded_filename_is_normalized_to_detected_content_extension(): void
     {
-        $file = UploadedFile::fake()->image('../../passport<script>.jpeg');
-        $this->assertSame('passport-script.jpg', BookingAttachmentName::fromUpload($file));
+        $file = UploadedFile::fake()->createWithContent('../../passport<script>.png', base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jfZcAAAAASUVORK5CYII='));
+        $this->assertSame('passport-script.png', BookingAttachmentName::fromUpload($file));
     }
 
     public function test_historical_download_filenames_cannot_include_path_or_executable_suffix(): void
