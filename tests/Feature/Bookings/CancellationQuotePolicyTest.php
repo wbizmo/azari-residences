@@ -3,6 +3,7 @@
 namespace Tests\Feature\Bookings;
 
 use App\Models\Booking;
+use App\Models\Payment;
 use App\Services\Bookings\BookingCancellationQuoteService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -35,6 +36,53 @@ class CancellationQuotePolicyTest extends TestCase
         $quote = app(BookingCancellationQuoteService::class)->quote($stay);
         $this->assertSame(400.0, $quote['cancellation_fee']);
         $this->assertSame(0.0, $quote['maximum_refund_due']);
+    }
+
+    public function test_partial_deposit_less_than_policy_penalty_gets_no_refund(): void
+    {
+        $stay = Booking::factory()->create([
+            'total' => 100, 'currency' => 'NGN',
+            'check_in' => now()->addDays(7),
+            'policy_snapshot' => [
+                'rate_plan' => ['is_refundable' => true],
+                'cancellation' => ['fee_amount' => 40, 'free_cancel_hours' => 0],
+            ],
+        ]);
+        Payment::query()->create([
+            'booking_id' => $stay->id, 'status' => Payment::SUCCESSFUL,
+            'amount' => 20, 'currency' => 'NGN', 'provider' => 'manual',
+            'reference' => 'CANCEL-PARTIAL-DEPOSIT',
+        ]);
+        $quote = app(BookingCancellationQuoteService::class)->quote($stay);
+        $this->assertEqualsWithDelta(40, $quote['cancellation_fee'], 0.001);
+        $this->assertSame(0.0, $quote['maximum_refund_due']);
+    }
+
+    public function test_previous_settled_refund_does_not_reduce_original_entitlement(): void
+    {
+        $stay = Booking::factory()->create([
+            'total' => 100, 'currency' => 'NGN',
+            'check_in' => now()->addDays(7),
+            'policy_snapshot' => [
+                'rate_plan' => ['is_refundable' => true],
+                'cancellation' => ['fee_amount' => 40, 'free_cancel_hours' => 0],
+            ],
+        ]);
+        $payment = Payment::query()->create([
+            'booking_id' => $stay->id, 'status' => Payment::SUCCESSFUL,
+            'amount' => 100, 'currency' => 'NGN', 'provider' => 'manual',
+            'reference' => 'CANCEL-FULL-PAYMENT',
+        ]);
+        $payment->refunds()->create([
+            'booking_id' => $stay->id,
+            'reference' => 'CANCEL-SETTLED-FIRST',
+            'amount' => 30, 'currency' => 'NGN',
+            'provider' => 'manual', 'status' => 'successful',
+        ]);
+        $quote = app(BookingCancellationQuoteService::class)->quote($stay);
+        $this->assertSame(100.0, $quote['gross_verified_paid']);
+        $this->assertSame(70.0, $quote['net_paid']);
+        $this->assertSame(60.0, $quote['maximum_refund_due']);
     }
 
     public function test_unknown_legacy_policy_does_not_invent_a_refund_amount(): void
