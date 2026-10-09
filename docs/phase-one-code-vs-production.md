@@ -66,3 +66,15 @@ Both scripts require `APP_ENV=testing` and a separately named disposable databas
 2. **Synthetic capacity data:** with a freshly migrated disposable DB, set `RESAVAR_ALLOW_SYNTHETIC_SEED=I_ACCEPT_DISPOSABLE_DB`, `RESAVAR_SYNTH_LISTINGS` (1–100000), `RESAVAR_SYNTH_BOOKINGS` (0–1000000) and `RESAVAR_SYNTH_DAYS` (7, 30 or 365). Run `php tests/local/phase1-synthetic-capacity.php`. It inserts batch-capped nightly inventory and historical completed bookings, with no remote provider calls. The 100k × 365 case can exceed storage resources; operators must assess disk/DB capacity first. Then benchmark `php artisan resavar:benchmark-inventory TYPE_ID --runs=20 --json` and attach actual explain plans and measured p50/p95/p99 to #123.
 
 Neither script is invoked by GitHub Actions. They are for local or isolated development testing only; external production/staging, provider settlement and offsite restore evidence remains with the operator under #123.
+
+
+## Independent checkout latency and explain plan driver
+
+`tests/local/phase1-checkout-load.php` creates 4–24 distinct held, one-unit synthetic properties and uses separate forked MySQL processes with synchronized checkout starts. It measures each successful checkout's p50/p95/p99 elapsed time and DB query-count distribution, and captures raw MySQL EXPLAIN rows for date-range inventory and booking-index lookups. It refuses non-MySQL connections, non-testing app environments, real DB names, missing `pcntl`, or a non-array mail driver.
+
+```bash
+APP_ENV=testing DB_CONNECTION=mysql MAIL_MAILER=array RESAVAR_LOCAL_LOAD_WORKERS=12 \
+  php tests/local/phase1-checkout-load.php
+```
+
+Run only in a disposable migrated database, with working Composer dev factories. Compare against `resavar:benchmark-inventory` and the one-room race test. This is synthetic **service-layer** checkout throughput, not end-to-end real payment or traffic performance, and no timings are claimed until measured. Full provider-connected and production-shaped targets remain in operator task #123.
