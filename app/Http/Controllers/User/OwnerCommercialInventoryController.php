@@ -11,6 +11,7 @@ use App\Models\RatePlan;
 use App\Models\RoomType;
 use App\Services\Bookings\CommercialInventoryManager;
 use App\Services\Bookings\InventoryBulkUpdateService;
+use App\Services\Owners\PropertyAccessService;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -138,12 +139,8 @@ class OwnerCommercialInventoryController extends Controller
 
     private function authorizeOwner(Request $request, Property $property): void
     {
-        abort_unless(
-            $request->user()
-            && (int) $property->owner_id === (int) $request->user()->getKey()
-            && $property->managed_for_owner,
-            404
-        );
+        abort_unless($property->managed_for_owner, 404);
+        app(PropertyAccessService::class)->assert($request->user(), $property, 'inventory.manage');
     }
 
     private function assertTypeBelongsToProperty(Property $property, AccommodationType $type): void
