@@ -56,7 +56,7 @@ class VerifiedPropertyClaimTest extends TestCase
             'action' => 'verify',
             'evidence_reference' => 'FAKE-EVIDENCE',
             'expires_at' => now()->addMonth()->toDateString(),
-        ])->assertForbidden();
+        ])->assertNotFound();
 
         $this->assertDatabaseCount('property_verified_claims', 0);
     }
