@@ -653,7 +653,27 @@ class AzariAvailabilityEngine
                 ]);
             }
 
+            // Capture the customer-visible amount before releasing the hold lock.
+            // A later price change must require renewed customer consent.
+            $heldQuote = app(AzariPricingEngine::class)->quote(
+                $property,
+                $in,
+                $out,
+                [],
+                $accommodationType,
+                $ratePlan,
+                $rooms
+            );
+
             return BookingHold::query()->create([
+                'pricing_snapshot' => [
+                    'version' => 1,
+                    'quoted_at' => now()->toIso8601String(),
+                    'total' => (string) $heldQuote['total'],
+                    'currency' => (string) $heldQuote['currency'],
+                    'rate_plan_id' => $ratePlan?->getKey(),
+                    'quantity' => $rooms,
+                ],
                 'property_id' => $property->getKey(),
                 'accommodation_type_id' => $accommodationType?->getKey(),
                 'rate_plan_id' => $ratePlan?->getKey(),
