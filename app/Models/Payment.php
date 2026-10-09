@@ -37,6 +37,7 @@ class Payment extends Model
     public function events(): HasMany { return $this->hasMany(PaymentEvent::class)->latest('received_at'); }
     public function verificationAttempts(): HasMany { return $this->hasMany(PaymentVerificationAttempt::class)->latest('attempted_at'); }
     public function refunds(): HasMany { return $this->hasMany(Refund::class)->latest(); }
+    public function disputes(): HasMany { return $this->hasMany(PaymentDispute::class)->latest(); }
 
     public function isSuccessful(): bool { return $this->status === self::SUCCESSFUL; }
     public function canRetry(): bool { return in_array($this->status, ['failed', 'abandoned', 'pending', 'initiated'], true); }
