@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Booking;
 use App\Services\Bookings\AzariAvailabilityEngine;
 use App\Services\Bookings\AzariPricingEngine;
+use App\Services\Bookings\AvailabilityService;
 use App\Services\Bookings\BookingCreationService;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -41,6 +42,42 @@ class PhaseOneQuoteIntegrityTest extends TestCase
         $this->assertSame($calculated['currency'], $hold->pricing_snapshot['currency']);
         $this->assertEqualsWithDelta((float) $calculated['total'], (float) $hold->pricing_snapshot['total'], 0.001);
         $this->assertSame(1, $hold->pricing_snapshot['quantity']);
+    }
+
+    public function test_legacy_quote_facade_matches_authoritative_checkout_totals_and_currency(): void
+    {
+        $property = Property::factory()->create([
+            'status' => 'available', 'is_published' => true,
+            'same_day_booking' => true,
+            'currency' => 'NGN', 'cleaning_fee' => 125,
+            'tax_rate' => 7.5,
+        ]);
+        $type = $property->accommodationTypes()->firstOrFail();
+        $ratePlan = $type->ratePlans()->first();
+        $start = CarbonImmutable::today()->addDays(45);
+        $end = $start->addDays(3);
+        $canonical = app(AzariPricingEngine::class)->quote(
+            $property, $start, $end, [], $type, $ratePlan, 1
+        );
+        $facade = app(AvailabilityService::class)->quote($property->id, $start, $end);
+
+        foreach ([
+            'currency', 'nightly_rate', 'nights', 'subtotal',
+            'discount_total', 'fee_total', 'tax_total', 'total',
+            'nightly_breakdown', 'policy',
+        ] as $field) {
+            $this->assertEquals($canonical[$field], $facade[$field], "Mismatch in {$field}");
+        }
+        $this->assertSame($facade['available'],
+            app(AvailabilityService::class)->isAvailable($property->id, $start, $end));
+    }
+
+    public function test_legacy_quote_rejects_zero_night_stays(): void
+    {
+        $property = Property::factory()->create(['status' => 'available', 'is_published' => true]);
+        $day = CarbonImmutable::today()->addDays(30);
+        $this->expectException(ValidationException::class);
+        app(AvailabilityService::class)->quote($property->id, $day, $day);
     }
 
     public function test_checkout_rejects_changed_rate_instead_of_silently_charging_a_new_amount(): void

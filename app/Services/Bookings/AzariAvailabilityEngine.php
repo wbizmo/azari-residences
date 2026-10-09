@@ -283,11 +283,22 @@ class AzariAvailabilityEngine
         ?int $ignoreBooking = null,
         ?string $ignoreHold = null
     ): bool {
+        if ($out->toDateString() <= $in->toDateString()) {
+            return false;
+        }
         $type = $this->resolveAccommodationType($property, $accommodationTypeId);
 
         // A caller requesting a particular room type must never fall back to
         // property-wide legacy availability if that type is missing or inactive.
         if (! $type && $accommodationTypeId !== null) {
+            return false;
+        }
+
+        // Existing accommodation types are authoritative. A property with
+        // only inactive/unpublished types must not silently switch to
+        // property-level legacy inventory and appear sellable.
+        if (! $type && Schema::hasTable('accommodation_types')
+            && AccommodationType::query()->where('property_id', $property->getKey())->exists()) {
             return false;
         }
 
@@ -366,7 +377,8 @@ class AzariAvailabilityEngine
         $start = CarbonImmutable::parse($in->toDateString())->startOfDay();
         $end = CarbonImmutable::parse($out->toDateString())->startOfDay();
 
-        if ($end->lessThanOrEqualTo($start)) {
+        if ($end->lessThanOrEqualTo($start)
+            || $start->diffInDays($end) > 366) {
             return collect();
         }
 
@@ -589,7 +601,18 @@ class AzariAvailabilityEngine
         $end = $start->addDays($days);
         $property = Property::query()->find($propertyId);
 
-        if ($property && ($type = $this->resolveAccommodationType($property, $accommodationTypeId))) {
+        if (! $property) {
+            return $this->unavailableCalendar($start, $days);
+        }
+
+        $type = $this->resolveAccommodationType($property, $accommodationTypeId);
+        if (! $type && ($accommodationTypeId !== null
+            || (Schema::hasTable('accommodation_types')
+                && AccommodationType::query()->where('property_id', $propertyId)->exists()))) {
+            return $this->unavailableCalendar($start, $days);
+        }
+
+        if ($type) {
             $remaining = $this->remainingByDate($type, $start, $end);
 
             return $remaining->map(
@@ -812,6 +835,21 @@ class AzariAvailabilityEngine
             ->exists();
 
         return ! $holdConflict && ! $this->propertyMaintenanceBlocks($propertyId, $in, $out);
+    }
+
+    /** Explicitly unavailable dates for missing, disabled or foreign types. */
+    private function unavailableCalendar(CarbonImmutable $start, int $days): array
+    {
+        $calendar = [];
+        for ($offset = 0; $offset < $days; $offset++) {
+            $calendar[] = [
+                'date' => $start->addDays($offset),
+                'available' => false,
+                'remaining' => 0,
+                'state' => 'unavailable',
+            ];
+        }
+        return $calendar;
     }
 
     private function legacyCalendar(
