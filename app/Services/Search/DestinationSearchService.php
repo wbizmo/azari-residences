@@ -83,12 +83,14 @@ class DestinationSearchService
                 'value' => $location->city,
             ]);
 
-        return $locations
+        $results = $locations
             ->concat($properties)
             ->concat($cities)
             ->unique(fn (array $item) => $item['type'].'|'.($item['id'] ?? mb_strtolower($item['value'])))
             ->take($limit)
             ->values();
+
+        return $results->isNotEmpty() ? $results : $this->typoTolerantLocations($query, $limit);
     }
 
     public function normalize(string $query): string
@@ -97,6 +99,52 @@ class DestinationSearchService
         $query = preg_replace('/[%_\\\\]+/', '', $query) ?? '';
 
         return mb_substr(trim($query), 0, 80);
+    }
+
+    /**
+     * Bounded fallback for missing accents or a small spelling mistake.
+     * Only run when indexed prefix search returned nothing. The upper bound
+     * prevents a full-table PHP scan as the destination catalogue grows.
+     */
+    private function typoTolerantLocations(string $query, int $limit): Collection
+    {
+        $normalized = mb_strtolower(Str::ascii($query));
+        if (mb_strlen($normalized) < 3) {
+            return collect();
+        }
+
+        $maxDistance = mb_strlen($normalized) <= 5 ? 1 : 2;
+
+        return Location::query()
+            ->where('is_active', true)
+            ->whereHas('properties', fn (Builder $properties) => $this->publishedProperties($properties))
+            ->withCount('properties')
+            ->orderByDesc('properties_count')
+            ->orderBy('id')
+            ->limit(250)
+            ->get(['id', 'name', 'city', 'country'])
+            ->map(function (Location $location) use ($normalized): array {
+                $distance = collect([$location->name, $location->city])
+                    ->filter()
+                    ->map(fn (string $candidate) => levenshtein(
+                        $normalized,
+                        mb_strtolower(Str::ascii($candidate))
+                    ))
+                    ->min();
+
+                return ['location' => $location, 'distance' => $distance ?? PHP_INT_MAX];
+            })
+            ->filter(fn (array $entry) => $entry['distance'] <= $maxDistance)
+            ->sortBy(fn (array $entry) => sprintf('%04d-%s', $entry['distance'], mb_strtolower($entry['location']->name)))
+            ->take($limit)
+            ->map(fn (array $entry) => [
+                'type' => 'location',
+                'id' => $entry['location']->getKey(),
+                'label' => $entry['location']->name,
+                'secondary' => collect([$entry['location']->city, $entry['location']->country])->filter()->unique()->join(', '),
+                'value' => $entry['location']->name,
+            ])
+            ->values();
     }
 
     private function publishedProperties(Builder $query): Builder
