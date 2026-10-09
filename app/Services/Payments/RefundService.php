@@ -3,6 +3,7 @@
 namespace App\Services\Payments;
 
 use App\Models\AuditLog;
+use App\Models\Booking;
 use App\Models\Payment;
 use App\Models\Refund;
 use App\Services\Owners\OwnerEarningsService;
@@ -41,6 +42,15 @@ class RefundService
                 }
             }
 
+            // A booking-level cancellation reconciliation takes this same
+            // lock before locking individual payments. Preserve one lock
+            // order to avoid payment-vs-booking deadlocks under contention.
+            Booking::query()->whereKey($payment->booking_id)
+                ->when(
+                    DB::connection()->getDriverName() !== 'sqlite',
+                    fn (Builder $query) => $query->lockForUpdate()
+                )->firstOrFail();
+
             $lockedPayment = Payment::query()
                 ->whereKey($payment->getKey())
                 ->when(
@@ -70,13 +80,6 @@ class RefundService
                 && ! ($lockedPayment->status === 'successful_excess' && $lockedPayment->verified_at !== null)) {
                 throw ValidationException::withMessages(['payment' => 'Only verified successful payments can be refunded.']);
             }
-
-            $lockedPayment->booking()
-                ->when(
-                    DB::connection()->getDriverName() !== 'sqlite',
-                    fn (Builder $query) => $query->lockForUpdate()
-                )
-                ->firstOrFail();
 
             $alreadyCommitted = (float) Refund::query()
                 ->where('payment_id', $lockedPayment->getKey())
