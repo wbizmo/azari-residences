@@ -125,7 +125,7 @@ class ICalChannelAdapter implements ChannelAdapter
     private function date(string $value): ?CarbonImmutable
     {
         try {
-            if (! preg_match('/^\\d{8}(?:T\\d{6}Z?)?$/', $value)) {
+            if (! preg_match('/^[0-9]{8}(?:T[0-9]{6}Z?)?$/', $value)) {
                 return null;
             }
             $date = CarbonImmutable::createFromFormat('!Ymd', substr($value, 0, 8), 'UTC');
