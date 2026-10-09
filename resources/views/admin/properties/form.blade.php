@@ -101,4 +101,41 @@
         Save property
     </button>
 </form>
+@if($property->exists && auth()->user()?->is_admin)
+    <section class="admin-card" aria-label="Independent property claim verification" style="margin-top:24px">
+        <h2>Independent claim verification</h2>
+        <p>Only record checks supported by staff-reviewed evidence. Evidence references remain private and claims expire automatically.</p>
+        @php $claimRecords = $property->verifiedClaims->keyBy('claim_type'); @endphp
+        @foreach(\App\Models\PropertyVerifiedClaim::TYPES as $claimKey => $label)
+            @php $claim = $claimRecords->get($claimKey); @endphp
+            <div style="padding:12px 0;border-bottom:1px solid #bdc9d9">
+                <strong>{{ $label }}</strong>
+                <p>Status:
+                    @if($claim && $claim->status === 'verified' && $claim->expires_at?->isFuture())
+                        Verified until {{ $claim->expires_at->format('j M Y') }}
+                    @elseif($claim && $claim->status === 'verified')
+                        Expired
+                    @else
+                        Not independently verified
+                    @endif
+                </p>
+                <form method="POST" action="{{ route('azari.admin.properties.claims.update', $property) }}" class="admin-form-grid">
+                    @csrf
+                    <input type="hidden" name="claim_type" value="{{ $claimKey }}">
+                    <label>Evidence reference (staff only)
+                        <input name="evidence_reference" maxlength="255" value="{{ $claim?->evidence_reference }}">
+                    </label>
+                    <label>Expires at
+                        <input name="expires_at" type="date" value="{{ $claim?->expires_at?->toDateString() }}">
+                    </label>
+                    <button class="button button-primary" type="submit" name="action" value="verify">Verify claim</button>
+                    @if($claim && $claim->status === 'verified')
+                        <button class="button button-secondary" type="submit" name="action" value="revoke" formnovalidate>Revoke claim</button>
+                    @endif
+                </form>
+            </div>
+        @endforeach
+    </section>
+@endif
+
 @endsection
