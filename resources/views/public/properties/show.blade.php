@@ -429,6 +429,11 @@
                                     </article>
                                 @endforeach
                             </div>
+                            <p style="margin-top:16px">
+                                <a class="button button-secondary" href="{{ route('properties.reviews', $property) }}">
+                                    Browse all {{ number_format($reviewSummary['count']) }} verified guest reviews
+                                </a>
+                            </p>
                         </section>
                     @endif
 
