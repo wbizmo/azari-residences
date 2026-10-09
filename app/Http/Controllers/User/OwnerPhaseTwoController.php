@@ -150,7 +150,18 @@ class OwnerPhaseTwoController extends Controller
             ->limit(100)
             ->get();
 
-        return view('user.owner.operations', compact('property', 'tasks', 'bookings'));
+        $staffMemberships = PropertyStaffMembership::query()
+            ->where('property_id', $property->id)
+            ->whereNull('revoked_at')
+            ->whereNotNull('accepted_at')
+            ->get();
+
+        $staffUsers = User::query()
+            ->whereIn('id', $staffMemberships->pluck('user_id')->push($property->owner_id)->filter()->unique())
+            ->orderBy('name')
+            ->get();
+
+        return view('user.owner.operations', compact('property', 'tasks', 'bookings', 'staffUsers'));
     }
 
     public function createTask(Request $request, Property $property, PropertyAccessService $access): RedirectResponse
@@ -164,10 +175,22 @@ class OwnerPhaseTwoController extends Controller
             'title' => ['required', 'string', 'max:160'],
             'notes' => ['nullable', 'string', 'max:5000'],
             'due_at' => ['nullable', 'date'],
+            'assigned_to' => ['nullable', 'integer', 'exists:users,id'],
         ]);
 
         if (! empty($data['booking_id'])) {
             abort_unless(Booking::query()->whereKey($data['booking_id'])->where('property_id', $property->id)->exists(), 422);
+        }
+
+        if (! empty($data['assigned_to'])) {
+            $assignable = (int) $data['assigned_to'] === (int) $property->owner_id
+                || PropertyStaffMembership::query()
+                    ->where('property_id', $property->id)
+                    ->where('user_id', $data['assigned_to'])
+                    ->whereNull('revoked_at')
+                    ->whereNotNull('accepted_at')
+                    ->exists();
+            abort_unless($assignable, 422);
         }
 
         $task = PropertyOperationsTask::query()->create([
@@ -190,15 +213,27 @@ class OwnerPhaseTwoController extends Controller
         $data = $request->validate([
             'status' => ['required', Rule::in(['open', 'in_progress', 'blocked', 'completed', 'cancelled'])],
             'notes' => ['nullable', 'string', 'max:5000'],
+            'assigned_to' => ['nullable', 'integer', 'exists:users,id'],
         ]);
 
-        $before = $task->only(['status', 'notes']);
+        if (! empty($data['assigned_to'])) {
+            $assignable = (int) $data['assigned_to'] === (int) $property->owner_id
+                || PropertyStaffMembership::query()
+                    ->where('property_id', $property->id)
+                    ->where('user_id', $data['assigned_to'])
+                    ->whereNull('revoked_at')
+                    ->whereNotNull('accepted_at')
+                    ->exists();
+            abort_unless($assignable, 422);
+        }
+
+        $before = $task->only(['status', 'notes', 'assigned_to']);
         $task->update([
             ...$data,
             'completed_at' => $data['status'] === 'completed' ? now() : null,
         ]);
 
-        AuditLog::record('property_operations.task_updated', $task, $before, $task->only(['status', 'notes']));
+        AuditLog::record('property_operations.task_updated', $task, $before, $task->only(['status', 'notes', 'assigned_to']));
 
         return back()->with('success', 'Task updated.');
     }
