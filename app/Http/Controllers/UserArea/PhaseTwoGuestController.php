@@ -13,6 +13,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Support\BookingAttachmentName;
 use Illuminate\View\View;
 
 class PhaseTwoGuestController extends Controller
@@ -94,7 +95,7 @@ class PhaseTwoGuestController extends Controller
                     'body' => $data['body'],
                     'locale' => app()->getLocale(),
                     'attachment_path' => $attachmentPath,
-                    'attachment_name' => $file?->getClientOriginalName(),
+                    'attachment_name' => $file ? BookingAttachmentName::fromUpload($file) : null,
                 ]);
 
                 $locked->update(['last_message_at' => $message->created_at]);
@@ -145,7 +146,7 @@ class PhaseTwoGuestController extends Controller
         abort_unless((int) $message->conversation_id === (int) $conversation->id && $message->attachment_path, 404);
         abort_unless(Storage::disk('private')->exists($message->attachment_path), 404);
 
-        return Storage::disk('private')->download($message->attachment_path, $message->attachment_name ?: 'attachment');
+        return Storage::disk('private')->download($message->attachment_path, BookingAttachmentName::forDownload($message->attachment_name, $message->attachment_path));
     }
 
     public function arrival(Request $request, string $reference): View
