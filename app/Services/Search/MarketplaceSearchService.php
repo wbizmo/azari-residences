@@ -24,7 +24,7 @@ class MarketplaceSearchService
         private readonly ReviewSummaryService $reviews,
     ) {}
 
-    public function search(array $filters, bool $includeFacets = true): array
+    public function search(array $filters, bool $includeFacets = true, ?int $probePageSize = null): array
     {
         $checkIn = CarbonImmutable::parse($filters['check_in'])->startOfDay();
         $checkOut = CarbonImmutable::parse($filters['check_out'])->startOfDay();
@@ -65,7 +65,11 @@ class MarketplaceSearchService
 
         $this->applySort($query, $filters);
 
-        $perPage = max(6, min((int) config('reserva.search.per_page', 15), 30));
+        // Flexible-date previews only need one canonical available quote;
+        // avoid eager loading and quoting a full results page for every day.
+        $perPage = $probePageSize !== null
+            ? max(1, min($probePageSize, 30))
+            : max(6, min((int) config('reserva.search.per_page', 15), 30));
         $paginator = $query->paginate($perPage)->withQueryString();
 
         $reviewSummaries = $this->reviews->forProperties(
