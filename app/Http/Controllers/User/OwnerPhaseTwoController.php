@@ -339,6 +339,8 @@ class OwnerPhaseTwoController extends Controller
         $conversations = BookingConversation::query()
             ->where('property_id', $property->id)
             ->with(['messages' => fn ($q) => $q->latest()->limit(1)])
+            ->withCount(['messages as guest_unread_count' => fn ($q) => $q
+                ->where('sender_type', 'guest')->whereNull('read_at')])
             ->orderByDesc('last_message_at')
             ->paginate(25);
 
