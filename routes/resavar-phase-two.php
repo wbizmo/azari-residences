@@ -5,6 +5,7 @@ use App\Http\Controllers\User\OwnerCommercialInventoryController;
 use App\Http\Controllers\User\OwnerPhaseTwoController;
 use App\Http\Controllers\UserArea\PhaseTwoGuestController;
 use App\Http\Controllers\UserArea\ReviewController;
+use App\Http\Controllers\UserArea\BookingShareController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer'])->group(function (): void {
@@ -49,6 +50,11 @@ Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer'])->group
         Route::post('/arrival/check-in', [PhaseTwoGuestController::class, 'selfCheckIn'])
             ->middleware('throttle:5,10')->name('arrival.check-in');
     });
+
+    Route::post('/account/bookings/{reference}/share', [BookingShareController::class, 'create'])
+        ->middleware('throttle:5,60')->name('user.bookings.share.create');
+    Route::delete('/account/bookings/{reference}/share', [BookingShareController::class, 'revoke'])
+        ->middleware('throttle:10,60')->name('user.bookings.share.revoke');
 
     Route::patch('/account/bookings/{booking}/review', [ReviewController::class, 'update'])->name('user.reviews.update');
     Route::post('/account/bookings/{booking}/review/appeal', [ReviewController::class, 'appeal'])
