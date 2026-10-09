@@ -88,7 +88,19 @@ class AzariAvailabilityController extends Controller
                     report($exception);
                     return null;
                 }
-            })->filter(fn ($item) => $item && $item['example_total'] !== null)->values();
+            })->filter(fn ($item) => $item !== null)->values();
+
+            // Show a genuine rolling date grid, including dates with no
+            // confirmed quote. Unavailable cells are not bookable links.
+            $firstCurrent = $results->getCollection()->first();
+            $alternatives = $alternatives->push([
+                'check_in' => $baseCheckIn->toDateString(),
+                'check_out' => $baseCheckOut->toDateString(),
+                'count' => $results->total(),
+                'example_total' => $firstCurrent['quote']['total'] ?? null,
+                'currency' => $firstCurrent['quote']['currency'] ?? null,
+                'current' => true,
+            ])->sortBy('check_in')->values();
         }
 
         $locations = Location::query()
