@@ -12,6 +12,18 @@ The scheduler runs `azari:heartbeat` every minute. It records a scheduler heartb
 
 If the queue heartbeat is stale, inspect worker supervision and failed jobs before accepting new production load. If the scheduler heartbeat is stale, confirm the system cron invokes `php artisan schedule:run` every minute.
 
+## Safe failed-job replay
+
+On **System health → Failed jobs**, administrators with system-health.manage may requeue only explicitly allowlisted, repeat-safe jobs (queue heartbeat, channel sync and managed image derivatives). The retry endpoint is CSRF protected, throttled, single-flight per failed job and audited; it never dumps failed-job payloads or exception bodies to the page. Failed bookings, refunds, provider transfers or other unapproved job types must be investigated and reconciled rather than manually replayed.
+
+Before using the control, confirm the original failure cause is resolved. Recheck job state, channel sellability and side effects afterwards. A successful queue submission is **not** evidence the job has completed.
+
+For a production deployment, configure a shared atomic cache-lock backend across all workers (database or Redis) and a durable queue connection; \`sync\` and \`null\` queue drivers are inappropriate for production. Calendar imports use a single-flight 120-second lock and delay missing-event cancellation by 30 minutes unless the operator explicitly allows a reviewed empty snapshot.
+
+## Repeatable search metrics
+
+Use \`php artisan resavar:benchmark-search --runs=50 --json\` in a controlled, isolated environment, not against live traffic. The command emits p50, p95 and p99 search latency, query distribution and PHP peak memory. Record hardware, MySQL version/isolation, dataset size, cache state, query plans and concurrency separately. It is read-only and **not** a checkout load test or a production SLA.
+
 ## Backup and restore drill
 
 Create and verify a backup with `php artisan azari:backup --verify`. Run `php artisan azari:backup-restore-check` to verify checksum, gzip decompression and structural integrity without changing production data.
