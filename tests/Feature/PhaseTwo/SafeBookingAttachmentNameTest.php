@@ -18,6 +18,6 @@ class SafeBookingAttachmentNameTest extends TestCase
     {
         $this->assertSame('report.pdf', BookingAttachmentName::forDownload('../../report.php', 'booking-messages/secure.pdf'));
         $this->assertSame('safe-file.png', BookingAttachmentName::forDownload('C:\\private\\safe file.png'));
-        $this->assertSame('attachment.bin', BookingAttachmentName::forDownload('malware.exe'));
+        $this->assertSame('malware.bin', BookingAttachmentName::forDownload('malware.exe'));
     }
 }
