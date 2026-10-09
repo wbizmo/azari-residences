@@ -24,6 +24,8 @@ Route::prefix('azaridevadmin')->name('azari.admin.')->middleware('azari.staff')-
         ->middleware('azari.permission:bookings.edit')
         ->name('bookings.modifications.review');
     Route::get('/bookings/{booking}/receipt', [BookingManagementController::class, 'receipt'])->name('bookings.receipt');
+    Route::get('/bookings/{booking}/cancellation-quote', [BookingManagementController::class, 'cancellationQuote'])
+        ->middleware('azari.permission:bookings.view')->name('bookings.cancellation-quote');
     Route::put('/bookings/{booking}/cancel', AzariBookingCancellationController::class)
         ->middleware('azari.permission:bookings.edit')->name('bookings.cancel');
 });
