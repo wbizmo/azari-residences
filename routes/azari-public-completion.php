@@ -7,8 +7,12 @@ use App\Http\Controllers\PublicSite\AvailabilitySearchController;
 use App\Http\Controllers\PublicSite\DestinationSearchController;
 use App\Http\Controllers\PublicSite\AzariAvailabilityController;
 use App\Http\Controllers\PublicSite\PublicPageController;
+use App\Http\Controllers\UserArea\BookingShareController;
 use App\Http\Controllers\PublicSite\PublicPropertyReviewsController;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/stay-share/{token}', [BookingShareController::class, 'show'])
+    ->middleware('throttle:60,1')->name('public.booking-share.show');
 
 Route::get('/availability', [PublicPageController::class, 'availability'])
     ->name('availability.index');

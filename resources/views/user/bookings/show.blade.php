@@ -11,6 +11,33 @@
     $directionsUrl = $showLocation ? $booking->directionsUrl() : null;
 @endphp
 
+@if(in_array($booking->status, ['approved','confirmed','paid','check_in','checked_in','checked_out','completed'], true))
+<section class="az-user-panel" aria-label="Share a limited itinerary" style="margin-bottom:18px">
+    <header class="az-user-panel-header">
+        <div><h2 class="az-user-panel-title">Share a limited itinerary</h2>
+            <p class="az-user-panel-subtitle">Create a 24-hour read-only link showing the property and stay dates, without your contact details, reservation reference, payments or documents. Creating a new link invalidates the previous one.</p>
+        </div>
+    </header>
+    <div class="az-user-panel-body">
+        @if(session('itinerary_share_url'))
+            <label><span>Copy this link now. It will not be shown again.</span>
+                <input readonly value="{{ session('itinerary_share_url') }}" aria-label="Limited itinerary share URL">
+            </label>
+        @endif
+        <div class="az-user-actions">
+            <form method="POST" action="{{ route('user.bookings.share.create', $booking->reference) }}">
+                @csrf
+                <button type="submit" class="az-user-button az-user-button--dark">Create new share link</button>
+            </form>
+            <form method="POST" action="{{ route('user.bookings.share.revoke', $booking->reference) }}">
+                @csrf @method('DELETE')
+                <button type="submit" class="az-user-button az-user-button--light">Revoke shared link</button>
+            </form>
+        </div>
+    </div>
+</section>
+@endif
+
 <div class="az-user-actions" style="margin-bottom:18px">
     <a class="az-user-button az-user-button--dark" href="{{ route('user.bookings.receipt', $booking->reference) }}" target="_blank">
         <span class="material-symbols-outlined">description</span> Print invoice
