@@ -54,7 +54,7 @@ class ReservaDesignSystemRegressionTest extends TestCase
         $this->assertStringContainsString('color: var(--reserva-navy) !important;', $css);
     }
 
-    public function test_customer_facing_templates_do_not_contain_the_retired_resavar_name(): void
+    public function test_customer_facing_templates_do_not_contain_the_old_resarva_name(): void
     {
         $files = $this->bladeFiles(resource_path('views'));
 
@@ -76,7 +76,7 @@ class ReservaDesignSystemRegressionTest extends TestCase
         foreach ($files as $file) {
             $contents = file_get_contents($file->getPathname());
 
-            if (preg_match('/\b(?:Resavar|RESAVAR)\b/', $contents) === 1) {
+            if (preg_match('/\b(?:Resarva|RESARVA)\b/', $contents) === 1) {
                 $offenders[] = str_replace(base_path().DIRECTORY_SEPARATOR, '', $file->getPathname());
             }
         }
@@ -84,7 +84,7 @@ class ReservaDesignSystemRegressionTest extends TestCase
         $this->assertSame(
             [],
             $offenders,
-            'Retired Resavar branding remains in: '.implode(', ', $offenders)
+            'Retired Resarva branding remains in: '.implode(', ', $offenders)
         );
     }
 

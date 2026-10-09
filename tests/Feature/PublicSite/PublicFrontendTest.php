@@ -14,7 +14,7 @@ class PublicFrontendTest extends TestCase
         $this->get('/')
             ->assertOk()
             ->assertSee('Exceptional stays, thoughtfully managed.')
-            ->assertSee('Find your residence')
+            ->assertSee('Check availability')
             ->assertSee('Back to top', false);
     }
 
@@ -28,7 +28,7 @@ class PublicFrontendTest extends TestCase
     public function test_public_navigation_contains_required_primary_actions(): void
     {
         $this->get('/')
-            ->assertSee('Residences')
+            ->assertSee('Apartments')
             ->assertSee('Services')
             ->assertSee('Verify booking')
             ->assertSee('Book now');
