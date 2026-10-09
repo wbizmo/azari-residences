@@ -488,9 +488,12 @@ html[data-admin-theme="dark"] :is(.az-section-heading__meta,.az-topbar-page__eye
     color: inherit;
     -webkit-text-fill-color: currentColor;
 }
-.az-user-button--dark,
-.az-user-button--dark > .material-symbols-outlined {
+.az-user-button--dark {
     background-color: #052058;
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+.az-user-button--dark > .material-symbols-outlined {
     color: #FFFFFF !important;
     -webkit-text-fill-color: #FFFFFF !important;
 }
@@ -615,6 +618,11 @@ html[data-admin-theme="dark"] :is(.az-section-heading__meta,.az-topbar-page__eye
 
 /* Address lookup uses navy spinner on light map/search surfaces. */
 .az-address-fields { min-width: 0; }
+.az-address-fields [data-azari-address-status][hidden],
+.az-address-fields [data-azari-address-results][hidden],
+.az-address-fields .az-address-spinner[hidden] {
+    display: none !important;
+}
 .az-address-fields [data-azari-address-status] {
     display: flex;
     align-items: center;
