@@ -73,6 +73,30 @@
             @endif
             <button class="az-button" type="submit">Update moderation</button>
         </form>
+        @if($review->appeal)
+            <section class="az-admin-card" aria-label="Guest review moderation appeal" style="margin-top:14px">
+                <strong>Guest moderation appeal: {{ Str::headline($review->appeal->status) }}</strong>
+                <p>{{ $review->appeal->reason }}</p>
+                @if($review->appeal->status === 'pending')
+                    <form method="POST" action="{{ route('azari.admin.reviews.appeal', $review) }}" class="az-form-grid">
+                        @csrf
+                        <label><span>Decision</span>
+                            <select name="decision" required>
+                                <option value="">Choose decision</option>
+                                <option value="accepted">Accept and restore review</option>
+                                <option value="rejected">Reject appeal</option>
+                            </select>
+                        </label>
+                        <label class="wide"><span>Decision note (required when rejected)</span>
+                            <textarea name="decision_note" maxlength="2000" rows="3"></textarea>
+                        </label>
+                        <button class="az-button" type="submit">Record appeal decision</button>
+                    </form>
+                @elseif($review->appeal->decision_note)
+                    <p>Decision note: {{ $review->appeal->decision_note }}</p>
+                @endif
+            </section>
+        @endif
     </article>
 @endforeach
 
