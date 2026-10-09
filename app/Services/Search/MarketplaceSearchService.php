@@ -181,6 +181,26 @@ class MarketplaceSearchService
             return $query->whereKey((int) $filters['property_id']);
         }
 
+        if (isset($filters['north'], $filters['south'], $filters['east'], $filters['west'])) {
+            $north = (float) $filters['north'];
+            $south = (float) $filters['south'];
+            $east = (float) $filters['east'];
+            $west = (float) $filters['west'];
+
+            $query->whereNotNull('latitude')->whereNotNull('longitude')
+                ->whereBetween('latitude', [$south, $north]);
+
+            if ($west <= $east) {
+                $query->whereBetween('longitude', [$west, $east]);
+            } else {
+                // Antimeridian viewport: longitudes are either west..180 or -180..east.
+                $query->where(function (Builder $longitude) use ($west, $east): void {
+                    $longitude->where('longitude', '>=', $west)
+                        ->orWhere('longitude', '<=', $east);
+                });
+            }
+        }
+
         $query
             ->when($filters['location_id'] ?? null, fn (Builder $q, $value) => $q->where('location_id', (int) $value))
             ->when($filters['room_type_id'] ?? null, fn (Builder $q, $value) => $q->where('room_type_id', (int) $value))
