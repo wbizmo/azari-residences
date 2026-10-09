@@ -10,6 +10,10 @@ Schedule::command('resavar:recover-amendment-payments --limit=50')->everyFiveMin
 Schedule::command('azari:send-transactional-reminders')->hourly()->withoutOverlapping();
 Schedule::command('azari:send-unpaid-booking-reminders')->everyFiveMinutes()->withoutOverlapping();
 Schedule::command('azari:provision-successful-booking-accounts')->hourly()->withoutOverlapping();
+if (config('filesystems.media_backup_schedule_enabled', false)) {
+    Schedule::command('resavar:backup-private-media')
+        ->dailyAt('03:10')->name('offsite-private-media-backup')->withoutOverlapping();
+}
 Schedule::command('model:prune')->daily();
 Schedule::command('azari:expire-unpaid-bookings')->everyFiveMinutes()->name('expire-unpaid-bookings')->withoutOverlapping();
 Schedule::command('azari:sitemap')->dailyAt('04:15')->name('public-sitemap')->withoutOverlapping();

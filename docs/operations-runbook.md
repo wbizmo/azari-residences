@@ -31,7 +31,28 @@ Create and verify a backup with `php artisan azari:backup --verify`. Run `php ar
 For a real restore, never restore over a live production database. Provision an isolated database from the same schema version, stop application writes, decrypt/copy the backup through the approved secret-handling path, verify its checksum, restore tables in dependency order, run booking/payment/inventory reconciliation, run the full local Laravel and Playwright suites against the isolated restore, then perform an explicit controlled cutover. Preserve the original production database until reconciliation and rollback windows have expired.
 
 
-### Executable isolated database restore rehearsal
+#### Encrypted offsite private-media backup and isolated recovery
+
+Database backups alone do **not** recover identity documents or other non-database private assets. A separate, **opt-in** media archive is implemented by \`resavar:backup-private-media\`. The command uses private storage as a **read-only source**, excludes existing DB-backup archives, encrypts file **paths and contents** into independent authenticated 256 KiB chunks, uploads them to dedicated \`resavar_offsite\` storage, publishes the signed/encrypted manifest last, then reads back/decrypts/checks **all files and hashes**. It never claims a completed backup if any chunk is missing or fails verification.
+
+**Configuration (operators only; never commit credentials):**
+
+- Install/configure the Laravel S3 Flysystem adapter in the deployment environment if not bundled, and provision a separate bucket with restricted write/read access, versioning and server-side encryption / object-lock retention. Do not point the offsite disk to the same local folder as private media.
+- Set \`RESAVAR_OFFSITE_BACKUP_DISK=resavar_offsite\`, \`RESAVAR_OFFSITE_ACCESS_KEY_ID\`, \`RESAVAR_OFFSITE_SECRET_ACCESS_KEY\`, \`RESAVAR_OFFSITE_REGION\`, \`RESAVAR_OFFSITE_BUCKET\`; optional endpoint and root settings are \`RESAVAR_OFFSITE_ENDPOINT\` and \`RESAVAR_OFFSITE_ROOT\`. Backups are **not** enabled automatically when these are absent.
+- To enable daily non-overlapping scheduled media archives at 03:10 application time, set \`RESAVAR_PRIVATE_MEDIA_BACKUP_ENABLED=true\` and reload configuration/scheduler. Ensure the offsite bucket has independently enforced retention/lifecycle policies. Missing offsite connectivity must alert; never silently fall back to the production disk.
+
+**Commands:**
+
+1. \`php artisan resavar:backup-private-media\` creates and fully verifies the encrypted archive; record its returned \`manifest\` and backup timestamp.
+2. \`php artisan resavar:backup-private-media --manifest="resavar/private-media/<RUN_ID>/manifest.rsvenc"\` independently re-verifies every offsite object against the authenticated manifest and SHA-256 hashes.
+3. Provision a **new empty local directory** whose canonical path contains \`restore\` or \`drill\`, outside and not above/below \`storage/app/private\`. Point \`RESAVAR_MEDIA_RESTORE_ROOT\` there. Do not connect outbound mail, webhooks, or public endpoints.
+4. \`php artisan resavar:backup-private-media --manifest="resavar/private-media/<RUN_ID>/manifest.rsvenc" --restore-drill --confirm-isolated=RESTORE_PRIVATE_MEDIA_TO_ISOLATED_ROOT\` verifies everything first, refuses any nonempty destination (including symlinks) and checks each restored file's size and SHA-256.
+5. Use \`resavar:restore-drill\` separately for the matching database snapshot. Cross-check DB identity document records and expected private paths, run read-only document retrieval under proper role permissions, and record actual recovery time/point in [operator acceptance #123](https://github.com/wbizmo/azari-residences/issues/123). Never serve the isolated copy publicly.
+
+**Important:** Copy and protect the matching Laravel \`APP_KEY\` independently; both database and private-media ciphertext are unrecoverable without it. Key rotation needs an explicit re-encryption plan. Objects left by interrupted uploads have no published manifest; configure offsite lifecycle cleanup for orphaned chunks, while retaining valid snapshots under immutable policy. Do **not** treat a locally passing parser/CI build as a verified offsite recovery.
+
+
+## Executable isolated database restore rehearsal
 
 The database archive is **not** a replacement for the private-media archive. This command never restores into the live application connection. It requires a separate database, matching migrations, and explicit confirmation.
 
