@@ -165,11 +165,11 @@ class PhaseTwoGuestController extends Controller
     public function selfCheckIn(Request $request, string $reference): RedirectResponse
     {
         $booking = $this->booking($request, $reference);
-        abort_unless($booking->isCheckInEligible(), 422);
+        abort_unless($booking->isSelfCheckInEligible(), 422);
 
         DB::transaction(function () use ($booking, $request): void {
             $locked = $request->user()->bookings()->whereKey($booking->id)->lockForUpdate()->firstOrFail();
-            abort_unless($locked->isCheckInEligible(), 422);
+            abort_unless($locked->isSelfCheckInEligible(), 422);
 
             $locked->update(['checked_in_at' => now(), 'status' => 'checked_in']);
             StayLifecycleEvent::query()->create([
