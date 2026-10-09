@@ -82,12 +82,13 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->text('endpoint');
+            $table->char('endpoint_hash', 64);
             $table->text('public_key');
             $table->text('auth_token');
             $table->string('user_agent', 1000)->nullable();
             $table->timestamp('revoked_at')->nullable();
             $table->timestamps();
-            $table->unique(['user_id', 'endpoint']);
+            $table->unique(['user_id', 'endpoint_hash']);
         });
 
         Schema::table('inventory_change_logs', function (Blueprint $table): void {
@@ -108,9 +109,6 @@ return new class extends Migration
             }
             if (! Schema::hasColumn('support_tickets', 'sla_due_at')) {
                 $table->timestamp('sla_due_at')->nullable()->after('severity');
-            }
-            if (! Schema::hasColumn('support_tickets', 'escalated_at')) {
-                $table->timestamp('escalated_at')->nullable()->after('sla_due_at');
             }
         });
 
@@ -159,7 +157,7 @@ return new class extends Migration
             }
         });
         Schema::table('support_tickets', function (Blueprint $table): void {
-            foreach (['severity', 'sla_due_at', 'escalated_at'] as $column) {
+            foreach (['severity', 'sla_due_at'] as $column) {
                 if (Schema::hasColumn('support_tickets', $column)) $table->dropColumn($column);
             }
         });
