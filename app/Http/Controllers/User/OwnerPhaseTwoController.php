@@ -200,6 +200,13 @@ class OwnerPhaseTwoController extends Controller
             'status' => 'open',
         ]);
 
+        if (! empty($data['booking_id']) && in_array($data['type'], ['housekeeping', 'inspection', 'maintenance'], true)) {
+            Booking::query()->whereKey($data['booking_id'])->update([
+                'room_ready_at' => null,
+                'room_ready_by' => null,
+            ]);
+        }
+
         AuditLog::record('property_operations.task_created', $task);
 
         return back()->with('success', 'Operations task created.');
@@ -233,11 +240,67 @@ class OwnerPhaseTwoController extends Controller
             'completed_at' => $data['status'] === 'completed' ? now() : null,
         ]);
 
+        if ($task->booking_id
+            && in_array($task->type, ['housekeeping', 'inspection', 'maintenance'], true)
+            && ! in_array($task->status, ['completed', 'cancelled'], true)) {
+            Booking::query()->whereKey($task->booking_id)->update([
+                'room_ready_at' => null,
+                'room_ready_by' => null,
+            ]);
+        }
+
         AuditLog::record('property_operations.task_updated', $task, $before, $task->only(['status', 'notes', 'assigned_to']));
 
         return back()->with('success', 'Task updated.');
     }
 
+
+    public function markRoomReady(
+        Request $request,
+        Property $property,
+        Booking $booking,
+        PropertyAccessService $access
+    ): RedirectResponse {
+        $access->assert($request->user(), $property, 'operations.manage');
+        abort_unless((int) $booking->property_id === (int) $property->id, 404);
+        abort_unless(in_array($booking->status, ['confirmed', 'paid'], true), 422);
+
+        $blockingTask = PropertyOperationsTask::query()
+            ->where('property_id', $property->id)
+            ->where('booking_id', $booking->id)
+            ->whereIn('type', ['housekeeping', 'inspection', 'maintenance'])
+            ->whereNotIn('status', ['completed', 'cancelled'])
+            ->exists();
+
+        abort_if($blockingTask, 422, 'Complete or cancel blocking housekeeping, inspection and maintenance tasks first.');
+
+        $before = $booking->only(['room_ready_at', 'room_ready_by']);
+        $booking->update([
+            'room_ready_at' => now(),
+            'room_ready_by' => $request->user()->id,
+        ]);
+
+        AuditLog::record('booking.room_ready', $booking, $before, $booking->only(['room_ready_at', 'room_ready_by']));
+
+        return back()->with('success', 'Room marked ready for guest arrival.');
+    }
+
+    public function revokeRoomReady(
+        Request $request,
+        Property $property,
+        Booking $booking,
+        PropertyAccessService $access
+    ): RedirectResponse {
+        $access->assert($request->user(), $property, 'operations.manage');
+        abort_unless((int) $booking->property_id === (int) $property->id, 404);
+        abort_if($booking->checked_in_at, 422, 'Room readiness cannot be revoked after check-in.');
+
+        $before = $booking->only(['room_ready_at', 'room_ready_by']);
+        $booking->update(['room_ready_at' => null, 'room_ready_by' => null]);
+        AuditLog::record('booking.room_ready_revoked', $booking, $before, []);
+
+        return back()->with('success', 'Room readiness revoked.');
+    }
 
     public function reviews(Request $request, Property $property, PropertyAccessService $access): View
     {
