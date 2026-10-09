@@ -52,12 +52,12 @@ class RefundSettlementEvidenceTest extends TestCase
             'reference' => 'PAY-REF-003',
         ]);
         $refund = app(RefundService::class)->request($payment, 25, $staff->id, 'Test', 'provider-key');
-        $this->actingAs($staff)
+        $this->actingAs($staff)->withSession(['auth.password_confirmed_at' => time()])
             ->patch(route('azari.admin.payments.refunds.update', [$payment, $refund]), [
                 'action' => 'successful',
                 'provider_reference' => 'unverified-operator-supplied-id',
             ])->assertSessionHasErrors('action');
-        $this->actingAs($staff)
+        $this->actingAs($staff)->withSession(['auth.password_confirmed_at' => time()])
             ->patch(route('azari.admin.payments.refunds.update', [$payment, $refund]), [
                 'action' => 'processing',
                 'provider_reference' => 'unverified-operator-supplied-id',
