@@ -63,12 +63,15 @@ class PhaseTwoGuestController extends Controller
             ['property_id' => $booking->property_id]
         );
 
+        abort_if($conversation->closed_at, 422, 'This booking conversation is closed.');
+
         $file = $request->file('attachment');
         $attachmentPath = $file?->store('booking-messages', 'private');
 
         try {
             $created = DB::transaction(function () use ($conversation, $request, $data, $file, $attachmentPath): bool {
                 $locked = BookingConversation::query()->whereKey($conversation->id)->lockForUpdate()->firstOrFail();
+                abort_if($locked->closed_at, 422, 'This booking conversation is closed.');
 
                 // A browser retry or two concurrent tabs must not send a duplicate.
                 if ($locked->messages()
