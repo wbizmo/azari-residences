@@ -173,6 +173,7 @@ class PhaseTwoGuestController extends Controller
             'keys.auth' => ['required', 'string', 'max:1000'],
         ]);
 
+        $this->assertSecurePushEndpoint($data['endpoint']);
         $endpointHash = hash('sha256', $data['endpoint']);
 
         DB::table('web_push_subscriptions')->updateOrInsert(
@@ -195,6 +196,8 @@ class PhaseTwoGuestController extends Controller
     {
         $data = $request->validate(['endpoint' => ['required', 'url', 'max:4000']]);
 
+        $this->assertSecurePushEndpoint($data['endpoint']);
+
         DB::table('web_push_subscriptions')
             ->where('user_id', $request->user()->id)
             ->where('endpoint_hash', hash('sha256', $data['endpoint']))
@@ -202,4 +205,29 @@ class PhaseTwoGuestController extends Controller
 
         return response()->json(['ok' => true]);
     }
+    private function assertSecurePushEndpoint(string $endpoint): void
+    {
+        $parts = parse_url($endpoint);
+        $hostname = strtolower((string) ($parts['host'] ?? ''));
+        $scheme = strtolower((string) ($parts['scheme'] ?? ''));
+
+        // Never let a saved browser endpoint become an arbitrary intranet
+        // or loopback fetch target for future queued web-push delivery.
+        $forbidden = $scheme !== 'https'
+            || $hostname === ''
+            || isset($parts['user']) || isset($parts['pass'])
+            || isset($parts['port']) && (int) $parts['port'] !== 443
+            || $hostname === 'localhost'
+            || str_ends_with($hostname, '.localhost')
+            || str_ends_with($hostname, '.local')
+            || str_ends_with($hostname, '.internal')
+            || str_ends_with($hostname, '.test');
+
+        if (filter_var(trim($hostname, '[]'), FILTER_VALIDATE_IP)) {
+            $forbidden = true;
+        }
+
+        abort_if($forbidden, 422, 'A secure browser push service endpoint is required.');
+    }
+
 }
