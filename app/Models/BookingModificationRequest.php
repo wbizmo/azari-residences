@@ -13,6 +13,9 @@ class BookingModificationRequest extends Model
     {
         return [
             'requested_changes' => 'array',
+            'price_quote' => 'array',
+            'quote_expires_at' => 'datetime',
+            'accepted_at' => 'datetime',
             'reviewed_at' => 'datetime',
         ];
     }
