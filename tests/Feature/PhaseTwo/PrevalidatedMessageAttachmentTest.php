@@ -10,9 +10,17 @@ class PrevalidatedMessageAttachmentTest extends TestCase
 {
     public function test_unsupported_bytes_fail_before_storage_with_a_safe_error(): void
     {
-        $file = UploadedFile::fake()->createWithContent('fake-photo.jpg', 'plain text is not a JPEG image');
-        $this->expectException(\Symfony\Component\HttpKernel\Exception\HttpException::class);
-        BookingAttachmentName::fromUpload($file);
+        $path = tempnam(sys_get_temp_dir(), 'resavar-invalid-');
+        file_put_contents($path, 'plain text is not a JPEG image');
+        try {
+            // Real temporary file: finfo detects text/plain, regardless of
+            // the filename supplied by the browser.
+            $file = new UploadedFile($path, 'fake-photo.jpg', null, null, true);
+            $this->expectException(\Symfony\Component\HttpKernel\Exception\HttpException::class);
+            BookingAttachmentName::fromUpload($file);
+        } finally {
+            unlink($path);
+        }
     }
 
     public function test_both_inbox_uploads_validate_content_before_storing_file(): void
