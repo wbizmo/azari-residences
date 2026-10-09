@@ -4,7 +4,6 @@ namespace App\Services\Bookings;
 
 use App\Models\Property;
 use Carbon\CarbonInterface;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -28,6 +27,11 @@ class AvailabilityService
 
     public function quote(int $propertyId, CarbonInterface $checkIn, CarbonInterface $checkOut): array
     {
+        if ($checkOut->toDateString() <= $checkIn->toDateString()) {
+            throw ValidationException::withMessages([
+                'check_out' => 'Check-out must follow check-in.',
+            ]);
+        }
         $property = Property::query()->findOrFail($propertyId);
         $type = $this->engine->resolveAccommodationType($property);
         $ratePlan = $type ? $this->engine->resolveRatePlan($type) : null;
