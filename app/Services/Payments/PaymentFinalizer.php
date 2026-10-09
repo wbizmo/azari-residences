@@ -3,6 +3,7 @@
 namespace App\Services\Payments;
 
 use App\Models\AuditLog;
+use App\Models\Booking;
 use App\Models\BookingStatusHistory;
 use App\Models\Payment;
 use App\Models\PaymentProviderStatus;
@@ -50,59 +51,64 @@ class PaymentFinalizer
                 AuditLog::record('payment.verification_conflict_after_success', $payment, [], [], ['result' => $result, 'source' => $source]);
                 return $payment->refresh();
             }
-            $payment->update([
-                'status' => 'invalid',
-                'provider_reference' => $verification['provider_reference'] ?? $payment->provider_reference,
-                'provider_response_summary' => $verification['safe_response'] ?? null,
-            ]);
+            Payment::query()->whereKey($payment->getKey())
+                ->whereNotIn('status', [Payment::SUCCESSFUL, 'successful_excess'])
+                ->update([
+                    'status' => 'invalid',
+                    'provider_reference' => $verification['provider_reference'] ?? $payment->provider_reference,
+                    'provider_response_summary' => $verification['safe_response'] ?? null,
+                ]);
             AuditLog::record('payment.verification_rejected', $payment, [], [], ['result' => $result, 'source' => $source]);
             return $payment->refresh();
         }
 
         if ($result === 'pending') {
             if (! $payment->isSuccessful() && $payment->status !== 'successful_excess') {
-                $payment->update([
-                    'status' => 'pending',
-                    'provider_reference' => $verification['provider_reference'] ?? $payment->provider_reference,
-                    'provider_response_summary' => $verification['safe_response'] ?? null,
-                ]);
+                Payment::query()->whereKey($payment->getKey())
+                    ->whereNotIn('status', [Payment::SUCCESSFUL, 'successful_excess'])
+                    ->update([
+                        'status' => 'pending',
+                        'provider_reference' => $verification['provider_reference'] ?? $payment->provider_reference,
+                        'provider_response_summary' => $verification['safe_response'] ?? null,
+                    ]);
             }
             return $payment->refresh();
         }
 
         if ($result === 'failed') {
             if (! $payment->isSuccessful() && $payment->status !== 'successful_excess') {
-                $payment->update([
-                    'status' => 'failed',
-                    'failed_at' => now(),
-                    'provider_reference' => $verification['provider_reference'] ?? $payment->provider_reference,
-                    'provider_response_summary' => $verification['safe_response'] ?? null,
-                ]);
+                Payment::query()->whereKey($payment->getKey())
+                    ->whereNotIn('status', [Payment::SUCCESSFUL, 'successful_excess'])
+                    ->update([
+                        'status' => 'failed',
+                        'failed_at' => now(),
+                        'provider_reference' => $verification['provider_reference'] ?? $payment->provider_reference,
+                        'provider_response_summary' => $verification['safe_response'] ?? null,
+                    ]);
             }
             AuditLog::record('payment.failed', $payment, [], [], ['source' => $source]);
             return $payment->refresh();
         }
 
         return DB::transaction(function () use ($payment, $verification, $source): Payment {
-            $locked = 
-        Payment::query()
-                ->whereKey($payment->id)
+            // All payment writers/refund allocators lock booking first,
+            // then payment. Reverse order deadlocks under callback/refund
+            // contention even when both operations are individually atomic.
+            $booking = Booking::query()->whereKey($payment->booking_id)
                 ->when(
                     DB::connection()->getDriverName() !== 'sqlite',
                     fn ($query) => $query->lockForUpdate()
-                )
-                ->firstOrFail()
-    ;
-            if ($locked->isSuccessful() || $locked->status === 'successful_excess') return $locked;
+                )->firstOrFail();
 
-            $booking = 
-        $locked->booking()
+            $locked = Payment::query()->whereKey($payment->getKey())
                 ->when(
                     DB::connection()->getDriverName() !== 'sqlite',
                     fn ($query) => $query->lockForUpdate()
-                )
-                ->firstOrFail()
-    ;
+                )->firstOrFail();
+
+            if ($locked->isSuccessful() || $locked->status === 'successful_excess') {
+                return $locked;
+            }
             if ($booking->status === 'cancelled') {
                 $paidAt = filled($verification['paid_at'] ?? null)
                     ? CarbonImmutable::parse((string) $verification['paid_at'])
