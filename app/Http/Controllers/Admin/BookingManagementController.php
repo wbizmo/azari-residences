@@ -94,6 +94,12 @@ class BookingManagementController extends Controller
             'note' => ['nullable', 'string', 'max:2000'],
         ]);
 
+        if ($data['status'] === 'cancelled') {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'status' => 'Use the audited Cancel booking section for this action.',
+            ]);
+        }
+
         $lifecycle->transition(
             $booking,
             $data['status'],
