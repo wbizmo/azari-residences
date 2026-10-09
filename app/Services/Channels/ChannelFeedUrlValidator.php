@@ -12,7 +12,8 @@ class ChannelFeedUrlValidator
         $scheme = strtolower((string) ($parts['scheme'] ?? ''));
         $host = strtolower((string) ($parts['host'] ?? ''));
 
-        if (! in_array($scheme, ['https', 'http'], true) || $host === '' || isset($parts['user']) || isset($parts['pass'])) {
+        if (! in_array($scheme, ['https', 'http'], true) || $host === '' || isset($parts['user']) || isset($parts['pass'])
+            || (isset($parts['port']) && ! in_array((int) $parts['port'], [80, 443], true))) {
             throw new InvalidArgumentException('The calendar URL must be a public HTTP or HTTPS URL without embedded credentials.');
         }
 

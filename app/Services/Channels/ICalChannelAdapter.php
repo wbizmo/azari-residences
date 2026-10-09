@@ -16,7 +16,9 @@ class ICalChannelAdapter implements ChannelAdapter
 
     public function import(ChannelConnection $connection): array
     {
-        if (! $connection->import_url) return [];
+        if (! $connection->import_url) {
+            throw new \RuntimeException('External channel is missing its calendar import URL.');
+        }
         $this->urls->assertSafe($connection->import_url);
         $body = Http::withOptions(['allow_redirects' => false])->timeout(12)->connectTimeout(5)->retry(2, 500, throw: false)->get($connection->import_url);
         if (! $body->successful()) {
@@ -29,8 +31,17 @@ class ICalChannelAdapter implements ChannelAdapter
     /** @return array<int, array<string, mixed>> */
     public function parse(string $ical): array
     {
+        if (strlen($ical) > 2_000_000) {
+            throw new \RuntimeException('External calendar exceeds the safe import size.');
+        }
+        if (! str_contains($ical, 'BEGIN:VCALENDAR') || ! str_contains($ical, 'END:VCALENDAR')) {
+            throw new \RuntimeException('External calendar is missing required calendar boundaries.');
+        }
         $ical = preg_replace("/\r?\n[ \t]/", '', $ical) ?? $ical;
         preg_match_all('/BEGIN:VEVENT\R(.*?)\REND:VEVENT/s', $ical, $matches);
+        if (count($matches[1] ?? []) > 5000) {
+            throw new \RuntimeException('External calendar contains too many events.');
+        }
         $events = [];
         foreach ($matches[1] ?? [] as $block) {
             $fields = [];
@@ -55,6 +66,11 @@ class ICalChannelAdapter implements ChannelAdapter
                 'external_updated_at' => $this->dateTime($fields['LAST-MODIFIED'] ?? null),
                 'source_hash' => hash('sha256', $block),
             ];
+        }
+        // A calendar with VEVENT rows but no parsable reservation must be
+        // treated as corrupt, not as a legitimate zero-reservation snapshot.
+        if ($events === [] && str_contains($ical, 'BEGIN:VEVENT')) {
+            throw new \RuntimeException('External calendar events could not be parsed safely.');
         }
         return $events;
     }

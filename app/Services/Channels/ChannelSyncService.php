@@ -37,10 +37,31 @@ class ChannelSyncService
     public function applySnapshot(ChannelConnection $connection, array $events): array
     {
         return DB::transaction(function () use ($connection, $events): array {
-            ChannelConnection::query()->whereKey($connection->getKey())->lockForUpdate()->firstOrFail();
+            $lockedConnection = ChannelConnection::query()->whereKey($connection->getKey())
+                ->lockForUpdate()->firstOrFail();
+
+            // A truncated/invalid empty feed must not silently release every
+            // external reservation. Legitimate empty snapshots need explicit
+            // opt-in after an operator reviews the supplier calendar.
+            if ($events === []
+                && ! (bool) data_get($lockedConnection->settings, 'allow_empty_snapshot', false)
+                && ChannelReservation::query()->where('channel_connection_id', $connection->getKey())
+                    ->where('status', 'active')->exists()) {
+                throw new \UnexpectedValueException('Empty channel snapshot requires manual confirmation before releasing existing reservations.');
+            }
+
             $now = now(); $seen = []; $imported = 0; $updated = 0;
             foreach ($events as $event) {
-                $externalId = (string) $event['external_id'];
+                $externalId = trim((string) ($event['external_id'] ?? ''));
+                if ($externalId === '' || strlen($externalId) > 255
+                    || ! in_array((string) ($event['status'] ?? 'active'), ['active', 'cancelled'], true)
+                    || empty($event['starts_on']) || empty($event['ends_on'])
+                    || (string) $event['ends_on'] <= (string) $event['starts_on']) {
+                    throw new \UnexpectedValueException('Invalid external reservation in calendar snapshot.');
+                }
+                if (in_array($externalId, $seen, true)) {
+                    throw new \UnexpectedValueException('Duplicate reservation identifiers in external calendar snapshot.');
+                }
                 $seen[] = $externalId;
                 $reservation = ChannelReservation::query()->where('channel_connection_id',$connection->id)->where('external_id',$externalId)->lockForUpdate()->first();
                 $payload = [
