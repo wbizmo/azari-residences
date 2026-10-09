@@ -108,11 +108,32 @@
     border-color: rgba(255,255,255,.65) !important;
     color: var(--reserva-white) !important;
 }
+/* The legacy guest-area CSS sets -webkit-text-fill-color with !important.
+ * Override it explicitly or buttons appear white-on-white / navy-on-navy
+ * in Chromium and Safari despite a correct computed color property. */
+.az-user-welcome .az-user-button--primary,
+.az-user-welcome .az-user-button--primary :is(span,strong,.material-symbols-outlined) {
+    color: var(--reserva-navy) !important;
+    -webkit-text-fill-color: var(--reserva-navy) !important;
+}
+.az-user-welcome .az-user-button--ghost,
+.az-user-welcome .az-user-button--ghost :is(span,strong,.material-symbols-outlined) {
+    color: var(--reserva-white) !important;
+    -webkit-text-fill-color: var(--reserva-white) !important;
+}
 .az-user-welcome .az-user-button--primary:hover,
 .az-user-welcome .az-user-button--ghost:hover {
     background: var(--reserva-black) !important;
     border-color: var(--reserva-black) !important;
     color: var(--reserva-white) !important;
+    -webkit-text-fill-color: var(--reserva-white) !important;
+}
+.az-user-welcome .az-user-button--primary:hover :is(span,strong,.material-symbols-outlined),
+.az-user-welcome .az-user-button--ghost:hover :is(span,strong,.material-symbols-outlined),
+.az-user-welcome .az-user-button--primary:focus-visible :is(span,strong,.material-symbols-outlined),
+.az-user-welcome .az-user-button--ghost:focus-visible :is(span,strong,.material-symbols-outlined) {
+    color: inherit !important;
+    -webkit-text-fill-color: currentColor !important;
 }
 .az-user-status {
     background: var(--reserva-surface-soft) !important;
