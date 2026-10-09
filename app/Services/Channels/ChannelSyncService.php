@@ -123,7 +123,6 @@ class ChannelSyncService
                     $connection->reservations()->create(['external_id'=>$externalId, ...$payload]);
                     $imported++;
                 }
-                else { $connection->reservations()->create(['external_id'=>$externalId, ...$payload]); $imported++; }
             }
             $missing = ChannelReservation::query()
                 ->where('channel_connection_id', $connection->id)
