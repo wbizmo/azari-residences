@@ -272,7 +272,8 @@ class BookingCreationService
         for ($index = 0; $index < $hold->adults; $index++) {
             $rules["adults.$index.first_name"] = ['required', 'string', 'max:80'];
             $rules["adults.$index.last_name"] = ['required', 'string', 'max:80'];
-
+            // Preserve additional adult email through validated checkout drafts.
+            $rules["adults.$index.email"] = ['nullable', 'email:rfc', 'max:190'];
         }
 
         for ($index = 0; $index < $hold->children; $index++) {
