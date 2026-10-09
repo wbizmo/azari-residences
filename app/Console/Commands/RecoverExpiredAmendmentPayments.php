@@ -22,7 +22,18 @@ class RecoverExpiredAmendmentPayments extends Command
         $counts = ['checked' => 0, 'expired' => 0, 'refund_requested' => 0, 'error' => 0];
 
         BookingModificationRequest::query()
-            ->whereIn('status', ['quoted', 'expired'])
+            // Do not starve newer work by repeatedly scanning historical
+            // expired offers with no verified unallocated payment.
+            ->where(function (Builder $query): void {
+                $query->where('status', 'quoted')
+                    ->orWhere(function (Builder $expired): void {
+                        $expired->where('status', 'expired')
+                            ->whereIn('payment_id', Payment::query()
+                                ->select('id')
+                                ->where('status', 'successful_excess')
+                                ->whereNotNull('verified_at'));
+                    });
+            })
             ->whereNotNull('quote_expires_at')
             ->where('quote_expires_at', '<', now())
             ->orderBy('id')->limit($limit)->get()
