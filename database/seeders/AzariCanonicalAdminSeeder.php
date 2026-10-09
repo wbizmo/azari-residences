@@ -27,6 +27,10 @@ class AzariCanonicalAdminSeeder extends Seeder
             $password = '12345678';
         }
 
+        if (! app()->environment('local', 'testing') && strlen($password) < 14) {
+            throw new \RuntimeException('Production bootstrap administrator requires a strong password of at least 14 characters.');
+        }
+
         $user = User::query()->firstOrNew(['email' => $email]);
 
         $values = [
