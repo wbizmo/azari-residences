@@ -37,7 +37,7 @@ if (mapRoot) {
 
     // Mercator tiles represent real geographical positions. Only request visible
     // tiles; do not attempt background tile downloads or user geolocation.
-    const valid = points.filter(point => Number.isFinite(Number(point.lat)) &&
+    let valid = points.filter(point => Number.isFinite(Number(point.lat)) &&
         Number.isFinite(Number(point.lng)) && Math.abs(Number(point.lat)) <= 85.05112878 &&
         Math.abs(Number(point.lng)) <= 180);
     const clamp = (number, min, max) => Math.min(max, Math.max(min, number));
@@ -56,7 +56,18 @@ if (mapRoot) {
         return {lat, lng};
     };
 
-    if (valid.length) {
+    const loadMore = document.querySelector('[data-map-load-more]');
+    const status = document.querySelector('[data-map-status]');
+    const pageCount = Math.min(100, Number(mapRoot.dataset.mapPages) || 1);
+    const loadedPages = new Set([Number(mapRoot.dataset.mapPage) || 1]);
+    const nextUnloadedPage = () => {
+        for (let page = 1; page <= pageCount; page++) {
+            if (!loadedPages.has(page)) return page;
+        }
+        return null;
+    };
+
+    if (valid.length || pageCount > 1) {
         mapRoot.replaceChildren();
         mapRoot.classList.add('reserva-map-shell--geographic');
         const canvas = document.createElement('div');
@@ -96,12 +107,14 @@ if (mapRoot) {
 
         // Use the actual geographic midpoint of the current result page.
         // Antimeridian crossings are treated as a short arc, not 360 degrees.
-        const meanLat = valid.reduce((sum, p) => sum + Number(p.lat), 0) / valid.length;
+        const meanLat = valid.length
+            ? valid.reduce((sum, p) => sum + Number(p.lat), 0) / valid.length
+            : 0;
         const angles = valid.map(p => Number(p.lng) * Math.PI / 180);
-        const meanLng = Math.atan2(
+        const meanLng = valid.length ? Math.atan2(
             angles.reduce((sum, angle) => sum + Math.sin(angle), 0),
             angles.reduce((sum, angle) => sum + Math.cos(angle), 0)
-        ) * 180 / Math.PI;
+        ) * 180 / Math.PI : 0;
         let zoom = 11;
         let center = {lat: meanLat, lng: meanLng};
         let isActive = false;
@@ -194,7 +207,18 @@ if (mapRoot) {
                     pin.setAttribute('aria-label', point.name + ', ' + point.currency + ' ' + point.price);
                     pin.addEventListener('click', () => {
                         const card = document.querySelector('[data-property-card="' + CSS.escape(String(point.id)) + '"]');
-                        if (!card) return;
+                        if (!card) {
+                            // This pin belongs to an additional result page.
+                            // Navigate only to the same-origin property URL
+                            // returned by Resavar; never guess slug routes.
+                            if (typeof point.url === 'string') {
+                                const target = new URL(point.url, window.location.origin);
+                                if (target.origin === window.location.origin) {
+                                    window.location.assign(target.href);
+                                }
+                            }
+                            return;
+                        }
                         document.querySelector('[data-results-view="list"]')?.click();
                         card.classList.add('is-map-active');
                         card.scrollIntoView({behavior: 'smooth', block: 'center'});
@@ -244,6 +268,59 @@ if (mapRoot) {
             destination.searchParams.delete('page');
             window.location.assign(destination.toString());
         });
+        // Explicit progressive loading avoids N pages of quote work on mobile
+        // until the visitor requests more. Each page is independently server
+        // validated and carries a canonical priced eligibility check.
+        if (loadMore) {
+            const updateStatus = () => {
+                if (status) status.textContent = valid.length + ' known-coordinate, server-quoted stays shown on map across ' +
+                    loadedPages.size + ' result ' + (loadedPages.size === 1 ? 'page' : 'pages') + '.';
+                loadMore.hidden = nextUnloadedPage() === null;
+            };
+            updateStatus();
+            loadMore.addEventListener('click', async () => {
+                const page = nextUnloadedPage();
+                if (page === null || loadMore.disabled) return;
+                const endpoint = new URL(mapRoot.dataset.mapEndpoint, window.location.origin);
+                if (endpoint.origin !== window.location.origin) return;
+                const current = new URL(window.location.href);
+                current.searchParams.forEach((value, key) => endpoint.searchParams.append(key, value));
+                endpoint.searchParams.set('page', String(page));
+                loadMore.disabled = true;
+                loadMore.textContent = 'Loading map stays…';
+                try {
+                    const response = await fetch(endpoint, {
+                        credentials: 'same-origin',
+                        headers: {'Accept': 'application/json'}
+                    });
+                    if (!response.ok) throw new Error('Map results unavailable');
+                    const payload = await response.json();
+                    if (!Array.isArray(payload.points) || Number(payload.page) !== page) {
+                        throw new Error('Invalid map response');
+                    }
+                    const seen = new Set(valid.map(point => String(point.id)));
+                    const additional = payload.points.filter(point =>
+                        Number.isFinite(Number(point.lat)) &&
+                        Number.isFinite(Number(point.lng)) &&
+                        Math.abs(Number(point.lat)) <= 85.05112878 &&
+                        Math.abs(Number(point.lng)) <= 180 &&
+                        !seen.has(String(point.id)));
+                    if (valid.length === 0 && additional.length > 0) {
+                        center = {lat: Number(additional[0].lat), lng: Number(additional[0].lng)};
+                    }
+                    valid.push(...additional);
+                    loadedPages.add(page);
+                    updateStatus();
+                    render();
+                } catch {
+                    if (status) status.textContent = 'Could not load more map results. Try again.';
+                } finally {
+                    loadMore.disabled = false;
+                    loadMore.textContent = 'Load more matching stays on map';
+                }
+            });
+        }
+
         document.querySelector('[data-results-view="map"]')?.addEventListener('click', () => {
             isActive = true;
             requestAnimationFrame(render);
