@@ -57,6 +57,55 @@ class ChannelImportReliabilityTest extends TestCase
         $adapter->parse("BEGIN:VCALENDAR\nBEGIN:VEVENT\nUID:broken\nEND:VEVENT\nEND:VCALENDAR\n");
     }
 
+    public function test_one_malformed_event_causes_whole_calendar_to_fail_closed(): void
+    {
+        $ical = "BEGIN:VCALENDAR\nBEGIN:VEVENT\nUID:valid\n"
+            ."DTSTART;VALUE=DATE:20261101\nDTEND;VALUE=DATE:20261103\nEND:VEVENT\n"
+            ."BEGIN:VEVENT\nUID:broken\nDTSTART;VALUE=DATE:invalid\n"
+            ."DTEND;VALUE=DATE:20261104\nEND:VEVENT\nEND:VCALENDAR\n";
+
+        $this->expectException(\RuntimeException::class);
+        app(ICalChannelAdapter::class)->parse($ical);
+    }
+
+    public function test_missing_event_must_survive_grace_period_before_inventory_release(): void
+    {
+        $property = Property::factory()->create();
+        $connection = ChannelConnection::query()->create([
+            'property_id' => $property->id, 'provider' => 'ical',
+            'name' => 'Retention calendar', 'import_url' => 'https://example.org/cal.ics',
+            'status' => 'healthy', 'settings' => [],
+        ]);
+
+        foreach (['A', 'B'] as $id) {
+            ChannelReservation::query()->create([
+                'channel_connection_id' => $connection->id,
+                'property_id' => $property->id,
+                'external_id' => $id, 'status' => 'active',
+                'starts_on' => '2026-11-01', 'ends_on' => '2026-11-03',
+                'quantity' => 1,
+            ]);
+        }
+
+        $snapshot = [[
+            'external_id' => 'A', 'starts_on' => '2026-11-01',
+            'ends_on' => '2026-11-03', 'status' => 'active',
+        ]];
+        $sync = app(ChannelSyncService::class);
+        $first = $sync->applySnapshot($connection, $snapshot);
+        $this->assertSame(0, $first['cancelled']);
+        $missing = ChannelReservation::query()
+            ->where('channel_connection_id', $connection->id)
+            ->where('external_id', 'B')->firstOrFail();
+        $this->assertSame('active', $missing->status);
+        $this->assertNotEmpty($missing->metadata['missing_since']);
+
+        $this->travel(31)->minutes();
+        $second = $sync->applySnapshot($connection, $snapshot);
+        $this->assertSame(1, $second['cancelled']);
+        $this->assertSame('cancelled', $missing->fresh()->status);
+    }
+
     public function test_duplicate_external_uid_cannot_corrupt_snapshot_in_one_import(): void
     {
         $property = Property::factory()->create();
