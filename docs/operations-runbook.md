@@ -73,3 +73,25 @@ Every HTTP response carries `X-Request-ID`. Application logs include the same re
 ## External channel incidents
 
 Channel imports are idempotent by connection + external reservation ID. A stale or failed connection configured `fail_closed` removes its linked inventory from sale until a successful sync. Resolve feed/network/provider failures, trigger a new sync, and verify `last_successful_sync_at` before reopening inventory.
+
+
+### Read-only external provider settlement reconciliation
+
+A successful local payment/refund state is **not** proof of settlement to the merchant bank account. To compare an independently downloaded provider statement to Resavar records, normalize the provider CSV with exact columns:
+
+```csv
+type,reference,currency,amount,status
+payment,PROVIDER-TX-ID,NGN,120.00,settled
+refund,PROVIDER-REFUND-ID,NGN,20.00,settled
+```
+
+Here `reference` is the **provider** reference, not the Resavar merchant reference. `type` is `payment` or `refund`. `status` is `settled` or `reversed`. Amounts are positive normalized decimal major units with exactly two decimal places; do not include fees in these gross amounts. Only run this format for two-decimal currencies. **Do not upload raw provider statements, customer PII, card or identity data to GitHub.**
+
+Place the sanitized statement on a protected local/administrative workstation and execute:
+
+```bash
+php artisan resavar:reconcile-provider-statement flutterwave /secure/normalized-statement.csv --json
+```
+
+The command is read-only. Its failure exit status or exception list calls for human reconciliation. It detects missing/ambiguous provider references, locally unverified settlements, mismatched amounts/currencies, duplicate rows and provider reversals. Summaries are grouped by currency and do not perform FX conversion. A zero-exception report means **only the rows supplied matched**; it does not prove bank payout, fees, absence of omitted rows, or chargeback finality. Compare independent provider and bank account statements and reconcile daily net fees and chargebacks under #123 before final financial signoff.
+
