@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
+use App\Models\BookingModificationRequest;
+use App\Services\Bookings\BookingModificationService;
 use App\Models\AuditLog;
 use App\Models\BookingOperationalNote;
 use App\Services\Bookings\AzariBookingLifecycle;
@@ -100,6 +102,24 @@ class BookingManagementController extends Controller
         );
 
         return back()->with('success', 'Booking status updated.');
+    }
+
+    public function reviewModification(
+        Request $request,
+        Booking $booking,
+        BookingModificationRequest $modification,
+        BookingModificationService $service
+    ): \Illuminate\Http\RedirectResponse {
+        abort_unless((int) $modification->booking_id === (int) $booking->getKey(), 404);
+        $data = $request->validate([
+            'decision' => ['required', 'in:approve,decline'],
+            'staff_note' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        $service->review($booking, $modification, $request->user(),
+            $data['decision'], $data['staff_note'] ?? null);
+
+        return back()->with('success', 'Booking change request reviewed.');
     }
 
     public function receipt(Booking $booking): Response
