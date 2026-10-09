@@ -418,3 +418,38 @@
   box-shadow: 0 3px 16px rgba(5,32,88,.32);
 }
 .reserva-map-cluster:hover, .reserva-map-cluster:focus-visible { background: #173f88; outline: 3px solid #052058; outline-offset: 3px; }
+
+
+/* Price-calendar cells are server-quoted stay windows, never fabricated rates. */
+.reserva-flex-date-options { margin: 24px 0; }
+.reserva-flex-date-options h2 { color: #052058; font-size: clamp(1.1rem, 2vw, 1.4rem); margin: 0 0 6px; }
+.reserva-flex-date-calendar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 158px), 1fr));
+  gap: 10px;
+  margin-top: 16px;
+}
+.reserva-flex-date-tile {
+  display: flex;
+  flex-direction: column;
+  min-height: 138px;
+  padding: 13px;
+  gap: 4px;
+  border: 1px solid #bdc9d9;
+  border-radius: 12px;
+  background: #fff;
+  color: #052058;
+  text-decoration: none;
+}
+a.reserva-flex-date-tile:hover,
+a.reserva-flex-date-tile:focus-visible {
+  border-color: #052058;
+  box-shadow: 0 0 0 2px #052058;
+  outline: none;
+}
+.reserva-flex-date-tile strong { margin-top: 5px; font-size: 1rem; }
+.reserva-flex-date-tile small { font-size: .8rem; }
+.reserva-flex-date-tile.is-selected { background: #052058; border-color: #052058; color: #fff; }
+.reserva-flex-date-tile.is-selected:hover,
+.reserva-flex-date-tile.is-selected:focus-visible { outline: 3px solid #195ee6; outline-offset: 3px; }
+.reserva-flex-date-tile.is-unavailable { background: #eef2f6; color: #46566d; border-style: dashed; }
