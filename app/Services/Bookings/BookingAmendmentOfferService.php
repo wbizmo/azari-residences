@@ -5,6 +5,7 @@ namespace App\Services\Bookings;
 use App\Models\AccommodationType;
 use App\Models\AuditLog;
 use App\Models\Booking;
+use App\Models\BookingAddOn;
 use App\Models\BookingModificationRequest;
 use App\Models\Payment;
 use App\Models\Property;
@@ -36,16 +37,20 @@ class BookingAmendmentOfferService
         return DB::transaction(function () use ($booking, $request, $staff): BookingModificationRequest {
             [$locked, $change, $type] = $this->lock($booking, $request);
 
-            if ($change->status !== 'pending' || $change->type !== 'date_change') {
-                throw ValidationException::withMessages(['change' => 'Only pending date-change requests can be offered a quote.']);
+            if ($change->status !== 'pending' || ! in_array($change->type, ['date_change', 'add_extras'], true)) {
+                throw ValidationException::withMessages(['change' => 'Only pending date or extras changes can be offered a quote.']);
             }
             $this->assertEligible($locked);
-            if (! $this->modifications->policyAllows($locked, 'date_change')) {
-                throw ValidationException::withMessages(['change' => 'The booking is no longer eligible for a date change.']);
+            if (! $this->modifications->policyAllows($locked, $change->type)) {
+                throw ValidationException::withMessages(['change' => 'The booking is no longer eligible for this amendment.']);
             }
 
-            $newStart = $this->parseDate((string) data_get($change->requested_changes, 'check_in'));
-            $newEnd = $this->parseDate((string) data_get($change->requested_changes, 'check_out'));
+            $newStart = $change->type === 'date_change'
+                ? $this->parseDate((string) data_get($change->requested_changes, 'check_in'))
+                : $this->parseDate($locked->check_in->toDateString());
+            $newEnd = $change->type === 'date_change'
+                ? $this->parseDate((string) data_get($change->requested_changes, 'check_out'))
+                : $this->parseDate($locked->check_out->toDateString());
             $ratePlan = $locked->rate_plan_id ? RatePlan::query()
                 ->whereKey($locked->rate_plan_id)->where('accommodation_type_id', $type->getKey())->firstOrFail() : null;
 
@@ -64,6 +69,24 @@ class BookingAmendmentOfferService
             $selectedAddOns = $locked->addOns()->get()->mapWithKeys(
                 fn ($addon) => [$addon->getKey() => (int) $addon->pivot->quantity]
             )->all();
+            if ($change->type === 'add_extras') {
+                $newIds = array_values(array_unique(array_map('intval',
+                    (array) data_get($change->requested_changes, 'add_on_ids', []))));
+                if ($newIds === [] || count($newIds) > 20 || in_array(0, $newIds, true)
+                    || BookingAddOn::query()->whereIn('id', $newIds)->where('is_active', true)->count() !== count($newIds)) {
+                    throw ValidationException::withMessages(['add_on_ids' => 'Choose one or more valid, available extras.']);
+                }
+                $changed = false;
+                foreach ($newIds as $id) {
+                    if (! isset($selectedAddOns[$id])) {
+                        $selectedAddOns[$id] = 1;
+                        $changed = true;
+                    }
+                }
+                if (! $changed) {
+                    throw ValidationException::withMessages(['add_on_ids' => 'These extras are already part of the booking.']);
+                }
+            }
             $quote = $this->pricing->quote($locked->property, $newStart, $newEnd,
                 $selectedAddOns, $type, $ratePlan, (int) $locked->rooms);
 
@@ -82,6 +105,8 @@ class BookingAmendmentOfferService
                 'new_check_out' => $newEnd->toDateString(),
                 'booking_updated_at' => $locked->updated_at?->toIso8601String(),
                 'net_paid' => $locked->netPaidTotal(),
+                'change_type' => $change->type,
+                'selected_add_ons' => $selectedAddOns,
                 'quote' => $quote,
             ];
 
@@ -119,7 +144,8 @@ class BookingAmendmentOfferService
                 throw ValidationException::withMessages(['change' => 'This offer has expired or was already used. Request a fresh quotation.']);
             }
             $this->assertEligible($locked);
-            if (! $this->modifications->policyAllows($locked, 'date_change')) {
+            if (! in_array($change->type, ['date_change', 'add_extras'], true)
+                || ! $this->modifications->policyAllows($locked, $change->type)) {
                 throw ValidationException::withMessages(['change' => 'This booking is no longer eligible for changes.']);
             }
             $snapshot = $change->price_quote;
@@ -146,6 +172,24 @@ class BookingAmendmentOfferService
             $selectedAddOns = $locked->addOns()->get()->mapWithKeys(
                 fn ($addon) => [$addon->getKey() => (int) $addon->pivot->quantity]
             )->all();
+            if ($change->type === 'add_extras') {
+                if (($snapshot['change_type'] ?? null) !== 'add_extras'
+                    || ! is_array($snapshot['selected_add_ons'] ?? null)) {
+                    throw ValidationException::withMessages(['change' => 'The extras quotation is incomplete.']);
+                }
+                $newIds = array_values(array_unique(array_map('intval',
+                    (array) data_get($change->requested_changes, 'add_on_ids', []))));
+                if ($newIds === [] || BookingAddOn::query()->whereIn('id', $newIds)
+                    ->where('is_active', true)->count() !== count($newIds)) {
+                    throw ValidationException::withMessages(['add_on_ids' => 'An extra is no longer available.']);
+                }
+                foreach ($newIds as $id) {
+                    if (isset($selectedAddOns[$id])) {
+                        throw ValidationException::withMessages(['change' => 'An extra has already been added. Request a new quotation.']);
+                    }
+                }
+                $selectedAddOns = array_map('intval', $snapshot['selected_add_ons']);
+            }
             $quote = $this->pricing->quote($locked->property, $start, $end,
                 $selectedAddOns, $type, $ratePlan, (int) $locked->rooms);
             if (round((float) $quote['total'], 2) !== round((float) $snapshot['new_total'], 2)
@@ -209,6 +253,18 @@ class BookingAmendmentOfferService
                 'tax_rate' => $quote['tax_rate'], 'tax_total' => $quote['tax_total'],
                 'total' => $quote['total'], 'pricing_snapshot' => $quote, 'modified_at' => now(),
             ])->save();
+
+            // Pivot line totals must follow the new quote, particularly for
+            // per-night extras when dates change and for newly purchased add-ons.
+            $pivot = [];
+            foreach (($quote['addons'] ?? []) as $addonLine) {
+                $pivot[(int) $addonLine['id']] = [
+                    'quantity' => (int) $addonLine['quantity'],
+                    'unit_price' => (float) $addonLine['unit_price'],
+                    'line_total' => (float) $addonLine['line_total'],
+                ];
+            }
+            $locked->addOns()->sync($pivot);
 
             if ($topup) {
                 $topup->forceFill([
