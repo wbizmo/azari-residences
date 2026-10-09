@@ -3,7 +3,7 @@
 const CACHE = 'resavar-shell-v3';
 const SAFE_SHELL = ['/manifest.webmanifest', '/offline.html'];
 const STATIC_PATH = /^\/build\/assets\/[a-zA-Z0-9_.-]+\.(?:js|css|woff2?|png|webp|svg)$/;
-const PUBLIC_IMAGES = new Set(['/images/resavar-logo-dark.png', '/images/resavar-logo-light.png']);
+const PUBLIC_IMAGES = new Set(['/images/resavar-logo-dark.png', '/images/resavar-logo-light.png', '/images/resavar-pwa-192.png', '/images/resavar-pwa-512.png']);
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SAFE_SHELL)).then(() => self.skipWaiting()));
