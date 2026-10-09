@@ -74,6 +74,7 @@ return [
     // Offsite backup credentials MUST be independent of application media
     // storage. There is deliberately no fallback to local/private/public.
     'offsite_backup_disk' => env('RESAVAR_OFFSITE_BACKUP_DISK'),
+    'media_backup_schedule_enabled' => env('RESAVAR_PRIVATE_MEDIA_BACKUP_ENABLED', false),
 
     // No symlink is required because files are written directly there.
     'links' => [],
