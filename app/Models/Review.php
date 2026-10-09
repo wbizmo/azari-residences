@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Review extends Model
 {
@@ -29,6 +30,8 @@ class Review extends Model
     public function user(): BelongsTo { return $this->belongsTo(User::class); }
     public function moderator(): BelongsTo { return $this->belongsTo(User::class, 'moderated_by'); }
     public function managementReplyBy(): BelongsTo { return $this->belongsTo(User::class, 'management_reply_by'); }
+    public function helpfulVotes(): HasMany { return $this->hasMany(ReviewHelpfulVote::class); }
+    public function reports(): HasMany { return $this->hasMany(ReviewReport::class); }
 
     public function categoryScores(): array
     {
