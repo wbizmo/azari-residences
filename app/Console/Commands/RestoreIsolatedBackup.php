@@ -20,7 +20,8 @@ class RestoreIsolatedBackup extends Command
     protected $signature = 'resavar:restore-drill
         {backupRun : ID of a verified encrypted database archive}
         {--target=resavar_restore : Explicit separate restore DB connection}
-        {--confirm-isolated= : Must equal RESTORE_TO_ISOLATED_DATABASE}';
+        {--confirm-isolated= : Must equal RESTORE_TO_ISOLATED_DATABASE}
+        {--replace-migration-seeds= : Must equal REPLACE_ONLY_MIGRATION_DEFAULTS to remove known migration-generated rows}';
 
     protected $description = 'Restore a verified archive into an EMPTY isolated database and compare all table row counts.';
 
@@ -109,7 +110,14 @@ class RestoreIsolatedBackup extends Command
                     throw new \RuntimeException("Schema mismatch for archive table [{$table}].");
                 }
 
-                if ($table !== 'migrations' && $target->table($table)->exists()) {
+                // Some Laravel migrations seed only base permissions and
+                // default settings. These may be replaced ONLY after an
+                // additional explicit operator acknowledgement. Never permit
+                // this exception for guest, booking, payment or ledger rows.
+                $migrationSeedTables = ['permissions', 'site_settings'];
+                $replaceDefaults = $this->option('replace-migration-seeds') === 'REPLACE_ONLY_MIGRATION_DEFAULTS';
+                if ($table !== 'migrations' && $target->table($table)->exists()
+                    && ! ($replaceDefaults && in_array($table, $migrationSeedTables, true))) {
                     throw new \RuntimeException('Restore target is not empty; refusing all writes.');
                 }
             }
@@ -120,6 +128,13 @@ class RestoreIsolatedBackup extends Command
                     // Replacing the migration tracking rows is safe ONLY on
                     // the preflighted, otherwise empty target.
                     $target->table('migrations')->delete();
+                    if ($this->option('replace-migration-seeds') === 'REPLACE_ONLY_MIGRATION_DEFAULTS') {
+                        foreach (['permissions', 'site_settings'] as $migrationTable) {
+                            if (isset($tables[$migrationTable])) {
+                                $target->table($migrationTable)->delete();
+                            }
+                        }
+                    }
                     $this->restoreRows($path, $target, $tables);
 
                     foreach ($tables as $table => $meta) {

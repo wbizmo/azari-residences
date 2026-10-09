@@ -3,11 +3,14 @@
 namespace Tests\Feature\Security;
 
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Route;
 use Tests\TestCase;
 
 class PhaseOnePrivilegedStepUpTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_expired_password_confirmation_blocks_financial_action_without_replaying_post(): void
     {
         Route::middleware(['web', 'auth', 'azari.step-up'])
@@ -16,11 +19,11 @@ class PhaseOnePrivilegedStepUpTest extends TestCase
 
         $actor = User::factory()->create();
         $this->actingAs($actor)->withSession(['auth.password_confirmed_at' => time() - 3600])
-            ->post(route('resavar.test.privileged'))
+            ->post('/_test/resavar-privileged-action')
             ->assertRedirect(route('password.confirm'));
 
         $this->actingAs($actor)->withSession(['auth.password_confirmed_at' => time()])
-            ->post(route('resavar.test.privileged'))
+            ->post('/_test/resavar-privileged-action')
             ->assertOk()
             ->assertSee('allowed');
     }

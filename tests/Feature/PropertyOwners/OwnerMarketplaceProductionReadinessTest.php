@@ -93,6 +93,7 @@ class OwnerMarketplaceProductionReadinessTest extends TestCase
             'status' => 'reconciliation_required',
             'destination_snapshot' => [],
             'reconciliation_required_at' => now(),
+            'processed_by' => User::factory()->create()->getKey(),
         ]);
 
         $service = app(OwnerWithdrawalService::class);

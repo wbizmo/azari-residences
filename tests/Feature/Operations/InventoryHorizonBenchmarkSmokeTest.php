@@ -24,7 +24,7 @@ class InventoryHorizonBenchmarkSmokeTest extends TestCase
             '--json' => true,
         ]));
         $result = json_decode(Artisan::output(), true, flags: JSON_THROW_ON_ERROR);
-        $this->assertSame(['7', '30', '365'], array_keys($result['horizons']));
+        $this->assertSame([7, 30, 365], array_keys($result['horizons']));
         foreach ([7, 30, 365] as $horizon) {
             $row = $result['horizons'][$horizon];
             $this->assertSame(2, $row['samples']);

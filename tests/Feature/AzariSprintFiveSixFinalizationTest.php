@@ -95,7 +95,7 @@ class AzariSprintFiveSixFinalizationTest extends TestCase
             )
             ->assertNotFound();
 
-        $this->actingAs($admin)
+        $this->actingAs($admin)->withSession(['auth.password_confirmed_at' => time()])
             ->put(
                 route('azari.admin.bookings.cancel', $booking),
                 ['reason' => 'Property unavailable']

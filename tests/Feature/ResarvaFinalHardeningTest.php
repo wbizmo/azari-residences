@@ -62,11 +62,16 @@ ICS;
         $first = $sync->applySnapshot($connection, $events);
         $second = $sync->applySnapshot($connection, $events);
         $third = $sync->applySnapshot($connection, [$events[0]]);
+        // Partial feed omissions are held for the 30-minute grace period;
+        // removing a reservation immediately risks an oversell.
+        $this->assertSame(0, $third['cancelled']);
+        $this->travel(31)->minutes();
+        $fourth = $sync->applySnapshot($connection, [$events[0]]);
 
         $this->assertSame(2, $first['imported']);
         $this->assertSame(0, $second['imported']);
         $this->assertSame(2, ChannelReservation::query()->count());
-        $this->assertSame(1, $third['cancelled']);
+        $this->assertSame(1, $fourth['cancelled']);
         $this->assertDatabaseHas('channel_reservations', ['external_id' => 'stay-2@example', 'status' => 'cancelled']);
     }
 

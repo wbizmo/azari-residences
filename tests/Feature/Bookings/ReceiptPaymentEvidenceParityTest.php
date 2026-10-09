@@ -46,7 +46,11 @@ class ReceiptPaymentEvidenceParityTest extends TestCase
         ]);
 
         $this->actingAs($guest);
-        $response = app(UserBookingController::class)->receipt(request(), $booking->reference);
+        $response = app(UserBookingController::class)->receipt(
+            tap(\Illuminate\Http\Request::create('/user/receipt', 'GET'),
+                fn ($request) => $request->setUserResolver(fn () => $guest)),
+            $booking->reference
+        );
         $view = $response->getOriginalContent();
         $this->assertSame($paid->getKey(), $view->getData()['payment']->getKey());
         $this->assertSame(Payment::SUCCESSFUL, $view->getData()['payment']->status);
@@ -75,7 +79,11 @@ class ReceiptPaymentEvidenceParityTest extends TestCase
 
         $this->actingAs($guest);
         $this->expectException(NotFoundHttpException::class);
-        app(UserBookingController::class)->receipt(request(), $booking->reference);
+        app(UserBookingController::class)->receipt(
+            tap(\Illuminate\Http\Request::create('/user/receipt', 'GET'),
+                fn ($request) => $request->setUserResolver(fn () => $guest)),
+            $booking->reference
+        );
     }
 
     public function test_booking_pdf_rejects_payment_from_another_booking(): void

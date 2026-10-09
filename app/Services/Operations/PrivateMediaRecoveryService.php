@@ -135,8 +135,12 @@ class PrivateMediaRecoveryService
     public function restoreDrill(string $offsiteDisk, string $manifest): array
     {
         $targetConfig = config('filesystems.disks.resavar_media_restore');
-        $targetRoot = realpath((string) ($targetConfig['root'] ?? ''));
-        $sourceRoot = realpath((string) config('filesystems.disks.private.root'));
+        $destination = Storage::disk('resavar_media_restore');
+        // Resolve the *active* disk root, not just its declarative config.
+        // Laravel Storage::fake overrides the adapter root in local tests;
+        // the same rule also detects the real path after deployment.
+        $targetRoot = realpath($destination->path(''));
+        $sourceRoot = realpath(Storage::disk('private')->path(''));
         if (($targetConfig['driver'] ?? null) !== 'local'
             || ! $sourceRoot || ! $targetRoot
             || ! preg_match('/(?:restore|drill|isolat)/i', $targetRoot)
@@ -146,7 +150,6 @@ class PrivateMediaRecoveryService
             throw new \RuntimeException('A separate, existing isolated media restore root is required.');
         }
 
-        $destination = Storage::disk('resavar_media_restore');
         // A directory containing symlinks or empty subdirectories is not a
         // clean restore target either; reject any existing child entry.
         if (array_diff(scandir($targetRoot) ?: [], ['.', '..']) !== []) {
