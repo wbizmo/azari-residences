@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
 
 class PublicGuestVerificationController extends Controller
@@ -193,7 +194,7 @@ class PublicGuestVerificationController extends Controller
         }
 
         $data = $request->validate([
-            'password' => ['required', 'string', 'min:8', 'max:255', 'confirmed'],
+            'password' => ['required', 'confirmed', Password::min(12)->letters()->mixedCase()->numbers()],
         ]);
 
         $user = User::query()->create([

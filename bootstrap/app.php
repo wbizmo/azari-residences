@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\EnsureAdmin;
 use App\Http\Middleware\EnsureAzariCustomer;
+use App\Http\Middleware\EnsureDojahVerified;
 use App\Http\Middleware\EnsureAzariStaff;
 use App\Http\Middleware\EnsureStaffPermission;
 use App\Http\Middleware\EnsureRouteModelOwnership;
@@ -25,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'azari.staff' => EnsureAzariStaff::class,
             'azari.customer' => EnsureAzariCustomer::class,
+            'azari.identity.verified' => EnsureDojahVerified::class,
             'azari.admin' => EnsureAdmin::class,
             'azari.permission' => EnsureStaffPermission::class,
             'azari.owns-route' => EnsureRouteModelOwnership::class,
@@ -33,6 +35,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'payments/*/webhook',
             'payments/*/callback/*',
             'webhooks/twilio/message-status',
+            'webhooks/dojah',
         ]);
         $middleware->trustProxies(at: '*');
     })
