@@ -28,6 +28,10 @@
         <tr><td>Add-ons</td><td>{{ $booking->currency }} {{ number_format((float) $booking->add_on_total, 2) }}</td></tr>
         <tr><td>Fees</td><td>{{ $booking->currency }} {{ number_format((float) $booking->fee_total, 2) }}</td></tr>
         <tr><td>Tax</td><td>{{ $booking->currency }} {{ number_format((float) $booking->tax_total, 2) }}</td></tr>
+        @if((float) $booking->discount_total > 0)
+            <tr><td>Voucher discount{{ $booking->voucher_code ? ' ('.$booking->voucher_code.')' : '' }}</td><td>-{{ $booking->currency }} {{ number_format((float) $booking->discount_total, 2) }}</td></tr>
+        @endif
+        <tr><td><strong>Booking total</strong></td><td><strong>{{ $booking->currency }} {{ number_format((float) $booking->total, 2) }}</strong></td></tr>
         <tr><td>Verified payments</td><td>{{ $booking->currency }} {{ number_format($booking->successfulPaymentsTotal(), 2) }}</td></tr>
         <tr class="total"><td>Outstanding balance</td><td>{{ $booking->currency }} {{ number_format($booking->balanceDue(), 2) }}</td></tr>
     </tbody></table></section>
