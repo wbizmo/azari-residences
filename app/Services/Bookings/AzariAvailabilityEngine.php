@@ -65,6 +65,12 @@ class AzariAvailabilityEngine
 
         $nights = $checkIn->diffInDays($checkOut);
 
+        if ($nights > max(1, (int) config('azari.booking.max_stay_nights', 366))) {
+            throw ValidationException::withMessages([
+                'check_out' => 'The selected stay is longer than the booking limit.',
+            ]);
+        }
+
         $minimumStay = max(
             1,
             (int) ($ratePlan?->minimum_stay
@@ -279,6 +285,12 @@ class AzariAvailabilityEngine
     ): bool {
         $type = $this->resolveAccommodationType($property, $accommodationTypeId);
 
+        // A caller requesting a particular room type must never fall back to
+        // property-wide legacy availability if that type is missing or inactive.
+        if (! $type && $accommodationTypeId !== null) {
+            return false;
+        }
+
         if (! $type) {
             return $this->legacyAvailable(
                 $property->getKey(),
@@ -380,6 +392,47 @@ class AzariAvailabilityEngine
                 ->keyBy(fn (InventoryDate $row) => $row->date->toDateString())
             : collect();
 
+        $committed = $this->committedQuantityByDate($accommodationType, $start, $end, $ignoreBooking, $ignoreHold);
+
+        $remaining = collect();
+        $baseInventory = max(0, (int) $accommodationType->total_inventory);
+
+        foreach ($dates as $date) {
+            $row = $inventory->get($date);
+
+            $sellable = $row?->sellable_inventory;
+            $sellable = $sellable === null ? $baseInventory : max(0, (int) $sellable);
+            $maintenance = max(0, (int) ($row?->maintenance_inventory ?? 0));
+
+            if ($row?->stop_sell) {
+                $sellable = 0;
+            }
+
+            $remaining->put($date, max(0, $sellable - $maintenance - (int) $committed->get($date, 0)));
+        }
+
+        return $remaining;
+    }
+
+    /**
+     * Room nights already committed by bookings, active holds and external channels.
+     * Called inside inventory-row locks by writers; read paths use the same count.
+     * @return Collection<string, int>
+     */
+    public function committedQuantityByDate(
+        AccommodationType $accommodationType,
+        CarbonInterface $in,
+        CarbonInterface $out,
+        ?int $ignoreBooking = null,
+        ?string $ignoreHold = null
+    ): Collection {
+        $start = CarbonImmutable::parse($in->toDateString())->startOfDay();
+        $end = CarbonImmutable::parse($out->toDateString())->startOfDay();
+
+        if ($end->lessThanOrEqualTo($start)) {
+            return collect();
+        }
+
         $events = [];
 
         $applyEvent = static function (string $date, int $delta) use (&$events): void {
@@ -451,28 +504,16 @@ class AzariAvailabilityEngine
             );
         }
 
-        $remaining = collect();
-        $occupied = 0;
-        $baseInventory = max(0, (int) $accommodationType->total_inventory);
         $channelBlocked = $this->channels->blockedByDate($accommodationType, $start, $end);
-
-        foreach ($dates as $date) {
+        $committed = collect();
+        $occupied = 0;
+        for ($cursor = $start; $cursor->lessThan($end); $cursor = $cursor->addDay()) {
+            $date = $cursor->toDateString();
             $occupied += (int) ($events[$date] ?? 0);
-            $row = $inventory->get($date);
-
-            $sellable = $row?->sellable_inventory;
-            $sellable = $sellable === null ? $baseInventory : max(0, (int) $sellable);
-            $maintenance = max(0, (int) ($row?->maintenance_inventory ?? 0));
-
-            if ($row?->stop_sell) {
-                $sellable = 0;
-            }
-
-            $external = max(0, (int) $channelBlocked->get($date, 0));
-            $remaining->put($date, max(0, $sellable - $maintenance - $occupied - $external));
+            $committed->put($date, max(0, $occupied) + max(0, (int) $channelBlocked->get($date, 0)));
         }
 
-        return $remaining;
+        return $committed;
     }
 
     private function addOccupancyEvents(

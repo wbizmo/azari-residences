@@ -1,26 +1,18 @@
 <?php
 namespace App\Services\Bookings;
-use App\Models\Booking;
+use App\Models\Property;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\DB;
 class AvailabilityService
 {
+    public function __construct(private readonly AzariAvailabilityEngine $engine) {}
+
     public function isAvailable(int $propertyId, CarbonInterface $checkIn, CarbonInterface $checkOut, ?int $ignoreBookingId = null): bool
     {
-        if ($checkOut->lessThanOrEqualTo($checkIn)) return false;
-        $bookingConflict = Booking::query()
-            ->where('property_id', $propertyId)
-            ->whereIn('status', ['pending','approved','confirmed','checked_in'])
-            ->when($ignoreBookingId, fn($q) => $q->whereKeyNot($ignoreBookingId))
-            ->whereDate('check_in', '<', $checkOut)
-            ->whereDate('check_out', '>', $checkIn)
-            ->exists();
-        if ($bookingConflict) return false;
-        return ! DB::table('blocked_dates')
-            ->where('property_id', $propertyId)
-            ->whereDate('starts_on', '<', $checkOut)
-            ->whereDate('ends_on', '>', $checkIn)
-            ->exists();
+        $property = Property::query()->find($propertyId);
+
+        return $property !== null
+            && $this->engine->availableForProperty($property, $checkIn, $checkOut, 1, null, $ignoreBookingId);
     }
 
     public function quote(int $propertyId, CarbonInterface $checkIn, CarbonInterface $checkOut): array
