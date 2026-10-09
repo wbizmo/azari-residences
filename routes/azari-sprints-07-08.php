@@ -40,6 +40,8 @@ Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer', 'azari.
         Route::get('/bookings', [UserBookingController::class, 'index'])->name('bookings.index');
         Route::get('/bookings/{reference}', [UserBookingController::class, 'show'])->name('bookings.show');
         Route::get('/bookings/{reference}/receipt', [UserBookingController::class, 'receipt'])->name('bookings.receipt');
+        Route::post('/bookings/{reference}/cancel', [BookingSelfServiceController::class, 'cancelBooking'])
+            ->middleware('throttle:5,10')->name('bookings.cancel');
         Route::post('/bookings/{reference}/modifications', [BookingSelfServiceController::class, 'storeModification'])
             ->middleware('throttle:20,1')
             ->name('bookings.modifications.store');

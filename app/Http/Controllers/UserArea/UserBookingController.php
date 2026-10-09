@@ -102,7 +102,14 @@ class UserBookingController extends Controller
 
         $schedule = $paymentSchedule->forBooking($booking);
 
-        return view('user.bookings.show', compact('booking', 'timeline', 'selfService', 'schedule'));
+        $canCancel = in_array($booking->status, ['pending', 'pending_payment', 'approved', 'paid', 'confirmed'], true)
+            && ! $booking->checked_in_at && $booking->check_in?->toDateString()
+                > now($booking->property_timezone ?: config('localization.platform_timezone', 'UTC'))->toDateString();
+        $cancellationQuote = $canCancel
+            ? app(\App\Services\Bookings\BookingCancellationQuoteService::class)->quote($booking)
+            : null;
+
+        return view('user.bookings.show', compact('booking', 'timeline', 'selfService', 'schedule', 'canCancel', 'cancellationQuote'));
     }
 
     public function receipt(Request $request, string $reference): Response

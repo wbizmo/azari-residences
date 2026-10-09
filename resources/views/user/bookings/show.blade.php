@@ -135,6 +135,32 @@
         </div>
     </div>
 
+    @if($canCancel)
+        <div class="az-user-panel">
+            <header class="az-user-panel-header"><div><h2 class="az-user-panel-title">Cancel this stay</h2>
+                <p class="az-user-panel-subtitle">Review the policy and potential refund before confirming.</p></div></header>
+            <div class="az-user-panel-body">
+                <p>Policy: {{ $cancellationQuote['policy_name'] ?? 'Original booking conditions' }}</p>
+                @if($cancellationQuote['manual_review_required'])
+                    <p>Your booking has legacy or incomplete cancellation rules. A staff member must review any refund; no amount is promised.</p>
+                @else
+                    <p>Cancellation fee: {{ $booking->currency }} {{ number_format((float) $cancellationQuote['cancellation_fee'], 2) }}</p>
+                    <p>Maximum eligible refund: {{ $booking->currency }} {{ number_format((float) $cancellationQuote['maximum_refund_due'], 2) }}</p>
+                    <p>Refund requests are separate from successful provider settlement and may take additional time.</p>
+                @endif
+                <form action="{{ route('user.bookings.cancel', $booking->reference) }}" method="POST" class="az-form-grid">
+                    @csrf
+                    <label class="wide"><span>Why are you cancelling?</span>
+                        <textarea name="reason" required minlength="4" maxlength="500"></textarea></label>
+                    <button type="submit" class="az-user-button az-user-button--dark"
+                        onclick="return confirm('Cancel this booking? Your existing dates will be released.');">
+                        Confirm booking cancellation
+                    </button>
+                </form>
+            </div>
+        </div>
+    @endif
+
     <div class="az-user-panel">
         <header class="az-user-panel-header"><div><h2 class="az-user-panel-title">Change requests</h2><p class="az-user-panel-subtitle">Status and staff response</p></div></header>
         <div class="az-user-panel-body az-user-list">

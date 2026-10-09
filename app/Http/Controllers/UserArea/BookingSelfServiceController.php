@@ -10,6 +10,19 @@ use Illuminate\Http\Request;
 
 class BookingSelfServiceController extends Controller
 {
+    public function cancelBooking(
+        Request $request,
+        string $reference,
+        \App\Services\Bookings\BookingCancellationSettlementService $settlement
+    ): RedirectResponse {
+        $booking = $request->user()->bookings()->where('reference', $reference)->firstOrFail();
+        $data = $request->validate(['reason' => ['required', 'string', 'min:4', 'max:500']]);
+        $settlement->cancelForGuest($booking, $request->user(), $data['reason']);
+
+        return redirect()->route('user.bookings.show', $reference)
+            ->with('success', 'Your booking is cancelled. Eligible refunds have been requested separately; payment-provider settlement is not immediate.');
+    }
+
     public function payDateAmendment(
         Request $request,
         string $reference,
