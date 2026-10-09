@@ -18,6 +18,21 @@ Create and verify a backup with `php artisan azari:backup --verify`. Run `php ar
 
 For a real restore, never restore over a live production database. Provision an isolated database from the same schema version, stop application writes, decrypt/copy the backup through the approved secret-handling path, verify its checksum, restore tables in dependency order, run booking/payment/inventory reconciliation, run the full local Laravel and Playwright suites against the isolated restore, then perform an explicit controlled cutover. Preserve the original production database until reconciliation and rollback windows have expired.
 
+
+### Executable isolated database restore rehearsal
+
+The database archive is **not** a replacement for the private-media archive. This command never restores into the live application connection. It requires a separate database, matching migrations, and explicit confirmation.
+
+1. Provision an **empty/disposable** MySQL database whose name visibly contains \`restore\` or \`drill\` and whose schema has been migrated with the **same application commit**. Never use the production database or a database containing user data.
+2. Supply \`RESAVAR_RESTORE_DB_HOST\`, \`RESAVAR_RESTORE_DB_PORT\`, \`RESAVAR_RESTORE_DB_DATABASE\`, \`RESAVAR_RESTORE_DB_USERNAME\`, and \`RESAVAR_RESTORE_DB_PASSWORD\` in the supervised operator environment. This connection does not inherit production credentials/database names.
+3. Run \`php artisan migrate --database=resavar_restore --force\` against the dedicated target **only after verifying its connection configuration**.
+4. Run \`php artisan azari:backup --verify\` on the source, record the verified backup ID, and run \`php artisan resavar:restore-drill BACKUP_ID --target=resavar_restore --confirm-isolated=RESTORE_TO_ISOLATED_DATABASE\`.
+5. The drill rejects an unverified archive, same database, mismatched schema, populated user tables and already-restored targets. It verifies encrypted records before any target write, restores inside a transaction, checks **every** restored table's row counts, and records an audit event (connection alias, count, elapsed duration, not credentials).
+6. Run read-only inventory/booking/payment and role-boundary tests on the restored target. Discard/reprovision the target after the exercise; never point public traffic or workers at it. Perform a separate encrypted **private-media** and **offsite** recovery check, then record recovery point and elapsed recovery time.
+7. Never run this on production without an independently provisioned target. Restoring sensitive database rows also means granting restricted access, disabling outward email/webhooks/workers on the restore environment, and using secret-safe logging.
+
+The command is intentionally fail-closed and is NOT a release-complete RPO/RTO claim until the actual isolated drill is performed and its evidence recorded.
+
 ## Incident correlation
 
 Every HTTP response carries `X-Request-ID`. Application logs include the same request ID. Audit events retain the request ID and critical booking/payment operations retain their booking/payment references. Do not log API keys, authorization headers, identity documents, full webhook payloads or secrets.
