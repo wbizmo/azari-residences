@@ -82,7 +82,10 @@ class RestoreIsolatedBackup extends Command
             $target = DB::connection($targetName);
             $schema = Schema::connection($targetName);
 
-            $targetTables = $schema->getTableListing(null, false);
+            $targetTables = array_values(array_filter(
+                $schema->getTableListing(null, false),
+                fn (string $name): bool => ! str_starts_with($name, 'sqlite_')
+            ));
             sort($targetTables);
             $archiveTables = array_keys($tables);
             sort($archiveTables);
