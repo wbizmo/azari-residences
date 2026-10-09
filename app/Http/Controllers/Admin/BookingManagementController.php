@@ -92,6 +92,12 @@ class BookingManagementController extends Controller
             'note' => ['nullable', 'string', 'max:2000'],
         ]);
 
+        if ($data['status'] === 'cancelled') {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'status' => 'Use the Cancel booking section to record the cancellation reason and payment treatment.',
+            ]);
+        }
+
         $lifecycle->transition(
             $booking,
             $data['status'],
