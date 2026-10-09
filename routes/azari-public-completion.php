@@ -7,12 +7,15 @@ use App\Http\Controllers\PublicSite\AvailabilitySearchController;
 use App\Http\Controllers\PublicSite\DestinationSearchController;
 use App\Http\Controllers\PublicSite\AzariAvailabilityController;
 use App\Http\Controllers\PublicSite\PublicPageController;
+use App\Http\Controllers\PublicSite\PublicPropertyReviewsController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/availability', [PublicPageController::class, 'availability'])
     ->name('availability.index');
 Route::get('/residences/{property}/availability', [PublicPageController::class, 'propertyAvailability'])
     ->name('availability.property');
+Route::get('/residences/{property}/reviews', PublicPropertyReviewsController::class)
+    ->middleware('throttle:60,1')->name('properties.reviews');
 
 Route::get('/availability/results', [AzariAvailabilityController::class, 'index'])
     ->name('availability.results');
