@@ -46,6 +46,9 @@ Route::prefix('azaridevadmin')->name('azari.admin.')->middleware(['auth.session'
     Route::get('/system-health',[OperationsController::class,'index'])->middleware('azari.permission:system-health.view')->name('system-health.index');
     Route::get('/communications',[CommunicationController::class,'index'])->middleware('azari.permission:system-health.view')->name('communications.index');
     Route::post('/communications/{communicationLog}/retry',[CommunicationController::class,'retry'])->middleware('azari.permission:system-health.manage')->name('communications.retry');
+    Route::post('/system-health/failed-jobs/{id}/retry',[OperationsController::class,'retryFailedJob'])
+        ->whereNumber('id')->middleware('azari.permission:system-health.manage')
+        ->middleware('throttle:5,1')->name('system-health.failed-jobs.retry');
     Route::post('/system-health/backups',[OperationsController::class,'backup'])->middleware('azari.permission:system-health.manage')->name('system-health.backup');
     Route::post('/system-health/backups/{backupRun}/verify',[OperationsController::class,'verifyBackup'])->middleware('azari.permission:system-health.manage')->name('system-health.backup.verify');
 });
