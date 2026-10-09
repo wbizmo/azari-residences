@@ -7,7 +7,7 @@
 @forelse($reviews as $review)
 <article class="az-user-list-item"><div style="width:100%"><strong>{{ $review->rating }}/5 @if($review->title) · {{ $review->title }} @endif</strong><p>{{ $review->body }}</p>
 @if($review->edited_at)<small>Guest updated {{ $review->edited_at->diffForHumans() }}</small>@endif
-<form method="POST" action="{{ route('user.owner.phase2.reviews.reply',[$property,$review]) }}" class="az-form-grid" style="margin-top:10px">@csrf<label style="grid-column:1/-1"><span>Property response</span><textarea name="reply" required maxlength="2000" rows="3">{{ old('reply',$review->owner_reply) }}</textarea></label><button class="az-user-button az-user-button--dark" type="submit">Save response</button></form>
+<form method="POST" action="{{ route('user.owner.phase2.reviews.reply',[$property,$review]) }}" class="az-form-grid" style="margin-top:10px">@csrf<label style="grid-column:1/-1"><span>Property response (moderated before publication)</span><textarea name="reply" required maxlength="2000" rows="3">{{ old('reply',$review->owner_reply) }}</textarea></label>@if($review->owner_reply)<small>Current response: {{ Str::headline($review->owner_reply_status ?? 'pending') }}</small>@endif<button class="az-user-button az-user-button--dark" type="submit">Submit response</button></form>
 </div></article>
 @empty<div class="az-user-empty"><h3>No approved reviews yet</h3></div>@endforelse
 {{ $reviews->links() }}

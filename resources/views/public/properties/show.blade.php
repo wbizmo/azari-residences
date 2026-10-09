@@ -419,7 +419,7 @@
                                                 <p>{{ $review->admin_reply }}</p>
                                             </div>
                                         @endif
-                                        @if($review->owner_reply)
+                                        @if($review->owner_reply && $review->owner_reply_status === 'approved')
                                             <div class="reserva-management-reply">
                                                 <strong>Property response</strong>
                                                 <p>{{ $review->owner_reply }}</p>

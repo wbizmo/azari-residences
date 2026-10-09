@@ -37,6 +37,7 @@ class ReviewController extends Controller
             'status' => ['required', Rule::in(['pending', 'approved', 'hidden', 'archived', 'flagged'])],
             'featured' => ['nullable', 'boolean'],
             'admin_reply' => ['nullable', 'string', 'max:2000'],
+            'owner_reply_status' => ['nullable', Rule::in(['pending', 'approved', 'rejected'])],
             'moderation_reason' => [
                 Rule::requiredIf(in_array($request->input('status'), ['hidden', 'flagged', 'archived'], true)),
                 'nullable',
@@ -53,6 +54,9 @@ class ReviewController extends Controller
         $review->update([
             'status' => $data['status'],
             'featured' => $request->boolean('featured'),
+            'owner_reply_status' => filled($review->owner_reply)
+                ? ($data['owner_reply_status'] ?? $review->owner_reply_status ?? 'pending')
+                : 'pending',
             'admin_reply' => $data['admin_reply'] ?? null,
             'management_reply_by' => $replyChanged && filled($data['admin_reply'] ?? null)
                 ? $request->user()->id

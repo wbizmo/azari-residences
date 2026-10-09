@@ -61,6 +61,16 @@
             <label><span>Featured</span><input type="checkbox" name="featured" value="1" @checked($review->featured)></label>
             <label class="wide"><span>Moderation reason</span><textarea name="moderation_reason" maxlength="1000">{{ $review->moderation_reason }}</textarea></label>
             <label class="wide"><span>Public management response</span><textarea name="admin_reply" maxlength="2000">{{ $review->admin_reply }}</textarea></label>
+            @if(filled($review->owner_reply))
+                <div class="wide"><strong>Property team's proposed public reply</strong><p>{{ $review->owner_reply }}</p></div>
+                <label class="wide"><span>Property reply publication</span>
+                    <select name="owner_reply_status">
+                        @foreach(['pending', 'approved', 'rejected'] as $replyStatus)
+                            <option value="{{ $replyStatus }}" @selected(($review->owner_reply_status ?? 'pending') === $replyStatus)>{{ Str::headline($replyStatus) }}</option>
+                        @endforeach
+                    </select>
+                </label>
+            @endif
             <button class="az-button" type="submit">Update moderation</button>
         </form>
     </article>

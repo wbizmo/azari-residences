@@ -325,11 +325,15 @@ class OwnerPhaseTwoController extends Controller
 
         $data = $request->validate(['reply' => ['required', 'string', 'min:2', 'max:2000']]);
         $before = $review->owner_reply;
-        $review->update(['owner_reply' => $data['reply'], 'owner_replied_at' => now()]);
+        $review->update([
+            'owner_reply' => $data['reply'],
+            'owner_replied_at' => now(),
+            'owner_reply_status' => 'pending',
+        ]);
 
         AuditLog::record('review.owner_replied', $review, ['owner_reply' => $before], ['owner_reply' => $review->owner_reply]);
 
-        return back()->with('success', 'Property response saved.');
+        return back()->with('success', 'Property response submitted for moderation.');
     }
 
     public function conversations(Request $request, Property $property, PropertyAccessService $access): View
