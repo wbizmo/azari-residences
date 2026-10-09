@@ -1648,3 +1648,87 @@ if ('serviceWorker' in navigator && window.isSecureContext) {
         });
     });
 })();
+
+
+(() => {
+    document.querySelectorAll('[data-booking-message-thread]').forEach((thread) => {
+        const pollUrl = thread.dataset.pollUrl;
+        const selfSender = thread.dataset.selfSender;
+        let polling = false;
+
+        const latestId = () => Math.max(
+            0,
+            ...Array.from(thread.querySelectorAll('[data-message-id]'))
+                .map((item) => Number(item.dataset.messageId) || 0)
+        );
+
+        const appendMessage = (message) => {
+            if (!message?.id || thread.querySelector('[data-message-id="' + message.id + '"]')) return;
+
+            const article = document.createElement('article');
+            article.className = 'az-user-list-item';
+            article.dataset.messageId = String(message.id);
+
+            const box = document.createElement('div');
+            const sender = document.createElement('strong');
+            sender.textContent = message.sender_type === selfSender
+                ? (selfSender === 'guest' ? 'You' : 'Property team')
+                : (message.sender_type === 'guest' ? 'Guest' : 'Property team');
+
+            const body = document.createElement('p');
+            body.textContent = String(message.body || '');
+
+            const time = document.createElement('small');
+            const parsed = new Date(message.created_at);
+            time.textContent = Number.isNaN(parsed.getTime())
+                ? ''
+                : parsed.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+
+            box.append(sender, body, time);
+
+            if (message.attachment_url) {
+                const attachment = document.createElement('p');
+                const link = document.createElement('a');
+                link.href = String(message.attachment_url);
+                link.textContent = message.attachment_name
+                    ? 'Download ' + String(message.attachment_name)
+                    : 'Download attachment';
+                attachment.append(link);
+                box.append(attachment);
+            }
+
+            article.append(box);
+            thread.append(article);
+        };
+
+        const poll = async () => {
+            if (polling || document.visibilityState !== 'visible' || !pollUrl) return;
+            polling = true;
+
+            try {
+                const url = new URL(pollUrl, window.location.origin);
+                url.searchParams.set('after', String(latestId()));
+
+                const response = await fetch(url, {
+                    headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    credentials: 'same-origin',
+                    cache: 'no-store',
+                });
+
+                if (!response.ok) return;
+                const payload = await response.json();
+                (payload.messages || []).forEach(appendMessage);
+            } catch {
+                // A disconnected network must not replay message POSTs. The next GET poll retries safely.
+            } finally {
+                polling = false;
+            }
+        };
+
+        const timer = window.setInterval(poll, 15000);
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') poll();
+        });
+        window.addEventListener('pagehide', () => window.clearInterval(timer), { once: true });
+    });
+})();
