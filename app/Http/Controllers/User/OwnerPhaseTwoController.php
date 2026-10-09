@@ -177,6 +177,19 @@ class OwnerPhaseTwoController extends Controller
     {
         $access->assert($request->user(), $property, 'operations.manage');
 
+        // A single property-scoped SQL aggregate avoids scanning all tasks
+        // in PHP and includes tasks beyond the current paginated page.
+        $now = now();
+        $metrics = PropertyOperationsTask::query()
+            ->where('property_id', $property->id)
+            ->selectRaw("COUNT(*) AS total")
+            ->selectRaw("SUM(CASE WHEN status IN ('open','in_progress','blocked') THEN 1 ELSE 0 END) AS active")
+            ->selectRaw("SUM(CASE WHEN status = 'blocked' THEN 1 ELSE 0 END) AS blocked")
+            ->selectRaw("SUM(CASE WHEN status IN ('open','in_progress','blocked') AND assigned_to IS NULL THEN 1 ELSE 0 END) AS unassigned")
+            ->selectRaw("SUM(CASE WHEN status IN ('open','in_progress','blocked') AND due_at IS NOT NULL AND due_at < ? THEN 1 ELSE 0 END) AS overdue", [$now])
+            ->selectRaw("SUM(CASE WHEN status IN ('open','in_progress','blocked') AND priority IN ('high','urgent') THEN 1 ELSE 0 END) AS high_priority")
+            ->first();
+
         $tasks = PropertyOperationsTask::query()
             ->where('property_id', $property->id)
             ->orderByRaw("CASE WHEN status IN ('open','in_progress') THEN 0 ELSE 1 END")
@@ -202,7 +215,7 @@ class OwnerPhaseTwoController extends Controller
             ->orderBy('name')
             ->get();
 
-        return view('user.owner.operations', compact('property', 'tasks', 'bookings', 'staffUsers'));
+        return view('user.owner.operations', compact('property', 'tasks', 'bookings', 'staffUsers', 'metrics'));
     }
 
     public function createTask(Request $request, Property $property, PropertyAccessService $access): RedirectResponse
