@@ -15,6 +15,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
@@ -151,6 +152,40 @@ class AzariAvailabilityController extends Controller
             'emptyState' => $results->total() === 0 ? 'dates' : null,
             'ruleFailure' => null,
         ]);
+    }
+
+    /**
+     * Progressive map pages use the exact same SQL eligibility and canonical
+     * server-priced quotes as the accessible list. No fabricated map prices.
+     */
+    public function mapPoints(
+        MarketplaceSearchRequest $request,
+        MarketplaceSearchService $marketplace
+    ): JsonResponse {
+        $filters = $request->validated();
+        abort_if((int) ($filters['page'] ?? 1) > 100, 422, 'Map pagination limit reached.');
+
+        if (($filters['destination_type'] ?? null) === 'location' && ! empty($filters['destination_id'])) {
+            $filters['location_id'] = (int) $filters['destination_id'];
+        }
+        if (($filters['destination_type'] ?? null) === 'property' && ! empty($filters['destination_id'])) {
+            $filters['property_id'] = (int) $filters['destination_id'];
+        }
+        $filters['children'] = (int) ($filters['children'] ?? 0);
+        $filters['rooms'] = (int) ($filters['rooms'] ?? 1);
+        $filters['sort'] = $filters['sort'] ?? 'recommended';
+
+        $search = $marketplace->search($filters, false);
+        $page = $search['results'];
+
+        return response()->json([
+            'points' => $search['map_points']->values(),
+            'page' => $page->currentPage(),
+            'total' => $page->total(),
+            'next_page' => $page->hasMorePages() && $page->currentPage() < 100
+                ? $page->currentPage() + 1
+                : null,
+        ])->header('Cache-Control', 'private, no-store');
     }
 
     public function hold(
