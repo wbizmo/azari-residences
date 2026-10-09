@@ -50,6 +50,8 @@ class OperationsController {
     'job_class' => $name, 'failed_job_id' => $id,
    ], actorId: $request->user()->getKey());
    return back()->with('success', 'Approved background job queued for a controlled retry.');
+  } catch (\Symfony\Component\HttpKernel\Exception\HttpExceptionInterface $error) {
+   throw $error;
   } catch (\Throwable $error) {
    Log::warning('Failed-job retry was not completed.', [
     'failed_job_id' => $id, 'failure_class' => $error::class,
