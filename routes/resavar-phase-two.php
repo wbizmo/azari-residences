@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\User\OwnerBookingMessageController;
+use App\Http\Controllers\User\OwnerCommercialInventoryController;
 use App\Http\Controllers\User\OwnerPhaseTwoController;
 use App\Http\Controllers\UserArea\PhaseTwoGuestController;
 use App\Http\Controllers\UserArea\ReviewController;
@@ -22,6 +23,9 @@ Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer'])->group
             Route::get('/operations', [OwnerPhaseTwoController::class, 'operations'])->name('operations');
             Route::post('/operations/tasks', [OwnerPhaseTwoController::class, 'createTask'])->name('operations.tasks.store');
             Route::patch('/operations/tasks/{task}', [OwnerPhaseTwoController::class, 'updateTask'])->name('operations.tasks.update');
+
+            Route::post('/commercial/{accommodationType}/calendar/preview', [OwnerCommercialInventoryController::class, 'previewBulkUpdate'])->name('calendar.preview');
+            Route::post('/commercial/calendar-changes/{log}/undo', [OwnerCommercialInventoryController::class, 'undoBulkUpdate'])->name('calendar.undo');
 
             Route::get('/messages', [OwnerPhaseTwoController::class, 'conversations'])->name('messages');
             Route::get('/messages/{conversation}', [OwnerBookingMessageController::class, 'show'])->name('messages.show');
