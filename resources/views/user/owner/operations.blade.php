@@ -4,7 +4,19 @@
 @section('page_title',$property->name.' operations')
 @section('content')
 <section class="az-user-panel"><header class="az-user-panel-header"><div><h2 class="az-user-panel-title">Operations board</h2><p class="az-user-panel-subtitle">Housekeeping, arrivals, inspections, maintenance and handovers tied to this property.</p></div></header>
-<div class="az-user-panel-body"><form method="POST" action="{{ route('user.owner.phase2.operations.tasks.store',$property) }}" class="az-form-grid">@csrf
+<div class="az-user-panel-body">
+    <dl class="az-user-detail-grid" aria-label="Property operations summary">
+        @foreach([
+            'Active tasks' => 'active',
+            'Overdue tasks' => 'overdue',
+            'Blocked tasks' => 'blocked',
+            'High-priority tasks' => 'high_priority',
+            'Unassigned tasks' => 'unassigned',
+        ] as $label => $metric)
+            <div><dt>{{ $label }}</dt><dd><strong>{{ number_format((int) ($metrics->{$metric} ?? 0)) }}</strong></dd></div>
+        @endforeach
+    </dl>
+    <form method="POST" action="{{ route('user.owner.phase2.operations.tasks.store',$property) }}" class="az-form-grid">@csrf
 <label><span>Task</span><input name="title" required maxlength="160"></label>
 <label><span>Type</span><select name="type"><option>arrival</option><option>housekeeping</option><option>inspection</option><option>maintenance</option><option>handover</option></select></label>
 <label><span>Priority</span><select name="priority"><option>normal</option><option>low</option><option>high</option><option>urgent</option></select></label>
