@@ -86,6 +86,7 @@ class ReviewController extends Controller
         $review->update([
             ...$data,
             'edited_at' => now(),
+            'locale' => app()->getLocale(),
             'status' => 'pending',
         ]);
 
