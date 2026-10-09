@@ -11,6 +11,7 @@ use App\Services\Owners\PropertyAccessService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class OwnerBookingMessageController extends Controller
@@ -33,24 +34,59 @@ class OwnerBookingMessageController extends Controller
 
         $data = $request->validate([
             'body' => ['required', 'string', 'max:5000'],
+            'client_token' => ['required', 'uuid'],
             'attachment' => ['nullable', 'file', 'max:5120', 'mimes:jpg,jpeg,png,pdf'],
         ]);
 
         $file = $request->file('attachment');
-        $message = $conversation->messages()->create([
-            'sender_id' => $request->user()->id,
-            'sender_type' => 'property',
-            'body' => $data['body'],
-            'locale' => app()->getLocale(),
-            'attachment_path' => $file?->store('booking-messages', 'private'),
-            'attachment_name' => $file?->getClientOriginalName(),
-        ]);
+        $attachmentPath = $file?->store('booking-messages', 'private');
 
-        $conversation->update(['last_message_at' => $message->created_at]);
-        AuditLog::record('booking_message.property_sent', $conversation, [], ['message_id' => $message->id, 'property_id' => $property->id]);
+        try {
+            $created = DB::transaction(function () use ($conversation, $request, $property, $data, $file, $attachmentPath, $access): bool {
+                $locked = BookingConversation::query()->whereKey($conversation->id)->lockForUpdate()->firstOrFail();
+                abort_unless((int) $locked->property_id === (int) $property->id && ! $locked->closed_at, 404);
+                $access->assert($request->user(), $property, 'messages.manage');
 
-        return back()->with('success', 'Message sent.');
+                if ($locked->messages()
+                    ->where('sender_id', $request->user()->id)
+                    ->where('client_token', $data['client_token'])
+                    ->exists()) {
+                    return false;
+                }
+
+                $message = $locked->messages()->create([
+                    'sender_id' => $request->user()->id,
+                    'sender_type' => 'property',
+                    'client_token' => $data['client_token'],
+                    'body' => $data['body'],
+                    'locale' => app()->getLocale(),
+                    'attachment_path' => $attachmentPath,
+                    'attachment_name' => $file?->getClientOriginalName(),
+                ]);
+
+                $locked->update(['last_message_at' => $message->created_at]);
+                AuditLog::record('booking_message.property_sent', $locked, [], [
+                    'message_id' => $message->id,
+                    'property_id' => $property->id,
+                ]);
+
+                return true;
+            }, 3);
+        } catch (\Throwable $exception) {
+            if ($attachmentPath) {
+                Storage::disk('private')->delete($attachmentPath);
+            }
+
+            throw $exception;
+        }
+
+        if (! $created && $attachmentPath) {
+            Storage::disk('private')->delete($attachmentPath);
+        }
+
+        return back()->with('success', $created ? 'Message sent.' : 'This message was already sent.');
     }
+
     public function attachment(
         Request $request,
         Property $property,

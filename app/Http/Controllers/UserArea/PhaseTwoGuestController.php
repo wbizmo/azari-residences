@@ -32,7 +32,7 @@ class PhaseTwoGuestController extends Controller
     {
         $booking = $this->booking($request, $reference);
 
-        $conversation = BookingConversation::query()->firstOrCreate(
+        $conversation = BookingConversation::query()->createOrFirst(
             ['booking_id' => $booking->id],
             ['property_id' => $booking->property_id]
         );
@@ -53,28 +53,59 @@ class PhaseTwoGuestController extends Controller
 
         $data = $request->validate([
             'body' => ['required', 'string', 'max:5000'],
+            'client_token' => ['required', 'uuid'],
             'attachment' => ['nullable', 'file', 'max:5120', 'mimes:jpg,jpeg,png,pdf'],
         ]);
 
-        $conversation = BookingConversation::query()->firstOrCreate(
+        $conversation = BookingConversation::query()->createOrFirst(
             ['booking_id' => $booking->id],
             ['property_id' => $booking->property_id]
         );
 
         $file = $request->file('attachment');
-        $message = $conversation->messages()->create([
-            'sender_id' => $request->user()->id,
-            'sender_type' => 'guest',
-            'body' => $data['body'],
-            'locale' => app()->getLocale(),
-            'attachment_path' => $file?->store('booking-messages', 'private'),
-            'attachment_name' => $file?->getClientOriginalName(),
-        ]);
+        $attachmentPath = $file?->store('booking-messages', 'private');
 
-        $conversation->update(['last_message_at' => $message->created_at]);
-        AuditLog::record('booking_message.guest_sent', $booking, [], ['message_id' => $message->id]);
+        try {
+            $created = DB::transaction(function () use ($conversation, $request, $data, $file, $attachmentPath): bool {
+                $locked = BookingConversation::query()->whereKey($conversation->id)->lockForUpdate()->firstOrFail();
 
-        return back()->with('success', 'Message sent.');
+                // A browser retry or two concurrent tabs must not send a duplicate.
+                if ($locked->messages()
+                    ->where('sender_id', $request->user()->id)
+                    ->where('client_token', $data['client_token'])
+                    ->exists()) {
+                    return false;
+                }
+
+                $message = $locked->messages()->create([
+                    'sender_id' => $request->user()->id,
+                    'sender_type' => 'guest',
+                    'client_token' => $data['client_token'],
+                    'body' => $data['body'],
+                    'locale' => app()->getLocale(),
+                    'attachment_path' => $attachmentPath,
+                    'attachment_name' => $file?->getClientOriginalName(),
+                ]);
+
+                $locked->update(['last_message_at' => $message->created_at]);
+                AuditLog::record('booking_message.guest_sent', $locked, [], ['message_id' => $message->id]);
+
+                return true;
+            }, 3);
+        } catch (\Throwable $exception) {
+            if ($attachmentPath) {
+                Storage::disk('private')->delete($attachmentPath);
+            }
+
+            throw $exception;
+        }
+
+        // An attempted replay may carry a different upload. Never retain it.
+        if (! $created && $attachmentPath) {
+            Storage::disk('private')->delete($attachmentPath);
+        }
+
+        return back()->with('success', $created ? 'Message sent.' : 'This message was already sent.');
     }
 
     public function messageAttachment(Request $request, string $reference, BookingMessage $message)
