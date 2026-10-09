@@ -238,6 +238,7 @@ class OwnerPhaseTwoController extends Controller
             'status' => ['required', Rule::in(['open', 'in_progress', 'blocked', 'completed', 'cancelled'])],
             'notes' => ['nullable', 'string', 'max:5000'],
             'assigned_to' => ['nullable', 'integer', 'exists:users,id'],
+            'version' => ['required', 'integer', 'min:0'],
         ]);
 
         if (! empty($data['assigned_to'])) {
@@ -252,12 +253,36 @@ class OwnerPhaseTwoController extends Controller
         }
 
         $before = $task->only(['status', 'notes', 'assigned_to']);
-        $task->update([
-            ...$data,
-            'completed_at' => $data['status'] === 'completed' ? now() : null,
-        ]);
+        $expected = $data['version'];
+        unset($data['version']);
 
-        AuditLog::record('property_operations.task_updated', $task, $before, $task->only(['status', 'notes', 'assigned_to']));
+        $changed = DB::transaction(function () use ($property, $task, $data, $expected, $before): bool {
+            // SQL compare-and-swap avoids a stale form overwriting an edit made
+            // by another property collaborator. Only a successful update is audited.
+            $updated = PropertyOperationsTask::query()
+                ->whereKey($task->getKey())
+                ->where('property_id', $property->getKey())
+                ->where('version', $expected)
+                ->update([
+                    ...$data,
+                    'completed_at' => $data['status'] === 'completed' ? now() : null,
+                    'version' => $expected + 1,
+                    'updated_at' => now(),
+                ]);
+
+            if ($updated !== 1) {
+                return false;
+            }
+
+            $task->refresh();
+            AuditLog::record('property_operations.task_updated', $task, $before, $task->only(['status', 'notes', 'assigned_to']));
+
+            return true;
+        }, 3);
+
+        if (! $changed) {
+            return back()->withErrors(['status' => 'This task was changed by another team member. Reload the operations board before updating.']);
+        }
 
         return back()->with('success', 'Task updated.');
     }
