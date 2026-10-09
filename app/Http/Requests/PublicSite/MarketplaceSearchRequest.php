@@ -4,6 +4,8 @@ namespace App\Http\Requests\PublicSite;
 
 use App\Http\Requests\AzariFormRequest;
 use Illuminate\Validation\Rule;
+use Carbon\CarbonImmutable;
+use Closure;
 
 class MarketplaceSearchRequest extends AzariFormRequest
 {
@@ -27,7 +29,24 @@ class MarketplaceSearchRequest extends AzariFormRequest
     {
         return [
             'check_in' => ['required', 'date', 'after_or_equal:today'],
-            'check_out' => ['required', 'date', 'after:check_in'],
+            'check_out' => ['required', 'date', 'after:check_in',
+                function (string $attribute, mixed $value, Closure $fail): void {
+                    if (! $this->filled('check_in')) {
+                        return;
+                    }
+
+                    try {
+                        $start = CarbonImmutable::parse((string) $this->input('check_in'))->startOfDay();
+                        $end = CarbonImmutable::parse((string) $value)->startOfDay();
+                    } catch (\Throwable) {
+                        return; // Let the date rules report the invalid input.
+                    }
+
+                    if ($end->diffInDays($start, true) > max(1, (int) config('azari.booking.max_stay_nights', 366))) {
+                        $fail('The selected stay exceeds the maximum allowed booking length.');
+                    }
+                },
+            ],
             'adults' => ['required', 'integer', 'min:1', 'max:12'],
             'children' => ['nullable', 'integer', 'min:0', 'max:8'],
             'rooms' => ['nullable', 'integer', 'min:1', 'max:20'],
