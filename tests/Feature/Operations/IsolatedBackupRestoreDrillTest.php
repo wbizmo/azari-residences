@@ -53,6 +53,13 @@ class IsolatedBackupRestoreDrillTest extends TestCase
                 '--database' => 'resavar_restore', '--force' => true,
             ]));
 
+            // Default safety stays fail-closed: migrated target contains
+            // permissions/site_settings defaults, and overwriting them needs
+            // a second explicit operator acknowledgement.
+            $this->assertSame(1, Artisan::call('resavar:restore-drill', [
+                'backupRun' => $run->getKey(),
+                '--confirm-isolated' => 'RESTORE_TO_ISOLATED_DATABASE',
+            ]));
             $this->assertSame(0, Artisan::call('resavar:restore-drill', [
                 'backupRun' => $run->getKey(),
                 '--confirm-isolated' => 'RESTORE_TO_ISOLATED_DATABASE',
