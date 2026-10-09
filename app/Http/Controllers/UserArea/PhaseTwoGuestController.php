@@ -7,6 +7,7 @@ use App\Models\AuditLog;
 use App\Models\BookingConversation;
 use App\Models\BookingMessage;
 use App\Models\StayLifecycleEvent;
+use App\Services\Bookings\BookingMessagingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -46,13 +47,16 @@ class PhaseTwoGuestController extends Controller
         return view('user.bookings.messages', compact('booking', 'conversation', 'messages'));
     }
 
-    public function sendMessage(Request $request, string $reference): RedirectResponse
-    {
+    public function sendMessage(
+        Request $request,
+        string $reference,
+        BookingMessagingService $messaging
+    ): RedirectResponse {
         $booking = $this->booking($request, $reference);
-        abort_if(in_array($booking->status, ['cancelled', 'no_show'], true) && $booking->updated_at?->lt(now()->subDays(30)), 422);
 
         $data = $request->validate([
             'body' => ['required', 'string', 'max:5000'],
+            'client_token' => ['required', 'string', 'max:128'],
             'attachment' => ['nullable', 'file', 'max:5120', 'mimes:jpg,jpeg,png,pdf'],
         ]);
 
@@ -62,20 +66,68 @@ class PhaseTwoGuestController extends Controller
         );
 
         $file = $request->file('attachment');
-        $message = $conversation->messages()->create([
-            'sender_id' => $request->user()->id,
-            'sender_type' => 'guest',
-            'body' => $data['body'],
-            'locale' => app()->getLocale(),
-            'attachment_path' => $file?->store('booking-messages', 'private'),
-            'attachment_name' => $file?->getClientOriginalName(),
-        ]);
+        $attachmentPath = $file?->store('booking-messages', 'private');
 
-        $conversation->update(['last_message_at' => $message->created_at]);
-        AuditLog::record('booking_message.guest_sent', $booking, [], ['message_id' => $message->id]);
+        [$message, $created] = $messaging->create(
+            $conversation,
+            $booking,
+            $request->user(),
+            'guest',
+            $data['body'],
+            $data['client_token'],
+            $attachmentPath,
+            $file?->getClientOriginalName(),
+        );
 
-        return back()->with('success', 'Message sent.');
+        if (! $created && $attachmentPath) {
+            Storage::disk('private')->delete($attachmentPath);
+        }
+
+        if ($created) {
+            $messaging->notifyRecipients($booking, $conversation, $message);
+            AuditLog::record('booking_message.guest_sent', $booking, [], ['message_id' => $message->id]);
+        }
+
+        return back()->with('success', $created ? 'Message sent.' : 'That message was already sent.');
     }
+
+    public function pollMessages(Request $request, string $reference, BookingMessagingService $messaging): JsonResponse
+    {
+        $booking = $this->booking($request, $reference);
+        $messaging->assertMessagingAllowed($booking);
+        $after = max(0, (int) $request->query('after', 0));
+
+        $conversation = BookingConversation::query()->where('booking_id', $booking->id)->first();
+        if (! $conversation) {
+            return response()->json(['messages' => [], 'latest_id' => $after]);
+        }
+
+        $messages = $conversation->messages()
+            ->where('id', '>', $after)
+            ->oldest('id')
+            ->limit(50)
+            ->get();
+
+        $conversation->messages()
+            ->where('sender_type', 'property')
+            ->whereNull('read_at')
+            ->update(['read_at' => now()]);
+
+        return response()->json([
+            'messages' => $messages->map(fn ($message) => [
+                'id' => $message->id,
+                'sender_type' => $message->sender_type,
+                'body' => $message->body,
+                'created_at' => $message->created_at->toIso8601String(),
+                'attachment_url' => $message->attachment_path
+                    ? route('user.bookings.phase2.messages.attachment', [$booking->reference, $message])
+                    : null,
+                'attachment_name' => $message->attachment_name,
+            ])->values(),
+            'latest_id' => (int) ($messages->max('id') ?: $after),
+        ]);
+    }
+
 
     public function messageAttachment(Request $request, string $reference, BookingMessage $message)
     {
