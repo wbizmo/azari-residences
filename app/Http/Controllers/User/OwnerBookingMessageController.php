@@ -25,7 +25,16 @@ class OwnerBookingMessageController extends Controller
         abort_unless((int) $conversation->property_id === (int) $property->id, 404);
 
         $messages = $conversation->messages()->oldest()->paginate(40);
-        $conversation->messages()->where('sender_type', 'guest')->whereNull('read_at')->update(['read_at' => now()]);
+        // A paginated conversation may have unseen later pages. Mark only
+        // messages actually rendered to this recipient as read.
+        $visibleIds = $messages->getCollection()->pluck('id')->all();
+        if ($visibleIds !== []) {
+            $conversation->messages()
+                ->whereIn('id', $visibleIds)
+                ->where('sender_type', 'guest')
+                ->whereNull('read_at')
+                ->update(['read_at' => now()]);
+        }
 
         return view('user.owner.conversation-show', compact('property', 'conversation', 'messages'));
     }
