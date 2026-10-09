@@ -153,10 +153,30 @@ class BookingAmendmentOfferService
                 throw ValidationException::withMessages(['change' => 'Rates changed since the offer. Request a new quotation.']);
             }
             $difference = round((float) $quote['total'] - (float) $locked->total, 2);
+            $topup = null;
             if ($difference > 0.009) {
-                throw ValidationException::withMessages([
-                    'payment' => 'An additional verified payment is required before these new dates can be confirmed. The original booking remains unchanged.',
-                ]);
+                // A verified provider charge is unallocated until the guest
+                // accepts THIS quote and the new dates pass the final lock.
+                $topup = $change->payment_id ? Payment::query()->whereKey($change->payment_id)
+                    ->when(DB::connection()->getDriverName() !== 'sqlite',
+                        fn (Builder $q) => $q->lockForUpdate())->first() : null;
+                if (! $topup || $topup->status !== 'successful_excess'
+                    || ! $topup->verified_at
+                    || $topup->payment_kind !== 'amendment'
+                    || (int) $topup->booking_id !== (int) $locked->getKey()
+                    || (int) $topup->user_id !== (int) $guest->getKey()
+                    || strtoupper((string) $topup->currency) !== strtoupper((string) $quote['currency'])
+                    || abs((float) $topup->amount - $difference) >= 0.01) {
+                    throw ValidationException::withMessages([
+                        'payment' => 'The exact additional payment must be independently verified before changing dates.',
+                    ]);
+                }
+                if (\App\Models\Refund::query()->where('payment_id', $topup->getKey())
+                    ->whereIn('status', ['requested', 'processing', 'reconciliation_required', 'successful'])->exists()) {
+                    throw ValidationException::withMessages([
+                        'payment' => 'The additional payment is already in a refund workflow and cannot be allocated to this change.',
+                    ]);
+                }
             }
 
             $refundDue = max(0.0, round($locked->netPaidTotal() - (float) $quote['total'], 2));
@@ -189,6 +209,14 @@ class BookingAmendmentOfferService
                 'tax_rate' => $quote['tax_rate'], 'tax_total' => $quote['tax_total'],
                 'total' => $quote['total'], 'pricing_snapshot' => $quote, 'modified_at' => now(),
             ])->save();
+
+            if ($topup) {
+                $topup->forceFill([
+                    'status' => Payment::SUCCESSFUL,
+                    'administrative_note' => 'Amendment top-up allocated after customer consent and final inventory check.',
+                ])->save();
+                app(\App\Services\Owners\OwnerEarningsService::class)->creditForPayment($topup->refresh());
+            }
 
             $change->forceFill(['status' => 'approved', 'accepted_at' => now()])->save();
             AuditLog::record('booking.modification_applied', $change,

@@ -43,7 +43,8 @@ class Payment extends Model
 
     public function refundableBalance(): float
     {
-        if (! $this->isSuccessful()) {
+        if (! $this->isSuccessful()
+            && ! ($this->status === 'successful_excess' && $this->verified_at !== null)) {
             return 0.0;
         }
 

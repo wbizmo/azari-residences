@@ -135,6 +135,37 @@ class PaymentFinalizer
                 return $locked->refresh();
             }
 
+            // Amendment top-up is held as verified, UNALLOCATED money until the
+            // guest explicitly accepts the still-bookable quoted dates. Never
+            // count it as ordinary booking payment or owner earnings before then.
+            if ($locked->payment_kind === 'amendment') {
+                $related = \App\Models\BookingModificationRequest::query()
+                    ->where('payment_id', $locked->getKey())
+                    ->where('booking_id', $booking->getKey())
+                    ->first();
+                if (! $related) {
+                    throw new \LogicException('Verified amendment payment is missing its change request.');
+                }
+                $paidAt = filled($verification['paid_at'] ?? null)
+                    ? CarbonImmutable::parse((string) $verification['paid_at'])
+                    : now();
+                $locked->forceFill([
+                    'status' => 'successful_excess',
+                    'provider_reference' => $verification['provider_reference'] ?? $locked->provider_reference,
+                    'payment_method' => $verification['payment_method'] ?? $locked->payment_method,
+                    'paid_at' => $paidAt,
+                    'verified_at' => now(),
+                    'failed_at' => null,
+                    'provider_response_summary' => $verification['safe_response'] ?? null,
+                    'receipt_number' => $locked->receipt_number ?: $this->receiptNumber($locked),
+                    'administrative_note' => 'Amendment top-up verified but not allocated. Await guest acceptance and live inventory recheck; refund if offer cannot be completed.',
+                ])->save();
+                AuditLog::record('payment.amendment_topup_verified_unallocated', $locked, [], [
+                    'status' => 'successful_excess', 'change_id' => $related->getKey(),
+                ], ['source' => $source]);
+                return $locked->refresh();
+            }
+
             $alreadyAllocated = (float) $booking->payments()
                 ->where('status', Payment::SUCCESSFUL)
                 ->where('id', '!=', $locked->id)

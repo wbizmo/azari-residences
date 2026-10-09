@@ -157,7 +157,27 @@
                                     <button type="submit" class="az-user-button az-user-button--dark">Accept these dates and price</button>
                                 </form>
                             @else
-                                <p>An additional verified payment is required before accepting the new dates. Your existing dates remain unchanged; contact support to arrange this.</p>
+                                @php($amendmentPayment = $requestItem->payment_id ? \App\Models\Payment::query()->find($requestItem->payment_id) : null)
+                                @if(! $amendmentPayment)
+                                    <p>Your original stay stays confirmed until you pay the difference and approve the new dates.</p>
+                                    <form method="POST" action="{{ route('user.bookings.modifications.pay', [$booking->reference, $requestItem]) }}">
+                                        @csrf
+                                        <button type="submit" class="az-user-button az-user-button--dark">
+                                            Pay difference {{ $offer['currency'] ?? $booking->currency }} {{ number_format((float) ($offer['delta'] ?? 0), 2) }}
+                                        </button>
+                                    </form>
+                                @elseif($amendmentPayment->status === 'successful_excess' && $amendmentPayment->verified_at)
+                                    <p>Your additional payment is verified but not yet allocated. Confirm the current available dates below.</p>
+                                    <form method="POST" action="{{ route('user.bookings.modifications.accept', [$booking->reference, $requestItem]) }}">
+                                        @csrf
+                                        <button type="submit" class="az-user-button az-user-button--dark">Accept and confirm new dates</button>
+                                    </form>
+                                @else
+                                    <p>Your additional payment is {{ str_replace('_', ' ', $amendmentPayment->status) }}. Do not pay twice. The existing stay remains confirmed. Contact Resavar support if your payment is verified but the offer has expired.</p>
+                                    @if($amendmentPayment->checkout_url && in_array($amendmentPayment->status, ['pending','initiated'], true))
+                                        <a href="{{ $amendmentPayment->checkout_url }}" rel="nofollow noopener">Continue secure payment</a>
+                                    @endif
+                                @endif
                             @endif
                         @endif
 
