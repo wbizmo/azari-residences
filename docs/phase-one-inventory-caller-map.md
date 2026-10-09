@@ -26,3 +26,16 @@ The day-level source of truth is \`AzariAvailabilityEngine\`. Dates are property
 Run \`php artisan test --filter='PhaseOneInventorySafetyTest|PhaseOneQuoteIntegrityTest'\` in a disposable environment, then full local Laravel and MySQL contention suites. Benchmark 7/30/365-day calendar reads with actual query-count and p50/p95/p99 samples. The repo supplies a search benchmark, but **no timings or capacity baselines are asserted here without running it**.
 
 **Known complexity gate:** search's date-level SQL availability prefilters scale with nights. The large-horizon MySQL query-plan and latency budget must be checked before closing performance issue #52. No inference from a passing GitHub Actions syntax check is valid.
+
+
+## MySQL contention fixture (local only)
+
+`tests/local/phase1-mysql-contention.php` forks six **independent MySQL connections** and uses synchronized starts. The fixture requires `APP_ENV=testing`, PHP `pcntl`, a migrated disposable `mysql`/`mariadb` database whose name contains `test`, `sandbox` or `isolat`, and Composer development dependencies for factories. It refuses other environments and never contacts payment gateways:
+
+```bash
+APP_ENV=testing DB_CONNECTION=mysql php tests/local/phase1-mysql-contention.php
+```
+
+The script verifies exactly one hold for a one-unit room across six simultaneous customers, then independently races six identical checkout requests against the same held token. Expected: six identical requests return the same **one booking**, the hold is consumed, and no extra booking is inserted. Any unknown worker error fails the gate. Use a disposable database with no live user data, isolate network routes, and keep the MySQL server's deadlock/lock-timeout logs for evidence.
+
+The checkout transaction now locks **property → hold → accommodation type → inventory dates**, matching the property's serialization boundary in hold acquisition. This prevents a prior **hold → property** lock-order inversion with expired-hold cleanup. The fixture does not replace the broader financial, provider, deadlock and actual production-shaped acceptance in #123.
