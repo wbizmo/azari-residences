@@ -127,7 +127,7 @@ class ProviderRefundExecutionService
                 ]
             ),
             'failed', 'cancelled', 'canceled' => $this->refunds->markFailed(
-                $refund, 'Flutterwave reports that this refund did not settle.', $actorId
+                $refund, 'Flutterwave reports that this refund did not settle.', $actorId, providerVerified: true
             ),
             default => $refund->fresh(),
         };
