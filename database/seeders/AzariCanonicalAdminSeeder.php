@@ -33,6 +33,13 @@ class AzariCanonicalAdminSeeder extends Seeder
 
         $user = User::query()->firstOrNew(['email' => $email]);
 
+        if (! app()->environment('local', 'testing') && $user->exists) {
+            // Re-running a production seed must never reset an established
+            // administrator's password to a bootstrap environment value.
+            $this->command?->warn('Existing administrator left unchanged. Rotate credentials through the authorized account workflow.');
+            return;
+        }
+
         $values = [
             'name' => 'Azari Administrator',
             'email' => $email,
