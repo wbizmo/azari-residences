@@ -27,6 +27,9 @@ Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer'])->group
             Route::post('/commercial/{accommodationType}/calendar/preview', [OwnerCommercialInventoryController::class, 'previewBulkUpdate'])->name('calendar.preview');
             Route::post('/commercial/calendar-changes/{log}/undo', [OwnerCommercialInventoryController::class, 'undoBulkUpdate'])->name('calendar.undo');
 
+            Route::get('/reviews', [OwnerPhaseTwoController::class, 'reviews'])->name('reviews');
+            Route::post('/reviews/{review}/reply', [OwnerPhaseTwoController::class, 'replyReview'])->name('reviews.reply');
+
             Route::get('/messages', [OwnerPhaseTwoController::class, 'conversations'])->name('messages');
             Route::get('/messages/{conversation}', [OwnerBookingMessageController::class, 'show'])->name('messages.show');
             Route::post('/messages/{conversation}', [OwnerBookingMessageController::class, 'store'])
