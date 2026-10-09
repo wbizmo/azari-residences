@@ -53,6 +53,17 @@
                     @if($review->positive_feedback)<p><strong>Liked:</strong> {{ $review->positive_feedback }}</p>@endif
                     @if($review->negative_feedback)<p><strong>Could be better:</strong> {{ $review->negative_feedback }}</p>@endif
                     <p>{{ $review->body }}</p>
+                    <div class="reserva-review-helpful">
+                        <span>{{ number_format((int) ($review->helpful_votes_count ?? 0)) }} found this helpful</span>
+                        @if(auth()->check() && auth()->user()->hasVerifiedEmail()
+                            && (int) auth()->id() !== (int) $review->user_id
+                            && (int) auth()->id() !== (int) $property->owner_id)
+                            <form method="POST" action="{{ route('user.reviews.helpful', $review) }}">
+                                @csrf
+                                <button class="button button-secondary" type="submit" aria-label="Mark review as helpful">Helpful</button>
+                            </form>
+                        @endif
+                    </div>
                     @if($review->admin_reply)
                         <div class="reserva-management-reply"><strong>Resavar response</strong><p>{{ $review->admin_reply }}</p></div>
                     @endif
