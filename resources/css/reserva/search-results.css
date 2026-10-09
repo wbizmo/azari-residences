@@ -241,7 +241,7 @@
 }
 
 .reserva-map-shell::before {
-    content: "Relative property locations";
+    content: "Interactive property viewport";
     position: absolute;
     top: 12px;
     left: 12px;
@@ -385,5 +385,103 @@
 
     .reserva-mobile-filter-trigger {
         display: inline-flex;
+    }
+}
+
+
+.reserva-map-pin-layer {
+    position: absolute;
+    inset: 0;
+}
+
+.reserva-map-controls {
+    position: absolute;
+    z-index: 6;
+    top: 12px;
+    right: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    max-width: calc(100% - 220px);
+}
+
+.reserva-map-controls button {
+    min-height: 38px;
+    padding: 7px 11px;
+    border: 1px solid var(--reserva-border-strong);
+    border-radius: 9px;
+    background: rgba(255,255,255,.96);
+    color: var(--reserva-navy);
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.reserva-map-controls button:hover,
+.reserva-map-controls button:focus-visible {
+    background: var(--reserva-navy);
+    color: var(--reserva-white);
+    outline: 3px solid rgba(5,32,88,.18);
+    outline-offset: 2px;
+}
+
+.reserva-map-controls .reserva-map-search-area {
+    background: var(--reserva-navy);
+    color: var(--reserva-white);
+}
+
+.reserva-map-status {
+    position: absolute;
+    z-index: 5;
+    right: 12px;
+    bottom: 12px;
+    max-width: min(420px, calc(100% - 24px));
+    padding: 7px 10px;
+    border-radius: 8px;
+    background: rgba(255,255,255,.94);
+    color: var(--reserva-text-muted);
+    font-size: .72rem;
+}
+
+.reserva-map-cluster {
+    min-width: 40px;
+    min-height: 40px;
+    padding: 8px;
+    border-radius: 50%;
+    background: var(--reserva-white);
+    color: var(--reserva-navy);
+    border-color: var(--reserva-navy);
+}
+
+.reserva-map-shell {
+    touch-action: none;
+    cursor: grab;
+}
+
+.reserva-map-shell.is-dragging {
+    cursor: grabbing;
+}
+
+.reserva-map-shell:focus-visible {
+    outline: 3px solid rgba(5,32,88,.3);
+    outline-offset: 3px;
+}
+
+@media (max-width: 720px) {
+    .reserva-map-controls {
+        top: 52px;
+        left: 10px;
+        right: 10px;
+        max-width: none;
+    }
+
+    .reserva-map-controls button {
+        flex: 0 0 auto;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .reserva-map-pin,
+    .reserva-results-card {
+        transition: none;
     }
 }
