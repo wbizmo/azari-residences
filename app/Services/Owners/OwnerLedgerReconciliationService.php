@@ -8,7 +8,6 @@ use App\Models\PaymentDispute;
 use App\Models\Refund;
 use App\Models\User;
 use App\Models\WithdrawalRequest;
-use Illuminate\Support\Facades\DB;
 
 /**
  * Read-only internal ledger exception report. Provider settlement files are
@@ -59,9 +58,6 @@ class OwnerLedgerReconciliationService
                 ->whereHas('booking.property', fn ($property) => $property
                     ->where('owner_id', $owner->getKey())
                     ->where('managed_for_owner', true)))
-            ->whereHas('payment', fn ($payment) => $payment
-                ->whereHas('booking.property', fn ($q) => $q
-                    ->where('owner_id', $owner->getKey())))
             ->whereExists(function ($query) use ($owner): void {
                 $query->selectRaw('1')->from('owner_ledger_entries as credit')
                     ->whereColumn('credit.payment_id', 'refunds.payment_id')
