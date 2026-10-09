@@ -32,6 +32,8 @@ class PropertyController extends Controller
             'images',
             'pointsOfInterest',
             'reviews' => fn ($query) => $query
+                ->where('verified_stay', true)
+                ->where('status', 'approved')
                 ->with(['user', 'managementReplyBy'])
                 ->latest()
                 ->limit(12),
