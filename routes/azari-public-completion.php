@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Admin\RoomTypeController;
+use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
 use App\Http\Controllers\PublicSite\AvailabilitySearchController;
 use App\Http\Controllers\PublicSite\DestinationSearchController;
 use App\Http\Controllers\PublicSite\AzariAvailabilityController;
@@ -61,6 +62,10 @@ Route::prefix('azaridevadmin')
         Route::resource('locations', LocationController::class)
             ->except(['show', 'destroy'])
             ->names('locations');
+
+        Route::post('reviews/{review}/appeal', [AdminReviewController::class, 'decideAppeal'])
+            ->middleware('throttle:20,1')
+            ->name('reviews.appeal');
 
         Route::resource('room-types', RoomTypeController::class)
             ->except(['show', 'destroy'])
