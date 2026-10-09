@@ -6,7 +6,7 @@ use InvalidArgumentException;
 
 class ChannelFeedUrlValidator
 {
-    public function assertSafe(string $url): void
+    public function assertSafe(string $url): string
     {
         $parts = parse_url($url);
         $scheme = strtolower((string) ($parts['scheme'] ?? ''));
@@ -31,6 +31,10 @@ class ChannelFeedUrlValidator
                 throw new InvalidArgumentException('Private or reserved calendar addresses are not permitted.');
             }
         }
+
+        // Pin the transport to this validated IP. DNS validation followed by
+        // an ordinary HTTP request permits a DNS-rebinding TOCTOU attack.
+        return $ips[0];
     }
 
     /** @return string[] */

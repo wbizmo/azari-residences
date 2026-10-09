@@ -106,6 +106,35 @@ class ChannelImportReliabilityTest extends TestCase
         $this->assertSame('cancelled', $missing->fresh()->status);
     }
 
+    public function test_invalid_calendar_date_does_not_roll_over_to_a_different_month(): void
+    {
+        $ical = "BEGIN:VCALENDAR\nBEGIN:VEVENT\nUID:valid\n"
+            ."DTSTART;VALUE=DATE:20261101\nDTEND;VALUE=DATE:20261103\nEND:VEVENT\n"
+            ."BEGIN:VEVENT\nUID:invalid-date\nDTSTART;VALUE=DATE:20260230\n"
+            ."DTEND;VALUE=DATE:20260303\nEND:VEVENT\nEND:VCALENDAR\n";
+
+        $this->expectException(\RuntimeException::class);
+        app(ICalChannelAdapter::class)->parse($ical);
+    }
+
+    public function test_calendar_import_refuses_local_and_metadata_network_hosts(): void
+    {
+        $validator = app(\App\Services\Channels\ChannelFeedUrlValidator::class);
+        foreach ([
+            'http://127.0.0.1/secret',
+            'http://169.254.169.254/latest/meta-data/',
+            'https://localhost/calendar.ics',
+            'https://user:pass@example.com/calendar.ics',
+        ] as $url) {
+            try {
+                $validator->assertSafe($url);
+                $this->fail('Unsafe calendar endpoint was accepted.');
+            } catch (\InvalidArgumentException $error) {
+                $this->assertNotEmpty($error->getMessage());
+            }
+        }
+    }
+
     public function test_duplicate_external_uid_cannot_corrupt_snapshot_in_one_import(): void
     {
         $property = Property::factory()->create();
