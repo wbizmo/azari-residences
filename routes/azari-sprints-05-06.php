@@ -30,6 +30,17 @@ Route::prefix('azaridevadmin')->name('azari.admin.')->middleware('azari.staff')-
         ->middleware('azari.permission:bookings.edit')->middleware('azari.step-up')->name('bookings.no-show');
     Route::get('/bookings/{booking}/cancellation-quote', [BookingManagementController::class, 'cancellationQuote'])
         ->middleware('azari.permission:bookings.view')->name('bookings.cancellation-quote');
+    Route::post('/bookings/{booking}/cancellation-overrides', [BookingManagementController::class, 'requestCancellationOverride'])
+        ->middleware('azari.permission:bookings.edit')
+        ->middleware('azari.step-up')
+        ->middleware('throttle:5,10')
+        ->name('bookings.cancellation-overrides.store');
+    Route::post('/bookings/{booking}/cancellation-overrides/{override}/review', [BookingManagementController::class, 'reviewCancellationOverride'])
+        ->middleware('azari.admin')
+        ->middleware('azari.permission:payments.manage')
+        ->middleware('azari.step-up')
+        ->middleware('throttle:10,10')
+        ->name('bookings.cancellation-overrides.review');
     Route::put('/bookings/{booking}/cancel', AzariBookingCancellationController::class)
         ->middleware('azari.permission:bookings.edit')->middleware('azari.step-up')->name('bookings.cancel');
 });
