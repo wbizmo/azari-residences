@@ -54,6 +54,42 @@ class UnknownPayoutOutcomeTest extends TestCase
         $this->assertFalse($withdrawal->isSafelyRetryable());
     }
 
+    public function test_same_operator_cannot_self_approve_ambiguous_payout_or_release_funds(): void
+    {
+        $owner = User::factory()->create();
+        $operator = User::factory()->create();
+        $withdrawal = WithdrawalRequest::query()->create([
+            'user_id' => $owner->id, 'gateway' => 'paypal',
+            'currency' => 'USD', 'amount' => 100,
+            'status' => 'reconciliation_required',
+            'processed_by' => $operator->id,
+            'reference' => 'WDR-TEST-INDEPENDENT-REVIEW',
+            'destination_snapshot' => ['paypal_recipient' => 'owner@example.test'],
+        ]);
+        $service = new OwnerWithdrawalService(
+            app(OwnerBalanceService::class),
+            Mockery::mock(WithdrawalGatewayManager::class)
+        );
+
+        foreach (['paid', 'not_paid'] as $outcome) {
+            try {
+                if ($outcome === 'paid') {
+                    $service->reconcileAsPaid($withdrawal, $operator, 'PROVIDER-PAID-123', 'Provider receipt');
+                } else {
+                    $service->reconcileAsNotPaid($withdrawal, $operator, 'Provider confirmed transfer failed');
+                }
+                $this->fail('An operator may not independently resolve a payout they dispatched.');
+            } catch (RuntimeException $error) {
+                $this->assertStringContainsString('Independent finance approval', $error->getMessage());
+            }
+        }
+
+        $this->assertSame('reconciliation_required', $withdrawal->fresh()->status);
+        $this->assertDatabaseMissing('owner_ledger_entries', [
+            'withdrawal_request_id' => $withdrawal->id,
+        ]);
+    }
+
     public function test_owner_cannot_request_withdrawal_to_another_owners_verified_profile(): void
     {
         $owner = User::factory()->create();
