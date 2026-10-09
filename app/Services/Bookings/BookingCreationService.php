@@ -35,6 +35,7 @@ class BookingCreationService
 
         if ($existingBooking) {
             abort_unless((int) $existingBooking->user_id === (int) $user->id, 403);
+            $this->assertRetryPayloadMatches($request, $existingBooking);
 
             return $existingBooking;
         }
@@ -52,6 +53,7 @@ class BookingCreationService
 
             if ($existingBooking) {
                 abort_unless((int) $existingBooking->user_id === (int) $user->id, 403);
+                $this->assertRetryPayloadMatches($request, $existingBooking);
 
                 return $existingBooking;
             }
@@ -85,6 +87,7 @@ class BookingCreationService
 
                 if ($existing) {
                     abort_unless((int) $existing->user_id === (int) $user->id, 403);
+                    $this->assertRetryPayloadMatches($request, $existing);
 
                     return $existing;
                 }
@@ -251,6 +254,65 @@ class BookingCreationService
 
 
         return $booking;
+    }
+
+    /**
+     * An idempotency key identifies exactly one customer/guest payload, not
+     * merely a user. Retrying with altered guest details must fail safely.
+     */
+    private function assertRetryPayloadMatches(Request $request, Booking $booking): void
+    {
+        $inputs = [
+            'first_name' => (string) $booking->guest_first_name,
+            'last_name' => (string) $booking->guest_last_name,
+            'guest_email' => mb_strtolower((string) $booking->guest_email),
+            'guest_phone' => (string) $booking->guest_phone,
+            'nationality' => (string) $booking->nationality,
+            'address' => (string) $booking->address,
+            'city' => (string) $booking->city,
+            'country' => (string) $booking->country,
+            'guest_notes' => (string) ($booking->guest_notes ?? ''),
+            'arrival_time' => (string) ($booking->arrival_time?->format('H:i') ?? ''),
+        ];
+        foreach ($inputs as $field => $original) {
+            $submitted = (string) $request->input($field);
+            if ($field === 'guest_email') {
+                $submitted = mb_strtolower($submitted);
+            }
+            if ($submitted !== $original) {
+                throw ValidationException::withMessages([
+                    'hold_token' => 'This reservation key was already used with different booking details.',
+                ]);
+            }
+        }
+
+        $adultInputs = $request->input('adults');
+        $childInputs = $request->input('children') ?: [];
+        if (! is_array($adultInputs) || ! is_array($childInputs)
+            || ! $request->boolean('terms')) {
+            throw ValidationException::withMessages([
+                'hold_token' => 'This reservation key was already used with different booking details.',
+            ]);
+        }
+        $guests = $booking->guests()->get(['type', 'position', 'first_name', 'last_name'])
+            ->groupBy('type');
+        foreach (['adult' => $adultInputs, 'child' => $childInputs] as $type => $submitted) {
+            $stored = ($guests->get($type) ?? collect())->sortBy('position')->values();
+            if (count($submitted) !== $stored->count()) {
+                throw ValidationException::withMessages([
+                    'hold_token' => 'This reservation key was already used with different guest counts.',
+                ]);
+            }
+            foreach (array_values($submitted) as $i => $guest) {
+                if (! is_array($guest)
+                    || (string) ($guest['first_name'] ?? '') !== (string) $stored[$i]->first_name
+                    || (string) ($guest['last_name'] ?? '') !== (string) $stored[$i]->last_name) {
+                    throw ValidationException::withMessages([
+                        'hold_token' => 'This reservation key was already used with different guest details.',
+                    ]);
+                }
+            }
+        }
     }
 
     public function validateDraft(Request $request, BookingHold $hold): array
