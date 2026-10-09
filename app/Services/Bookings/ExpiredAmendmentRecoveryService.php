@@ -34,8 +34,15 @@ class ExpiredAmendmentRecoveryService
             if ($lockedChange->status === 'approved') {
                 return null; // This payment is allocated to the booking already.
             }
-            if ($lockedChange->status !== 'quoted' || $lockedChange->quote_expires_at?->isFuture()
-                || ! $lockedChange->payment_id) {
+            if (! in_array($lockedChange->status, ['quoted', 'expired'], true)
+                || ! $lockedChange->quote_expires_at
+                || $lockedChange->quote_expires_at->isFuture()) {
+                return null;
+            }
+            if ($lockedChange->status === 'quoted') {
+                $lockedChange->forceFill(['status' => 'expired'])->save();
+            }
+            if (! $lockedChange->payment_id) {
                 return null;
             }
 
