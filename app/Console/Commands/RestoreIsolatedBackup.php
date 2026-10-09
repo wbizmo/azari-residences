@@ -8,6 +8,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -45,7 +46,10 @@ class RestoreIsolatedBackup extends Command
         // the actual active source database name, not an environment guess.
         $sourceDatabase = (string) DB::connection($sourceName)->getDatabaseName();
         $targetDatabase = (string) $targetConfig['database'];
-        if ($targetDatabase === $sourceDatabase
+        if (strcasecmp($targetDatabase, $sourceDatabase) === 0
+            || ($sourceDriverName = DB::connection($sourceName)->getDriverName()) === 'sqlite'
+                && realpath($targetDatabase) !== false
+                && realpath($targetDatabase) === realpath($sourceDatabase)
             || ! preg_match('/(?:restore|drill|isolat)/i', $targetDatabase)) {
             $this->error('Restore database name must be distinct and visibly isolated.');
             return self::FAILURE;
@@ -138,7 +142,12 @@ class RestoreIsolatedBackup extends Command
             $this->warn('Private media/offsite recovery and operational cutover are separate drills.');
             return self::SUCCESS;
         } catch (\Throwable $exception) {
-            report($exception);
+            // Never put decrypted row values, SQL bindings, PII or secrets
+            // from QueryException messages into application logs.
+            Log::warning('Isolated recovery drill did not complete.', [
+                'exception_class' => $exception::class,
+                'target_connection' => $targetName,
+            ]);
             $this->error('Isolated restore refused or failed. Target must be discarded and reprovisioned.');
             return self::FAILURE;
         }
