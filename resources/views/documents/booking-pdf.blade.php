@@ -535,6 +535,13 @@ h2 { margin-top: 17px; margin-bottom: 5px; font-size: 12px; page-break-after: av
         </td>
     </tr>
 
+    @if((float) $booking->discount_total > 0)
+        <tr>
+            <td>Voucher discount{{ $booking->voucher_code ? ' ('.$booking->voucher_code.')' : '' }}</td>
+            <td class="money">-{{ $booking->currency }} {{ number_format((float) $booking->discount_total, 2) }}</td>
+        </tr>
+    @endif
+
     <tr class="total">
         <td>Total</td>
         <td class="money">
