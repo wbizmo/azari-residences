@@ -223,7 +223,7 @@ class PhaseTwoGuestController extends Controller
             || str_ends_with($hostname, '.internal')
             || str_ends_with($hostname, '.test');
 
-        if (filter_var($hostname, FILTER_VALIDATE_IP)) {
+        if (filter_var(trim($hostname, '[]'), FILTER_VALIDATE_IP)) {
             $forbidden = true;
         }
 
