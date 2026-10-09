@@ -426,3 +426,220 @@ html[data-admin-theme="dark"] :is(.az-section-heading__meta,.az-topbar-page__eye
     white-space: nowrap !important;
 }
 /* RESAVAR_USER_AVATAR_INITIAL_ABSOLUTE_CENTER_V2_END */
+
+
+/* PHASE 2 | Guest, owner and address controls | Accessible navy/white */
+.az-user-sidebar .az-user-nav-link,
+.az-user-mobile-drawer .az-user-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.az-user-sidebar .az-user-nav-link > .material-symbols-outlined,
+.az-user-mobile-drawer .az-user-nav-link > .material-symbols-outlined {
+    display: inline-grid !important;
+    place-items: center !important;
+    width: 24px;
+    height: 24px;
+    flex: 0 0 24px;
+    line-height: 1 !important;
+    text-align: center;
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+.az-user-sidebar .az-user-nav-link.is-active > .material-symbols-outlined,
+.az-user-mobile-drawer .az-user-nav-link.is-active > .material-symbols-outlined {
+    color: #052058 !important;
+    -webkit-text-fill-color: #052058 !important;
+}
+.az-user-summary-icon,
+.az-user-mini-icon,
+.az-user-timezone-icon,
+.az-user-stat > .material-symbols-outlined {
+    display: grid !important;
+    place-items: center !important;
+    flex-shrink: 0 !important;
+    line-height: 1 !important;
+    text-align: center;
+}
+.az-user-summary-icon > .material-symbols-outlined,
+.az-user-mini-icon > .material-symbols-outlined,
+.az-user-timezone-icon > .material-symbols-outlined,
+.az-user-stat > .material-symbols-outlined,
+.az-user-meta-item .material-symbols-outlined {
+    color: #052058 !important;
+    -webkit-text-fill-color: #052058 !important;
+}
+.az-user-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-align: center;
+}
+.az-user-button > .material-symbols-outlined,
+.az-user-actions .material-symbols-outlined {
+    display: inline-grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 20px;
+    height: 20px;
+    line-height: 1 !important;
+    color: inherit;
+    -webkit-text-fill-color: currentColor;
+}
+.az-user-button--dark,
+.az-user-button--dark > .material-symbols-outlined {
+    background-color: #052058;
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+.az-user-button--light,
+.az-user-button--light > .material-symbols-outlined {
+    color: #052058 !important;
+    -webkit-text-fill-color: #052058 !important;
+}
+.az-user-welcome .az-user-button--primary > .material-symbols-outlined {
+    color: #052058 !important;
+    -webkit-text-fill-color: #052058 !important;
+}
+.az-user-welcome .az-user-button--ghost > .material-symbols-outlined {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+.az-user-welcome .az-user-button--primary:is(:hover,:focus-visible) > .material-symbols-outlined,
+.az-user-welcome .az-user-button--ghost:is(:hover,:focus-visible) > .material-symbols-outlined {
+    color: #FFFFFF !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+}
+
+/* Single-column, full-width withdrawal amount entry at every viewport. */
+.az-user-form--withdrawal {
+    display: grid;
+    grid-template-columns: minmax(0,1fr) !important;
+    gap: 16px;
+    width: 100%;
+    max-width: 720px;
+    min-width: 0;
+}
+.az-user-form--withdrawal > *,
+.az-user-withdrawal-amount-field {
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+    grid-column: 1 / -1;
+}
+.az-user-withdrawal-amount-field {
+    display: grid;
+    gap: 8px;
+}
+.az-user-withdrawal-amount-field > label {
+    color: #052058;
+    font-weight: 700;
+}
+.az-user-withdrawal-amount-field > input {
+    display: block;
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+    min-height: 48px;
+    border: 1px solid #98a9c5;
+    border-radius: 12px;
+    background: #FFFFFF;
+    color: #052058;
+    -webkit-text-fill-color: #052058;
+    padding: 12px 14px;
+}
+.az-user-withdrawal-amount-field > small,
+.az-user-currency-note,
+.az-dashboard-currency-form > small {
+    color: #415575;
+    line-height: 1.6;
+}
+.az-user-form-error { color: #8a1b1b !important; }
+.az-user-form--withdrawal > .az-user-button {
+    justify-self: start;
+    width: auto;
+    max-width: 100%;
+    padding-inline: 22px;
+}
+.az-user-form--withdrawal input:focus-visible,
+.az-currency-preference-form select:focus-visible,
+.az-dashboard-currency-form select:focus-visible {
+    outline: 3px solid rgba(5,32,88,.28);
+    outline-offset: 2px;
+    border-color: #052058;
+}
+.az-dashboard-currency-form {
+    display: grid;
+    gap: 9px;
+    margin-top: 16px;
+    padding-top: 16px;
+    min-width: 0;
+    border-top: 1px solid rgba(5,32,88,.15);
+}
+.az-dashboard-currency-form > label,
+.az-currency-preference-form > label {
+    color: #052058;
+    font-size: 13px;
+    font-weight: 700;
+}
+.az-dashboard-currency-controls,
+.az-currency-preference-form {
+    display: grid;
+    grid-template-columns: minmax(0,1fr) auto;
+    gap: 10px;
+    align-items: center;
+    min-width: 0;
+}
+.az-currency-preference-form > label { grid-column: 1 / -1; }
+.az-dashboard-currency-form select,
+.az-currency-preference-form select {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    padding: 10px 12px;
+    border-radius: 11px;
+    border: 1px solid #98a9c5;
+    background: #FFFFFF;
+    color: #052058;
+    -webkit-text-fill-color: #052058;
+}
+@media (max-width: 390px) {
+    .az-dashboard-currency-controls,
+    .az-currency-preference-form { grid-template-columns: minmax(0,1fr); }
+    .az-dashboard-currency-controls > .az-user-button,
+    .az-currency-preference-form > .az-user-button { width: 100%; }
+}
+
+/* Address lookup uses navy spinner on light map/search surfaces. */
+.az-address-fields { min-width: 0; }
+.az-address-fields [data-azari-address-status] {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 8px 0 12px;
+    color: #052058 !important;
+    -webkit-text-fill-color: #052058 !important;
+    font-size: 12px;
+    font-weight: 600;
+}
+.az-address-fields .az-address-spinner {
+    display: inline-block;
+    inline-size: 19px;
+    block-size: 19px;
+    border: 2.5px solid rgba(5,32,88,.22);
+    border-top-color: #052058;
+    border-radius: 50%;
+    flex: 0 0 19px;
+    animation: az-action-spin .8s linear infinite;
+}
+.az-address-fields [data-azari-address-results] button:is(:hover,:focus-visible) {
+    background: #edf3fc !important;
+    color: #052058 !important;
+    -webkit-text-fill-color: #052058 !important;
+}
+@media (prefers-reduced-motion: reduce) {
+    .az-address-fields .az-address-spinner { animation-duration: 1.6s; }
+}
