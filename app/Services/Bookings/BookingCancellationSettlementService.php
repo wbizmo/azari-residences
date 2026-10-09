@@ -103,6 +103,13 @@ class BookingCancellationSettlementService
             $fresh = Booking::query()->whereKey($booking->getKey())
                 ->when(DB::connection()->getDriverName() !== 'sqlite',
                     fn (Builder $q) => $q->lockForUpdate())->firstOrFail();
+            // A staff-recorded external refund reference is not settlement
+            // evidence, but it means the provider may already have moved
+            // funds. Never issue a second automatic refund; escalate for
+            // independent reconciliation and evidence review instead.
+            if (filled($fresh->external_refund_reference)) {
+                return ['refunds_requested' => 0, 'manual_review' => true];
+            }
             if (! in_array($fresh->status, ['cancelled', 'no_show'], true)) {
                 throw ValidationException::withMessages([
                     'booking' => 'Refunds require a terminal cancellation or no-show.',
