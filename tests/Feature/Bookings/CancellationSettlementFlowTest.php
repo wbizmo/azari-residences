@@ -99,6 +99,21 @@ class CancellationSettlementFlowTest extends TestCase
         $this->assertSame(1, $booking->refunds()->count());
     }
 
+    public function test_external_refund_claim_suspends_automatic_refund_recovery(): void
+    {
+        [$booking, $payment, $guest] = $this->paidBooking();
+        app(\App\Services\Bookings\BookingCancellationService::class)->cancel(
+            $booking, $guest->id, 'Refund already handled by finance',
+            externalRefundReference: 'EXTERNAL-TRANSFER-12345'
+        );
+        $service = app(BookingCancellationSettlementService::class);
+        $result = $service->reserveEligibleRefunds($booking->fresh());
+        $this->assertTrue($result['manual_review']);
+        $this->assertSame(0, $result['refunds_requested']);
+        $this->assertSame(0, Artisan::call('resavar:reconcile-cancellation-refunds'));
+        $this->assertSame(0, Refund::query()->where('payment_id', $payment->id)->count());
+    }
+
     public function test_foreign_guest_cannot_cancel_booking(): void
     {
         [$booking] = $this->paidBooking();
