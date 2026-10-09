@@ -517,12 +517,12 @@ html[data-admin-theme="dark"] :is(.az-section-heading__meta,.az-topbar-page__eye
 }
 
 /* Single-column, full-width withdrawal amount entry at every viewport. */
-.az-user-form--withdrawal {
+.az-user-form.az-user-form--withdrawal {
     display: grid;
     grid-template-columns: minmax(0,1fr) !important;
     gap: 16px;
     width: 100%;
-    max-width: 720px;
+    max-width: 720px !important;
     min-width: 0;
 }
 .az-user-form--withdrawal > *,
