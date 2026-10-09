@@ -39,6 +39,13 @@ class ICalChannelAdapter implements ChannelAdapter
         }
         $ical = preg_replace("/\r?\n[ \t]/", '', $ical) ?? $ical;
         preg_match_all('/BEGIN:VEVENT\R(.*?)\REND:VEVENT/s', $ical, $matches);
+        // Reject partially truncated calendars even when some earlier events
+        // parse correctly. A partial feed is not evidence that missing remote
+        // reservations were cancelled.
+        if (substr_count($ical, 'BEGIN:VEVENT') !== count($matches[1] ?? [])
+            || substr_count($ical, 'END:VEVENT') !== count($matches[1] ?? [])) {
+            throw new \RuntimeException('External calendar has incomplete reservation blocks.');
+        }
         if (count($matches[1] ?? []) > 5000) {
             throw new \RuntimeException('External calendar contains too many events.');
         }
@@ -51,10 +58,15 @@ class ICalChannelAdapter implements ChannelAdapter
                 $key = strtoupper(explode(';', $key, 2)[0]);
                 $fields[$key] = trim($value);
             }
-            if (blank($fields['UID'] ?? null) || blank($fields['DTSTART'] ?? null) || blank($fields['DTEND'] ?? null)) continue;
+            if (blank($fields['UID'] ?? null) || blank($fields['DTSTART'] ?? null)
+                || blank($fields['DTEND'] ?? null)) {
+                throw new \RuntimeException('External calendar contains an incomplete reservation.');
+            }
             $start = $this->date($fields['DTSTART']);
             $end = $this->date($fields['DTEND']);
-            if (! $start || ! $end || $end->lessThanOrEqualTo($start)) continue;
+            if (! $start || ! $end || $end->lessThanOrEqualTo($start)) {
+                throw new \RuntimeException('External calendar contains an invalid reservation date range.');
+            }
             $status = strtoupper((string) ($fields['STATUS'] ?? 'CONFIRMED')) === 'CANCELLED' ? 'cancelled' : 'active';
             $events[] = [
                 'external_id' => mb_substr($fields['UID'], 0, 255),
