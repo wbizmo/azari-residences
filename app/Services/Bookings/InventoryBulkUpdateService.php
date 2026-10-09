@@ -104,7 +104,28 @@ class InventoryBulkUpdateService
                 );
             }
 
+            // Store the exact post-apply state. Undo must not overwrite a
+            // colleague's later change or an intervening inventory hold.
+            $afterSnapshot = [];
+            $appliedRows = InventoryDate::query()
+                ->where('accommodation_type_id', $lockedType->getKey())
+                ->whereBetween('date', [$from->toDateString(), $to->toDateString()])
+                ->get()->keyBy(fn (InventoryDate $row) => $row->date->toDateString());
+            foreach ($rows as $row) {
+                $date = $row['date'];
+                $applied = $appliedRows->get($date);
+                $afterSnapshot[$date] = [
+                    'exists' => (bool) $applied,
+                    'values' => $applied
+                        ? collect(self::ALLOWED)->mapWithKeys(
+                            fn (string $key) => [$key => $applied->getRawOriginal($key)]
+                        )->all()
+                        : [],
+                ];
+            }
+
             return InventoryChangeLog::query()->create([
+                'after_snapshot' => $afterSnapshot,
                 'property_id' => $lockedType->property_id,
                 'accommodation_type_id' => $lockedType->getKey(),
                 'actor_id' => $actorId,
@@ -193,11 +214,16 @@ class InventoryBulkUpdateService
         }
 
         $snapshot = (array) $log->before_snapshot;
-        if ($snapshot === []) {
-            throw ValidationException::withMessages(['inventory' => 'This older calendar change does not contain an undo snapshot.']);
+        $afterSnapshot = (array) $log->after_snapshot;
+        if ($snapshot === [] || $afterSnapshot === []) {
+            // Historical changes cannot be safely undone without the original
+            // post-apply state. Staff must review them manually.
+            throw ValidationException::withMessages([
+                'inventory' => 'This calendar change has no safe undo snapshot. Contact an administrator.',
+            ]);
         }
 
-        return DB::transaction(function () use ($log, $snapshot, $actorId): InventoryChangeLog {
+        return DB::transaction(function () use ($log, $snapshot, $afterSnapshot, $actorId): InventoryChangeLog {
             $lockedLog = InventoryChangeLog::query()->whereKey($log->getKey())
                 ->when(DB::connection()->getDriverName() !== 'sqlite', fn (Builder $q) => $q->lockForUpdate())
                 ->firstOrFail();
@@ -206,12 +232,50 @@ class InventoryBulkUpdateService
                 throw ValidationException::withMessages(['inventory' => 'This calendar change has already been undone.']);
             }
 
+            // Match booking holds and bulk application: property -> type -> dates.
+            Property::query()->whereKey($lockedLog->property_id)
+                ->when(DB::connection()->getDriverName() !== 'sqlite', fn (Builder $q) => $q->lockForUpdate())
+                ->firstOrFail();
+
             $type = AccommodationType::query()->whereKey($lockedLog->accommodation_type_id)
                 ->when(DB::connection()->getDriverName() !== 'sqlite', fn (Builder $q) => $q->lockForUpdate())
                 ->firstOrFail();
 
+            $firstDate = CarbonImmutable::parse(array_key_first($snapshot));
+            $lastDate = CarbonImmutable::parse(array_key_last($snapshot));
+            $committed = $this->availability->committedQuantityByDate(
+                $type, $firstDate, $lastDate->addDay()
+            );
+
             foreach ($snapshot as $date => $before) {
+                $current = InventoryDate::query()
+                    ->where('accommodation_type_id', $type->id)
+                    ->whereDate('date', $date)
+                    ->when(DB::connection()->getDriverName() !== 'sqlite', fn (Builder $q) => $q->lockForUpdate())
+                    ->first();
+                $expected = $afterSnapshot[$date] ?? null;
+                if (! is_array($expected) || ! ($expected['exists'] ?? false) || ! $current) {
+                    throw ValidationException::withMessages([
+                        'inventory' => "Inventory changed since this update on {$date}; undo has been refused.",
+                    ]);
+                }
+                foreach (self::ALLOWED as $field) {
+                    $actual = $current->getRawOriginal($field);
+                    $previous = $expected['values'][$field] ?? null;
+                    if (($actual === null) !== ($previous === null)
+                        || ($actual !== null && (string) $actual !== (string) $previous)) {
+                        throw ValidationException::withMessages([
+                            'inventory' => "Another inventory change exists on {$date}; undo has been refused.",
+                        ]);
+                    }
+                }
+
                 if (! ($before['exists'] ?? false)) {
+                    if ((int) $committed->get($date, 0) > 0) {
+                        throw ValidationException::withMessages([
+                            'inventory' => "A room is now committed on {$date}; undo cannot delete its inventory.",
+                        ]);
+                    }
                     InventoryDate::query()
                         ->where('accommodation_type_id', $type->id)
                         ->whereDate('date', $date)
