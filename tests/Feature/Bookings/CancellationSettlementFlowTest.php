@@ -62,6 +62,43 @@ class CancellationSettlementFlowTest extends TestCase
         }
     }
 
+    public function test_partial_deposit_below_cancellation_fee_cannot_be_refunded(): void
+    {
+        [$booking, $payment, $guest] = $this->paidBooking([
+            'policy_snapshot' => [
+                'rate_plan' => ['is_refundable' => true],
+                'cancellation' => ['fee_amount' => 400],
+            ],
+        ]);
+        $payment->forceFill(['amount' => 200])->save();
+        $result = app(BookingCancellationSettlementService::class)
+            ->cancelForGuest($booking, $guest, 'Changed my plans');
+        $this->assertSame('cancelled', $result->status);
+        $this->assertSame(0, $booking->refunds()->count());
+        $this->assertSame(0, app(BookingCancellationSettlementService::class)
+            ->reserveEligibleRefunds($booking->fresh())['refunds_requested']);
+    }
+
+    public function test_settled_refunds_count_against_original_entitlement_on_replay(): void
+    {
+        [$booking, $payment, $guest] = $this->paidBooking([
+            'policy_snapshot' => [
+                'rate_plan' => ['is_refundable' => true],
+                'cancellation' => ['fee_amount' => 600],
+            ],
+        ]);
+        $settlement = app(BookingCancellationSettlementService::class);
+        $settlement->cancelForGuest($booking, $guest, 'Cancel this booking');
+        $refund = $booking->refunds()->firstOrFail();
+        $this->assertEqualsWithDelta(400, (float) $refund->amount, 0.01);
+
+        // Simulate confirmed remote settlement by recording the terminal
+        // evidence state. Reconciliation must not reserve again.
+        $refund->forceFill(['status' => 'successful', 'processed_at' => now()])->save();
+        $this->assertSame(0, $settlement->reserveEligibleRefunds($booking->fresh())['refunds_requested']);
+        $this->assertSame(1, $booking->refunds()->count());
+    }
+
     public function test_foreign_guest_cannot_cancel_booking(): void
     {
         [$booking] = $this->paidBooking();
