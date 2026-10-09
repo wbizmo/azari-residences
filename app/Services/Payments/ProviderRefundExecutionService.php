@@ -35,7 +35,9 @@ class ProviderRefundExecutionService
             $payment = Payment::query()->whereKey($row->payment_id)
                 ->when(DB::connection()->getDriverName() !== 'sqlite',
                     fn (Builder $query) => $query->lockForUpdate())->firstOrFail();
-            if (! $payment->isSuccessful() || blank($payment->provider_reference)) {
+            if ((! $payment->isSuccessful()
+                && ! ($payment->status === 'successful_excess' && $payment->verified_at !== null))
+                || blank($payment->provider_reference)) {
                 throw ValidationException::withMessages(['refund' => 'A verified source charge reference is required before dispatch.']);
             }
             if (strtoupper((string) $row->currency) !== strtoupper((string) $payment->currency)) {

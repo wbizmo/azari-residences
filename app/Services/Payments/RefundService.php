@@ -49,7 +49,8 @@ class RefundService
                 )
                 ->firstOrFail();
 
-            if (! $lockedPayment->isSuccessful()) {
+            if (! $lockedPayment->isSuccessful()
+                && ! ($lockedPayment->status === 'successful_excess' && $lockedPayment->verified_at !== null)) {
                 throw ValidationException::withMessages(['payment' => 'Only verified successful payments can be refunded.']);
             }
 
@@ -150,7 +151,8 @@ class RefundService
                 )
                 ->firstOrFail();
 
-            if (! $payment->isSuccessful()) {
+            if (! $payment->isSuccessful()
+                && ! ($payment->status === 'successful_excess' && $payment->verified_at !== null)) {
                 throw ValidationException::withMessages(['payment' => 'The source payment is no longer refundable.']);
             }
 
