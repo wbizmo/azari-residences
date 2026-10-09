@@ -33,6 +33,8 @@ class BookingCancellationService
                 ]);
             }
 
+            $cancellationQuote = app(BookingCancellationQuoteService::class)->quote($locked);
+
             $previous = (string) $locked->status;
             $locked->forceFill([
                 'status' => 'cancelled',
@@ -54,6 +56,7 @@ class BookingCancellationService
                     'payment_status_note' => $paymentNote,
                     'external_refund_reference' => $externalRefundReference,
                     'refund_handled_externally' => filled($externalRefundReference),
+                    'cancellation_quote' => $cancellationQuote,
                 ],
             ]);
 
