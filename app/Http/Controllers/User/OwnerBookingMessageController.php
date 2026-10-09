@@ -14,6 +14,7 @@ use App\Services\Owners\PropertyAccessService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Support\BookingAttachmentName;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
@@ -73,7 +74,7 @@ class OwnerBookingMessageController extends Controller
                     'body' => $data['body'],
                     'locale' => app()->getLocale(),
                     'attachment_path' => $attachmentPath,
-                    'attachment_name' => $file?->getClientOriginalName(),
+                    'attachment_name' => $file ? BookingAttachmentName::fromUpload($file) : null,
                 ]);
 
                 $locked->update(['last_message_at' => $message->created_at]);
@@ -140,7 +141,7 @@ class OwnerBookingMessageController extends Controller
 
         return Storage::disk('private')->download(
             $message->attachment_path,
-            $message->attachment_name ?: 'attachment'
+            BookingAttachmentName::forDownload($message->attachment_name, $message->attachment_path)
         );
     }
 }
