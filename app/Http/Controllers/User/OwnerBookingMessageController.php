@@ -57,7 +57,7 @@ class OwnerBookingMessageController extends Controller
         $attachmentPath = $file?->store('booking-messages', 'private');
 
         try {
-            $created = DB::transaction(function () use ($conversation, $request, $property, $data, $file, $attachmentPath, $access): bool {
+            $created = DB::transaction(function () use ($conversation, $request, $property, $data, $file, $attachmentPath, $safeAttachmentName, $access): bool {
                 $locked = BookingConversation::query()->whereKey($conversation->id)->lockForUpdate()->firstOrFail();
                 abort_unless((int) $locked->property_id === (int) $property->id && ! $locked->closed_at, 404);
                 $access->assert($request->user(), $property, 'messages.manage');
