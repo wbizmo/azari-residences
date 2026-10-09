@@ -62,6 +62,30 @@ class InventoryBulkUpdateService
 
             $this->assertCommittedInventoryPreserved($lockedType, $from, $to, $changes);
 
+            $existingRows = InventoryDate::query()
+                ->where('accommodation_type_id', $lockedType->getKey())
+                ->whereBetween('date', [$from->toDateString(), $to->toDateString()])
+                ->orderBy('date')
+                ->get()
+                ->keyBy(fn (InventoryDate $row) => $row->date->toDateString());
+
+            $beforeSnapshot = [];
+            for ($snapshotDate = $from; $snapshotDate->lessThanOrEqualTo($to); $snapshotDate = $snapshotDate->addDay()) {
+                $key = $snapshotDate->toDateString();
+                $row = $existingRows->get($key);
+                $beforeSnapshot[$key] = [
+                    'exists' => (bool) $row,
+                    'sellable_inventory' => $row?->sellable_inventory,
+                    'maintenance_inventory' => $row?->maintenance_inventory,
+                    'stop_sell' => $row?->stop_sell,
+                    'closed_to_arrival' => $row?->closed_to_arrival,
+                    'closed_to_departure' => $row?->closed_to_departure,
+                    'minimum_stay' => $row?->minimum_stay,
+                    'maximum_stay' => $row?->maximum_stay,
+                    'price_override' => $row?->price_override,
+                ];
+            }
+
             $rows = [];
             for ($date = $from; $date->lessThanOrEqualTo($to); $date = $date->addDay()) {
                 $rows[] = array_merge([
@@ -88,6 +112,7 @@ class InventoryBulkUpdateService
                 'to_date' => $to,
                 'source' => $source,
                 'changes' => $changes,
+                'before_snapshot' => $beforeSnapshot,
             ]);
         }, 5);
     }
@@ -132,6 +157,86 @@ class InventoryBulkUpdateService
                 ]);
             }
         }
+    }
+
+
+    public function preview(
+        AccommodationType $type,
+        CarbonImmutable $from,
+        CarbonImmutable $to,
+        array $changes
+    ): array {
+        if ($to->lessThan($from) || $from->diffInDays($to) > 366) {
+            throw ValidationException::withMessages(['to_date' => 'Preview range must be between 1 and 367 calendar days.']);
+        }
+
+        $changes = collect($changes)->only(self::ALLOWED)->all();
+        $this->validateChanges($type, $changes);
+        $this->assertCommittedInventoryPreserved($type, $from, $to, $changes);
+
+        $committed = $this->availability->committedQuantityByDate($type, $from, $to->addDay());
+
+        return [
+            'from' => $from->toDateString(),
+            'to' => $to->toDateString(),
+            'days' => $from->diffInDays($to) + 1,
+            'changes' => $changes,
+            'maximum_committed_units' => (int) ($committed->max() ?? 0),
+            'affected_committed_dates' => $committed->filter(fn ($count) => (int) $count > 0)->count(),
+        ];
+    }
+
+    public function undo(InventoryChangeLog $log, ?int $actorId): InventoryChangeLog
+    {
+        if ($log->reverted_at) {
+            throw ValidationException::withMessages(['inventory' => 'This calendar change has already been undone.']);
+        }
+
+        $snapshot = (array) $log->before_snapshot;
+        if ($snapshot === []) {
+            throw ValidationException::withMessages(['inventory' => 'This older calendar change does not contain an undo snapshot.']);
+        }
+
+        return DB::transaction(function () use ($log, $snapshot, $actorId): InventoryChangeLog {
+            $lockedLog = InventoryChangeLog::query()->whereKey($log->getKey())
+                ->when(DB::connection()->getDriverName() !== 'sqlite', fn (Builder $q) => $q->lockForUpdate())
+                ->firstOrFail();
+
+            if ($lockedLog->reverted_at) {
+                throw ValidationException::withMessages(['inventory' => 'This calendar change has already been undone.']);
+            }
+
+            $type = AccommodationType::query()->whereKey($lockedLog->accommodation_type_id)
+                ->when(DB::connection()->getDriverName() !== 'sqlite', fn (Builder $q) => $q->lockForUpdate())
+                ->firstOrFail();
+
+            foreach ($snapshot as $date => $before) {
+                if (! ($before['exists'] ?? false)) {
+                    InventoryDate::query()
+                        ->where('accommodation_type_id', $type->id)
+                        ->whereDate('date', $date)
+                        ->delete();
+                    continue;
+                }
+
+                $restore = collect($before)->only(self::ALLOWED)->all();
+                $this->assertCommittedInventoryPreserved(
+                    $type,
+                    CarbonImmutable::parse($date),
+                    CarbonImmutable::parse($date),
+                    $restore
+                );
+
+                InventoryDate::query()->updateOrCreate(
+                    ['accommodation_type_id' => $type->id, 'date' => $date],
+                    $restore
+                );
+            }
+
+            $lockedLog->update(['reverted_at' => now(), 'reverted_by' => $actorId]);
+
+            return $lockedLog->fresh();
+        }, 5);
     }
 
     private function validateChanges(AccommodationType $type, array $changes): void

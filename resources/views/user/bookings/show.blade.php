@@ -22,6 +22,8 @@
 <div class="az-user-actions" style="margin-bottom:18px">
     <a class="az-user-button az-user-button--light" target="_blank" href="{{ route('user.bookings.documents', [$booking->reference, 'confirmation']) }}">Booking confirmation</a>
     <a class="az-user-button az-user-button--light" target="_blank" href="{{ route('user.bookings.documents', [$booking->reference, 'invoice']) }}">Invoice PDF</a>
+    <a class="az-user-button az-user-button--light" href="{{ route('user.bookings.phase2.messages', $booking->reference) }}">Messages</a>
+    <a class="az-user-button az-user-button--light" href="{{ route('user.bookings.phase2.arrival', $booking->reference) }}">Arrival</a>
     @if($receiptAvailable)<a class="az-user-button az-user-button--light" target="_blank" href="{{ route('user.bookings.documents', [$booking->reference, 'receipt']) }}">Receipt PDF</a>@endif
     @if($booking->isCheckInEligible())
         <form method="post" action="{{ route('user.bookings.check-in', $booking->reference) }}">@csrf<button class="az-user-button az-user-button--primary">Check in</button></form>
@@ -309,8 +311,23 @@
     </header>
     <div class="az-user-panel-body">
         <strong>{{ $booking->review->rating }}/5</strong>
+        @if($booking->review->edited_at)<p><small>Updated {{ $booking->review->edited_at->diffForHumans() }}</small></p>@endif
         @if($booking->review->title)<h3>{{ $booking->review->title }}</h3>@endif
         <p>{{ $booking->review->body }}</p>
+        <details style="margin-top:14px"><summary>Edit review</summary>
+            <form method="POST" action="{{ route('user.reviews.update',$booking) }}" class="az-form-grid" style="margin-top:12px">
+                @csrf @method('PATCH')
+                @foreach(['rating'=>'Overall','cleanliness'=>'Cleanliness','comfort'=>'Comfort','facilities'=>'Facilities','location_score'=>'Location','staff_service'=>'Staff/service','value_score'=>'Value','wifi_score'=>'Wi-Fi'] as $name=>$label)
+                    <label><span>{{ $label }}</span><select name="{{ $name }}" {{ $name==='wifi_score' ? '' : 'required' }}><option value="">Choose</option>@foreach([5,4,3,2,1] as $score)<option value="{{ $score }}" @selected((int)$booking->review->{$name}===$score)>{{ $score }}/5</option>@endforeach</select></label>
+                @endforeach
+                <label class="wide"><span>Review title</span><input name="title" maxlength="120" value="{{ $booking->review->title }}"></label>
+                <label class="wide"><span>What did you like?</span><textarea name="positive_feedback" maxlength="1500">{{ $booking->review->positive_feedback }}</textarea></label>
+                <label class="wide"><span>What could be better?</span><textarea name="negative_feedback" maxlength="1500">{{ $booking->review->negative_feedback }}</textarea></label>
+                <label class="wide"><span>Your review</span><textarea name="body" minlength="20" maxlength="3000" required>{{ $booking->review->body }}</textarea></label>
+                <input type="hidden" name="trip_type" value="{{ $booking->review->trip_type }}">
+                <button class="az-user-button az-user-button--dark" type="submit">Update review</button>
+            </form>
+        </details>
         @if($booking->review->admin_reply)
             <div class="az-user-alert"><strong>Resavar response</strong><p>{{ $booking->review->admin_reply }}</p></div>
         @endif

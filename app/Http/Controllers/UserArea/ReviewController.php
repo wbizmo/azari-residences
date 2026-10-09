@@ -56,4 +56,45 @@ class ReviewController extends Controller
 
         return back()->with('success', 'Your verified-stay review was submitted for moderation.');
     }
+
+    public function update(Request $request, Booking $booking): RedirectResponse
+    {
+        abort_unless((int) $booking->user_id === (int) $request->user()->id, 403);
+
+        $review = Review::query()
+            ->where('booking_id', $booking->id)
+            ->where('user_id', $request->user()->id)
+            ->firstOrFail();
+
+        $data = $request->validate([
+            'rating' => ['required', 'integer', 'min:1', 'max:5'],
+            'cleanliness' => ['required', 'integer', 'min:1', 'max:5'],
+            'comfort' => ['required', 'integer', 'min:1', 'max:5'],
+            'facilities' => ['required', 'integer', 'min:1', 'max:5'],
+            'location_score' => ['required', 'integer', 'min:1', 'max:5'],
+            'staff_service' => ['required', 'integer', 'min:1', 'max:5'],
+            'value_score' => ['required', 'integer', 'min:1', 'max:5'],
+            'wifi_score' => ['nullable', 'integer', 'min:1', 'max:5'],
+            'title' => ['nullable', 'string', 'max:120'],
+            'body' => ['required', 'string', 'min:20', 'max:3000'],
+            'positive_feedback' => ['nullable', 'string', 'max:1500'],
+            'negative_feedback' => ['nullable', 'string', 'max:1500'],
+            'trip_type' => ['nullable', Rule::in(['business', 'couple', 'family', 'friends', 'solo', 'other'])],
+        ]);
+
+        $before = $review->only(array_keys($data));
+        $review->update([
+            ...$data,
+            'edited_at' => now(),
+            'status' => 'pending',
+        ]);
+
+        AuditLog::record('review.updated', $review, $before, [
+            ...$review->only(array_keys($data)),
+            'edited_at' => $review->edited_at?->toIso8601String(),
+        ]);
+
+        return back()->with('success', 'Your review was updated and returned to moderation.');
+    }
+
 }

@@ -408,6 +408,13 @@
                                                 <p>{{ $review->admin_reply }}</p>
                                             </div>
                                         @endif
+                                        @if($review->owner_reply)
+                                            <div class="reserva-management-reply">
+                                                <strong>Property response</strong>
+                                                <p>{{ $review->owner_reply }}</p>
+                                                @if($review->owner_replied_at)<small>{{ $review->owner_replied_at->format('M Y') }}</small>@endif
+                                            </div>
+                                        @endif
                                     </article>
                                 @endforeach
                             </div>

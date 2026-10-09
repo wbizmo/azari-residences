@@ -1,14 +1,17 @@
 {
-    "id": "/",
-    "name": "Resavar",
-    "short_name": "Resavar",
-    "description": "Resavar guest application",
-    "start_url": "/login",
-    "scope": "/",
-    "display": "standalone",
-    "orientation": "portrait-primary",
-    "background_color": "#FFFFFF",
-    "theme_color": "#052058",
-    "prefer_related_applications": false,
-    "icons": []
+  "id": "/",
+  "name": "Resavar",
+  "short_name": "Resavar",
+  "description": "Search, book and manage Resavar stays.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#FFFFFF",
+  "theme_color": "#052058",
+  "prefer_related_applications": false,
+  "icons": [
+    {"src":"/images/resavar-logo-dark.png","sizes":"any","type":"image/png","purpose":"any"},
+    {"src":"/images/resavar-logo-light.png","sizes":"any","type":"image/png","purpose":"monochrome"}
+  ]
 }

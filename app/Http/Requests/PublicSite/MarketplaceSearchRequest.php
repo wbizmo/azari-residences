@@ -60,6 +60,11 @@ class MarketplaceSearchRequest extends AzariFormRequest
             'sort' => ['nullable', Rule::in(['recommended', 'price_asc', 'price_desc', 'rating', 'distance', 'popularity'])],
             'latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
+            'flex_days' => ['nullable', Rule::in([1, 3, 7])],
+            'north' => ['nullable', 'numeric', 'between:-90,90'],
+            'south' => ['nullable', 'numeric', 'between:-90,90', 'lte:north'],
+            'east' => ['nullable', 'numeric', 'between:-180,180'],
+            'west' => ['nullable', 'numeric', 'between:-180,180'],
             'page' => ['nullable', 'integer', 'min:1', 'max:10000'],
         ];
     }

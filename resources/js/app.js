@@ -1555,3 +1555,12 @@ else initialiseAzariResponsiveTables();
     }
 })();
 // RESAVAR_BOOKING_FRONTEND_PARITY_V1_END
+
+
+if ('serviceWorker' in navigator && window.isSecureContext) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(() => {
+            // PWA registration is progressive enhancement and must never block booking.
+        });
+    }, { once: true });
+}
