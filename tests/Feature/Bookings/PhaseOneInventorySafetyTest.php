@@ -50,6 +50,77 @@ class PhaseOneInventorySafetyTest extends TestCase
         $this->assertFalse(app(AvailabilityService::class)->isAvailable($property->id, $start, $end));
     }
 
+    public function test_disabled_accommodation_does_not_revert_to_legacy_property_availability(): void
+    {
+        $property = Property::factory()->create(['is_published' => true, 'status' => 'available']);
+        $type = $property->accommodationTypes()->firstOrFail();
+        $type->update(['is_active' => false, 'is_published' => false]);
+        $start = CarbonImmutable::today()->addDays(21);
+        $end = $start->addDays(3);
+
+        $engine = app(AzariAvailabilityEngine::class);
+        $this->assertFalse($engine->availableForProperty($property, $start, $end));
+        $this->assertFalse($engine->availableForProperty($property, $start, $end, 1, $type->id));
+
+        $calendar = $engine->calendar($property->id, $start, 3, $type->id);
+        $this->assertCount(3, $calendar);
+        $this->assertSame([0, 0, 0], array_column($calendar, 'remaining'));
+    }
+
+    public function test_absent_calendar_property_or_foreign_type_returns_unavailable_dates(): void
+    {
+        $property = Property::factory()->create(['status' => 'available', 'is_published' => true]);
+        $foreign = Property::factory()->create(['status' => 'available', 'is_published' => true])
+            ->accommodationTypes()->firstOrFail();
+        $start = CarbonImmutable::today()->addDays(20);
+        $engine = app(AzariAvailabilityEngine::class);
+
+        foreach ([
+            $engine->calendar($property->id, $start, 3, $foreign->id),
+            $engine->calendar(99999999, $start, 3),
+        ] as $calendar) {
+            $this->assertCount(3, $calendar);
+            $this->assertSame([false, false, false], array_column($calendar, 'available'));
+        }
+        $this->assertFalse($engine->availableForProperty($property, $start, $start));
+    }
+
+    public function test_leap_day_booking_blocks_nights_but_not_exclusive_check_out(): void
+    {
+        $property = Property::factory()->create(['status' => 'available', 'is_published' => true]);
+        $type = $property->accommodationTypes()->firstOrFail();
+        $type->update(['total_inventory' => 1]);
+
+        // Future leap day; check-out is exclusive (the night of Mar 1 is free).
+        $start = CarbonImmutable::parse('2028-02-28');
+        $checkout = CarbonImmutable::parse('2028-03-01');
+        Booking::factory()->for($property)->create([
+            'accommodation_type_id' => $type->id,
+            'status' => 'confirmed',
+            'check_in' => $start,
+            'check_out' => $checkout,
+            'rooms' => 1,
+        ]);
+
+        $engine = app(AzariAvailabilityEngine::class);
+        $this->assertSame(0, $engine->availableQuantity($type, $start, $checkout));
+        $this->assertSame(1, $engine->availableQuantity($type, $checkout, $checkout->addDay()));
+        $this->assertSame([0, 0, 1], array_values(
+            $engine->remainingByDate($type, $start, $checkout->addDay())->all()
+        ));
+    }
+
+    public function test_calendar_supports_365_day_read_without_unbounded_inventory_materialization(): void
+    {
+        $property = Property::factory()->create(['status' => 'available', 'is_published' => true]);
+        $type = $property->accommodationTypes()->firstOrFail();
+        $start = CarbonImmutable::today()->addDays(20);
+        $engine = app(AzariAvailabilityEngine::class);
+
+        $this->assertCount(365, $engine->calendar($property->id, $start, 365, $type->id));
+        $this->assertSame(0, $engine->availableQuantity($type, $start, $start->addDays(367)));
+    }
+
     public function test_bulk_inventory_cannot_cut_capacity_below_existing_confirmed_booking(): void
     {
         $property = Property::factory()->create(['is_published' => true, 'status' => 'available']);
