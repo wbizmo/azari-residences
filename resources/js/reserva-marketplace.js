@@ -146,33 +146,64 @@ if (mapRoot) {
             });
 
             markers.replaceChildren();
+
+            // Pixel-grid clustering is O(n) and uses the same server-provided
+            // bookable results as the accessible list. No unquoted markers.
+            const buckets = new Map();
+            const cellSize = zoom <= 11 ? 84 : (zoom <= 13 ? 60 : 0);
             valid.forEach(point => {
                 const coords = toWorld(Number(point.lat), Number(point.lng), zoom);
-                // Wrap longitudes so nearby markers do not jump across the map.
                 let deltaX = coords.x - location.x;
                 if (deltaX > scale / 2) deltaX -= scale;
                 if (deltaX < -scale / 2) deltaX += scale;
                 const px = deltaX + width / 2;
                 const py = coords.y - location.y + height / 2;
                 if (px < -60 || py < -30 || px > width + 60 || py > height + 30) return;
+
+                const key = cellSize > 0
+                    ? Math.floor(px / cellSize) + ':' + Math.floor(py / cellSize)
+                    : 'property:' + point.id;
+                if (!buckets.has(key)) buckets.set(key, []);
+                buckets.get(key).push({point, px, py});
+            });
+
+            for (const members of buckets.values()) {
+                const px = members.reduce((sum, item) => sum + item.px, 0) / members.length;
+                const py = members.reduce((sum, item) => sum + item.py, 0) / members.length;
                 const pin = document.createElement('button');
                 pin.type = 'button';
                 pin.className = 'reserva-map-pin';
-                pin.dataset.propertyId = String(point.id);
                 pin.style.left = px + 'px';
                 pin.style.top = py + 'px';
-                pin.textContent = point.currency + ' ' + Number(point.price).toLocaleString(undefined, {maximumFractionDigits: 0});
-                pin.setAttribute('aria-label', point.name + ', ' + point.currency + ' ' + point.price);
-                pin.addEventListener('click', () => {
-                    const card = document.querySelector('[data-property-card="' + CSS.escape(String(point.id)) + '"]');
-                    if (!card) return;
-                    document.querySelector('[data-results-view="list"]')?.click();
-                    card.classList.add('is-map-active');
-                    card.scrollIntoView({behavior: 'smooth', block: 'center'});
-                    card.querySelector('a,button')?.focus({preventScroll: true});
-                });
+
+                if (members.length > 1) {
+                    pin.classList.add('reserva-map-cluster');
+                    pin.textContent = String(members.length);
+                    pin.setAttribute('aria-label', members.length + ' stays in this map area. Zoom in to inspect.');
+                    pin.addEventListener('click', () => {
+                        zoom = Math.min(16, zoom + 2);
+                        const first = members[0].point;
+                        center = {lat: Number(first.lat), lng: Number(first.lng)};
+                        render();
+                    });
+                } else {
+                    const point = members[0].point;
+                    pin.dataset.propertyId = String(point.id);
+                    pin.textContent = point.currency + ' ' + Number(point.price)
+                        .toLocaleString(undefined, {maximumFractionDigits: 0});
+                    pin.setAttribute('aria-label', point.name + ', ' + point.currency + ' ' + point.price);
+                    pin.addEventListener('click', () => {
+                        const card = document.querySelector('[data-property-card="' + CSS.escape(String(point.id)) + '"]');
+                        if (!card) return;
+                        document.querySelector('[data-results-view="list"]')?.click();
+                        card.classList.add('is-map-active');
+                        card.scrollIntoView({behavior: 'smooth', block: 'center'});
+                        card.querySelector('a,button')?.focus({preventScroll: true});
+                    });
+                }
+
                 markers.append(pin);
-            });
+            }
         };
         const move = (deltaX, deltaY) => {
             const world = toWorld(center.lat, center.lng, zoom);
