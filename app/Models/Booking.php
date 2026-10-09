@@ -184,15 +184,53 @@ class Booking extends Model
         ]);
     }
 
+    /** Reasons self check-in is not yet safe. Owners can still use staffed check-in. */
+    public function selfCheckInBlockers(): array
+    {
+        $reasons = [];
+
+        if (! in_array($this->status, ['confirmed', 'paid'], true)
+            || $this->cancelled_at !== null || $this->checked_in_at !== null) {
+            $reasons[] = 'This reservation is not in an eligible confirmed state.';
+        }
+
+        if ($this->balanceDue() > 0) {
+            $reasons[] = 'Outstanding payment must be settled and verified.';
+        }
+
+        $timezone = $this->property_timezone ?: LocalDate::propertyTimezone($this->property);
+        if (now($timezone)->toDateString() !== $this->check_in?->toDateString()) {
+            $reasons[] = 'Online check-in is available only on your arrival date.';
+        }
+
+        if (! $this->user_id || ! IdentityVerification::userIsVerified((int) $this->user_id)) {
+            $reasons[] = 'The booking guest must complete identity verification.';
+        }
+
+        $ready = PropertyOperationsTask::query()
+            ->where('property_id', $this->property_id)
+            ->where('booking_id', $this->getKey())
+            ->whereIn('type', ['housekeeping', 'inspection'])
+            ->where('status', 'completed')
+            ->exists();
+
+        $unfinished = PropertyOperationsTask::query()
+            ->where('property_id', $this->property_id)
+            ->where('booking_id', $this->getKey())
+            ->whereIn('type', ['housekeeping', 'inspection', 'maintenance'])
+            ->whereIn('status', ['open', 'in_progress', 'blocked'])
+            ->exists();
+
+        if (! $ready || $unfinished) {
+            $reasons[] = 'Your room has not yet been marked ready by the property team.';
+        }
+
+        return $reasons;
+    }
+
     public function isCheckInEligible(): bool
     {
-        $baseEligible = in_array($this->status, ['confirmed', 'paid'], true)
-            && $this->balanceDue() <= 0
-            && ! $this->cancelled_at
-            && ! $this->checked_in_at
-            && now($this->property_timezone ?: LocalDate::propertyTimezone($this->property))->toDateString() === optional($this->check_in)->toDateString();
-
-        return $baseEligible;
+        return $this->selfCheckInBlockers() === [];
     }
 
     public function directionsUrl(): ?string
