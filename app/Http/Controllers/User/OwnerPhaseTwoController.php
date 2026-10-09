@@ -9,6 +9,7 @@ use App\Models\BookingConversation;
 use App\Models\Property;
 use App\Models\PropertyOperationsTask;
 use App\Models\PropertyStaffMembership;
+use App\Models\Review;
 use App\Models\User;
 use App\Notifications\PremiumMailNotification;
 use App\Services\Owners\PropertyAccessService;
@@ -201,6 +202,34 @@ class OwnerPhaseTwoController extends Controller
         AuditLog::record('property_operations.task_updated', $task, $before, $task->only(['status', 'notes']));
 
         return back()->with('success', 'Task updated.');
+    }
+
+
+    public function reviews(Request $request, Property $property, PropertyAccessService $access): View
+    {
+        $access->assert($request->user(), $property, 'messages.manage');
+
+        $reviews = Review::query()
+            ->where('property_id', $property->id)
+            ->where('status', 'approved')
+            ->latest()
+            ->paginate(20);
+
+        return view('user.owner.reviews', compact('property', 'reviews'));
+    }
+
+    public function replyReview(Request $request, Property $property, Review $review, PropertyAccessService $access): RedirectResponse
+    {
+        $access->assert($request->user(), $property, 'messages.manage');
+        abort_unless((int) $review->property_id === (int) $property->id && $review->status === 'approved', 404);
+
+        $data = $request->validate(['reply' => ['required', 'string', 'min:2', 'max:2000']]);
+        $before = $review->owner_reply;
+        $review->update(['owner_reply' => $data['reply'], 'owner_replied_at' => now()]);
+
+        AuditLog::record('review.owner_replied', $review, ['owner_reply' => $before], ['owner_reply' => $review->owner_reply]);
+
+        return back()->with('success', 'Property response saved.');
     }
 
     public function conversations(Request $request, Property $property, PropertyAccessService $access): View
