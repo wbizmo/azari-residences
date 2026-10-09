@@ -93,18 +93,26 @@ class OwnerWithdrawalService
         } catch (Throwable $exception) {
             report($exception);
 
+            // An HTTP timeout/reset is NOT proof that the remote gateway
+            // rejected the payout. Mark the outcome uncertain and reserve
+            // funds until a human verifies the provider ledger. Otherwise a
+            // retry could pay the owner twice.
             DB::transaction(function () use ($claimed, $exception): void {
                 $locked = $this->lock($claimed);
                 if ($locked->status === 'processing') {
                     $locked->update([
-                        'status' => 'failed',
-                        'failed_at' => now(),
-                        'last_error' => Str::limit($exception->getMessage(), 4000),
+                        'status' => 'reconciliation_required',
+                        'reconciliation_required_at' => now(),
+                        'last_error' => 'Unconfirmed provider dispatch: '.$exception::class,
                     ]);
                 }
             }, 5);
 
-            throw new RuntimeException('Payout failed safely before confirmation: '.$exception->getMessage(), 0, $exception);
+            throw new RuntimeException(
+                'Payout outcome could not be confirmed. Manual provider reconciliation is required; do not retry automatically.',
+                0,
+                $exception
+            );
         }
 
         try {
