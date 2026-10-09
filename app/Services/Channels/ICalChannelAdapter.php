@@ -19,8 +19,20 @@ class ICalChannelAdapter implements ChannelAdapter
         if (! $connection->import_url) {
             throw new \RuntimeException('External channel is missing its calendar import URL.');
         }
-        $this->urls->assertSafe($connection->import_url);
-        $body = Http::withOptions(['allow_redirects' => false])->timeout(12)->connectTimeout(5)->retry(2, 500, throw: false)->get($connection->import_url);
+        $ip = $this->urls->assertSafe($connection->import_url);
+        // Refuse stream-handler fallback: the transport must honor the pinned
+        // resolved IP, retaining the original HTTPS hostname for TLS checks.
+        if (! function_exists('curl_init') || ! defined('CURLOPT_RESOLVE')) {
+            throw new \RuntimeException('Safe pinned calendar transport is unavailable.');
+        }
+        $parts = parse_url($connection->import_url);
+        $host = (string) ($parts['host'] ?? '');
+        $port = (int) ($parts['port'] ?? (strtolower((string) ($parts['scheme'] ?? '')) === 'https' ? 443 : 80));
+        $address = str_contains($ip, ':') ? '['.$ip.']' : $ip;
+        $body = Http::withOptions([
+            'allow_redirects' => false,
+            'curl' => [CURLOPT_RESOLVE => ["{$host}:{$port}:{$address}"]],
+        ])->timeout(12)->connectTimeout(5)->retry(2, 500, throw: false)->get($connection->import_url);
         if (! $body->successful()) {
             throw new \RuntimeException('External calendar returned HTTP '.$body->status().'.');
         }
@@ -113,8 +125,12 @@ class ICalChannelAdapter implements ChannelAdapter
     private function date(string $value): ?CarbonImmutable
     {
         try {
+            if (! preg_match('/^\\d{8}(?:T\\d{6}Z?)?$/', $value)) {
+                return null;
+            }
             $date = CarbonImmutable::createFromFormat('!Ymd', substr($value, 0, 8), 'UTC');
-            return $date ?: null;
+            return $date && $date->format('Ymd') === substr($value, 0, 8)
+                ? $date : null;
         } catch (\Throwable) {
             return null;
         }
