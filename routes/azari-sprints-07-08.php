@@ -69,6 +69,8 @@ Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer', 'azari.
         Route::patch('/notifications/read-all', [UserNotificationController::class, 'readAll'])->name('notifications.read-all');
         Route::get('/profile', [UserProfileController::class, 'edit'])->name('profile.edit');
         Route::patch('/profile', [UserProfileController::class, 'update'])->name('profile.update');
+        Route::patch('/profile/currency', [UserProfileController::class, 'currency'])
+            ->middleware('throttle:20,1')->name('profile.currency');
         Route::patch('/preferences', [UserProfileController::class, 'preferences'])->name('preferences.update');
         Route::post('/phone-verification/send', [PhoneVerificationController::class, 'send'])->name('phone.send');
         Route::post('/phone-verification/verify', [PhoneVerificationController::class, 'verify'])->name('phone.verify');

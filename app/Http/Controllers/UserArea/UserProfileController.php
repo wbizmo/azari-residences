@@ -58,6 +58,31 @@ class UserProfileController extends Controller
         return back()->with('success', __('resarva.account.profile_updated'));
     }
 
+    /**
+     * Display preference only. Never mutate historical booking/payment/refund
+     * currencies, or present a converted total without a verified FX quote.
+     */
+    public function currency(Request $request): RedirectResponse
+    {
+        $supported = array_keys((array) config('localization.supported_currencies', ['USD' => 'US Dollar']));
+        $validated = $request->validate([
+            'display_currency' => ['required', 'string', Rule::in($supported)],
+        ]);
+
+        $user = $request->user();
+        $previous = (string) ($user->display_currency ?: config('localization.default_currency', 'USD'));
+        $selected = (string) $validated['display_currency'];
+
+        if ($previous !== $selected) {
+            $user->forceFill(['display_currency' => $selected])->save();
+            AuditLog::record('user.display_currency_changed', $user,
+                ['display_currency' => $previous], ['display_currency' => $selected]);
+        }
+
+        return back()->with('success',
+            'Currency preference saved. Existing bookings and receipts keep their actual payment currency.');
+    }
+
     public function preferences(Request $request): RedirectResponse
     {
         $request->validate([

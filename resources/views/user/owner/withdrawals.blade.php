@@ -28,10 +28,15 @@
 </form></div></section>
 
 <section class="az-user-panel"><header class="az-user-panel-header"><div><h2 class="az-user-panel-title">Request withdrawal</h2><p class="az-user-panel-subtitle">Submitted funds are reserved immediately to prevent duplicate withdrawals. Owner payouts are processed in {{ $currency }}.</p></div></header><div class="az-user-panel-body">
-<form method="post" action="{{ route('user.owner.withdrawals.store') }}" class="az-user-form">@csrf
-<label>Amount ({{ $currency }})<input type="number" name="amount" min="{{ $minimum }}" max="{{ $available }}" step="0.01" required></label>
-<label>Note<textarea name="owner_note" rows="3"></textarea></label>
-<button class="az-user-button az-user-button--dark" @disabled(!$withdrawalOpen || $available<$minimum)>Submit withdrawal</button>
+<form method="post" action="{{ route('user.owner.withdrawals.store') }}" class="az-user-form az-user-form--withdrawal">@csrf
+<div class="az-user-withdrawal-amount-field">
+    <label for="owner-withdrawal-amount">Amount ({{ $currency }})</label>
+    <input id="owner-withdrawal-amount" type="number" name="amount" inputmode="decimal" min="{{ number_format((float)$minimum, 2, '.', '') }}" max="{{ number_format((float)$available, 2, '.', '') }}" step="0.01" value="{{ old('amount') }}" aria-describedby="owner-withdrawal-hint" required>
+    <small id="owner-withdrawal-hint">Available: {{ $currency }} {{ number_format($available,2) }} · Minimum: {{ $currency }} {{ number_format($minimum,2) }}</small>
+    @error('amount')<small class="az-user-form-error" role="alert">{{ $message }}</small>@enderror
+</div>
+<label for="owner-withdrawal-note">Note<textarea id="owner-withdrawal-note" name="owner_note" rows="3" maxlength="3000">{{ old('owner_note') }}</textarea></label>
+<button type="submit" class="az-user-button az-user-button--dark" @disabled(!$withdrawalOpen || $available<$minimum)>Submit withdrawal</button>
 </form></div></section>
 
 <section class="az-user-panel"><header class="az-user-panel-header"><div><h2 class="az-user-panel-title">Withdrawal history</h2><p class="az-user-panel-subtitle">Reconciliation-required items must not be resubmitted.</p></div></header><div class="az-user-panel-body">

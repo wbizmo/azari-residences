@@ -22,6 +22,19 @@
     <aside class="az-user-timezone-card">
         <div><div class="az-user-timezone-icon"><span class="material-symbols-outlined">schedule</span></div><h3>Your local time</h3><p>Dates and times are converted for clarity. Resavar's official operational timezone remains {{ config('localization.platform_timezone','UTC') }}.</p></div>
         <div class="az-user-timezone-value"><span>Showing times in</span><strong data-user-timezone>{{ auth()->user()->timezone ?: config('localization.platform_timezone','UTC') }}</strong></div>
+        <form method="POST" action="{{ route('user.profile.currency') }}" class="az-dashboard-currency-form">
+            @csrf @method('PATCH')
+            <label for="dashboard-display-currency">Preferred display currency</label>
+            <div class="az-dashboard-currency-controls">
+                <select id="dashboard-display-currency" name="display_currency" required aria-describedby="dashboard-currency-help">
+                    @foreach(config('localization.supported_currencies', []) as $code => $label)
+                        <option value="{{ $code }}" @selected(auth()->user()->display_currency === $code || (!auth()->user()->display_currency && config('localization.default_currency') === $code))>{{ $code }} · {{ $label }}</option>
+                    @endforeach
+                </select>
+                <button type="submit" class="az-user-button az-user-button--dark">Save</button>
+            </div>
+            <small id="dashboard-currency-help">Preference only. Existing receipts and stays retain their charged currency.</small>
+        </form>
     </aside>
 </section>
 
