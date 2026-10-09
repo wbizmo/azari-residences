@@ -31,6 +31,7 @@ class PropertyController extends Controller
         );
 
         $property->load([
+            'publicVerifiedClaims',
             'amenities',
             'locationRecord',
             'images',
