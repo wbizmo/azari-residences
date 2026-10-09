@@ -17,13 +17,16 @@ class BookingDocumentService
     {
         $booking->loadMissing(['property', 'payments', 'user']);
 
+        // Never render a foreign payment against another guest's booking.
+        if ($payment?->exists) {
+            abort_unless((int) $payment->booking_id === (int) $booking->getKey(), 404);
+        }
+
+        // Confirmation/invoice documents should show settled payment evidence
+        // if it exists, not a more recent failed checkout attempt.
+        $payment ??= $booking->documentPayment();
         if ($type === 'receipt') {
-            $payment ??= $booking->documentPayment();
             abort_unless($payment instanceof Payment && $payment->status === Payment::SUCCESSFUL, 404);
-        } else {
-            $payment ??= $booking->payments
-                ->sortByDesc(fn (Payment $record) => $record->paid_at ?: $record->created_at)
-                ->first();
         }
 
         $verificationUrl = route('bookings.verify', ['reference' => $booking->reference]);
