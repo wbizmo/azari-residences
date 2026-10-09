@@ -24,7 +24,11 @@ class PropertyController extends Controller
         AzariAvailabilityEngine $availability,
         AzariPricingEngine $pricing
     ): View {
-        abort_unless($property->is_published, 404);
+        abort_unless(
+            $property->is_published
+            && ! in_array($property->status, ['inactive', 'unavailable', 'maintenance', 'archived'], true),
+            404
+        );
 
         $property->load([
             'amenities',
