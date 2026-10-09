@@ -22,6 +22,8 @@ class CriticalSupportEscalationTest extends TestCase
         $ticket = SupportTicket::query()->create([
             'reference' => 'SUP-CRITICAL-1',
             'user_id' => $guest->id,
+            // Legacy/bad assignment to the guest must never receive staff alerts.
+            'assigned_to' => $guest->id,
             'category' => 'booking',
             'subject' => 'Arrival issue',
             'status' => 'open',
