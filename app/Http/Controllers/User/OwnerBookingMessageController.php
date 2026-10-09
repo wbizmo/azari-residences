@@ -52,6 +52,8 @@ class OwnerBookingMessageController extends Controller
         ]);
 
         $file = $request->file('attachment');
+        // Validate content before committing any bytes to private storage.
+        $safeAttachmentName = $file ? BookingAttachmentName::fromUpload($file) : null;
         $attachmentPath = $file?->store('booking-messages', 'private');
 
         try {
@@ -74,7 +76,7 @@ class OwnerBookingMessageController extends Controller
                     'body' => $data['body'],
                     'locale' => app()->getLocale(),
                     'attachment_path' => $attachmentPath,
-                    'attachment_name' => $file ? BookingAttachmentName::fromUpload($file) : null,
+                    'attachment_name' => $safeAttachmentName,
                 ]);
 
                 $locked->update(['last_message_at' => $message->created_at]);
