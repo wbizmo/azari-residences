@@ -139,12 +139,12 @@ Route::prefix('azaridevadmin')
         Route::get('/settings/integrations', [SystemSettingsController::class, 'edit'])->name('settings.integrations');
         Route::put('/settings/integrations', [SystemSettingsController::class, 'update'])
             ->middleware('azari.admin')
-            ->name('settings.integrations.update');
+            ->middleware('azari.step-up')->name('settings.integrations.update');
 
         Route::get('/payments/providers', [AdminPaymentController::class, 'providers'])->name('payments.providers');
         Route::post('/payments/providers/{provider}/test', [AdminPaymentController::class, 'testProvider'])
             ->middleware('azari.admin')
-            ->name('payments.providers.test');
+            ->middleware('azari.step-up')->name('payments.providers.test');
         Route::get('/payments/create', [AdminPaymentController::class, 'create'])->name('payments.create');
         Route::post('/payments', [AdminPaymentController::class, 'store'])
             ->middleware('azari.permission:payments.manage')
@@ -153,21 +153,21 @@ Route::prefix('azaridevadmin')
         Route::get('/payments/{payment}', [AdminPaymentController::class, 'show'])->name('payments.show');
         Route::post('/payments/{payment}/reconcile', [AdminPaymentController::class, 'reconcile'])
             ->middleware('azari.permission:payments.manage')
-            ->name('payments.reconcile');
+            ->middleware('azari.step-up')->name('payments.reconcile');
         Route::post('/payments/{payment}/refunds', [RefundController::class, 'store'])
             ->middleware('azari.permission:payments.manage')
-            ->name('payments.refunds.store');
+            ->middleware('azari.step-up')->name('payments.refunds.store');
         Route::patch('/payments/{payment}/refunds/{refund}', [RefundController::class, 'update'])
             ->middleware('azari.permission:payments.manage')
-            ->name('payments.refunds.update');
+            ->middleware('azari.step-up')->name('payments.refunds.update');
         Route::post('/payments/{payment}/refunds/{refund}/dispatch', [RefundController::class, 'dispatchProvider'])
-            ->middleware('azari.permission:payments.manage')->name('payments.refunds.dispatch');
+            ->middleware('azari.permission:payments.manage')->middleware('azari.step-up')->name('payments.refunds.dispatch');
         Route::post('/payments/{payment}/refunds/{refund}/reconcile', [RefundController::class, 'reconcileProvider'])
-            ->middleware('azari.permission:payments.manage')->name('payments.refunds.reconcile');
+            ->middleware('azari.permission:payments.manage')->middleware('azari.step-up')->name('payments.refunds.reconcile');
         Route::post('/payments/{payment}/disputes', [PaymentDisputeController::class, 'store'])
-            ->middleware('azari.permission:payments.manage')->name('payments.disputes.store');
+            ->middleware('azari.permission:payments.manage')->middleware('azari.step-up')->name('payments.disputes.store');
         Route::post('/payment-disputes/{dispute}/resolve', [PaymentDisputeController::class, 'resolve'])
-            ->middleware('azari.permission:payments.manage')->name('payments.disputes.resolve');
+            ->middleware('azari.permission:payments.manage')->middleware('azari.step-up')->name('payments.disputes.resolve');
         Route::get('/payments/{payment}/proof', [AdminPaymentController::class, 'proof'])->name('payments.proof');
     });
 

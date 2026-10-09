@@ -3,6 +3,14 @@
 @section('kicker','Property Centre')
 @section('page_title','Withdrawals')
 @section('content')
+@if((int) session('auth.password_confirmed_at', 0) < now()->subMinutes(15)->timestamp)
+<div class="az-user-panel" role="status" style="padding:1rem;background:#F0F4FA;color:#052058">
+    Changing your payout destination or requesting a withdrawal requires a recent password confirmation.
+    <a href="{{ route('password.confirm') }}" style="color:#052058;text-decoration:underline">Confirm password</a>
+    first, then return here to submit.
+</div>
+@endif
+
 <section class="az-user-stat-grid">
 <article class="az-user-stat"><span class="material-symbols-outlined">account_balance_wallet</span><div><small>Available</small><strong>{{ $currency }} {{ number_format($available,2) }}</strong></div></article>
 <article class="az-user-stat"><span class="material-symbols-outlined">payments</span><div><small>Minimum</small><strong>{{ $currency }} {{ number_format($minimum,2) }}</strong></div></article>

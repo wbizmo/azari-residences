@@ -27,9 +27,9 @@ Route::prefix('azaridevadmin')->name('azari.admin.')->middleware('azari.staff')-
     Route::post('/bookings/{booking}/modifications/{modification}/offer', [BookingManagementController::class, 'offerDateAmendment'])
         ->middleware('azari.permission:bookings.edit')->name('bookings.modifications.offer');
     Route::post('/bookings/{booking}/no-show', [BookingManagementController::class, 'markNoShow'])
-        ->middleware('azari.permission:bookings.edit')->name('bookings.no-show');
+        ->middleware('azari.permission:bookings.edit')->middleware('azari.step-up')->name('bookings.no-show');
     Route::get('/bookings/{booking}/cancellation-quote', [BookingManagementController::class, 'cancellationQuote'])
         ->middleware('azari.permission:bookings.view')->name('bookings.cancellation-quote');
     Route::put('/bookings/{booking}/cancel', AzariBookingCancellationController::class)
-        ->middleware('azari.permission:bookings.edit')->name('bookings.cancel');
+        ->middleware('azari.permission:bookings.edit')->middleware('azari.step-up')->name('bookings.cancel');
 });

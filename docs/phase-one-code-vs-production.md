@@ -42,6 +42,14 @@ Use [Phase One production/staging acceptance issue #123](https://github.com/wbiz
 
 Attach redacted evidence (commands, expected/observed invariants, date, environment, measured RPO/RTO, signoff) against each checkbox. File regressions as new GitHub code issues.
 
+## Privileged password step-up
+
+For booking cancellations, no-show overrides, owner withdrawal requests/profile changes, staff payout dispatch/reconciliation, provider refund actions, dispute resolution and payment provider settings, the route now requires a password confirmation within the previous **15 minutes**. This is distinct from login/session authentication and role permission checks; users must still pass those checks. Missing/stale confirmation redirects to \`password.confirm\` (JSON requests receive HTTP 428). The action is **not automatically replayed**, preserving financial idempotency and preventing stale POST data.
+
+User and staff payout forms display an actionable confirm-password link. After confirming, return to the original page and submit the action again. The auth controller and route use the existing Laravel password-confirmation flow; the middleware never receives or logs the password itself.
+
+Local regression: \`php artisan test --filter='PhaseOnePrivilegedStepUpTest'\`. Staging must verify actual staff session expiry, revocation, permission downgrade and the password reset path without disclosing credentials.
+
 ## Release discipline
 
 - GitHub Actions remains syntax, frontend build and lightweight release gates. **No PHPUnit or Playwright in Actions.**

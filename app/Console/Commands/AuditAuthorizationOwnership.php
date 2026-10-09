@@ -27,11 +27,11 @@ class AuditAuthorizationOwnership extends Command
             'azari.admin.payments.providers.test' => ['azari.staff', 'azari.admin'],
             'azari.admin.payments.store' => ['azari.staff', 'azari.permission:payments.manage'],
             'azari.admin.payments.reconcile' => ['azari.staff', 'azari.permission:payments.manage'],
-            'azari.admin.bookings.cancel' => ['azari.staff', 'azari.permission:bookings.edit'],
-            'azari.admin.payments.refunds.dispatch' => ['azari.staff', 'azari.permission:payments.manage'],
-            'azari.admin.payments.refunds.reconcile' => ['azari.staff', 'azari.permission:payments.manage'],
-            'azari.admin.owner-withdrawals.reconcile-paid' => ['azari.staff', 'azari.permission:owner-withdrawals.process'],
-            'azari.admin.owner-withdrawals.reconcile-not-paid' => ['azari.staff', 'azari.permission:owner-withdrawals.process'],
+            'azari.admin.bookings.cancel' => ['azari.staff', 'azari.permission:bookings.edit', 'azari.step-up'],
+            'azari.admin.payments.refunds.dispatch' => ['azari.staff', 'azari.permission:payments.manage', 'azari.step-up'],
+            'azari.admin.payments.refunds.reconcile' => ['azari.staff', 'azari.permission:payments.manage', 'azari.step-up'],
+            'azari.admin.owner-withdrawals.reconcile-paid' => ['azari.staff', 'azari.permission:owner-withdrawals.process', 'azari.step-up'],
+            'azari.admin.owner-withdrawals.reconcile-not-paid' => ['azari.staff', 'azari.permission:owner-withdrawals.process', 'azari.step-up'],
             'azari.admin.system-health.failed-jobs.retry' => ['azari.staff', 'azari.permission:system-health.manage', 'throttle:5,1'],
         ];
 
