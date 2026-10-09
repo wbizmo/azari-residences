@@ -70,6 +70,17 @@ class BookingCreationService
         $data = $this->validateDraft($request, $hold);
 
         $booking = DB::transaction(function () use ($request, $user, $hold, $data): Booking {
+            // Hold acquisition locks property before hold/date rows. Checkout
+            // must acquire locks in that same order, otherwise expiry cleanup
+            // (property -> expired holds) can deadlock with checkout
+            // (hold -> property) under contention.
+            $lockedProperty = \App\Models\Property::query()
+                ->whereKey($hold->property_id)
+                ->when(
+                    DB::connection()->getDriverName() !== 'sqlite',
+                    fn (Builder $query) => $query->lockForUpdate()
+                )->firstOrFail();
+
             $lockedHold = BookingHold::query()
                 ->with(['property', 'accommodationType', 'ratePlan.cancellationPolicy', 'ratePlan.paymentPolicy'])
                 ->active()
@@ -101,12 +112,12 @@ class BookingCreationService
                 abort(403);
             }
 
-            $property = $lockedHold->property()
-                ->when(
-                    DB::connection()->getDriverName() !== 'sqlite',
-                    fn (Builder $query) => $query->lockForUpdate()
-                )
-                ->firstOrFail();
+            if ((int) $lockedHold->property_id !== (int) $lockedProperty->getKey()) {
+                throw ValidationException::withMessages([
+                    'hold_token' => 'The reservation property changed. Please begin a new search.',
+                ]);
+            }
+            $property = $lockedProperty;
 
             $accommodationType = $lockedHold->accommodationType;
 
