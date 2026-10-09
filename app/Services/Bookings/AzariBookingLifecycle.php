@@ -50,6 +50,21 @@ class AzariBookingLifecycle
                 ]);
             }
 
+            if ($to === 'confirmed') {
+                $schedule = app(\App\Services\Payments\PaymentScheduleService::class)->forBooking($locked);
+                if (! $schedule['confirmation_threshold_met']) {
+                    throw ValidationException::withMessages([
+                        'status' => 'This booking does not meet its frozen payment policy. Verify payment or authorized deferral before confirmation.',
+                    ]);
+                }
+            }
+
+            if ($to === 'cancelled') {
+                throw ValidationException::withMessages([
+                    'status' => 'Use the cancellation workflow so financial notes, inventory release and audit remain synchronized.',
+                ]);
+            }
+
             $updates = ['status' => $to];
 
             if ($to === 'approved') {
