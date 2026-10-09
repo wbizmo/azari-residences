@@ -4,8 +4,6 @@ namespace App\Notifications;
 
 use App\Models\CommunicationLog;
 use App\Models\SiteSetting;
-use App\Notifications\Channels\TwilioSmsChannel;
-use App\Notifications\Channels\TwilioWhatsAppChannel;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\AnonymousNotifiable;
@@ -54,8 +52,6 @@ class PremiumMailNotification extends Notification implements ShouldQueue
 
         $emailAllowed = $this->forceDelivery
             || (bool) ($preference?->email_transactional ?? $notifiable->email_notifications ?? true);
-        $smsAllowed = (bool) ($preference?->sms_transactional ?? $notifiable->sms_notifications ?? false);
-        $whatsappAllowed = (bool) ($preference?->whatsapp_transactional ?? $notifiable->whatsapp_notifications ?? false);
         $inAppAllowed = (bool) ($preference?->in_app_transactional ?? true);
 
         $available = [];
@@ -65,13 +61,6 @@ class PremiumMailNotification extends Notification implements ShouldQueue
         }
 
         if (! $this->mailOnly) {
-            if ($smsAllowed && filled($notifiable->phone ?? null)) {
-                $available['sms'] = TwilioSmsChannel::class;
-            }
-
-            if ($whatsappAllowed && filled($notifiable->phone ?? null)) {
-                $available['whatsapp'] = TwilioWhatsAppChannel::class;
-            }
 
             if ($inAppAllowed) {
                 $available['database'] = 'database';
