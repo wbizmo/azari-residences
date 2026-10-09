@@ -257,7 +257,7 @@ class BookingAmendmentOfferService
             // Pivot line totals must follow the new quote, particularly for
             // per-night extras when dates change and for newly purchased add-ons.
             $pivot = [];
-            foreach (($quote['addons'] ?? []) as $addonLine) {
+            foreach (($quote['add_ons'] ?? []) as $addonLine) {
                 $pivot[(int) $addonLine['id']] = [
                     'quantity' => (int) $addonLine['quantity'],
                     'unit_price' => (float) $addonLine['unit_price'],
