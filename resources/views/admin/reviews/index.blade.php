@@ -25,7 +25,7 @@
                 · {{ $review->booking?->reference }}
                 · {{ $review->property?->name ?? $review->booking?->property?->name }}
             </strong>
-            <p>{{ $review->verified_stay ? 'Verified completed stay' : 'Legacy/unverified review' }}</p>
+            <p>{{ $review->verified_stay ? 'Verified completed stay' : 'Legacy/unverified review' }} · {{ $review->helpful_votes_count }} helpful vote(s) · {{ $review->pending_reports_count }} pending report(s)</p>
         </header>
 
         <dl class="az-s78-detail">
@@ -46,6 +46,14 @@
         @if($review->positive_feedback)<p><strong>Liked:</strong> {{ $review->positive_feedback }}</p>@endif
         @if($review->negative_feedback)<p><strong>Could be better:</strong> {{ $review->negative_feedback }}</p>@endif
         <p>{{ $review->body }}</p>
+        @if($review->reports->isNotEmpty())
+            <details style="margin:12px 0">
+                <summary>Review reports ({{ $review->reports_count }})</summary>
+                @foreach($review->reports as $report)
+                    <p><strong>{{ Str::headline($report->reason) }}</strong> · {{ Str::headline($report->status) }} @if($report->details) · {{ $report->details }} @endif</p>
+                @endforeach
+            </details>
+        @endif
 
         <form method="POST" action="{{ route('azari.admin.reviews.update',$review) }}" class="az-form-grid">
             @csrf
