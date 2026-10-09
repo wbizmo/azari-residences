@@ -24,7 +24,7 @@ class OwnerLedgerExceptionAuditTest extends TestCase
         $owner = User::factory()->create();
         OwnerLedgerEntry::query()->create([
             'user_id' => $owner->id, 'currency' => 'NGN',
-            'reference' => 'LEDGER-AUDIT-CREDIT', 'type' => 'adjustment',
+            'reference' => 'LEDGER-AUDIT-CREDIT', 'description' => 'Synthetic ledger adjustment', 'type' => 'adjustment',
             'direction' => 'credit', 'amount' => 100,
         ]);
         $pending = WithdrawalRequest::query()->create([
@@ -48,7 +48,7 @@ class OwnerLedgerExceptionAuditTest extends TestCase
 
         OwnerLedgerEntry::query()->create([
             'user_id' => $owner->id, 'currency' => 'NGN',
-            'reference' => 'LEDGER-AUDIT-WITHDRAWAL',
+            'reference' => 'LEDGER-AUDIT-WITHDRAWAL', 'description' => 'Synthetic payout debit',
             'withdrawal_request_id' => $pending->id,
             'type' => 'withdrawal', 'direction' => 'debit', 'amount' => 30,
         ]);
