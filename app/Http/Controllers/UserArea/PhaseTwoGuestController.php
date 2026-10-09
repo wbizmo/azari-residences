@@ -156,8 +156,22 @@ class PhaseTwoGuestController extends Controller
             'arrival_notes' => ['nullable', 'string', 'max:1000'],
         ]);
 
-        $booking->update($data);
-        AuditLog::record('booking.arrival_updated', $booking, [], $data);
+        DB::transaction(function () use ($request, $booking, $data): void {
+            // Arrival instructions cannot be changed after the stay has
+            // ended or been cancelled, including by a stale browser tab.
+            $locked = $request->user()->bookings()
+                ->whereKey($booking->id)->lockForUpdate()->firstOrFail();
+            abort_if(
+                in_array($locked->status, ['cancelled', 'no_show', 'checked_out', 'completed'], true)
+                || filled($locked->checked_out_at) || filled($locked->completed_at),
+                422,
+                'Arrival details cannot be changed after a stay ends or is cancelled.'
+            );
+
+            $before = $locked->only(['arrival_time', 'arrival_notes']);
+            $locked->update($data);
+            AuditLog::record('booking.arrival_updated', $locked, $before, $data);
+        }, 3);
 
         return back()->with('success', 'Arrival details updated.');
     }
