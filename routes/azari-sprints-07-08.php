@@ -13,6 +13,9 @@ use App\Http\Controllers\UserArea\PhoneVerificationController;
 use App\Http\Controllers\UserArea\UserBookingController;
 use App\Http\Controllers\UserArea\UserContactController;
 use App\Http\Controllers\UserArea\UserDashboardController;
+use App\Http\Controllers\UserArea\DojahVerificationController;
+use App\Http\Controllers\PublicSite\PublicGuestVerificationController;
+use App\Http\Controllers\Webhooks\DojahWebhookController;
 use App\Http\Controllers\UserArea\UserDocumentController;
 use App\Http\Controllers\UserArea\UserNotificationController;
 use App\Http\Controllers\UserArea\UserPaymentController;
@@ -40,6 +43,13 @@ Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer', 'azari.
         Route::post('/bookings/{reference}/modifications', [BookingSelfServiceController::class, 'storeModification'])
             ->middleware('throttle:20,1')
             ->name('bookings.modifications.store');
+        // The Dojah identity portal is intentionally reachable before identity
+        // verification; do not put the verification guard on these endpoints.
+        Route::get('/identity', [DojahVerificationController::class, 'user'])
+            ->name('identity.index');
+        Route::get('/identity/status', [DojahVerificationController::class, 'status'])
+            ->middleware('throttle:60,1')->name('identity.status');
+
         Route::get('/payments', [UserPaymentController::class, 'index'])->name('payments.index');
         Route::get('/payments/{payment}', [UserPaymentController::class, 'show'])->name('payments.show');
         Route::post('/payments/{payment}/retry', [UserPaymentController::class, 'retry'])->name('payments.retry');
@@ -61,6 +71,26 @@ Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer', 'azari.
         Route::get('/service-requests', fn (UserContactController $controller) => $controller('service-requests'))->name('service-requests');
         Route::get('/support-tickets', fn (UserContactController $controller) => $controller('support-tickets'))->name('support-tickets');
     });
+
+// Invite links contain no PII; the controller requires an email-code session
+// grant before revealing guest details, granting account access or status.
+Route::prefix('guest-verification')->name('guest-verification.')->group(function (): void {
+    Route::get('/{reference}/{position}', [PublicGuestVerificationController::class, 'show'])
+        ->whereNumber('position')->middleware('throttle:40,1')->name('show');
+    Route::post('/{reference}/{position}/code/send', [PublicGuestVerificationController::class, 'sendCode'])
+        ->whereNumber('position')->middleware('throttle:3,10')->name('code.send');
+    Route::post('/{reference}/{position}/code/verify', [PublicGuestVerificationController::class, 'verifyCode'])
+        ->whereNumber('position')->middleware('throttle:10,10')->name('code.verify');
+    Route::get('/{reference}/{position}/status', [PublicGuestVerificationController::class, 'status'])
+        ->whereNumber('position')->middleware('throttle:60,1')->name('status');
+    Route::post('/{reference}/{position}/account', [PublicGuestVerificationController::class, 'createAccount'])
+        ->whereNumber('position')->middleware('throttle:5,10')->name('account.create');
+    Route::post('/{reference}/{position}/link', [PublicGuestVerificationController::class, 'linkAccount'])
+        ->whereNumber('position')->middleware('throttle:10,10')->name('account.link');
+});
+
+Route::post('/webhooks/dojah', DojahWebhookController::class)
+    ->middleware('throttle:120,1')->name('webhooks.dojah');
 
 Route::middleware(['auth', 'auth.session', 'throttle:60,1'])
     ->prefix('location')

@@ -13,6 +13,7 @@ return [
 
     'booking' => [
         'hold_minutes' => (int) env('AZARI_BOOKING_HOLD_MINUTES', 15),
+        'max_stay_nights' => max(1, min(730, (int) env('RESAVAR_MAX_STAY_NIGHTS', 366))),
         'unpaid_booking_minutes' => max(1, (int) env('AZARI_UNPAID_BOOKING_MINUTES', 60)),
         'payment_reminder_minutes' => max(1, (int) env('AZARI_PAYMENT_REMINDER_MINUTES', 30)),
         'default_tax_rate' => (float) env('AZARI_DEFAULT_TAX_RATE', 0),

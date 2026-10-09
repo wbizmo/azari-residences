@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
 
 class PublicGuestVerificationController extends Controller
@@ -193,19 +194,25 @@ class PublicGuestVerificationController extends Controller
         }
 
         $data = $request->validate([
-            'password' => ['required', 'string', 'min:8', 'max:255', 'confirmed'],
+            'password' => ['required', 'confirmed', Password::min(12)->letters()->mixedCase()->numbers()],
         ]);
 
-        $user = User::query()->create([
+        // Security-sensitive attributes are guarded by User::$fillable.
+        // Use forceFill for these server-verified values only after the
+        // signed-invitation email-code session grant has succeeded.
+        $user = new User;
+        $user->fill([
             'name' => $guest->full_name,
             'email' => mb_strtolower((string) $guest->email),
-            'email_verified_at' => now(),
             'password' => Hash::make($data['password']),
+            'timezone' => config('localization.platform_timezone', 'UTC'),
+        ]);
+        $user->forceFill([
+            'email_verified_at' => now(),
             'account_type' => 'customer',
             'status' => 'active',
             'is_active' => true,
-            'timezone' => config('localization.platform_timezone', 'UTC'),
-        ]);
+        ])->save();
 
         $guest->forceFill(['user_id' => $user->id])->save();
 

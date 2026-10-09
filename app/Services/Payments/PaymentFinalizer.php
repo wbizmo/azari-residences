@@ -46,6 +46,10 @@ class PaymentFinalizer
         ]);
 
         if (! in_array($result, ['successful', 'pending', 'failed'], true)) {
+            if ($payment->isSuccessful() || $payment->status === 'successful_excess') {
+                AuditLog::record('payment.verification_conflict_after_success', $payment, [], [], ['result' => $result, 'source' => $source]);
+                return $payment->refresh();
+            }
             $payment->update([
                 'status' => 'invalid',
                 'provider_reference' => $verification['provider_reference'] ?? $payment->provider_reference,
@@ -56,7 +60,7 @@ class PaymentFinalizer
         }
 
         if ($result === 'pending') {
-            if (! $payment->isSuccessful()) {
+            if (! $payment->isSuccessful() && $payment->status !== 'successful_excess') {
                 $payment->update([
                     'status' => 'pending',
                     'provider_reference' => $verification['provider_reference'] ?? $payment->provider_reference,
@@ -67,7 +71,7 @@ class PaymentFinalizer
         }
 
         if ($result === 'failed') {
-            if (! $payment->isSuccessful()) {
+            if (! $payment->isSuccessful() && $payment->status !== 'successful_excess') {
                 $payment->update([
                     'status' => 'failed',
                     'failed_at' => now(),

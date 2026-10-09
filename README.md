@@ -1,10 +1,10 @@
 <p align="center">
-  <img src="/public/images/logo-light.png" alt="Resarva" width="320">
+  <img src="/public/images/logo-light.png" alt="Resavar" width="320">
 </p>
 
 <p align="center">
-  <strong>THE AZARI RESIDENCES</strong><br>
-  Africa's Finest Address
+  <strong>RESAVAR</strong><br>
+  Book your next stay
 </p>
 
 <p align="center">
@@ -636,21 +636,13 @@ When terminal access is unavailable, delete the generated files manually from `s
 
 ---
 
-## Demo Administrator
+## Administrator Provisioning and Security
 
-### Email
+Do not create administrator accounts from published demo credentials. For an explicitly approved new installation, supply `AZARI_BOOTSTRAP_ADMIN_EMAIL` and a unique strong `AZARI_BOOTSTRAP_ADMIN_PASSWORD` (at least 14 characters) through the private deployment environment before running `php artisan db:seed --force`.
 
-```text
-admin@azariadmin.com
-```
+The default seeder will not execute demo booking or test-user seeders in production. Legacy/demo seeders are also independently restricted to local/testing. After bootstrap, remove the password from any temporary deployment tooling and rotate it according to operational policy.
 
-### Password
-
-```text
-12345678
-```
-
-Change or remove the demo administrator credentials before using the application in a real production environment.
+**Existing installations:** Check for legacy accounts `admin@azariadmin.com`, `admin@azaridevadmin.com`, and `user@example.com` that may have been provisioned by older seeders. Inspect their activity and revoke/rotate credentials using the approved administrative process. Do not automatically delete real customer or staff accounts by email.
 
 ---
 

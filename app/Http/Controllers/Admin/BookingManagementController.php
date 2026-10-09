@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
+use App\Models\BookingModificationRequest;
+use App\Services\Bookings\BookingModificationService;
 use App\Models\AuditLog;
 use App\Models\BookingOperationalNote;
 use App\Services\Bookings\AzariBookingLifecycle;
@@ -92,6 +94,12 @@ class BookingManagementController extends Controller
             'note' => ['nullable', 'string', 'max:2000'],
         ]);
 
+        if ($data['status'] === 'cancelled') {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'status' => 'Use the audited Cancel booking section for this action.',
+            ]);
+        }
+
         $lifecycle->transition(
             $booking,
             $data['status'],
@@ -100,6 +108,31 @@ class BookingManagementController extends Controller
         );
 
         return back()->with('success', 'Booking status updated.');
+    }
+
+    public function reviewModification(
+        Request $request,
+        Booking $booking,
+        BookingModificationRequest $modification,
+        BookingModificationService $service
+    ): \Illuminate\Http\RedirectResponse {
+        abort_unless((int) $modification->booking_id === (int) $booking->getKey(), 404);
+        $data = $request->validate([
+            'decision' => ['required', 'in:approve,decline'],
+            'staff_note' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        $service->review($booking, $modification, $request->user(),
+            $data['decision'], $data['staff_note'] ?? null);
+
+        return back()->with('success', 'Booking change request reviewed.');
+    }
+
+    public function cancellationQuote(Booking $booking): \Illuminate\Http\JsonResponse
+    {
+        abort_unless(auth()->user()?->hasPermission('bookings.view'), 403);
+
+        return response()->json(app(\App\Services\Bookings\BookingCancellationQuoteService::class)->quote($booking));
     }
 
     public function receipt(Booking $booking): Response

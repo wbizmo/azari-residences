@@ -4,6 +4,7 @@ namespace App\Services\Owners;
 
 use App\Models\OwnerLedgerEntry;
 use App\Models\Payment;
+use App\Models\Refund;
 use Illuminate\Support\Str;
 
 class OwnerEarningsService
@@ -48,7 +49,7 @@ class OwnerEarningsService
                 'type' => 'booking_earning',
                 'direction' => 'credit',
                 'amount' => $amount,
-                'currency' => (string) config('azari.currency', 'USD'),
+                'currency' => strtoupper((string) $payment->currency),
                 'gross_amount' => $grossAmount,
                 'owner_share_percentage' => $share,
                 'azari_share_percentage' => $azariShare,
@@ -68,4 +69,38 @@ class OwnerEarningsService
             ]
         );
     }
+    /** Post exactly one refund debit, preserving the original owner's currency. */
+    public function reverseForRefund(Refund $refund): ?OwnerLedgerEntry
+    {
+        if (! $refund->isSuccessful()) {
+            return null;
+        }
+
+        $credit = OwnerLedgerEntry::query()->where('payment_id', $refund->payment_id)
+            ->where('type', 'booking_earning')->where('direction', 'credit')->first();
+
+        if (! $credit) {
+            return null;
+        }
+
+        return OwnerLedgerEntry::query()->firstOrCreate(
+            ['refund_id' => $refund->getKey()],
+            [
+                'user_id' => $credit->user_id,
+                'property_id' => $credit->property_id,
+                'booking_id' => $credit->booking_id,
+                'type' => 'refund_reversal',
+                'direction' => 'debit',
+                'amount' => min((float) $credit->amount, (float) $refund->amount),
+                'currency' => $credit->currency,
+                'reference' => 'OWNER-RFD-'.$refund->getKey(),
+                'description' => 'Refund '.$refund->reference.' reverses owner earnings.',
+                'metadata' => [
+                    'refund_reference' => $refund->reference,
+                    'original_credit_id' => $credit->getKey(),
+                ],
+            ]
+        );
+    }
+
 }

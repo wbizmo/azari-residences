@@ -15,6 +15,11 @@ class AzariSprintThreeFourSeeder extends Seeder
 {
     public function run(): void
     {
+        if (! app()->environment('local', 'testing')) {
+            $this->command?->warn('Unsafe legacy/demo seeder skipped outside local/testing.');
+            return;
+        }
+
         $admin = User::query()->firstOrNew(['email' => 'admin@azariadmin.com']);
         $admin->forceFill([
             'name' => 'Admin',

@@ -20,6 +20,12 @@ Route::prefix('azaridevadmin')->name('azari.admin.')->middleware('azari.staff')-
     Route::get('/bookings/{booking}', [BookingManagementController::class, 'show'])->name('bookings.show');
     Route::put('/bookings/{booking}/status', [BookingManagementController::class, 'transition'])->name('bookings.status');
     Route::post('/bookings/{booking}/notes', [BookingManagementController::class, 'storeNote'])->name('bookings.notes.store');
+    Route::put('/bookings/{booking}/modifications/{modification}/review', [BookingManagementController::class, 'reviewModification'])
+        ->middleware('azari.permission:bookings.edit')
+        ->name('bookings.modifications.review');
     Route::get('/bookings/{booking}/receipt', [BookingManagementController::class, 'receipt'])->name('bookings.receipt');
-    Route::put('/bookings/{booking}/cancel', AzariBookingCancellationController::class)->name('bookings.cancel');
+    Route::get('/bookings/{booking}/cancellation-quote', [BookingManagementController::class, 'cancellationQuote'])
+        ->middleware('azari.permission:bookings.view')->name('bookings.cancellation-quote');
+    Route::put('/bookings/{booking}/cancel', AzariBookingCancellationController::class)
+        ->middleware('azari.permission:bookings.edit')->name('bookings.cancel');
 });

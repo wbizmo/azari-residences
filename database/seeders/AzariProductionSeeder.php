@@ -12,6 +12,13 @@ class AzariProductionSeeder extends Seeder
 {
     public function run(): void
     {
+        // Example properties must never enter the live marketplace through a
+        // direct seeder command, even when run outside DatabaseSeeder.
+        if (! app()->environment('local', 'testing')) {
+            $this->command?->warn('Fixture property seeder disabled outside local/testing.');
+            return;
+        }
+
         SiteSetting::put('site_name', 'Resarva', 'text', 'branding');
         SiteSetting::put('site_tagline', 'Private serviced residences', 'text', 'branding');
         SiteSetting::put('operating_regions', 'Nigeria and Rwanda', 'text', 'branding');

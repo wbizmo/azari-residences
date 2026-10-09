@@ -5,6 +5,7 @@ namespace App\Services\Payments;
 use App\Models\AuditLog;
 use App\Models\Payment;
 use App\Models\Refund;
+use App\Services\Owners\OwnerEarningsService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -29,6 +30,13 @@ class RefundService
             if ($idempotencyKey) {
                 $existing = Refund::query()->where('idempotency_key', $idempotencyKey)->first();
                 if ($existing) {
+                    if ((int) $existing->payment_id !== (int) $payment->getKey()
+                        || abs(round((float) $existing->amount, 2) - $amount) >= 0.005) {
+                        throw ValidationException::withMessages([
+                            'idempotency_key' => 'This refund request key was already used for a different payment or amount.',
+                        ]);
+                    }
+
                     return $existing;
                 }
             }
@@ -180,6 +188,8 @@ class RefundService
                 ['payment_reference' => $payment->reference],
                 $actorId
             );
+
+            app(OwnerEarningsService::class)->reverseForRefund($locked->refresh());
 
             return $locked->refresh();
         }, 5);

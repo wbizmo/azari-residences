@@ -15,9 +15,9 @@ class PhaseOneAAuthenticationRouteHardeningTest extends TestCase
     public function test_customer_authentication_routes_have_layered_middleware(): void
     {
         $this->assertRouteMiddleware('login', ['guest']);
-        $this->assertMethodUriMiddleware('POST', 'login', ['guest', 'throttle:10,1']);
-        $this->assertRouteMiddleware('password.email', ['guest', 'throttle:5,1']);
-        $this->assertRouteMiddleware('password.store', ['guest', 'throttle:5,1']);
+        $this->assertMethodUriMiddleware('POST', 'login', ['guest', 'throttle:20,1']);
+        $this->assertRouteMiddleware('password.email', ['guest', 'throttle:5,15']);
+        $this->assertRouteMiddleware('password.store', ['guest', 'throttle:5,10']);
         $this->assertRouteMiddleware('logout', ['auth', 'auth.session']);
     }
 

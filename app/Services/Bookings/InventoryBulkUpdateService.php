@@ -3,14 +3,19 @@
 namespace App\Services\Bookings;
 
 use App\Models\AccommodationType;
+use App\Models\InventoryDate;
+use App\Models\Property;
 use App\Models\InventoryChangeLog;
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Collection;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class InventoryBulkUpdateService
 {
+    public function __construct(private readonly AzariAvailabilityEngine $availability) {}
+
     private const ALLOWED = [
         'sellable_inventory', 'maintenance_inventory', 'stop_sell',
         'closed_to_arrival', 'closed_to_departure', 'minimum_stay',
@@ -42,6 +47,11 @@ class InventoryBulkUpdateService
         $this->validateChanges($type, $changes);
 
         return DB::transaction(function () use ($type, $from, $to, $changes, $actorId, $source): InventoryChangeLog {
+            // Match the hold lock ordering: property, accommodation type, date range.
+            Property::query()->whereKey($type->property_id)
+                ->when(DB::connection()->getDriverName() !== 'sqlite', fn (Builder $query) => $query->lockForUpdate())
+                ->firstOrFail();
+
             $lockedType = AccommodationType::query()
                 ->whereKey($type->getKey())
                 ->when(
@@ -49,6 +59,8 @@ class InventoryBulkUpdateService
                     fn (Builder $query) => $query->lockForUpdate()
                 )
                 ->firstOrFail();
+
+            $this->assertCommittedInventoryPreserved($lockedType, $from, $to, $changes);
 
             $rows = [];
             for ($date = $from; $date->lessThanOrEqualTo($to); $date = $date->addDay()) {
@@ -78,6 +90,48 @@ class InventoryBulkUpdateService
                 'changes' => $changes,
             ]);
         }, 5);
+    }
+
+    /** Prevent rate/allotment bulk edits from removing rooms already committed to stays. */
+    private function assertCommittedInventoryPreserved(
+        AccommodationType $type,
+        CarbonImmutable $from,
+        CarbonImmutable $to,
+        array $changes
+    ): void {
+        if (! array_key_exists('sellable_inventory', $changes)
+            && ! array_key_exists('maintenance_inventory', $changes)) {
+            return;
+        }
+
+        $dates = InventoryDate::query()
+            ->where('accommodation_type_id', $type->getKey())
+            ->whereBetween('date', [$from->toDateString(), $to->toDateString()])
+            ->orderBy('date')
+            ->when(DB::connection()->getDriverName() !== 'sqlite', fn (Builder $query) => $query->lockForUpdate())
+            ->get()
+            ->keyBy(fn (InventoryDate $row) => $row->date->toDateString());
+
+        $committed = $this->availability->committedQuantityByDate($type, $from, $to->addDay());
+
+        for ($date = $from; $date->lessThanOrEqualTo($to); $date = $date->addDay()) {
+            $key = $date->toDateString();
+            $existing = $dates->get($key);
+            $sellable = array_key_exists('sellable_inventory', $changes)
+                ? $changes['sellable_inventory']
+                : $existing?->sellable_inventory;
+            $sellable = $sellable === null ? (int) $type->total_inventory : (int) $sellable;
+            $maintenance = array_key_exists('maintenance_inventory', $changes)
+                ? (int) ($changes['maintenance_inventory'] ?? 0)
+                : (int) ($existing?->maintenance_inventory ?? 0);
+            $reserved = (int) $committed->get($key, 0);
+
+            if ($sellable - $maintenance < $reserved) {
+                throw ValidationException::withMessages([
+                    'sellable_inventory' => "Cannot reduce rooms below {$reserved} committed unit(s) on {$key}.",
+                ]);
+            }
+        }
     }
 
     private function validateChanges(AccommodationType $type, array $changes): void

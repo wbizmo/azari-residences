@@ -3,6 +3,7 @@
 namespace Tests\Feature\Auth;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use App\Support\AuthAbuseGuard;
 use Tests\TestCase;
 
 class RegistrationTest extends TestCase
@@ -18,11 +19,16 @@ class RegistrationTest extends TestCase
 
     public function test_new_users_can_register(): void
     {
+        $this->withServerVariables(['HTTP_USER_AGENT' => 'Mozilla/5.0 - Test Client']);
+        $token = app(AuthAbuseGuard::class)->formToken('register');
+        $this->travel(3)->seconds();
+
         $response = $this->post('/register', [
+            '_auth_form_token' => $token,
             'name' => 'Test User',
             'email' => 'test@example.com',
-            'password' => 'password',
-            'password_confirmation' => 'password',
+            'password' => 'SecureTestPass2026',
+            'password_confirmation' => 'SecureTestPass2026',
         ]);
 
         $this->assertAuthenticated();

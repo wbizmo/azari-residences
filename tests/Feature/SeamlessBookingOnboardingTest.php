@@ -9,6 +9,7 @@ use App\Models\BookingHold;
 use App\Models\IdentityVerification;
 use App\Models\Property;
 use App\Models\User;
+use App\Support\AuthAbuseGuard;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
@@ -47,9 +48,14 @@ class SeamlessBookingOnboardingTest extends TestCase
         $this->get(route('azari.booking.checkout', $hold->token))
             ->assertOk()
             ->assertSee('Your booking details')
-            ->assertSee('Secure your Resarva access');
+            ->assertSee('Secure your Resavar access');
+
+        $this->withServerVariables(['HTTP_USER_AGENT' => 'Mozilla/5.0 - Test Client']);
+        $token = app(AuthAbuseGuard::class)->formToken('booking-account-create');
+        $this->travel(3)->seconds();
 
         $response = $this->post(route('azari.booking.onboarding.begin', $hold->token), [
+            '_auth_form_token' => $token,
             'hold_token' => $hold->token,
             'first_name' => 'Lead',
             'last_name' => 'Guest',
@@ -99,7 +105,12 @@ class SeamlessBookingOnboardingTest extends TestCase
             'expires_at' => now()->addMinutes(15),
         ]);
 
+        $this->withServerVariables(['HTTP_USER_AGENT' => 'Mozilla/5.0 - Test Client']);
+        $token = app(AuthAbuseGuard::class)->formToken('booking-account-create');
+        $this->travel(3)->seconds();
+
         $response = $this->post(route('azari.booking.onboarding.begin', $hold->token), [
+            '_auth_form_token' => $token,
             'hold_token' => $hold->token,
             'first_name' => 'Existing',
             'last_name' => 'Guest',
