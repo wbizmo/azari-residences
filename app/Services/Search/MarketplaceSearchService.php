@@ -24,7 +24,7 @@ class MarketplaceSearchService
         private readonly ReviewSummaryService $reviews,
     ) {}
 
-    public function search(array $filters): array
+    public function search(array $filters, bool $includeFacets = true): array
     {
         $checkIn = CarbonImmutable::parse($filters['check_in'])->startOfDay();
         $checkOut = CarbonImmutable::parse($filters['check_out'])->startOfDay();
@@ -135,7 +135,7 @@ class MarketplaceSearchService
 
         return [
             'results' => $paginator,
-            'facets' => $this->facets($filters, $checkIn, $checkOut, $rooms, $guests),
+            'facets' => $includeFacets ? $this->facets($filters, $checkIn, $checkOut, $rooms, $guests) : [],
             'map_points' => $paginator->getCollection()
                 ->filter(fn (array $result) => $result['property']->latitude !== null && $result['property']->longitude !== null)
                 ->map(fn (array $result) => [
