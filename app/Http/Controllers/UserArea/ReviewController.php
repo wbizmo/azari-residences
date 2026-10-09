@@ -102,6 +102,9 @@ class ReviewController extends Controller
             ...$data,
             'edited_at' => now(),
             'status' => 'pending',
+            // A property response approved for the old guest text must be
+            // reconsidered if the guest substantially rewrites the review.
+            'owner_reply_status' => 'pending',
         ]);
 
         AuditLog::record('review.updated', $review, $before, [
