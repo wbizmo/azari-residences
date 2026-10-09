@@ -37,23 +37,10 @@ const AzariProductionUI = (() => {
         }
     };
 
-    const enhanceCheckbox = (input) => {
-        if (!(input instanceof HTMLInputElement) || input.type !== 'checkbox' || input.dataset.azToggleReady === 'true') return;
-        input.dataset.azToggleReady = 'true';
-        const label = input.closest('label');
-        if (label) label.classList.add('az-toggle-label');
-        const toggle = document.createElement('span');
-        toggle.className = 'az-toggle';
-        toggle.setAttribute('aria-hidden', 'true');
-        toggle.innerHTML = '<span class="az-toggle__thumb"></span>';
-        input.insertAdjacentElement('afterend', toggle);
-    };
-
-    const enhance = (root = document) => root.querySelectorAll('input[type="checkbox"]').forEach(enhanceCheckbox);
+    // Keep the public API without injecting switch markup. Toggle visuals are CSS-only.
+    const enhance = () => {};
 
     const init = () => {
-        enhance();
-
         document.addEventListener('submit', (event) => {
             const form = event.target;
             if (!(form instanceof HTMLFormElement)) return;
@@ -72,12 +59,6 @@ const AzariProductionUI = (() => {
         window.addEventListener('pageshow', () => document.querySelectorAll('[data-az-working="true"]').forEach(resetWorking));
         document.addEventListener('azari:action-success', (e) => resetWorking(e.detail?.button, 'success'));
         document.addEventListener('azari:action-error', (e) => resetWorking(e.detail?.button, 'error'));
-
-        new MutationObserver((records) => records.forEach((record) => record.addedNodes.forEach((node) => {
-            if (!(node instanceof Element)) return;
-            if (node.matches('input[type="checkbox"]')) enhanceCheckbox(node);
-            enhance(node);
-        }))).observe(document.documentElement, { childList: true, subtree: true });
     };
 
     return { init, setWorking, resetWorking, enhance };
