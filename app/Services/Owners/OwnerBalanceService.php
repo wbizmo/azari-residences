@@ -41,8 +41,21 @@ class OwnerBalanceService
             ->sum('amount'), 2);
     }
 
+    public function disputeHeld(User $user, string $currency): float
+    {
+        return round((float) \App\Models\PaymentDispute::query()
+            ->where('owner_user_id', $user->getKey())
+            ->where('currency', strtoupper($currency))
+            ->where('status', 'open')->sum('amount'), 2);
+    }
+
     public function available(User $user, string $currency): float
     {
-        return max(0, round($this->balance($user, $currency) - $this->pending($user, $currency), 2));
+        return max(0, round(
+            $this->balance($user, $currency)
+            - $this->pending($user, $currency)
+            - $this->disputeHeld($user, $currency),
+            2
+        ));
     }
 }

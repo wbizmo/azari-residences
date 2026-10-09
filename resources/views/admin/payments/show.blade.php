@@ -59,4 +59,34 @@
 {{ $refunds->links() }}
 </section>
 <section class="az-s78-card"><h2>Callback and webhook events</h2>@forelse($events as $event)<article class="az-s78-event"><strong>{{ ucfirst($event->source) }} · {{ $event->event_type ?: 'payment event' }}</strong><p>{{ $event->received_at?->format('d M Y H:i:s') }} · Signature {{ $event->signature_valid===false?'invalid':'accepted' }} · {{ $event->processed?'processed':'not processed' }}</p>@if($event->safe_error)<p>{{ $event->safe_error }}</p>@endif</article>@empty<div class="az-s78-empty">No provider events recorded.</div>@endforelse{{ $events->links() }}</section><section class="az-s78-card"><h2>Audit history</h2>@forelse($auditLogs as $log)<article class="az-s78-event"><strong>{{ Str::headline($log->action) }}</strong><p>{{ $log->created_at?->format('d M Y H:i:s') }} · {{ $log->actor?->name ?? 'System' }}</p></article>@empty<div class="az-s78-empty">No audit events recorded.</div>@endforelse{{ $auditLogs->links() }}<h2 style="margin-top:22px">Receipt</h2>@if(in_array($payment->status,['successful','successful_excess'],true))<p><a class="az-button" href="{{ route('azari.admin.bookings.receipt',$payment->booking) }}" target="_blank">Print or save receipt</a></p>@else<p>No receipt is available for this payment.</p>@endif</section></div>
+<section class="az-s78-card" style="margin-top:18px">
+<h2>Provider disputes and owner payout holds</h2>
+<p>A newly reported chargeback holds the affected owner funds. Settlement loss requires independent administrator review and external evidence.</p>
+@if(auth()->user()?->isAdministrator() && $payment->isSuccessful())
+<form method="POST" class="az-form-grid" action="{{ route('azari.admin.payments.disputes.store', $payment) }}">
+@csrf
+<label><span>Provider dispute reference</span><input name="provider_dispute_reference" maxlength="190" required minlength="5"></label>
+<label><span>Evidence or case reference</span><input name="evidence_reference" maxlength="190" required minlength="5"></label>
+<label><span>Disputed amount ({{ $payment->currency }})</span><input type="number" name="amount" min="0.01" max="{{ $payment->amount }}" step="0.01" required></label>
+<button class="az-button" type="submit">Record dispute and hold funds</button>
+</form>
+@endif
+@forelse($payment->disputes()->orderByDesc('id')->get() as $dispute)
+<article class="az-s78-event">
+<strong>{{ $dispute->provider_dispute_reference }} · {{ Str::headline($dispute->status) }}</strong>
+<p>{{ $dispute->currency }} {{ number_format((float) $dispute->amount, 2) }} · Evidence: {{ $dispute->evidence_reference }}</p>
+@if($dispute->status === 'open' && auth()->user()?->isAdministrator() && (int) $dispute->reported_by !== (int) auth()->id())
+<form method="POST" class="az-form-grid" action="{{ route('azari.admin.payments.disputes.resolve', $dispute) }}">
+@csrf
+<label><span>Verified provider outcome</span><select name="decision" required><option value="won">Won - release hold</option><option value="lost">Lost - debit owner ledger</option></select></label>
+<label><span>Provider settlement evidence</span><input name="evidence_reference" maxlength="190" required minlength="5"></label>
+<label class="wide"><span>Independent reviewer note</span><textarea name="review_note" required minlength="8" maxlength="2000"></textarea></label>
+<button class="az-button az-button--secondary" type="submit">Record reviewed outcome</button>
+</form>
+@endif
+</article>
+@empty
+<p>No provider disputes recorded for this payment.</p>
+@endforelse
+</section>
 @endsection

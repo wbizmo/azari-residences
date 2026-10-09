@@ -21,6 +21,13 @@ class UnknownPayoutOutcomeTest extends TestCase
     {
         $owner = User::factory()->create();
         $operator = User::factory()->create();
+        // A payout being dispatched must have real prior owner earnings;
+        // the new dispute balance guard correctly rejects unbacked requests.
+        \App\Models\OwnerLedgerEntry::query()->create([
+            'user_id' => $owner->id, 'type' => 'booking_earning',
+            'direction' => 'credit', 'amount' => 100, 'currency' => 'USD',
+            'reference' => 'EARN-UNCONFIRMED-PAYOUT-TEST', 'description' => 'Verified owner earnings',
+        ]);
         $withdrawal = WithdrawalRequest::query()->create([
             'user_id' => $owner->id,
             'gateway' => 'paypal',
