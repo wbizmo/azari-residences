@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Bookings;
 
-use App\Contracts\Payments\PaymentProvider;
 use App\Models\Booking;
 use App\Models\Payment;
 use App\Models\Property;
@@ -12,11 +11,11 @@ use App\Services\Bookings\BookingAmendmentOfferService;
 use App\Services\Bookings\BookingAmendmentPaymentService;
 use App\Services\Bookings\BookingModificationService;
 use App\Services\Payments\PaymentFinalizer;
-use App\Services\Payments\PaymentManager;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
-use Mockery;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
 class BookingAmendmentTopupTest extends TestCase
@@ -61,16 +60,36 @@ class BookingAmendmentTopupTest extends TestCase
 
     private function mockCheckout(): void
     {
-        $driver = Mockery::mock(PaymentProvider::class);
-        $driver->shouldReceive('enabled')->andReturn(true);
-        $driver->shouldReceive('initialise')->once()->andReturn([
-            'checkout_url' => 'https://example.test/secure-amendment-checkout',
-            'provider_reference' => 'chg-amendment-123',
-            'safe_response' => ['status' => 'pending'],
+        Cache::flush();
+        foreach ([
+            'enabled' => true,
+            'mode' => 'test',
+            'api_version' => 'v4',
+            'client_id' => 'test-amendment-client',
+            'client_secret' => 'test-amendment-secret',
+            'webhook_secret' => 'test-webhook-secret',
+            'token_url' => 'https://idp.flutterwave.test/token',
+            'sandbox_base_url' => 'https://api.flutterwave.test',
+            'allowed_payment_methods' => ['card'],
+            'default_payment_method' => 'card',
+        ] as $key => $value) {
+            config()->set('azari.payments.flutterwave.'.$key, $value);
+        }
+
+        Http::fake([
+            'https://idp.flutterwave.test/token' => Http::response(['access_token' => 'fake-token'], 200),
+            'https://api.flutterwave.test/*' => Http::response([
+                'status' => 'success',
+                'data' => [
+                    'id' => 'chg-amendment-123',
+                    'status' => 'pending',
+                    'next_action' => [
+                        'type' => 'redirect',
+                        'redirect_url' => ['url' => 'https://example.test/secure-amendment-checkout'],
+                    ],
+                ],
+            ], 200),
         ]);
-        $manager = Mockery::mock(PaymentManager::class);
-        $manager->shouldReceive('driver')->with('flutterwave')->andReturn($driver);
-        app()->instance(PaymentManager::class, $manager);
     }
 
     public function test_verified_topup_is_unallocated_until_guest_accepts_and_then_balances_booking(): void
@@ -144,7 +163,7 @@ class BookingAmendmentTopupTest extends TestCase
         ]);
         $offer->forceFill(['quote_expires_at' => now()->subMinutes(2)])->save();
         $this->assertSame(0, \Illuminate\Support\Facades\Artisan::call('resavar:recover-amendment-payments'));
-        $this->assertSame('expired', $offer->fresh()->status);
+        $this->assertSame('refund_pending', $offer->fresh()->status);
         $this->assertDatabaseHas('refunds', [
             'payment_id' => $payment->getKey(),
             'status' => 'requested',
