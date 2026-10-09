@@ -39,10 +39,16 @@ class PhaseTwoGuestController extends Controller
         );
 
         $messages = $conversation->messages()->oldest()->paginate(40);
-        $conversation->messages()
-            ->where('sender_type', 'property')
-            ->whereNull('read_at')
-            ->update(['read_at' => now()]);
+        // A paginated conversation may have unseen later pages. Mark only
+        // messages actually rendered to this recipient as read.
+        $visibleIds = $messages->getCollection()->pluck('id')->all();
+        if ($visibleIds !== []) {
+            $conversation->messages()
+                ->whereIn('id', $visibleIds)
+                ->where('sender_type', 'property')
+                ->whereNull('read_at')
+                ->update(['read_at' => now()]);
+        }
 
         return view('user.bookings.messages', compact('booking', 'conversation', 'messages'));
     }
