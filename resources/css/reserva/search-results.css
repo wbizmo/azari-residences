@@ -406,3 +406,15 @@
   .reserva-map-shell { min-height: 430px; }
   .reserva-map-controls { flex-wrap: wrap; justify-content: end; }
 }
+
+.reserva-map-cluster {
+  min-width: 52px;
+  min-height: 52px;
+  border: 3px solid #fff;
+  border-radius: 999px;
+  background: #052058;
+  color: #fff;
+  font-weight: 800;
+  box-shadow: 0 3px 16px rgba(5,32,88,.32);
+}
+.reserva-map-cluster:hover, .reserva-map-cluster:focus-visible { background: #173f88; outline: 3px solid #052058; outline-offset: 3px; }
