@@ -241,7 +241,22 @@
                                         <div class="reserva-rate-row__price">
                                             @if($quote)
                                                 <strong>{{ \App\Support\Money::format($quote['total'], $quote['currency']) }}</strong>
-                                                <small>Total for {{ $quote['nights'] }} {{ Str::plural('night', $quote['nights']) }}</small>
+                                                <small>Total for {{ $quote['nights'] }} {{ Str::plural('night', $quote['nights']) }} · {{ $quote['quantity'] ?? 1 }} {{ Str::plural('room', $quote['quantity'] ?? 1) }}</small>
+                                                @if(($quote['discount_total'] ?? 0) > 0)
+                                                    <small>Discount included: −{{ \App\Support\Money::format($quote['discount_total'], $quote['currency']) }}</small>
+                                                @endif
+                                                @if(($quote['fee_total'] ?? 0) > 0)
+                                                    <small>Includes fees: {{ \App\Support\Money::format($quote['fee_total'], $quote['currency']) }}</small>
+                                                @endif
+                                                @if(($quote['tax_total'] ?? 0) > 0)
+                                                    <small>Includes taxes: {{ \App\Support\Money::format($quote['tax_total'], $quote['currency']) }}</small>
+                                                @endif
+                                                @if(($quote['security_deposit'] ?? 0) > 0)
+                                                    <small>Security deposit included: {{ \App\Support\Money::format($quote['security_deposit'], $quote['currency']) }}</small>
+                                                @endif
+                                                @if(($quote['policy']['cancellation']['free_cancel_hours'] ?? null) !== null && $plan->is_refundable)
+                                                    <small>Free cancellation up to {{ (int) $quote['policy']['cancellation']['free_cancel_hours'] }} hours before arrival, subject to the full policy</small>
+                                                @endif
                                                 @if(($option['remaining'] ?? null) !== null && $option['remaining'] <= 5)
                                                     <small>{{ $option['remaining'] }} {{ Str::plural('unit', $option['remaining']) }} left</small>
                                                 @endif
