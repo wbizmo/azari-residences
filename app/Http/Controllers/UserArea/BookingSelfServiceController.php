@@ -10,6 +10,19 @@ use Illuminate\Http\Request;
 
 class BookingSelfServiceController extends Controller
 {
+    public function payDateAmendment(
+        Request $request,
+        string $reference,
+        \App\Models\BookingModificationRequest $modification,
+        \App\Services\Bookings\BookingAmendmentPaymentService $payments
+    ): RedirectResponse {
+        $booking = $request->user()->bookings()->where('reference', $reference)->firstOrFail();
+        abort_unless((int) $modification->booking_id === (int) $booking->getKey(), 404);
+        $payment = $payments->initiate($booking, $modification, $request->user());
+
+        return redirect()->away($payment->checkout_url);
+    }
+
     public function acceptDateAmendment(
         Request $request,
         string $reference,
