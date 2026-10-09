@@ -108,7 +108,7 @@ class ICalChannelAdapter implements ChannelAdapter
             ->whereDate('check_out', '>=', now()->subDay()->toDateString())
             ->orderBy('check_in')->get(['reference','check_in','check_out','updated_at']);
 
-        $lines = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Resarva//Inventory Calendar//EN','CALSCALE:GREGORIAN','METHOD:PUBLISH'];
+        $lines = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Resavar//Inventory Calendar//EN','CALSCALE:GREGORIAN','METHOD:PUBLISH'];
         foreach ($bookings as $booking) {
             $lines[] = 'BEGIN:VEVENT';
             $lines[] = 'UID:'.Str::ascii((string) $booking->reference).'@resarva';
