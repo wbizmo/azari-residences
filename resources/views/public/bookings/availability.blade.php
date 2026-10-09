@@ -118,14 +118,30 @@
             </form>
 
             @if($alternatives->isNotEmpty())
-                <section class="reserva-flex-date-options" aria-label="Flexible date alternatives">
-                    <strong>Nearby dates with availability</strong>
-                    <div class="reserva-result-badges">
+                <section class="reserva-flex-date-options" aria-label="Flexible dates and full-stay price examples">
+                    <h2>Flexible-date price calendar</h2>
+                    <p class="az-user-panel-subtitle">Totals are examples for one verified available stay, including known fees and taxes. A final quote is confirmed when you choose a property. Dates without a verified quote cannot be selected here.</p>
+                    <div class="reserva-flex-date-calendar" role="list">
                         @foreach($alternatives as $alternative)
-                            <a class="button button-secondary" href="{{ route('availability.results', [...collect($queryWithoutPage)->except('flex_days')->all(), 'check_in'=>$alternative['check_in'], 'check_out'=>$alternative['check_out']]) }}">
-                                {{ Carbon\CarbonImmutable::parse($alternative['check_in'])->format('j M') }}–{{ Carbon\CarbonImmutable::parse($alternative['check_out'])->format('j M') }}
-                                @if($alternative['example_total'] !== null) · example total {{ $alternative['currency'] }} {{ number_format((float)$alternative['example_total'],2) }} @endif
-                            </a>
+                            <div role="listitem">
+                                @if($alternative['example_total'] !== null)
+                                    <a class="reserva-flex-date-tile {{ !empty($alternative['current']) ? 'is-selected' : '' }}"
+                                       @if(!empty($alternative['current'])) aria-current="true" @endif
+                                       href="{{ route('availability.results', [...collect($queryWithoutPage)->except('flex_days')->all(), 'check_in'=>$alternative['check_in'], 'check_out'=>$alternative['check_out']]) }}">
+                                        <time datetime="{{ $alternative['check_in'] }}">{{ Carbon\CarbonImmutable::parse($alternative['check_in'])->format('j M Y') }}</time>
+                                        <span>to {{ Carbon\CarbonImmutable::parse($alternative['check_out'])->format('j M') }}</span>
+                                        <strong>{{ $alternative['currency'] }} {{ number_format((float)$alternative['example_total'], 2) }}</strong>
+                                        <small>{{ !empty($alternative['current']) ? 'Current dates' : 'View available stays' }}</small>
+                                    </a>
+                                @else
+                                    <div class="reserva-flex-date-tile is-unavailable" aria-label="No verified quote for {{ $alternative['check_in'] }}">
+                                        <time datetime="{{ $alternative['check_in'] }}">{{ Carbon\CarbonImmutable::parse($alternative['check_in'])->format('j M Y') }}</time>
+                                        <span>to {{ Carbon\CarbonImmutable::parse($alternative['check_out'])->format('j M') }}</span>
+                                        <strong>No verified quote</strong>
+                                        <small>Not selectable</small>
+                                    </div>
+                                @endif
+                            </div>
                         @endforeach
                     </div>
                 </section>
