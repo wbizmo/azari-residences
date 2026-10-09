@@ -75,3 +75,14 @@ Staff with `bookings.edit` can record a confirmed, **occupied** early departure 
 The **original check-out date, pricing snapshot, fee/tax and policy snapshot remain immutable** so that invoices and dispute records retain contractual truth. An informational unused-night subtotal from the booked line items is recorded, but it is **not** treated as automatic refund entitlement because promotions, fees, taxes, prepaid deposit policy and nonrefundable terms differ. An exception can be requested for an *audited* early departure only, reviewed by a different finance administrator, and reserved through `RefundService` without assuming provider settlement. Missing external refund evidence always fails closed pending reconciliation.
 
 Local regression: `php artisan test --filter=BookingEarlyDepartureSafetyTest`. Operator acceptance: confirm property-local departure boundaries and manual policy review with real gateway/refund evidence; record under #123. No automatic partial-stay refund happens when policy is unknown.
+
+## Independent checkout latency and explain plan driver
+
+`tests/local/phase1-checkout-load.php` creates 4–24 distinct held, one-unit synthetic properties and uses separate forked MySQL processes with synchronized checkout starts. It measures each successful checkout's p50/p95/p99 elapsed time and DB query-count distribution, and captures raw MySQL EXPLAIN rows for date-range inventory and booking-index lookups. It refuses non-MySQL connections, non-testing app environments, real DB names, missing `pcntl`, or a non-array mail driver.
+
+```bash
+APP_ENV=testing DB_CONNECTION=mysql MAIL_MAILER=array RESAVAR_LOCAL_LOAD_WORKERS=12 \
+  php tests/local/phase1-checkout-load.php
+```
+
+Run only in a disposable migrated database, with working Composer dev factories. Compare against `resavar:benchmark-inventory` and the one-room race test. This is synthetic **service-layer** checkout throughput, not end-to-end real payment or traffic performance, and no timings are claimed until measured. Full provider-connected and production-shaped targets remain in operator task #123.
