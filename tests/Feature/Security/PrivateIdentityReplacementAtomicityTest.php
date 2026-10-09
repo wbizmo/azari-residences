@@ -16,7 +16,7 @@ class PrivateIdentityReplacementAtomicityTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_replacing_guest_identity_deletes_previous_document_only_after_commit(): void
+    public function test_replacing_guest_identity_keeps_prior_file_until_outer_commit(): void
     {
         Storage::fake('private');
         $booking = Booking::factory()->create();
@@ -42,6 +42,7 @@ class PrivateIdentityReplacementAtomicityTest extends TestCase
             'review_status' => 'pending',
         ]);
 
+        $initialLevel = DB::transactionLevel();
         DB::beginTransaction();
         try {
             $document = app(IdentityDocumentService::class)->storeGuestIdentity(
@@ -53,7 +54,7 @@ class PrivateIdentityReplacementAtomicityTest extends TestCase
             $this->assertNotSame($oldPath, $document->path);
             DB::commit();
         } finally {
-            if (DB::transactionLevel() > 0) {
+            while (DB::transactionLevel() > $initialLevel) {
                 DB::rollBack();
             }
         }
