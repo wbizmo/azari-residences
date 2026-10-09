@@ -16,7 +16,6 @@ use App\Services\Owners\PropertyAccessService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -97,7 +96,7 @@ class OwnerPhaseTwoController extends Controller
         $hash = hash('sha256', $token);
         $invite = DB::table('property_staff_invitations')->where('token_hash', $hash)->first();
 
-        abort_unless($invite && ! $invite->accepted_at && now()->lessThan($invite->expires_at), 404);
+        abort_unless($invite && ! $invite->accepted_at && now()->lessThan(\Carbon\CarbonImmutable::parse($invite->expires_at)), 404);
         abort_unless(hash_equals(mb_strtolower((string) $invite->email), mb_strtolower((string) $request->user()->email)), 403);
 
         DB::transaction(function () use ($invite, $request): void {
