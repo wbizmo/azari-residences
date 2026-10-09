@@ -37,7 +37,7 @@ class CanonicalAdminAndBrandRegressionTest extends TestCase
     {
         $brand = file_get_contents(resource_path('views/components/brand-logo.blade.php'));
 
-        $this->assertStringContainsString("siteName = 'Resarva'", $brand);
+        $this->assertStringContainsString("siteName = 'Resavar'", $brand);
         $this->assertStringContainsString('logo-light.png', $brand);
         $this->assertStringContainsString('logo-dark.png', $brand);
         $this->assertStringNotContainsString('azari-logo-mask', $brand);
@@ -45,12 +45,12 @@ class CanonicalAdminAndBrandRegressionTest extends TestCase
 
     public function test_primary_brand_matches_reserva_identity(): void
     {
-        $this->assertSame('Resarva', config('app.name'));
+        $this->assertSame('Resavar', config('app.name'));
 
         $email = file_get_contents(resource_path('views/emails/premium.blade.php'));
         $this->assertStringContainsString('#0577F5', $email);
-        $this->assertStringContainsString('Resarva', $email);
-        $this->assertStringNotContainsString('Resavar', $email);
+        $this->assertStringContainsString('Resavar', $email);
+        $this->assertStringNotContainsString('Resarva', $email);
         $this->assertStringContainsString('#052058', $email);
         $this->assertStringContainsString('#F58F07', $email);
         $this->assertStringContainsString('Exceptional Stays, Everywhere.', $email);
@@ -73,9 +73,9 @@ class CanonicalAdminAndBrandRegressionTest extends TestCase
     {
         $layout = file_get_contents(resource_path('views/layouts/public.blade.php'));
 
-        $this->assertStringContainsString('Resarva | Luxury Hotels, Residences, Apartments, Rooms and Hospitality', $layout);
-        $this->assertStringContainsString('Resarva Luxury Properties Ltd', $layout);
+        $this->assertStringContainsString('Resavar: Luxury Stays, Hotels, Apartments, Rooms and Hospitality', $layout);
+        $this->assertStringContainsString('Azari Luxury Properties Limited', $layout);
         $this->assertStringNotContainsString('Azari Hotels & Residences', $layout);
-        $this->assertStringNotContainsString('Resavar', $layout);
+        $this->assertStringNotContainsString('Resarva', $layout);
     }
 }
