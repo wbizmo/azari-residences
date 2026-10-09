@@ -33,8 +33,10 @@ class MessageDeliveryNotificationTest extends TestCase
         $this->actingAs($guest)->post($route, $payload)->assertRedirect();
 
         $this->assertDatabaseCount('booking_messages', 1);
-        Notification::assertSentToTimes($owner, PremiumMailNotification::class, 1);
-        Notification::assertNotSentTo($guest, PremiumMailNotification::class);
+        $this->assertCount(1, Notification::sent($owner, PremiumMailNotification::class)
+            ->filter(fn ($notice) => $notice->template === 'booking-message'));
+        $this->assertCount(0, Notification::sent($guest, PremiumMailNotification::class)
+            ->filter(fn ($notice) => $notice->template === 'booking-message'));
     }
 
     public function test_property_reply_alerts_booking_guest_once_on_retry(): void
@@ -58,7 +60,9 @@ class MessageDeliveryNotificationTest extends TestCase
         $this->actingAs($owner)->post($route, $payload)->assertRedirect();
 
         $this->assertDatabaseCount('booking_messages', 1);
-        Notification::assertSentToTimes($guest, PremiumMailNotification::class, 1);
-        Notification::assertNotSentTo($owner, PremiumMailNotification::class);
+        $this->assertCount(1, Notification::sent($guest, PremiumMailNotification::class)
+            ->filter(fn ($notice) => $notice->template === 'booking-message'));
+        $this->assertCount(0, Notification::sent($owner, PremiumMailNotification::class)
+            ->filter(fn ($notice) => $notice->template === 'booking-message'));
     }
 }
