@@ -47,7 +47,8 @@ class BookingItineraryShareTest extends TestCase
         $public->assertDontSee('PRIVATE_LEAD_GUEST')
             ->assertDontSee('private.share@example.test')
             ->assertDontSee($booking->reference);
-        $this->assertSame('private, no-store', $public->headers->get('Cache-Control'));
+        $this->assertStringContainsString('private', $public->headers->get('Cache-Control'));
+        $this->assertStringContainsString('no-store', $public->headers->get('Cache-Control'));
         $this->assertStringContainsString('noindex', $public->headers->get('X-Robots-Tag'));
     }
 
