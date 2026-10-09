@@ -94,12 +94,34 @@ class OwnerPhaseTwoController extends Controller
     public function accept(Request $request, string $token): RedirectResponse
     {
         $hash = hash('sha256', $token);
-        $invite = DB::table('property_staff_invitations')->where('token_hash', $hash)->first();
 
-        abort_unless($invite && ! $invite->accepted_at && now()->lessThan(\Carbon\CarbonImmutable::parse($invite->expires_at)), 404);
-        abort_unless(hash_equals(mb_strtolower((string) $invite->email), mb_strtolower((string) $request->user()->email)), 403);
+        DB::transaction(function () use ($hash, $request): void {
+            // Serialize redemption: two requests must never accept one invitation twice.
+            $invite = DB::table('property_staff_invitations')
+                ->where('token_hash', $hash)
+                ->lockForUpdate()
+                ->first();
 
-        DB::transaction(function () use ($invite, $request): void {
+            abort_unless(
+                $invite && ! $invite->accepted_at
+                    && now()->lessThan(\Carbon\CarbonImmutable::parse($invite->expires_at)),
+                404
+            );
+
+            abort_unless(
+                hash_equals(mb_strtolower((string) $invite->email), mb_strtolower((string) $request->user()->email)),
+                403
+            );
+
+            // Re-check account verification and the existence of the property
+            // before granting any access, even if its state changed after the invite.
+            abort_unless($request->user()->hasVerifiedEmail(), 403);
+            abort_unless(
+                Property::query()->whereKey($invite->property_id)
+                    ->whereNotNull('owner_id')->exists(),
+                404
+            );
+
             PropertyStaffMembership::query()->updateOrCreate(
                 ['property_id' => $invite->property_id, 'user_id' => $request->user()->id],
                 [
@@ -111,11 +133,13 @@ class OwnerPhaseTwoController extends Controller
                 ]
             );
 
-            DB::table('property_staff_invitations')->where('id', $invite->id)->update([
-                'accepted_at' => now(),
-                'updated_at' => now(),
-            ]);
-        });
+            $affected = DB::table('property_staff_invitations')
+                ->where('id', $invite->id)
+                ->whereNull('accepted_at')
+                ->update(['accepted_at' => now(), 'updated_at' => now()]);
+
+            abort_unless($affected === 1, 409, 'Invitation already redeemed.');
+        }, 3);
 
         return redirect()->route('user.owner.dashboard')->with('success', 'Property staff access accepted.');
     }
