@@ -56,7 +56,8 @@ class IsolatedBackupRestoreDrillTest extends TestCase
             $this->assertSame(0, Artisan::call('resavar:restore-drill', [
                 'backupRun' => $run->getKey(),
                 '--confirm-isolated' => 'RESTORE_TO_ISOLATED_DATABASE',
-            ]));
+                '--replace-migration-seeds' => 'REPLACE_ONLY_MIGRATION_DEFAULTS',
+            ]), Artisan::output());
 
             $this->assertSame(1, DB::connection('resavar_restore')
                 ->table('users')->where('email', 'restore-canary@example.test')->count());
