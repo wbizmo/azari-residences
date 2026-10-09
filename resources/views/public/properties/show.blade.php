@@ -391,6 +391,13 @@
                                 </div>
                             @endif
 
+                            <form method="GET" action="{{ route('properties.show',$property) }}#reviews" class="reserva-review-filters">
+                                <label><span>Sort</span><select name="review_sort"><option value="recent" @selected($reviewSort==='recent')>Most recent</option><option value="helpful" @selected($reviewSort==='helpful')>Most helpful</option><option value="highest" @selected($reviewSort==='highest')>Highest rated</option><option value="lowest" @selected($reviewSort==='lowest')>Lowest rated</option></select></label>
+                                <label><span>Trip type</span><select name="review_trip_type"><option value="">All trips</option>@foreach(['business','couple','family','friends','solo','other'] as $trip)<option value="{{ $trip }}" @selected($reviewTripType===$trip)>{{ Str::headline($trip) }}</option>@endforeach</select></label>
+                                <label><span>Language</span><select name="review_locale"><option value="">All languages</option>@foreach($reviewLocales as $locale)<option value="{{ $locale }}" @selected($reviewLocale===$locale)>{{ strtoupper($locale) }}</option>@endforeach</select></label>
+                                <button class="button button-secondary" type="submit">Apply</button>
+                            </form>
+
                             <div class="reserva-review-list">
                                 @foreach($property->reviews as $review)
                                     <article class="reserva-review-card">
@@ -415,6 +422,24 @@
                                                 @if($review->owner_replied_at)<small>{{ $review->owner_replied_at->format('M Y') }}</small>@endif
                                             </div>
                                         @endif
+                                        <div class="reserva-review-actions">
+                                            <span>{{ $review->helpful_votes_count ?? 0 }} found this helpful</span>
+                                            @auth
+                                                @if((int)$review->user_id !== (int)auth()->id())
+                                                    <form method="POST" action="{{ route('reviews.helpful',$review) }}">@csrf
+                                                        <button class="button button-secondary" type="submit">{{ !empty($review->current_user_helpful) ? 'Remove helpful' : 'Helpful' }}</button>
+                                                    </form>
+                                                    <details>
+                                                        <summary>Report review</summary>
+                                                        <form method="POST" action="{{ route('reviews.report',$review) }}" class="reserva-review-report-form">@csrf
+                                                            <label><span>Reason</span><select name="reason" required><option value="abusive">Abusive content</option><option value="pii">Personal information</option><option value="retaliatory">Retaliatory content</option><option value="fake">Authenticity concern</option><option value="other">Other</option></select></label>
+                                                            <label><span>Details</span><textarea name="details" maxlength="1500" rows="3"></textarea></label>
+                                                            <button class="button button-secondary" type="submit">Send report</button>
+                                                        </form>
+                                                    </details>
+                                                @endif
+                                            @endauth
+                                        </div>
                                     </article>
                                 @endforeach
                             </div>
