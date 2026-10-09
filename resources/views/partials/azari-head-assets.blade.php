@@ -1,5 +1,7 @@
 {{-- Shared Resavar browser assets --}}
 <meta name="theme-color" content="#052058">
+<link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
+<meta name="mobile-web-app-capable" content="yes">
 
 <style>
     @font-face {
