@@ -9,7 +9,7 @@ use App\Models\BookingShareLink;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\View\View;
+use Illuminate\Http\Response;
 
 class BookingShareController extends Controller
 {
@@ -64,7 +64,7 @@ class BookingShareController extends Controller
         return back()->with('success', 'Shared itinerary link revoked.');
     }
 
-    public function show(string $token): View
+    public function show(string $token): Response
     {
         abort_unless((bool) preg_match('/^[a-f0-9]{64}$/D', $token), 404);
 
@@ -78,10 +78,12 @@ class BookingShareController extends Controller
         abort_unless($share->booking
             && in_array($share->booking->status, self::SHAREABLE_STATUSES, true), 404);
 
-        return view('public.bookings.shared-itinerary', [
+        return response()->view('public.bookings.shared-itinerary', [
             'booking' => $share->booking,
             'expiresAt' => $share->expires_at,
-        ]);
+        ])->header('Cache-Control', 'private, no-store')
+            ->header('X-Robots-Tag', 'noindex, nofollow, noarchive')
+            ->header('Referrer-Policy', 'no-referrer');
     }
 
     private function owned(Request $request, string $reference): Booking
