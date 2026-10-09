@@ -61,6 +61,8 @@ if (mapRoot) {
         mapRoot.classList.add('reserva-map-shell--geographic');
         const canvas = document.createElement('div');
         canvas.className = 'reserva-map-canvas';
+        canvas.tabIndex = 0;
+        canvas.setAttribute('aria-label', 'Map. Use arrow keys to pan, plus or minus to zoom.');
         const tiles = document.createElement('div');
         tiles.className = 'reserva-map-tiles';
         const markers = document.createElement('div');
@@ -117,23 +119,31 @@ if (mapRoot) {
             const minY = Math.max(0, Math.floor(top / 256));
             const maxY = Math.min(2 ** zoom - 1, Math.ceil((top + height) / 256));
 
-            // Replace small fixed visible tile set on pan/zoom. No prefetch.
-            const fragment = document.createDocumentFragment();
-            for (let x = minX; x <= maxX && fragment.childNodes.length < 60; x++) {
-                for (let y = minY; y <= maxY && fragment.childNodes.length < 60; y++) {
-                    const tile = document.createElement('img');
+            // Reuse loaded tiles while dragging; only fetch newly visible tiles.
+            const needed = new Set();
+            for (let x = minX; x <= maxX && needed.size < 60; x++) {
+                for (let y = minY; y <= maxY && needed.size < 60; y++) {
                     const wrappedX = ((x % (2 ** zoom)) + 2 ** zoom) % (2 ** zoom);
-                    tile.src = 'https://tile.openstreetmap.org/' + zoom + '/' + wrappedX + '/' + y + '.png';
-                    tile.alt = '';
-                    tile.loading = 'lazy';
-                    tile.decoding = 'async';
-                    tile.draggable = false;
+                    const id = zoom + ':' + x + ':' + y;
+                    needed.add(id);
+                    let tile = tiles.querySelector('[data-tile="' + id + '"]');
+                    if (!tile) {
+                        tile = document.createElement('img');
+                        tile.src = 'https://tile.openstreetmap.org/' + zoom + '/' + wrappedX + '/' + y + '.png';
+                        tile.alt = '';
+                        tile.loading = 'lazy';
+                        tile.decoding = 'async';
+                        tile.draggable = false;
+                        tile.dataset.tile = id;
+                        tiles.append(tile);
+                    }
                     tile.style.left = x * 256 - left + 'px';
                     tile.style.top = y * 256 - top + 'px';
-                    fragment.append(tile);
                 }
             }
-            tiles.replaceChildren(fragment);
+            tiles.querySelectorAll('[data-tile]').forEach(tile => {
+                if (!needed.has(tile.dataset.tile)) tile.remove();
+            });
 
             markers.replaceChildren();
             valid.forEach(point => {
@@ -183,6 +193,12 @@ if (mapRoot) {
             drag = {x: event.clientX, y: event.clientY};
         });
         canvas.addEventListener('pointerup', () => { drag = null; });
+        canvas.addEventListener('keydown', event => {
+            const movements = {ArrowLeft: [-120, 0], ArrowRight: [120, 0], ArrowUp: [0, -120], ArrowDown: [0, 120]};
+            if (movements[event.key]) { event.preventDefault(); move(...movements[event.key]); }
+            if (event.key === '+' || event.key === '=') { event.preventDefault(); zoomIn.click(); }
+            if (event.key === '-') { event.preventDefault(); zoomOut.click(); }
+        });
         canvas.addEventListener('pointercancel', () => { drag = null; });
         searchArea.addEventListener('click', () => {
             const {width, height} = resize();
