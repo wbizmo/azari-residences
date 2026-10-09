@@ -58,6 +58,11 @@ class BookingAmendmentPaymentService
                     'payment' => 'Legacy recorded payments require accounting reconciliation before amendment top-ups.',
                 ]);
             }
+            if ($provider === 'flutterwave' && strtoupper((string) $bookingRow->currency) !== 'NGN') {
+                throw ValidationException::withMessages([
+                    'provider' => 'The configured Flutterwave OPay/USSD checkout supports NGN only. Contact support for another payment method.',
+                ]);
+            }
             $offer = $changeRow->price_quote ?? [];
             $delta = round((float) ($offer['delta'] ?? 0), 2);
             if ($delta <= 0 || ! isset($offer['old_total'], $offer['new_total'])

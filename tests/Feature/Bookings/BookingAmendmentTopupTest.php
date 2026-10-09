@@ -24,9 +24,9 @@ class BookingAmendmentTopupTest extends TestCase
 
     private function fixture(): array
     {
-        $property = Property::factory()->create(['is_published' => true, 'status' => 'available']);
+        $property = Property::factory()->create(['is_published' => true, 'status' => 'available', 'currency' => 'NGN']);
         $type = $property->accommodationTypes()->firstOrFail();
-        $type->update(['total_inventory' => 1, 'base_rate' => 200, 'weekend_rate' => 200]);
+        $type->update(['total_inventory' => 1, 'base_rate' => 200, 'weekend_rate' => 200, 'currency' => 'NGN']);
         $guest = User::factory()->create();
         $staff = User::factory()->create([
             'is_admin' => true, 'staff_role' => 'administrator', 'account_type' => 'staff',
@@ -70,8 +70,8 @@ class BookingAmendmentTopupTest extends TestCase
             'webhook_secret' => 'test-webhook-secret',
             'token_url' => 'https://idp.flutterwave.test/token',
             'sandbox_base_url' => 'https://api.flutterwave.test',
-            'allowed_payment_methods' => ['card'],
-            'default_payment_method' => 'card',
+            'allowed_payment_methods' => ['opay'],
+            'default_payment_method' => 'opay',
         ] as $key => $value) {
             config()->set('azari.payments.flutterwave.'.$key, $value);
         }
