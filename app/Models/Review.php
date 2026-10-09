@@ -19,6 +19,8 @@ class Review extends Model
             'management_replied_at' => 'datetime',
             'hidden_at' => 'datetime',
             'restored_at' => 'datetime',
+            'edited_at' => 'datetime',
+            'owner_replied_at' => 'datetime',
         ];
     }
 
