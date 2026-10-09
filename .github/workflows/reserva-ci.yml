@@ -83,6 +83,13 @@ jobs:
             --exclude=.git \
             --exclude=node_modules \
             --exclude=.env \
+            --exclude='*.pdf' \
+            --exclude='*.sql' \
+            --exclude='*.pem' \
+            --exclude='*.key' \
+            --exclude='*.p12' \
+            --exclude='*credentials*' \
+            --exclude='*secrets*' \
             --exclude=database/database.sqlite \
             --exclude=storage/logs \
             -czf /tmp/reserva-local-validation.tgz .
