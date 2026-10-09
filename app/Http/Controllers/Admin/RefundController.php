@@ -9,6 +9,7 @@ use App\Services\Payments\RefundService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class RefundController extends Controller
 {
@@ -58,6 +59,25 @@ class RefundController extends Controller
             'provider_reference' => ['nullable', 'string', 'max:190'],
             'safe_error' => ['nullable', 'string', 'max:500'],
         ]);
+
+        if ($data['action'] === 'successful') {
+            // A refund request (or a staff-entered arbitrary reference) is
+            // not proof that a remote payment provider paid the customer.
+            // Webhook/provider verification must settle non-manual refunds.
+            if ($payment->provider !== 'manual') {
+                throw ValidationException::withMessages([
+                    'action' => 'This provider refund needs independently verified settlement evidence. Manual success marking is disabled.',
+                ]);
+            }
+
+            abort_unless($request->user()->isAdministrator(), 403);
+
+            if (blank($data['provider_reference'] ?? null)) {
+                throw ValidationException::withMessages([
+                    'provider_reference' => 'A verified manual refund transaction reference is required before confirming settlement.',
+                ]);
+            }
+        }
 
         $actorId = $request->user()->getKey();
 
