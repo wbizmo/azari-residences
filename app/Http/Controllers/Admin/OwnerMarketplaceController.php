@@ -143,17 +143,22 @@ class OwnerMarketplaceController extends Controller
     public function agreementDownload(PropertyListing $listing): BinaryFileResponse
     {
         $agreement = $listing->agreement;
-        $path = storage_path('app/private/agreements/'.$agreement->id.'.pdf');
+        abort_unless($agreement !== null, 404);
+        $disk = Storage::disk('private');
+        $relativePath = 'agreements/'.$agreement->id.'.pdf';
+        $path = $disk->path($relativePath);
 
-        if (! is_file($path)) {
-            Storage::disk('local')->makeDirectory('private/agreements');
+        if (! $disk->exists($relativePath)) {
+            $disk->makeDirectory('agreements');
             $options = new Options();
             $options->set('defaultFont', 'DejaVu Sans');
             $pdf = new Dompdf($options);
             $pdf->loadHtml(view('user.owner.agreement-pdf', compact('agreement'))->render());
             $pdf->setPaper('A4');
             $pdf->render();
-            file_put_contents($path, $pdf->output());
+            if (! $disk->put($relativePath, $pdf->output())) {
+                throw new \RuntimeException('Unable to store the private agreement PDF.');
+            }
         }
 
         return response()->download($path, 'owner-agreement-'.$listing->reference.'.pdf');
