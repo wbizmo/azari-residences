@@ -34,6 +34,8 @@ Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer'])->group
             Route::get('/messages/{conversation}', [OwnerBookingMessageController::class, 'show'])->name('messages.show');
             Route::post('/messages/{conversation}', [OwnerBookingMessageController::class, 'store'])
                 ->middleware('throttle:30,1')->name('messages.store');
+            Route::get('/messages/{conversation}/attachments/{message}', [OwnerBookingMessageController::class, 'attachment'])
+                ->middleware('throttle:60,1')->name('messages.attachment');
         });
 
     Route::prefix('account/bookings/{reference}')->name('user.bookings.phase2.')->group(function (): void {
