@@ -13,6 +13,7 @@ use App\Models\RoomType;
 use App\Services\Bookings\CommercialInventoryManager;
 use App\Services\Bookings\InventoryBulkUpdateService;
 use App\Services\Owners\PropertyAccessService;
+use App\Services\Owners\OwnerInventoryCalendarService;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
@@ -21,20 +22,39 @@ use Illuminate\View\View;
 
 class OwnerCommercialInventoryController extends Controller
 {
-    public function edit(Request $request, Property $property): View
-    {
+    public function edit(
+        Request $request,
+        Property $property,
+        OwnerInventoryCalendarService $calendar
+    ): View {
         $this->authorizeOwner($request, $property);
 
+        $property->load([
+            'accommodationTypes.ratePlans.cancellationPolicy',
+            'accommodationTypes.ratePlans.paymentPolicy',
+        ]);
+
+        $calendarByType = $property->accommodationTypes
+            ->mapWithKeys(fn (AccommodationType $type) => [$type->id => $calendar->snapshot($type, 30)]);
+
+        $recentCalendarChanges = InventoryChangeLog::query()
+            ->with('actor')
+            ->where('property_id', $property->id)
+            ->whereIn('accommodation_type_id', $property->accommodationTypes->pluck('id'))
+            ->latest()
+            ->limit(50)
+            ->get()
+            ->groupBy('accommodation_type_id');
+
         return view('user.owner.commercial', [
-            'property' => $property->load([
-                'accommodationTypes.ratePlans.cancellationPolicy',
-                'accommodationTypes.ratePlans.paymentPolicy',
-            ]),
+            'property' => $property,
             'roomTypes' => RoomType::query()
                 ->where('is_active', true)
                 ->orderBy('sort_order')
                 ->orderBy('name')
                 ->get(),
+            'calendarByType' => $calendarByType,
+            'recentCalendarChanges' => $recentCalendarChanges,
         ]);
     }
 
