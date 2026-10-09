@@ -209,4 +209,46 @@
     </form>
 </section>
 @endif
+
+@if(in_array($booking->status, ['cancelled', 'no_show'], true))
+<section class="az-panel">
+    <h2>Exceptional refund approval</h2>
+    <p class="opacity-70">Exceptions require a different finance administrator to review. Approval reserves a refund request; it never means the payment provider has returned funds.</p>
+    @if(auth()->user()?->hasPermission('bookings.edit'))
+    <form method="POST" action="{{ route('azari.admin.bookings.cancellation-overrides.store', $booking) }}" class="az-form-grid az-contained-form">
+        @csrf
+        <label class="az-field"><span>Additional amount ({{ $booking->currency }})</span>
+            <input type="number" name="amount" min="0.01" step="0.01" required>
+        </label>
+        <label class="az-field az-span-2"><span>Reason and provider evidence</span>
+            <textarea name="reason" minlength="10" maxlength="2000" required></textarea>
+        </label>
+        <div class="az-form-actions az-span-2"><button type="submit" class="az-button az-button--primary">Request independent review</button></div>
+    </form>
+    @endif
+
+    @forelse($booking->cancellationOverrides as $override)
+    <article class="az-s78-event">
+        <strong>{{ $override->currency }} {{ number_format((float) $override->amount, 2) }} · {{ Str::headline($override->status) }}</strong>
+        <p>Requested by {{ $override->requester?->name ?? 'Staff' }}.
+           @if($override->reviewed_at) Reviewed by {{ $override->reviewer?->name ?? 'Staff' }}. @endif
+           {{ $override->reason }}
+        </p>
+        @if($override->status === 'requested' && $override->expires_at?->isFuture()
+            && auth()->user()?->isAdministrator()
+            && auth()->user()?->hasPermission('payments.manage')
+            && (int) auth()->id() !== (int) $override->requested_by)
+        <form method="POST" action="{{ route('azari.admin.bookings.cancellation-overrides.review', [$booking, $override]) }}" class="az-form-actions">
+            @csrf
+            <button type="submit" name="decision" value="approve" class="az-button az-button--primary">Approve refund reservation</button>
+            <button type="submit" name="decision" value="decline" class="az-button az-button--secondary">Decline</button>
+        </form>
+        @endif
+    </article>
+    @empty
+        <p>No exception requests recorded.</p>
+    @endforelse
+</section>
+@endif
+
 @endsection
