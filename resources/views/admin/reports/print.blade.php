@@ -19,7 +19,7 @@ th, td { border-bottom: 1px solid #DCE5F0; padding: 7px 6px; text-align: left; v
 th { background: #052058; color: #FFFFFF; font-size: 9px; font-weight: bold; }
 tbody tr:nth-child(even) { background: #F5F8FC; }
 .empty { text-align: center; padding: 18px; color: #526581; }
-@media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+@media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } th { background: #FFFFFF; color: #052058; border-bottom: 2px solid #052058; } }
 </style>
 </head>
 <body>
