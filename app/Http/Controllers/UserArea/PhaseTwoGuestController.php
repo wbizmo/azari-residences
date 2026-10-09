@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\BookingConversation;
 use App\Models\BookingMessage;
+use App\Notifications\PremiumMailNotification;
 use App\Models\StayLifecycleEvent;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -103,6 +104,26 @@ class PhaseTwoGuestController extends Controller
         // An attempted replay may carry a different upload. Never retain it.
         if (! $created && $attachmentPath) {
             Storage::disk('private')->delete($attachmentPath);
+        }
+
+        if ($created) {
+            // The notification is queued and sent only for a new message.
+            // Keep its content generic; do not include guest PII or attachments.
+            $recipient = $booking->property?->owner;
+            if ($recipient && (int) $recipient->id !== (int) $request->user()->id) {
+                try {
+                    $recipient->notify(new PremiumMailNotification(
+                        'booking-message',
+                        'A guest sent a message about a Resavar reservation',
+                        ['A new message is waiting in your property inbox. Sign in to read it securely.'],
+                        'Open conversation',
+                        route('user.owner.phase2.messages', ['property' => $booking->property_id]),
+                        ['booking_id' => $booking->id]
+                    ));
+                } catch (\Throwable $exception) {
+                    report($exception);
+                }
+            }
         }
 
         return back()->with('success', $created ? 'Message sent.' : 'This message was already sent.');
