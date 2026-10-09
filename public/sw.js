@@ -54,31 +54,3 @@ self.addEventListener('fetch', event => {
   }));
 });
 
-self.addEventListener('push', event => {
-  let payload = {};
-  try { payload = event.data ? event.data.json() : {}; }
-  catch { payload = {body: event.data ? event.data.text() : ''}; }
-  event.waitUntil(self.registration.showNotification(
-    typeof payload.title === 'string' ? payload.title : 'Resavar',
-    {body: typeof payload.body === 'string' ? payload.body : 'There is an update to your stay.',
-      icon: '/images/resavar-logo-dark.png',
-      data: {url: safeNotificationPath(payload.url)}}
-  ));
-});
-
-function safeNotificationPath(value) {
-  if (typeof value !== 'string' || !value.startsWith('/') || value.startsWith('//') ||
-      value.includes('\\')) return '/account/bookings';
-  try {
-    const url = new URL(value, self.location.origin);
-    return url.origin === self.location.origin ? url.pathname + url.search + url.hash : '/account/bookings';
-  } catch {
-    return '/account/bookings';
-  }
-}
-
-self.addEventListener('notificationclick', event => {
-  event.notification.close();
-  const url = safeNotificationPath(event.notification.data?.url);
-  event.waitUntil(clients.openWindow(url));
-});
