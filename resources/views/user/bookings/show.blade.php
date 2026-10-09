@@ -128,6 +128,16 @@
                 <label><span>Adult count</span><input type="number" name="adult_count" min="1" max="12"></label>
                 <label><span>Child count</span><input type="number" name="child_count" min="0" max="8"></label>
                 <label class="wide"><span>Room or bed preference</span><input name="room_preference" maxlength="500"></label>
+                <label class="wide"><span>Add extras (choose from available options)</span>
+                    <span style="display:block">
+                    @foreach(\App\Models\BookingAddOn::query()->where('is_active', true)->orderBy('sort_order')->get() as $extra)
+                        <label style="display:block;margin:5px 0">
+                            <input type="checkbox" name="add_on_ids[]" value="{{ $extra->getKey() }}">
+                            {{ $extra->name }} · {{ $booking->currency }} {{ number_format((float) $extra->price,2) }}
+                        </label>
+                    @endforeach
+                    </span>
+                </label>
                 <label class="wide"><span>Reason or notes</span><textarea name="guest_note" maxlength="2000"></textarea></label>
                 <label class="wide"><span>Cancellation reason if applicable</span><input name="cancellation_reason" maxlength="500"></label>
                 <button class="az-user-button az-user-button--dark" type="submit">Submit request</button>
@@ -170,9 +180,13 @@
                         <h3>{{ Str::headline($requestItem->type) }} · {{ $requestItem->reference }}</h3>
                         <p>{{ $requestItem->guest_note ?: 'No additional note.' }}</p>
                         @if($requestItem->staff_note)<p><strong>Resavar:</strong> {{ $requestItem->staff_note }}</p>@endif
-                        @if($requestItem->status === 'quoted' && $requestItem->quote_expires_at?->isFuture() && $requestItem->type === 'date_change')
+                        @if($requestItem->status === 'quoted' && $requestItem->quote_expires_at?->isFuture() && in_array($requestItem->type, ['date_change','add_extras'], true))
                             @php($offer = $requestItem->price_quote ?? [])
-                            <p><strong>New dates:</strong> {{ $offer['new_check_in'] ?? '' }} to {{ $offer['new_check_out'] ?? '' }}</p>
+                            @if($requestItem->type === 'date_change')
+                                <p><strong>New dates:</strong> {{ $offer['new_check_in'] ?? '' }} to {{ $offer['new_check_out'] ?? '' }}</p>
+                            @else
+                                <p><strong>Additional extras:</strong> {{ implode(', ', array_column($offer['quote']['add_ons'] ?? [], 'name')) }}</p>
+                            @endif
                             <p><strong>Price:</strong> {{ $offer['currency'] ?? $booking->currency }}
                                 {{ number_format((float) ($offer['new_total'] ?? 0), 2) }}
                                 (current total {{ number_format((float) ($offer['old_total'] ?? 0), 2) }})</p>
@@ -180,12 +194,12 @@
                             @if((float) ($offer['delta'] ?? 0) <= 0)
                                 <form method="POST" action="{{ route('user.bookings.modifications.accept', [$booking->reference, $requestItem]) }}">
                                     @csrf
-                                    <button type="submit" class="az-user-button az-user-button--dark">Accept these dates and price</button>
+                                    <button type="submit" class="az-user-button az-user-button--dark">Accept amended price</button>
                                 </form>
                             @else
                                 @php($amendmentPayment = $requestItem->payment_id ? \App\Models\Payment::query()->find($requestItem->payment_id) : null)
                                 @if(! $amendmentPayment)
-                                    <p>Your original stay stays confirmed until you pay the difference and approve the new dates.</p>
+                                    <p>Your current booking remains unchanged until you pay the difference and approve the amended quotation.</p>
                                     <form method="POST" action="{{ route('user.bookings.modifications.pay', [$booking->reference, $requestItem]) }}">
                                         @csrf
                                         <button type="submit" class="az-user-button az-user-button--dark">
@@ -196,7 +210,7 @@
                                     <p>Your additional payment is verified but not yet allocated. Confirm the current available dates below.</p>
                                     <form method="POST" action="{{ route('user.bookings.modifications.accept', [$booking->reference, $requestItem]) }}">
                                         @csrf
-                                        <button type="submit" class="az-user-button az-user-button--dark">Accept and confirm new dates</button>
+                                        <button type="submit" class="az-user-button az-user-button--dark">Accept and confirm amendment</button>
                                     </form>
                                 @else
                                     <p>Your additional payment is {{ str_replace('_', ' ', $amendmentPayment->status) }}. Do not pay twice. The existing stay remains confirmed. Contact Resavar support if your payment is verified but the offer has expired.</p>
