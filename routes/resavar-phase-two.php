@@ -5,6 +5,7 @@ use App\Http\Controllers\User\OwnerCommercialInventoryController;
 use App\Http\Controllers\User\OwnerPhaseTwoController;
 use App\Http\Controllers\UserArea\PhaseTwoGuestController;
 use App\Http\Controllers\UserArea\ReviewController;
+use App\Http\Controllers\UserArea\ReviewInteractionController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer'])->group(function (): void {
@@ -49,6 +50,8 @@ Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer'])->group
     });
 
     Route::patch('/account/bookings/{booking}/review', [ReviewController::class, 'update'])->name('user.reviews.update');
+    Route::post('/reviews/{review}/helpful', [ReviewInteractionController::class, 'helpful'])->middleware('throttle:30,1')->name('reviews.helpful');
+    Route::post('/reviews/{review}/report', [ReviewInteractionController::class, 'report'])->middleware('throttle:10,10')->name('reviews.report');
 
     Route::post('/account/push-subscriptions', [PhaseTwoGuestController::class, 'subscribePush'])
         ->middleware('throttle:20,1')->name('user.push.subscribe');
