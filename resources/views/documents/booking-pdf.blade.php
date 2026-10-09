@@ -282,6 +282,91 @@
     line-height: 1.35;
 }
 
+
+/* Resavar print design: preserve the original Azari document geometry while
+   replacing flattened navy-on-navy surfaces with legible, ink-efficient tones. */
+@page { margin: 19mm 17mm 22mm; }
+body { color: #052058; font-size: 10px; line-height: 1.45; background: #FFFFFF; }
+.head { table-layout: fixed; border-bottom: 2px solid #052058; padding-bottom: 11px; }
+.head-brand { width: 52%; }
+.head-meta { width: 48%; overflow-wrap: break-word; }
+.logo { max-width: 190px; max-height: 48px; }
+.title { font-size: 19px; line-height: 1.2; letter-spacing: 1.2px; }
+.meta-line { font-size: 9px; word-wrap: break-word; }
+h2 { margin-top: 17px; margin-bottom: 5px; font-size: 12px; page-break-after: avoid; }
+.grid { margin-top: 5px; table-layout: fixed; }
+.grid td { padding: 6px 8px; border-bottom: 1px solid #DFE7F1; word-wrap: break-word; }
+.grid td:first-child { width: 39%; color: #4C5F7A; }
+.grid td:last-child { width: 61%; }
+.total td { border-top: 2px solid #052058; font-size: 14px; color: #052058; }
+.grid tr { page-break-inside: avoid; }
+.payment-status { border-color: #AEBFD5; background: #ECF2FA; color: #052058; }
+.qr-image { border-color: #D4DFED; }
+.qr-fallback { border-color: #8398B8; background: #F0F4FA; color: #052058; }
+.qr p, .foot { color: #536781; }
+.notice { border-left: 3px solid #052058; background: #EEF3FB; color: #052058; }
+.foot { bottom: -13mm; font-size: 8px; }
+.verification-panel {
+    width: 100%;
+    margin-top: 17px;
+    border: 1px solid #CED9E8;
+    background: #F4F7FC;
+    table-layout: fixed;
+    page-break-inside: avoid;
+}
+.verification-copy {
+    width: 64%;
+    padding: 13px 15px;
+    border-right: 1px solid #D9E3EF;
+    background: #F4F7FC;
+    word-wrap: break-word;
+}
+.verification-eyebrow { color: #385B91; }
+.verification-title { color: #052058; font-size: 13px; }
+.verification-note { color: #354E70; font-size: 9px; line-height: 1.5; }
+.verification-reference {
+    border-color: #B8C9DF;
+    background: #FFFFFF;
+    color: #052058;
+    font-size: 8px;
+    letter-spacing: 0;
+    word-wrap: break-word;
+}
+.verification-security { color: #445B7A; font-size: 7.8px; }
+.verification-url { color: #536781; word-wrap: break-word; }
+.verification-qr-cell {
+    width: 36%;
+    padding: 8px 7px;
+    background: #FFFFFF;
+    text-align: center;
+    vertical-align: middle;
+}
+.verification-qr-card {
+    display: inline-block;
+    width: 124px;
+    padding: 6px;
+    margin: 0 auto;
+    border: 1px solid #CED9E8;
+    background: #FFFFFF;
+}
+.verification-qr-card .qr-image {
+    width: 110px;
+    height: 110px;
+    padding: 0;
+    border: 0;
+    background: #FFFFFF;
+}
+.verification-qr-card .qr-fallback {
+    width: 110px;
+    min-height: 85px;
+    padding: 9px 4px;
+    background: #F0F4FA;
+    border: 1px dashed #8398B8;
+    color: #052058;
+}
+.verification-scan-label { color: #052058; }
+.verification-scan-help { color: #536781; }
+
 </style>
 
 </head>
@@ -388,12 +473,12 @@
     @endif
 
     <tr>
-        <td>Stay</td>
+        <td>Property</td>
         <td>{{ $booking->property?->name ?: 'Not assigned' }}</td>
     </tr>
 
     <tr>
-        <td>Stay</td>
+        <td>Dates of stay</td>
         <td>
             {{ $booking->check_in?->format('j F Y') ?: 'Not available' }}
             –
