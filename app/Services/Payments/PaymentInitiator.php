@@ -48,6 +48,7 @@ class PaymentInitiator
             $active = Payment::query()
                 ->where('booking_id', $lockedBooking->id)
                 ->whereIn('status', ['initiated', 'pending'])
+                ->where('payment_kind', '!=', 'amendment')
                 ->where('initiated_at', '>=', now()->subMinutes(30))
                 ->latest('initiated_at')
                 ->first();
@@ -79,6 +80,7 @@ class PaymentInitiator
             Payment::query()
                 ->where('booking_id', $lockedBooking->id)
                 ->whereIn('status', ['initiated', 'pending'])
+                ->where('payment_kind', '!=', 'amendment')
                 ->where('initiated_at', '<', now()->subMinutes(30))
                 ->update(['status' => 'abandoned', 'abandoned_at' => now()]);
 

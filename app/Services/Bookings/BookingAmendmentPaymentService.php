@@ -50,6 +50,14 @@ class BookingAmendmentPaymentService
                     'change' => 'Date-change offer has expired or is no longer eligible for payment.',
                 ]);
             }
+            // A legacy receipt-only stay has no reliable payment ledger to
+            // which an incremental verified charge can be safely added.
+            if ($bookingRow->hasLegacyPaidRecord()
+                && ! $bookingRow->payments()->where('status', Payment::SUCCESSFUL)->exists()) {
+                throw ValidationException::withMessages([
+                    'payment' => 'Legacy recorded payments require accounting reconciliation before amendment top-ups.',
+                ]);
+            }
             $offer = $changeRow->price_quote ?? [];
             $delta = round((float) ($offer['delta'] ?? 0), 2);
             if ($delta <= 0 || ! isset($offer['old_total'], $offer['new_total'])
