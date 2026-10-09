@@ -214,13 +214,25 @@ class RefundService
         }, 5);
     }
 
-    public function markFailed(Refund $refund, string $safeError, ?int $actorId = null): Refund
+    public function markFailed(Refund $refund, string $safeError, ?int $actorId = null, bool $providerVerified = false): Refund
     {
-        return DB::transaction(function () use ($refund, $safeError, $actorId): Refund {
+        return DB::transaction(function () use ($refund, $safeError, $actorId, $providerVerified): Refund {
             $locked = $this->lockRefund($refund);
 
             if ($locked->status === 'successful') {
                 return $locked;
+            }
+
+            // Once a remote refund may have been dispatched, manually
+            // calling it failed can release money while the provider is
+            // still processing it. Only independently verified failure
+            // from the provider is permitted to release that reservation.
+            if (strtolower((string) $locked->provider) !== 'manual'
+                && in_array($locked->status, ['processing', 'reconciliation_required'], true)
+                && ! $providerVerified) {
+                throw ValidationException::withMessages([
+                    'refund' => 'A provider-verified failure is required before releasing this pending refund.',
+                ]);
             }
 
             $locked->update([

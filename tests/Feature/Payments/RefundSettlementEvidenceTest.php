@@ -57,6 +57,11 @@ class RefundSettlementEvidenceTest extends TestCase
                 'action' => 'successful',
                 'provider_reference' => 'unverified-operator-supplied-id',
             ])->assertSessionHasErrors('action');
+        $this->actingAs($staff)
+            ->patch(route('azari.admin.payments.refunds.update', [$payment, $refund]), [
+                'action' => 'processing',
+                'provider_reference' => 'unverified-operator-supplied-id',
+            ])->assertSessionHasErrors('action');
         $this->assertSame('requested', $refund->fresh()->status);
     }
 }

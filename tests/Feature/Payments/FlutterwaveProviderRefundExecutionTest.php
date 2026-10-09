@@ -126,6 +126,24 @@ class FlutterwaveProviderRefundExecutionTest extends TestCase
         $this->assertSame(40.0, (float) $refund->payment->fresh()->refunded_amount);
     }
 
+    public function test_staff_cannot_release_a_dispatched_refund_without_verified_provider_failure(): void
+    {
+        $this->fakeGateway(status: 'failed');
+        $service = app(ProviderRefundExecutionService::class);
+        $refund = $service->dispatch($this->refund());
+
+        try {
+            app(RefundService::class)->markFailed($refund, 'Staff believes the refund failed.');
+            $this->fail('A submitted remote refund cannot be released on staff judgment alone.');
+        } catch (ValidationException $exception) {
+            $this->assertArrayHasKey('refund', $exception->errors());
+        }
+
+        $this->assertSame('processing', $refund->fresh()->status);
+        $this->assertSame('failed', $service->reconcile($refund)->status);
+        $this->assertSame(0.0, (float) $refund->payment->fresh()->refunded_amount);
+    }
+
     public function test_pending_provider_status_keeps_money_unsettled(): void
     {
         $this->fakeGateway(status: 'pending');
