@@ -1,0 +1,81 @@
+/*
+ * Resavar switch controls.
+ *
+ * Render precisely one visual control per checkbox. The input itself is the
+ * switch for ordinary labels; existing authored tracks stay in charge for
+ * CMS/publication controls. Never append a second track with JavaScript.
+ */
+:root {
+    --resavar-switch-navy: #052058;
+    --resavar-switch-white: #FFFFFF;
+}
+
+/* Plain checkboxes already have the switch shape in the legacy base CSS. */
+input[type="checkbox"]:not([data-az-switch-ready="true"]):not([data-az-toggle-ready="true"]) {
+    border-color: var(--resavar-switch-navy);
+    background-color: var(--resavar-switch-white);
+    background-image: radial-gradient(circle at 13px 50%, var(--resavar-switch-navy) 0 9px, transparent 10px);
+    box-shadow: none;
+}
+input[type="checkbox"]:not([data-az-switch-ready="true"]):not([data-az-toggle-ready="true"]):checked {
+    border-color: var(--resavar-switch-navy);
+    background-color: var(--resavar-switch-navy);
+    background-image: radial-gradient(circle at 34px 50%, var(--resavar-switch-white) 0 9px, transparent 10px);
+}
+input[type="checkbox"]:focus-visible {
+    outline: 2px solid var(--resavar-switch-navy);
+    outline-offset: 3px;
+}
+
+/* Keep ordinary checkbox captions beside the control across all account areas. */
+label:has(> input[type="checkbox"]):not(.az-toggle):not(.az-promotion-switch__control):not(.az-switch) {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Authored switches contain their own track. Hide ONLY the real input visually. */
+.az-toggle > input[type="checkbox"],
+.az-promotion-switch__control > input[type="checkbox"] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+    opacity: 0;
+    clip-path: inset(50%);
+}
+.az-toggle > .az-toggle-track {
+    border: 1px solid var(--resavar-switch-navy);
+    background: var(--resavar-switch-white);
+}
+.az-toggle > .az-toggle-track::after {
+    top: 2px;
+    left: 2px;
+    background: var(--resavar-switch-navy);
+}
+.az-toggle > input[type="checkbox"]:checked + .az-toggle-track {
+    background: var(--resavar-switch-navy);
+}
+.az-toggle > input[type="checkbox"]:checked + .az-toggle-track::after {
+    background: var(--resavar-switch-white);
+}
+.az-toggle > input[type="checkbox"]:focus-visible + .az-toggle-track,
+.az-promotion-switch__control > input[type="checkbox"]:focus-visible + .az-promotion-switch__track {
+    outline: 2px solid var(--resavar-switch-navy);
+    outline-offset: 3px;
+}
+
+/* Compatibility for any older page that already renders the az-switch track. */
+.az-switch__track {
+    border-color: var(--resavar-switch-navy);
+    background: var(--resavar-switch-white);
+}
+.az-switch__thumb {
+    background: var(--resavar-switch-navy);
+}
+.az-switch > input[type="checkbox"]:checked + .az-switch__track {
+    background: var(--resavar-switch-navy);
+}
+.az-switch > input[type="checkbox"]:checked + .az-switch__track .az-switch__thumb {
+    background: var(--resavar-switch-white);
+}
