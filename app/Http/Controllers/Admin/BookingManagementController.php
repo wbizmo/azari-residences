@@ -128,6 +128,13 @@ class BookingManagementController extends Controller
         return back()->with('success', 'Booking change request reviewed.');
     }
 
+    public function cancellationQuote(Booking $booking): \Illuminate\Http\JsonResponse
+    {
+        abort_unless(auth()->user()?->hasPermission('bookings.view'), 403);
+
+        return response()->json(app(\App\Services\Bookings\BookingCancellationQuoteService::class)->quote($booking));
+    }
+
     public function receipt(Booking $booking): Response
     {
         $booking->load(['property', 'payments']);
