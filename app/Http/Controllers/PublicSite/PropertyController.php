@@ -5,6 +5,7 @@ namespace App\Http\Controllers\PublicSite;
 use App\Http\Controllers\Controller;
 use App\Models\Property;
 use App\Models\RecentlyViewedProperty;
+use App\Models\Review;
 use App\Services\Analytics\AnalyticsTracker;
 use App\Services\Bookings\AzariAvailabilityEngine;
 use App\Services\Bookings\AzariPricingEngine;
@@ -26,6 +27,16 @@ class PropertyController extends Controller
     ): View {
         abort_unless($property->is_published, 404);
 
+        $reviewSort = in_array($request->query('review_sort'), ['recent', 'helpful', 'highest', 'lowest'], true)
+            ? $request->query('review_sort')
+            : 'recent';
+        $reviewTripType = in_array($request->query('review_trip_type'), ['business', 'couple', 'family', 'friends', 'solo', 'other'], true)
+            ? $request->query('review_trip_type')
+            : null;
+        $reviewLocale = preg_match('/^[A-Za-z]{2,3}(?:[-_][A-Za-z]{2,4})?$/', (string) $request->query('review_locale'))
+            ? mb_substr((string) $request->query('review_locale'), 0, 16)
+            : null;
+
         $property->load([
             'amenities',
             'locationRecord',
@@ -33,7 +44,16 @@ class PropertyController extends Controller
             'pointsOfInterest',
             'reviews' => fn ($query) => $query
                 ->with(['user', 'managementReplyBy'])
-                ->latest()
+                ->withCount('helpfulVotes')
+                ->when($request->user(), fn ($reviewQuery) => $reviewQuery->withExists([
+                    'helpfulVotes as current_user_helpful' => fn ($votes) => $votes->where('user_id', $request->user()->id),
+                ]))
+                ->when($reviewTripType, fn ($reviewQuery) => $reviewQuery->where('trip_type', $reviewTripType))
+                ->when($reviewLocale, fn ($reviewQuery) => $reviewQuery->where('locale', $reviewLocale))
+                ->when($reviewSort === 'helpful', fn ($reviewQuery) => $reviewQuery->orderByDesc('helpful_votes_count')->latest())
+                ->when($reviewSort === 'highest', fn ($reviewQuery) => $reviewQuery->orderByDesc('rating')->latest())
+                ->when($reviewSort === 'lowest', fn ($reviewQuery) => $reviewQuery->orderBy('rating')->latest())
+                ->when($reviewSort === 'recent', fn ($reviewQuery) => $reviewQuery->latest())
                 ->limit(12),
             'publicAccommodationTypes.ratePlans' => fn ($query) => $query
                 ->where('is_active', true)
@@ -166,6 +186,17 @@ class PropertyController extends Controller
             'rateOptions' => $rateOptions,
             'searchState' => $searchState,
             'hasStayDates' => $hasStayDates,
+            'reviewSort' => $reviewSort,
+            'reviewTripType' => $reviewTripType,
+            'reviewLocale' => $reviewLocale,
+            'reviewLocales' => Review::query()
+                ->where('property_id', $property->id)
+                ->where('verified_stay', true)
+                ->where('status', 'approved')
+                ->whereNotNull('locale')
+                ->distinct()
+                ->orderBy('locale')
+                ->pluck('locale'),
         ]);
     }
 }
