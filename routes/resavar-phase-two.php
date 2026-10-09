@@ -28,6 +28,9 @@ Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer'])->group
             Route::post('/commercial/{accommodationType}/calendar/preview', [OwnerCommercialInventoryController::class, 'previewBulkUpdate'])->name('calendar.preview');
             Route::post('/commercial/calendar-changes/{log}/undo', [OwnerCommercialInventoryController::class, 'undoBulkUpdate'])->name('calendar.undo');
 
+            Route::post('/bookings/{booking}/room-ready', [OwnerPhaseTwoController::class, 'markRoomReady'])->name('room-ready');
+            Route::delete('/bookings/{booking}/room-ready', [OwnerPhaseTwoController::class, 'revokeRoomReady'])->name('room-ready.revoke');
+
             Route::get('/reviews', [OwnerPhaseTwoController::class, 'reviews'])->name('reviews');
             Route::post('/reviews/{review}/reply', [OwnerPhaseTwoController::class, 'replyReview'])->name('reviews.reply');
 
