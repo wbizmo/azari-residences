@@ -114,6 +114,18 @@ class FlutterwaveProviderRefundExecutionTest extends TestCase
         $this->assertSame('processing', $refund->fresh()->status);
     }
 
+    public function test_scheduled_reconciliation_verifies_and_settles_pending_provider_refund(): void
+    {
+        $this->fakeGateway();
+        $refund = app(ProviderRefundExecutionService::class)->dispatch($this->refund());
+
+        $this->assertSame(0, \Illuminate\Support\Facades\Artisan::call(
+            'resavar:reconcile-provider-refunds', ['--limit' => 10]
+        ));
+        $this->assertSame('successful', $refund->fresh()->status);
+        $this->assertSame(40.0, (float) $refund->payment->fresh()->refunded_amount);
+    }
+
     public function test_pending_provider_status_keeps_money_unsettled(): void
     {
         $this->fakeGateway(status: 'pending');
