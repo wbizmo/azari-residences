@@ -5,7 +5,7 @@
 <title>Resavar Property Listing Agreement</title>
 <style>
 @page { size: A4 portrait; margin: 20mm 18mm 23mm; }
-body { font-family: DejaVu Sans, sans-serif; color: #052058; font-size: 11px; line-height: 1.65; }
+body { font-family: DejaVu Sans, sans-serif; color: #052058; background: #FFFFFF; font-size: 11px; line-height: 1.65; }
 .header { border-bottom: 2px solid #052058; padding-bottom: 16px; margin-bottom: 23px; }
 .brand { color: #052058; font-size: 19px; font-weight: bold; letter-spacing: 1px; margin: 0; }
 .tagline { margin: 3px 0 0; color: #526581; font-size: 10px; }
