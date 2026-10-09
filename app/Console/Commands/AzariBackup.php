@@ -94,8 +94,8 @@ class AzariBackup extends Command
 
             $run->forceFill([
                 'path' => $path,
-                'status' => 'verified', 'size_bytes' => filesize($absolute),
-                'checksum' => $checksum, 'finished_at' => now(), 'verified_at' => now(),
+                'status' => 'completed', 'size_bytes' => filesize($absolute),
+                'checksum' => $checksum, 'finished_at' => now(), 'verified_at' => null,
                 'metadata' => [
                     'format' => 'resavar.encrypted.ndjson.v2',
                     'encrypted' => true, 'tables' => count($tables),
@@ -109,12 +109,15 @@ class AzariBackup extends Command
                     $run->update(['status' => 'verification_failed', 'verified_at' => null]);
                     return self::FAILURE;
                 }
+                $run->update(['status' => 'verified', 'verified_at' => now()]);
             }
 
             AuditLog::record('backup.created', $run, [], [
                 'format' => 'resavar.encrypted.ndjson.v2', 'tables' => count($tables),
             ]);
-            $this->info('Encrypted backup verified in private storage.');
+            $this->info($this->option('verify')
+                ? 'Encrypted backup structurally verified in private storage.'
+                : 'Encrypted backup created in private storage; structural verification is still required.');
             return self::SUCCESS;
         } catch (\Throwable $exception) {
             if (is_resource($stream)) {
