@@ -182,12 +182,12 @@
                                 Offer amended price
                             </button>
                         @endif
-                        @if(in_array($requestItem->type, ['contact_details', 'arrival_time'], true))
+                        @if(in_array($requestItem->type, ['contact_details', 'arrival_time', 'guest_change'], true))
                             <button type="submit" name="decision" value="approve" class="az-button az-button--primary">Approve and apply</button>
                         @endif
                         <button type="submit" name="decision" value="decline" class="az-button az-button--secondary">Decline request</button>
                     </div>
-                    @unless(in_array($requestItem->type, ['contact_details', 'arrival_time'], true))
+                    @unless(in_array($requestItem->type, ['contact_details', 'arrival_time', 'guest_change'], true))
                         <p>Inventory-changing or financial modifications require a separate repricing and confirmation workflow; they cannot be applied from this panel.</p>
                     @endunless
                 </form>

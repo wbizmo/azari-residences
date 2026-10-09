@@ -122,8 +122,13 @@ class BookingManagementController extends Controller
             'staff_note' => ['nullable', 'string', 'max:2000'],
         ]);
 
-        $service->review($booking, $modification, $request->user(),
-            $data['decision'], $data['staff_note'] ?? null);
+        if ($data['decision'] === 'approve' && $modification->type === 'guest_change') {
+            app(\App\Services\Bookings\BookingGuestCountAmendmentService::class)
+                ->approve($booking, $modification, $request->user(), $data['staff_note'] ?? null);
+        } else {
+            $service->review($booking, $modification, $request->user(),
+                $data['decision'], $data['staff_note'] ?? null);
+        }
 
         return back()->with('success', 'Booking change request reviewed.');
     }

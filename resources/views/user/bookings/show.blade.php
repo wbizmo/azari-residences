@@ -127,6 +127,16 @@
                 <label><span>Arrival time</span><input type="time" name="arrival_time"></label>
                 <label><span>Adult count</span><input type="number" name="adult_count" min="1" max="12"></label>
                 <label><span>Child count</span><input type="number" name="child_count" min="0" max="8"></label>
+                <label class="wide"><span>New additional adult guest</span>
+                    <input name="new_adults[0][first_name]" placeholder="First name" maxlength="80">
+                    <input name="new_adults[0][last_name]" placeholder="Last name" maxlength="80">
+                    <input type="email" name="new_adults[0][email]" placeholder="Guest email for identity verification" maxlength="190">
+                </label>
+                <label class="wide"><span>New additional child</span>
+                    <input name="new_children[0][first_name]" placeholder="Child first name" maxlength="80">
+                    <input name="new_children[0][last_name]" placeholder="Child last name" maxlength="80">
+                </label>
+                <p class="wide">If adding more than one guest, please contact support to provide all individual names and adult verification email addresses.</p>
                 <label class="wide"><span>Room or bed preference</span><input name="room_preference" maxlength="500"></label>
                 <label class="wide"><span>Add extras (choose from available options)</span>
                     <span style="display:block">
