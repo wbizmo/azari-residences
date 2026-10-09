@@ -51,4 +51,6 @@ Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer'])->group
     });
 
     Route::patch('/account/bookings/{booking}/review', [ReviewController::class, 'update'])->name('user.reviews.update');
+    Route::post('/account/bookings/{booking}/review/appeal', [ReviewController::class, 'appeal'])
+        ->middleware('throttle:3,60')->name('user.reviews.appeal');
 });
