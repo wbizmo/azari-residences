@@ -350,10 +350,14 @@
                         <div
                             class="reserva-map-shell"
                             data-reserva-results-map
+                            data-map-endpoint="{{ route('availability.map-points') }}"
+                            data-map-page="{{ $results->currentPage() }}"
+                            data-map-pages="{{ $results->lastPage() }}"
                             role="region"
                             aria-label="Interactive geographic map of the current result page"
                         ></div>
-                        <p class="az-user-panel-subtitle">Pins show known property coordinates for this result page. Pan to explore, zoom with the controls and select Search this area to update results. Map tiles are provided by OpenStreetMap; the list remains available without the map.</p>
+                        <p class="az-user-panel-subtitle" data-map-status role="status">Pins initially show the current result page. Load more pages to see other quoted stays. Pan, zoom, or select Search this area to update filters. The accessible list remains available.</p>
+                        <button type="button" class="button button-secondary" data-map-load-more @if($results->lastPage() <= 1) hidden @endif>Load more matching stays on map</button>
                     </section>
                 </div>
             </div>
