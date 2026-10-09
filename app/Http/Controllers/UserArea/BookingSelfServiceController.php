@@ -62,6 +62,7 @@ class BookingSelfServiceController extends Controller
 
         $data = $request->validate([
             'type' => ['required', 'string', 'max:40'],
+            'accommodation_type_id' => ['nullable', 'integer', 'min:1'],
             'guest_note' => ['nullable', 'string', 'max:2000'],
             'check_in' => ['nullable', 'date', 'after_or_equal:today'],
             'check_out' => ['nullable', 'date', 'after:check_in'],

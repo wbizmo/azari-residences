@@ -137,6 +137,16 @@
                     <input name="new_children[0][last_name]" placeholder="Child last name" maxlength="80">
                 </label>
                 <p class="wide">If adding more than one guest, please contact support to provide all individual names and adult verification email addresses.</p>
+                <label class="wide"><span>Request another accommodation type</span>
+                    <select name="accommodation_type_id">
+                        <option value="">Select room type if requesting a room change</option>
+                        @foreach($booking->property->accommodationTypes()->where('is_active', true)->where('is_published', true)->orderBy('sort_order')->get() as $type)
+                            @if((int) $type->getKey() !== (int) $booking->accommodation_type_id)
+                                <option value="{{ $type->getKey() }}">{{ $type->name }} · {{ $type->currency }} {{ number_format((float) $type->base_rate, 2) }} base rate</option>
+                            @endif
+                        @endforeach
+                    </select>
+                </label>
                 <label class="wide"><span>Room or bed preference</span><input name="room_preference" maxlength="500"></label>
                 <label class="wide"><span>Add extras (choose from available options)</span>
                     <span style="display:block">
@@ -190,10 +200,13 @@
                         <h3>{{ Str::headline($requestItem->type) }} · {{ $requestItem->reference }}</h3>
                         <p>{{ $requestItem->guest_note ?: 'No additional note.' }}</p>
                         @if($requestItem->staff_note)<p><strong>Resavar:</strong> {{ $requestItem->staff_note }}</p>@endif
-                        @if($requestItem->status === 'quoted' && $requestItem->quote_expires_at?->isFuture() && in_array($requestItem->type, ['date_change','add_extras'], true))
+                        @if($requestItem->status === 'quoted' && $requestItem->quote_expires_at?->isFuture() && in_array($requestItem->type, ['date_change','add_extras','room_change'], true))
                             @php($offer = $requestItem->price_quote ?? [])
                             @if($requestItem->type === 'date_change')
                                 <p><strong>New dates:</strong> {{ $offer['new_check_in'] ?? '' }} to {{ $offer['new_check_out'] ?? '' }}</p>
+                            @elseif($requestItem->type === 'room_change')
+                                <p><strong>New accommodation:</strong> {{ $offer['quote']['accommodation_type_name'] ?? 'Room change' }}</p>
+                                <p>Rate plan: {{ $offer['quote']['rate_plan_name'] ?? 'Standard' }} · Policy: {{ $offer['quote']['policy']['cancellation']['name'] ?? 'Property conditions' }}</p>
                             @else
                                 <p><strong>Additional extras:</strong> {{ implode(', ', array_column($offer['quote']['add_ons'] ?? [], 'name')) }}</p>
                             @endif
