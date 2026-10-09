@@ -36,6 +36,6 @@ class ArrivalLifecycleGuardTest extends TestCase
         $this->actingAs($guest)
             ->patch(route('user.bookings.phase2.arrival.update', $booking->reference), [
                 'arrival_notes' => 'Unauthorized change',
-            ])->assertNotFound();
+            ])->assertForbidden();
     }
 }
