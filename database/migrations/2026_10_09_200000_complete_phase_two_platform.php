@@ -149,8 +149,13 @@ return new class extends Migration
             }
         });
         Schema::table('inventory_change_logs', function (Blueprint $table): void {
-            foreach (['before_snapshot', 'reverted_at', 'reverted_by'] as $column) {
-                if (Schema::hasColumn('inventory_change_logs', $column)) $table->dropColumn($column);
+            if (Schema::hasColumn('inventory_change_logs', 'reverted_by')) {
+                $table->dropConstrainedForeignId('reverted_by');
+            }
+            foreach (['before_snapshot', 'reverted_at'] as $column) {
+                if (Schema::hasColumn('inventory_change_logs', $column)) {
+                    $table->dropColumn($column);
+                }
             }
         });
         Schema::table('support_tickets', function (Blueprint $table): void {
