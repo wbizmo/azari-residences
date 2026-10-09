@@ -207,6 +207,67 @@ final class FlutterwaveService implements PaymentProvider
         ];
     }
 
+    /**
+     * Flutterwave v4: creating a refund is not evidence of settlement.
+     * Use the original verified charge id, the stable local refund reference
+     * for the X-Idempotency-Key, and later GET /refunds/{id}.
+     */
+    public function createRefund(string $chargeId, float $amount, string $refundReference): array
+    {
+        $this->assertConfigured();
+        if ($chargeId === '' || $refundReference === '' || $amount <= 0) {
+            throw new PaymentProviderException('Verified charge, refund reference and positive amount are required.', $this->name());
+        }
+
+        $response = $this->postAuthorized(
+            (string) config('azari.payments.flutterwave.refund_path', '/refunds'),
+            [
+                'charge_id' => $chargeId,
+                'amount' => round($amount, 2),
+                'reason' => 'requested_by_customer',
+                'meta' => ['resavar_refund_reference' => $refundReference],
+            ],
+            $this->requestId('refund-create-trace', $refundReference),
+            $this->requestId('refund-create', $refundReference),
+        );
+        $this->ensureSuccessful($response, 'Flutterwave could not accept the refund request.');
+        $data = (array) $response->json('data', []);
+        $id = trim((string) ($data['id'] ?? ''));
+        if ($id === '' || (string) ($data['charge_id'] ?? '') !== $chargeId
+            || abs((float) ($data['amount_refunded'] ?? 0) - $amount) > 0.009) {
+            throw new PaymentProviderException('Flutterwave refund response did not match the source charge or amount.', $this->name());
+        }
+
+        return [
+            'refund_id' => $id,
+            'charge_id' => $chargeId,
+            'amount' => (float) $data['amount_refunded'],
+            'status' => strtolower((string) ($data['status'] ?? 'pending')),
+        ];
+    }
+
+    public function retrieveRefund(string $refundId): array
+    {
+        $this->assertConfigured();
+        if ($refundId === '' || strlen($refundId) > 190) {
+            throw new PaymentProviderException('A valid provider refund reference is required.', $this->name());
+        }
+        $path = rtrim((string) config('azari.payments.flutterwave.refund_path', '/refunds'), '/')
+            .'/'.rawurlencode($refundId);
+        $response = $this->getAuthorized($path, [], $this->requestId('refund-verify', $refundId));
+        $this->ensureSuccessful($response, 'Unable to verify Flutterwave refund status.');
+        $data = (array) $response->json('data', []);
+        if ((string) ($data['id'] ?? '') !== $refundId) {
+            throw new PaymentProviderException('Flutterwave refund ID verification failed.', $this->name());
+        }
+        return [
+            'refund_id' => $refundId,
+            'charge_id' => (string) ($data['charge_id'] ?? ''),
+            'amount' => (float) ($data['amount_refunded'] ?? 0),
+            'status' => strtolower((string) ($data['status'] ?? 'unknown')),
+        ];
+    }
+
     public function webhookSignatureIsValid(string $rawPayload, array $headers): bool
     {
         $secret = (string) config('azari.payments.flutterwave.webhook_secret');
