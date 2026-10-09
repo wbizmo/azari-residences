@@ -122,9 +122,9 @@
                     <strong>Nearby dates with availability</strong>
                     <div class="reserva-result-badges">
                         @foreach($alternatives as $alternative)
-                            <a class="button button-secondary" href="{{ route('availability.results', [...$queryWithoutPage, 'check_in'=>$alternative['check_in'], 'check_out'=>$alternative['check_out']]) }}">
+                            <a class="button button-secondary" href="{{ route('availability.results', [...collect($queryWithoutPage)->except('flex_days')->all(), 'check_in'=>$alternative['check_in'], 'check_out'=>$alternative['check_out']]) }}">
                                 {{ Carbon\CarbonImmutable::parse($alternative['check_in'])->format('j M') }}–{{ Carbon\CarbonImmutable::parse($alternative['check_out'])->format('j M') }}
-                                @if($alternative['from_total'] !== null) · from {{ $alternative['currency'] }} {{ number_format((float)$alternative['from_total'],2) }} @endif
+                                @if($alternative['example_total'] !== null) · example total {{ $alternative['currency'] }} {{ number_format((float)$alternative['from_total'],2) }} @endif
                             </a>
                         @endforeach
                     </div>
