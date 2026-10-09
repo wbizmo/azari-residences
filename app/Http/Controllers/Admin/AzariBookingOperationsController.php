@@ -28,6 +28,11 @@ class AzariBookingOperationsController extends Controller {
 
     public function transition(Request $r, Booking $booking, AzariBookingLifecycle $l) {
         $d=$r->validate(['status'=>['required','string'],'note'=>['nullable','string','max:2000']]);
+        if ($d['status'] === 'cancelled') {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'status' => 'Cancel bookings through the dedicated audited cancellation workflow.',
+            ]);
+        }
         $l->transition($booking,$d['status'],$r->user()?->getKey(),$d['note']??null);
         return back()->with('success','Booking status updated.');
     }
