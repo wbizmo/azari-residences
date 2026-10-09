@@ -210,7 +210,24 @@
 </section>
 @endif
 
-@if(in_array($booking->status, ['cancelled', 'no_show'], true))
+@if(in_array($booking->status, ['checked_in', 'check_in'], true) && $booking->checked_in_at)
+<section class="az-panel">
+    <h2>Early departure</h2>
+    <p>An early departure ends occupancy and makes future nights available. It does not automatically alter the original contract, fees or provider refund status. Any refund needs a separate, independently approved exception.</p>
+    <form method="POST" action="{{ route('azari.admin.bookings.early-departure', $booking) }}" class="az-form-grid az-contained-form">
+        @csrf
+        <label class="az-field az-span-2">
+            <span>Departure reason and supporting evidence</span>
+            <textarea name="reason" minlength="10" maxlength="2000" required></textarea>
+        </label>
+        <div class="az-form-actions az-span-2">
+            <button type="submit" class="az-button az-button--primary">Record early departure</button>
+        </div>
+    </form>
+</section>
+@endif
+
+@if(in_array($booking->status, ['cancelled', 'no_show'], true) || ($earlyDepartureRecorded ?? false))
 <section class="az-panel">
     <h2>Exceptional refund approval</h2>
     <p class="opacity-70">Exceptions require a different finance administrator to review. Approval reserves a refund request; it never means the payment provider has returned funds.</p>

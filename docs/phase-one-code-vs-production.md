@@ -66,3 +66,12 @@ Both scripts require `APP_ENV=testing` and a separately named disposable databas
 2. **Synthetic capacity data:** with a freshly migrated disposable DB, set `RESAVAR_ALLOW_SYNTHETIC_SEED=I_ACCEPT_DISPOSABLE_DB`, `RESAVAR_SYNTH_LISTINGS` (1–100000), `RESAVAR_SYNTH_BOOKINGS` (0–1000000) and `RESAVAR_SYNTH_DAYS` (7, 30 or 365). Run `php tests/local/phase1-synthetic-capacity.php`. It inserts batch-capped nightly inventory and historical completed bookings, with no remote provider calls. The 100k × 365 case can exceed storage resources; operators must assess disk/DB capacity first. Then benchmark `php artisan resavar:benchmark-inventory TYPE_ID --runs=20 --json` and attach actual explain plans and measured p50/p95/p99 to #123.
 
 Neither script is invoked by GitHub Actions. They are for local or isolated development testing only; external production/staging, provider settlement and offsite restore evidence remains with the operator under #123.
+
+
+## Early departure after check-in
+
+Staff with `bookings.edit` can record a confirmed, **occupied** early departure after at least one property-local completed night and before the originally booked check-out day. The endpoint additionally requires recent password confirmation and a documented reason. The booking transitions to `checked_out`, releasing future sellability under canonical inventory status rules, with a full status-history and audit event.
+
+The **original check-out date, pricing snapshot, fee/tax and policy snapshot remain immutable** so that invoices and dispute records retain contractual truth. An informational unused-night subtotal from the booked line items is recorded, but it is **not** treated as automatic refund entitlement because promotions, fees, taxes, prepaid deposit policy and nonrefundable terms differ. An exception can be requested for an *audited* early departure only, reviewed by a different finance administrator, and reserved through `RefundService` without assuming provider settlement. Missing external refund evidence always fails closed pending reconciliation.
+
+Local regression: `php artisan test --filter=BookingEarlyDepartureSafetyTest`. Operator acceptance: confirm property-local departure boundaries and manual policy review with real gateway/refund evidence; record under #123. No automatic partial-stay refund happens when policy is unknown.

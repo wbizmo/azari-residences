@@ -173,15 +173,28 @@ class BookingCancellationOverrideService
 
     private function assertTerminal(Booking $booking): void
     {
-        if (! in_array($booking->status, ['cancelled', 'no_show'], true)) {
+        $earlyDeparture = $booking->status === 'checked_out'
+            && $booking->statusHistory()
+                ->where('to_status', 'checked_out')
+                ->where('metadata->early_departure', true)
+                ->exists();
+        if (! in_array($booking->status, ['cancelled', 'no_show'], true) && ! $earlyDeparture) {
             throw ValidationException::withMessages([
-                'booking' => 'Only cancelled or no-show bookings can request a refund exception.',
+                'booking' => 'Only cancellations, no-shows or audited early departures can request a refund exception.',
             ]);
         }
     }
 
     private function refundableHeadroom(Booking $booking): float
     {
+        // An operator-recorded external refund may already have moved money.
+        // Never reserve further funds before independent reconciliation.
+        if (filled($booking->external_refund_reference)) {
+            throw ValidationException::withMessages([
+                'amount' => 'An external refund requires manual settlement reconciliation before another exception.',
+            ]);
+        }
+
         $paid = (float) $booking->payments()->where('status', Payment::SUCCESSFUL)->sum('amount');
         $reserved = (float) $booking->refunds()
             ->whereIn('status', ['requested', 'processing', 'reconciliation_required', 'successful'])
