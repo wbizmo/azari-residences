@@ -10,7 +10,7 @@ class AuditApplicationSecurity extends Command
     protected $signature = 'azari:security-audit
         {--strict : Fail for confirmed application-security regressions}';
 
-    protected $description = 'Audit Resarva XSS, CSRF, uploads, downloads, headers, cookies, rate limits and audit logging.';
+    protected $description = 'Audit Resavar XSS, CSRF, uploads, downloads, headers, cookies, rate limits and audit logging.';
 
     public function handle(): int
     {
