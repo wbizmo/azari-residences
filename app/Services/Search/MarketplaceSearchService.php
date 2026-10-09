@@ -94,9 +94,15 @@ class MarketplaceSearchService
                     ? (int) $filters['rate_plan_id']
                     : null;
 
-                $ratePlan = $type->ratePlans
-                    ->first(fn ($plan) => ! $requestedRatePlanId || (int) $plan->getKey() === $requestedRatePlanId)
-                    ?: $type->ratePlans->first();
+                $ratePlan = $requestedRatePlanId
+                    ? $type->ratePlans->first(fn ($plan) => (int) $plan->getKey() === $requestedRatePlanId)
+                    : $type->ratePlans->first();
+
+                // A removed, unpublished or mismatched requested plan must not
+                // be silently exchanged for a different price/policy.
+                if ($requestedRatePlanId && ! $ratePlan) {
+                    return ['property' => $property, 'unavailable' => true];
+                }
 
                 try {
                     $this->availability->assertRules(
