@@ -95,3 +95,8 @@ php artisan resavar:reconcile-provider-statement flutterwave /secure/normalized-
 
 The command is read-only. Its failure exit status or exception list calls for human reconciliation. It detects missing/ambiguous provider references, locally unverified settlements, mismatched amounts/currencies, duplicate rows and provider reversals. Summaries are grouped by currency and do not perform FX conversion. A zero-exception report means **only the rows supplied matched**; it does not prove bank payout, fees, absence of omitted rows, or chargeback finality. Compare independent provider and bank account statements and reconcile daily net fees and chargebacks under #123 before final financial signoff.
 
+
+
+### Fresh migrated restore databases with Laravel-generated defaults
+
+A migrated isolated database may already contain the application's default `permissions` and `site_settings` rows. By default `resavar:restore-drill` refuses **any** existing non-migration data, including these seed rows. After verifying that the target is a **separate, disposable, newly migrated database**, add the independent acknowledgement `--replace-migration-seeds=REPLACE_ONLY_MIGRATION_DEFAULTS` to permit clearing **only** those two known migration-populated tables before inserting archived records. Other tables (users, bookings, payments, refunds, ledger, guest identity records) **must** remain empty and are never allowed to be overwritten. Never enable this option for a real/active database; #123 still requires the operator's actual isolated restore evidence.
