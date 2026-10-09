@@ -3,6 +3,7 @@
 namespace App\Services\Payments;
 
 use App\Models\AuditLog;
+use App\Models\Booking;
 use App\Models\BookingStatusHistory;
 use App\Models\Payment;
 use App\Models\PaymentProviderStatus;
@@ -84,25 +85,24 @@ class PaymentFinalizer
         }
 
         return DB::transaction(function () use ($payment, $verification, $source): Payment {
-            $locked = 
-        Payment::query()
-                ->whereKey($payment->id)
+            // All payment writers/refund allocators lock booking first,
+            // then payment. Reverse order deadlocks under callback/refund
+            // contention even when both operations are individually atomic.
+            $booking = Booking::query()->whereKey($payment->booking_id)
                 ->when(
                     DB::connection()->getDriverName() !== 'sqlite',
                     fn ($query) => $query->lockForUpdate()
-                )
-                ->firstOrFail()
-    ;
-            if ($locked->isSuccessful() || $locked->status === 'successful_excess') return $locked;
+                )->firstOrFail();
 
-            $booking = 
-        $locked->booking()
+            $locked = Payment::query()->whereKey($payment->getKey())
                 ->when(
                     DB::connection()->getDriverName() !== 'sqlite',
                     fn ($query) => $query->lockForUpdate()
-                )
-                ->firstOrFail()
-    ;
+                )->firstOrFail();
+
+            if ($locked->isSuccessful() || $locked->status === 'successful_excess') {
+                return $locked;
+            }
             if ($booking->status === 'cancelled') {
                 $paidAt = filled($verification['paid_at'] ?? null)
                     ? CarbonImmutable::parse((string) $verification['paid_at'])
