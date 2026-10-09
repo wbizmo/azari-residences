@@ -196,6 +196,33 @@ class Booking extends Model
         return $baseEligible;
     }
 
+    public function allRequiredGuestsVerified(): bool
+    {
+        $adults = $this->guests()->where('type', 'adult')->get();
+
+        if ($adults->isEmpty()) {
+            // Legacy bookings without normalized guest rows keep the manual fallback.
+            return true;
+        }
+
+        return $adults->every(function (BookingGuest $guest): bool {
+            if (IdentityVerification::guestIsVerified((int) $guest->id)) {
+                return true;
+            }
+
+            return $guest->user_id
+                ? IdentityVerification::userIsVerified((int) $guest->user_id)
+                : false;
+        });
+    }
+
+    public function isSelfCheckInEligible(): bool
+    {
+        return $this->isCheckInEligible()
+            && $this->room_ready_at !== null
+            && $this->allRequiredGuestsVerified();
+    }
+
     public function directionsUrl(): ?string
     {
         $destination = null;
