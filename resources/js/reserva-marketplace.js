@@ -224,29 +224,6 @@ if (mapRoot) {
     }
 }
 
-document.querySelectorAll('[data-property-card]').forEach((item) => item.classList.remove('is-map-active'));
-                document.querySelectorAll('.reserva-map-pin').forEach((item) => item.classList.remove('is-active'));
-
-                pin.classList.add('is-active');
-                card?.classList.add('is-map-active');
-
-                if (card) {
-                    listPane.hidden = false;
-                    mapPane.hidden = true;
-                    document.querySelector('[data-results-view="list"]')?.click();
-                    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    card.querySelector('a,button')?.focus({ preventScroll: true });
-                }
-            });
-
-            mapRoot.append(pin);
-        });
-    } else {
-        mapRoot.classList.add('is-empty');
-        mapRoot.textContent = 'Map coordinates are not available for these results.';
-    }
-}
-
 document.querySelectorAll('[data-property-card]').forEach((card) => {
     const setActive = (active) => {
         const id = card.dataset.propertyCard;
