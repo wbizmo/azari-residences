@@ -10,6 +10,10 @@
         <small>Address suggestions use OpenStreetMap data. No Google API key is required, and manual entry remains available.</small>
     </label>
 
+    <div data-azari-address-status role="status" aria-live="polite" hidden>
+        <span class="az-address-spinner" aria-hidden="true" hidden></span>
+        <span data-azari-address-status-text></span>
+    </div>
     <div data-azari-address-results hidden></div>
 
     <div style="margin:8px 0 12px">
@@ -92,7 +96,7 @@
         return values;
     };
 
-    const renderResults = (root, features) => {
+    const renderResults = (root, features, onPick = () => {}) => {
         const box = root.querySelector('[data-azari-address-results]');
         if (!box) return;
 
@@ -125,6 +129,7 @@
             button.addEventListener('click', () => {
                 applyFeature(root, feature);
                 box.hidden = true;
+                onPick();
             });
             box.appendChild(button);
         });
@@ -134,34 +139,74 @@
         const search = root.querySelector('[data-azari-address-search]');
         const locationButton = root.querySelector('[data-azari-use-location]');
         const box = root.querySelector('[data-azari-address-results]');
+        const status = root.querySelector('[data-azari-address-status]');
+        const statusText = root.querySelector('[data-azari-address-status-text]');
+        const progress = root.querySelector('.az-address-spinner');
+        let generation = 0;
+        let activeRequest = null;
+
+        const showStatus = (message = '', busy = false) => {
+            if (status) status.hidden = !message;
+            if (statusText) statusText.textContent = message;
+            if (progress) progress.hidden = !busy;
+        };
 
         if (search) {
+            search.addEventListener('input', () => {
+                // Immediately invalidate stale results when the input changes,
+                // rather than waiting for the 450ms debounce to fire.
+                generation++;
+                activeRequest?.abort();
+                activeRequest = null;
+                if (box) box.hidden = true;
+                showStatus('');
+            });
             search.addEventListener('input', debounce(async () => {
                 const q = search.value.trim();
-                if (q.length < 3) {
-                    if (box) box.hidden = true;
-                    return;
-                }
+                const currentGeneration = generation;
+                if (q.length < 3) return;
 
+                const controller = new AbortController();
+                activeRequest = controller;
+                showStatus('Searching addresses…', true);
                 try {
                     const response = await fetch(`${searchEndpoint}?q=${encodeURIComponent(q)}`, {
                         headers: { 'Accept': 'application/json' },
                         credentials: 'same-origin',
+                        signal: controller.signal,
                     });
-                    if (!response.ok) throw new Error(`Address lookup ${response.status}`);
+                    if (!response.ok) throw new Error('Address lookup failed');
                     const payload = await response.json();
-                    renderResults(root, payload?.features ?? []);
+                    if (currentGeneration !== generation || controller.signal.aborted) return;
+                    const features = payload?.features ?? [];
+                    renderResults(root, features, () => {
+                        generation++;
+                        activeRequest?.abort();
+                        activeRequest = null;
+                        showStatus('');
+                    });
+                    showStatus(features.length ? '' : 'No matching address found. Enter the address manually.');
                 } catch (error) {
+                    if (currentGeneration !== generation || controller.signal.aborted) return;
                     if (box) box.hidden = true;
-                    console.warn('Address suggestions are temporarily unavailable. Manual entry remains available.', error);
+                    showStatus('Address suggestions are unavailable. You can enter the address manually.');
+                } finally {
+                    if (activeRequest === controller) activeRequest = null;
                 }
             }, 450));
         }
 
         if (locationButton) {
             locationButton.addEventListener('click', () => {
-                if (!navigator.geolocation) return;
+                if (!navigator.geolocation) {
+                    showStatus('Location is not supported here. Enter the address manually.');
+                    return;
+                }
 
+                generation++;
+                activeRequest?.abort();
+                if (box) box.hidden = true;
+                showStatus('Finding your location…', true);
                 locationButton.disabled = true;
                 navigator.geolocation.getCurrentPosition(async ({ coords }) => {
                     setField(root, 'latitude', coords.latitude);
@@ -176,14 +221,18 @@
                             const payload = await response.json();
                             const feature = payload?.features?.[0];
                             if (feature) applyFeature(root, feature);
+                            showStatus(feature ? 'Address found. Review it before saving.' : 'Location found. Enter the address manually.');
+                        } else {
+                            showStatus('Location found. Address lookup unavailable; enter the address manually.');
                         }
                     } catch (error) {
-                        console.warn('Reverse geocoding is temporarily unavailable.', error);
+                        showStatus('Location found. Address lookup unavailable; enter the address manually.');
                     } finally {
                         locationButton.disabled = false;
                     }
                 }, () => {
                     locationButton.disabled = false;
+                    showStatus('Location unavailable or permission denied. Enter the address manually.');
                 }, {
                     enableHighAccuracy: false,
                     timeout: 10000,
