@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\BookingConversation;
+use App\Models\BookingMessage;
 use App\Models\Property;
 use App\Services\Owners\PropertyAccessService;
 use Illuminate\Http\RedirectResponse;
@@ -49,5 +50,27 @@ class OwnerBookingMessageController extends Controller
         AuditLog::record('booking_message.property_sent', $conversation, [], ['message_id' => $message->id, 'property_id' => $property->id]);
 
         return back()->with('success', 'Message sent.');
+    }
+    public function attachment(
+        Request $request,
+        Property $property,
+        BookingConversation $conversation,
+        BookingMessage $message,
+        PropertyAccessService $access
+    ) {
+        $access->assert($request->user(), $property, 'messages.manage');
+        abort_unless((int) $conversation->property_id === (int) $property->id, 404);
+        abort_unless((int) $message->conversation_id === (int) $conversation->id && $message->attachment_path, 404);
+        abort_unless(Storage::disk('private')->exists($message->attachment_path), 404);
+
+        AuditLog::record('booking_message.attachment_downloaded', $conversation, [], [
+            'message_id' => $message->id,
+            'property_id' => $property->id,
+        ]);
+
+        return Storage::disk('private')->download(
+            $message->attachment_path,
+            $message->attachment_name ?: 'attachment'
+        );
     }
 }
