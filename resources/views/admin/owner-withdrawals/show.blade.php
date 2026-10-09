@@ -3,6 +3,13 @@
 @section('content')
 <div class="az-admin-page-header"><div><h1>{{ $withdrawal->reference }}</h1><p>{{ $withdrawal->user?->name }} · {{ $withdrawal->currency }} {{ number_format((float)$withdrawal->amount,2) }} · {{ str_replace('_',' ',$withdrawal->status) }}</p></div></div>
 
+@if((int) session('auth.password_confirmed_at', 0) < now()->subMinutes(15)->timestamp)
+<div class="az-admin-alert" role="status">
+    <strong>Additional verification required.</strong>
+    <a href="{{ route('password.confirm') }}" class="underline">Confirm your password</a>
+    before processing, reconciling or changing a payout destination. Return here to resubmit.
+</div>
+@endif
 @if($errors->any())<div class="az-admin-alert az-az-admin-alert--danger"><ul>@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
 @if($withdrawal->status==='reconciliation_required')<div class="az-admin-alert az-az-admin-alert--danger"><strong>Manual reconciliation required.</strong> Do not retry. Check the provider using {{ $withdrawal->provider_reference ?: $withdrawal->reference }}.</div>@endif
 
