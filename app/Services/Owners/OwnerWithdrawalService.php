@@ -29,8 +29,15 @@ class OwnerWithdrawalService
         $currency = strtoupper($currency);
         $amount = round($amount, 2);
 
+        // A verified destination is not enough: it must belong to the
+        // withdrawing user. Never let a caller substitute someone else's
+        // verified payout profile.
+        if ((int) $profile->user_id !== (int) $user->getKey()) {
+            throw new RuntimeException('The payout destination is not authorized for this owner.');
+        }
+
         if (! $profile->is_verified) {
-            throw new RuntimeException('Your payout destination must be verified by Azari before you can request a withdrawal.');
+            throw new RuntimeException('Your payout destination must be verified before you can request a withdrawal.');
         }
 
         return DB::transaction(function () use ($user, $profile, $currency, $amount, $ownerNote): WithdrawalRequest {
