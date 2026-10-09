@@ -15,6 +15,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class AzariAvailabilityController extends Controller
@@ -197,12 +198,24 @@ class AzariAvailabilityController extends Controller
             isset($data['accommodation_type_id']) ? (int) $data['accommodation_type_id'] : null
         );
 
+        if (isset($data['accommodation_type_id']) && ! $type) {
+            throw ValidationException::withMessages([
+                'accommodation_type_id' => 'The selected accommodation type is not available at this property.',
+            ]);
+        }
+
         $ratePlan = $type
             ? $availability->resolveRatePlan(
                 $type,
                 isset($data['rate_plan_id']) ? (int) $data['rate_plan_id'] : null
             )
             : null;
+
+        if (isset($data['rate_plan_id']) && ! $ratePlan) {
+            throw ValidationException::withMessages([
+                'rate_plan_id' => 'The selected rate does not belong to the available room type.',
+            ]);
+        }
 
         $availability->assertRules(
             $property,
