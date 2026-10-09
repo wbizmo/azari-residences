@@ -7,7 +7,6 @@ use App\Models\Payment;
 use App\Models\PaymentEvent;
 use App\Models\PaymentProviderStatus;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 
@@ -161,11 +160,14 @@ class PaymentWebhookProcessor
                 'event_type' => $references['event_type'] ?? null,
             ];
         } catch (\Throwable $exception) {
+            // Exceptions may include signed provider URLs, customer data,
+            // authorization tokens or raw responses. Log only safe identifiers
+            // and error category, not exception messages or stack arguments.
             Log::error('Payment webhook processing failed.', [
                 'provider' => $providerName,
-                'payment_reference' => $payment->reference,
-                'event_id' => $eventId,
-                'exception' => $exception,
+                'payment_id' => $payment->getKey(),
+                'event_id_hash' => hash('sha256', (string) $eventId),
+                'exception_class' => $exception::class,
             ]);
 
             // Do not mark a transient verification failure as permanently
@@ -188,11 +190,41 @@ class PaymentWebhookProcessor
         }
     }
 
+    /**
+     * Allowlisted reconciliation evidence only. External webhook envelopes
+     * commonly nest full customer profiles, card info and tokens in 'data'.
+     * A top-level blacklist does not prevent retaining that private data.
+     */
     private function safePayload(array $payload): array
     {
-        return Arr::except($payload, [
-            'card', 'authorization', 'customer', 'token', 'secret', 'credentials',
-            'password', 'api_key', 'apiKey', 'access_token',
-        ]);
+        $allowed = [
+            'event', 'event_id', 'id', 'type', 'status',
+            'reference', 'tx_ref', 'transaction_id',
+            'currency', 'amount',
+            'orderTrackingId', 'OrderTrackingId',
+            'orderMerchantReference', 'OrderMerchantReference',
+        ];
+        $safe = [];
+        foreach ($allowed as $field) {
+            $value = $payload[$field] ?? null;
+            if (is_string($value) || is_int($value) || is_float($value) || is_bool($value)) {
+                $safe[$field] = is_string($value) ? mb_substr($value, 0, 190) : $value;
+            }
+        }
+
+        if (is_array($payload['data'] ?? null)) {
+            $nested = [];
+            foreach (['id', 'tx_ref', 'status', 'currency', 'amount', 'reference'] as $field) {
+                $value = $payload['data'][$field] ?? null;
+                if (is_string($value) || is_int($value) || is_float($value) || is_bool($value)) {
+                    $nested[$field] = is_string($value) ? mb_substr($value, 0, 190) : $value;
+                }
+            }
+            if ($nested !== []) {
+                $safe['data'] = $nested;
+            }
+        }
+
+        return $safe;
     }
 }
