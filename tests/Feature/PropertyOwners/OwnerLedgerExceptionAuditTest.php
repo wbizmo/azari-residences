@@ -30,6 +30,7 @@ class OwnerLedgerExceptionAuditTest extends TestCase
         $pending = WithdrawalRequest::query()->create([
             'user_id' => $owner->id, 'currency' => 'NGN',
             'gateway' => 'paypal', 'status' => 'pending', 'amount' => 30,
+            'destination_snapshot' => [],
         ]);
 
         $auditor = app(OwnerLedgerReconciliationService::class);
