@@ -29,7 +29,11 @@ class IdentityDocumentService
                 ->first()
     ;
             $path = $file->store("identities/users/{$user->id}", 'private');
-            $document = UserIdentityDocument::query()->create([
+            if (! is_string($path) || $path === '') {
+                throw new \RuntimeException('Private identity storage is unavailable.');
+            }
+            try {
+                $document = UserIdentityDocument::query()->create([
                 'user_id' => $user->id,
                 'identity_type_id' => $type->id,
                 'document_type' => $type->slug,
@@ -52,8 +56,12 @@ class IdentityDocumentService
                 'action' => $current ? 'replaced' : 'uploaded',
                 'metadata' => ['identity_type' => $type->slug, 'previous_document_id' => $current?->id],
             ]);
-            AuditLog::record('identity.user_document_saved', $document, [], ['identity_type' => $type->slug]);
-            return $document;
+                AuditLog::record('identity.user_document_saved', $document, [], ['identity_type' => $type->slug]);
+                return $document;
+            } catch (\Throwable $e) {
+                Storage::disk('private')->delete($path);
+                throw $e;
+            }
         }, 3);
     }
 
@@ -75,12 +83,18 @@ class IdentityDocumentService
         abort_unless($guest->booking_id === $booking->id && $guest->type === 'adult', 404);
 
         return DB::transaction(function () use ($booking, $guest, $documentType, $file, $actorId): GuestIdentityDocument {
-            $existing = $guest->identityDocument()->first();
-            if ($existing && Storage::disk($existing->disk)->exists($existing->path)) {
-                Storage::disk($existing->disk)->delete($existing->path);
-            }
+            $lockedGuest = BookingGuest::query()->whereKey($guest->getKey())
+                ->when(DB::connection()->getDriverName() !== 'sqlite',
+                    fn ($query) => $query->lockForUpdate())->firstOrFail();
+            $existing = $lockedGuest->identityDocument()->first();
+            $oldDisk = (string) ($existing?->disk ?? '');
+            $oldPath = (string) ($existing?->path ?? '');
             $path = $file->store("identities/bookings/{$booking->reference}", 'private');
-            $document = GuestIdentityDocument::query()->updateOrCreate(
+            if (! is_string($path) || $path === '') {
+                throw new \RuntimeException('Private identity storage is unavailable.');
+            }
+            try {
+                $document = GuestIdentityDocument::query()->updateOrCreate(
                 ['booking_guest_id' => $guest->id],
                 [
                     'document_type' => $documentType,
@@ -108,8 +122,21 @@ class IdentityDocumentService
                 'action' => $existing ? 'replaced' : 'uploaded',
                 'metadata' => ['guest_id' => $guest->id, 'document_type' => $documentType],
             ]);
-            AuditLog::record('identity.booking_guest_document_saved', $document, [], ['booking_reference' => $booking->reference], actorId: $actorId);
-            return $document;
+                AuditLog::record('identity.booking_guest_document_saved', $document, [], [
+                    'booking_reference' => $booking->reference,
+                ], actorId: $actorId);
+                if ($oldDisk !== '' && $oldPath !== '' && ($oldDisk !== 'private' || $oldPath !== $path)) {
+                    // Previous identity is kept intact until the new document
+                    // and the booking identity link have both committed.
+                    DB::afterCommit(static function () use ($oldDisk, $oldPath): void {
+                        Storage::disk($oldDisk)->delete($oldPath);
+                    });
+                }
+                return $document;
+            } catch (\Throwable $e) {
+                Storage::disk('private')->delete($path);
+                throw $e;
+            }
         }, 3);
     }
 }
