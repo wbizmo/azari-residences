@@ -166,7 +166,10 @@ class BookingManagementController extends Controller
     public function receipt(Booking $booking): Response
     {
         $booking->load(['property', 'payments']);
-        $payment = $booking->payments->sortByDesc(fn ($record) => $record->paid_at ?: $record->created_at)->first();
+        // Never show an unverified/failed latest payment as the payment
+        // evidenced on a reservation receipt.
+        $payment = $booking->documentPayment();
+        abort_unless($payment !== null, 404);
 
         return response()->view('bookings.receipt', compact('booking', 'payment'));
     }
