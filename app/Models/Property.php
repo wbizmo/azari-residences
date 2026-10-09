@@ -175,6 +175,18 @@ class Property extends Model
         return $this->hasMany(UserFavourite::class);
     }
 
+    public function verifiedClaims(): HasMany
+    {
+        return $this->hasMany(PropertyVerifiedClaim::class);
+    }
+
+    public function publicVerifiedClaims(): HasMany
+    {
+        return $this->verifiedClaims()->where('status', 'verified')
+            ->whereNotNull('verified_at')
+            ->where('expires_at', '>', now());
+    }
+
     public function recentViews(): HasMany
     {
         return $this->hasMany(RecentlyViewedProperty::class);
