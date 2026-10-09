@@ -78,6 +78,19 @@
                 </label>
 
                 <label class="az-results-control">
+                    <span>Flexible dates</span>
+                    <span class="az-results-input">
+                        <span class="material-symbols-outlined" aria-hidden="true">date_range</span>
+                        <select name="flex_days">
+                            <option value="">Exact dates</option>
+                            <option value="1" @selected(($filters['flex_days'] ?? null)==1)>±1 day</option>
+                            <option value="3" @selected(($filters['flex_days'] ?? null)==3)>±3 days</option>
+                            <option value="7" @selected(($filters['flex_days'] ?? null)==7)>±7 days</option>
+                        </select>
+                    </span>
+                </label>
+
+                <label class="az-results-control">
                     <span>Rooms</span>
                     <span class="az-results-input">
                         <span class="material-symbols-outlined" aria-hidden="true">meeting_room</span>
@@ -103,6 +116,20 @@
                     <span>Update search</span>
                 </button>
             </form>
+
+            @if($alternatives->isNotEmpty())
+                <section class="reserva-flex-date-options" aria-label="Flexible date alternatives">
+                    <strong>Nearby dates with availability</strong>
+                    <div class="reserva-result-badges">
+                        @foreach($alternatives as $alternative)
+                            <a class="button button-secondary" href="{{ route('availability.results', [...$queryWithoutPage, 'check_in'=>$alternative['check_in'], 'check_out'=>$alternative['check_out']]) }}">
+                                {{ Carbon\CarbonImmutable::parse($alternative['check_in'])->format('j M') }}–{{ Carbon\CarbonImmutable::parse($alternative['check_out'])->format('j M') }}
+                                @if($alternative['from_total'] !== null) · from {{ $alternative['currency'] }} {{ number_format((float)$alternative['from_total'],2) }} @endif
+                            </a>
+                        @endforeach
+                    </div>
+                </section>
+            @endif
 
             <div class="reserva-results-toolbar">
                 <div>
