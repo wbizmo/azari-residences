@@ -43,6 +43,8 @@ Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer', 'azari.
         Route::post('/bookings/{reference}/modifications', [BookingSelfServiceController::class, 'storeModification'])
             ->middleware('throttle:20,1')
             ->name('bookings.modifications.store');
+        Route::post('/bookings/{reference}/modifications/{modification}/accept', [BookingSelfServiceController::class, 'acceptDateAmendment'])
+            ->middleware('throttle:10,1')->name('bookings.modifications.accept');
         // The Dojah identity portal is intentionally reachable before identity
         // verification; do not put the verification guard on these endpoints.
         Route::get('/identity', [DojahVerificationController::class, 'user'])

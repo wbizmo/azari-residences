@@ -10,6 +10,19 @@ use Illuminate\Http\Request;
 
 class BookingSelfServiceController extends Controller
 {
+    public function acceptDateAmendment(
+        Request $request,
+        string $reference,
+        \App\Models\BookingModificationRequest $modification,
+        \App\Services\Bookings\BookingAmendmentOfferService $offers
+    ): RedirectResponse {
+        $booking = $request->user()->bookings()->where('reference', $reference)->firstOrFail();
+        abort_unless((int) $modification->booking_id === (int) $booking->getKey(), 404);
+        $offers->accept($booking, $modification, $request->user());
+
+        return back()->with('success', 'Your new dates are confirmed. Any eligible refund is requested separately and is not yet settled.');
+    }
+
     public function storeModification(
         Request $request,
         string $reference,

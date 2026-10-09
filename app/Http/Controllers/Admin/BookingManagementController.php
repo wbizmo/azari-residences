@@ -128,6 +128,18 @@ class BookingManagementController extends Controller
         return back()->with('success', 'Booking change request reviewed.');
     }
 
+    public function offerDateAmendment(
+        Request $request,
+        Booking $booking,
+        BookingModificationRequest $modification,
+        \App\Services\Bookings\BookingAmendmentOfferService $offers
+    ): \Illuminate\Http\RedirectResponse {
+        abort_unless((int) $modification->booking_id === (int) $booking->getKey(), 404);
+        $offers->offer($booking, $modification, $request->user());
+
+        return back()->with('success', 'A 15-minute date-change quotation was sent to the guest for approval.');
+    }
+
     public function cancellationQuote(Booking $booking): \Illuminate\Http\JsonResponse
     {
         abort_unless(auth()->user()?->hasPermission('bookings.view'), 403);

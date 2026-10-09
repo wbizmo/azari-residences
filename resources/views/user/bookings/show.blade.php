@@ -144,6 +144,23 @@
                         <h3>{{ Str::headline($requestItem->type) }} · {{ $requestItem->reference }}</h3>
                         <p>{{ $requestItem->guest_note ?: 'No additional note.' }}</p>
                         @if($requestItem->staff_note)<p><strong>Resavar:</strong> {{ $requestItem->staff_note }}</p>@endif
+                        @if($requestItem->status === 'quoted' && $requestItem->quote_expires_at?->isFuture() && $requestItem->type === 'date_change')
+                            @php($offer = $requestItem->price_quote ?? [])
+                            <p><strong>New dates:</strong> {{ $offer['new_check_in'] ?? '' }} to {{ $offer['new_check_out'] ?? '' }}</p>
+                            <p><strong>Price:</strong> {{ $offer['currency'] ?? $booking->currency }}
+                                {{ number_format((float) ($offer['new_total'] ?? 0), 2) }}
+                                (current total {{ number_format((float) ($offer['old_total'] ?? 0), 2) }})</p>
+                            <p>Offer expires {{ $requestItem->quote_expires_at->format('d M Y H:i') }}. Dates are subject to a final availability and price check.</p>
+                            @if((float) ($offer['delta'] ?? 0) <= 0)
+                                <form method="POST" action="{{ route('user.bookings.modifications.accept', [$booking->reference, $requestItem]) }}">
+                                    @csrf
+                                    <button type="submit" class="az-user-button az-user-button--dark">Accept these dates and price</button>
+                                </form>
+                            @else
+                                <p>An additional verified payment is required before accepting the new dates. Your existing dates remain unchanged; contact support to arrange this.</p>
+                            @endif
+                        @endif
+
                     </div>
                     <span class="az-user-status {{ $requestItem->status==='pending'?'az-user-status--warning':'' }}">{{ Str::headline($requestItem->status) }}</span>
                 </div>
