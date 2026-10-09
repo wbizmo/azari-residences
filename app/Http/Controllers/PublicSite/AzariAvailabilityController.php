@@ -73,7 +73,7 @@ class AzariAvailabilityController extends Controller
                     ];
                     unset($candidateFilters['flex_days']);
 
-                    $candidate = $marketplace->search($candidateFilters, false, 1);
+                    $candidate = $marketplace->search($candidateFilters, false, 5);
                     $first = $candidate['results']->getCollection()->first();
 
                     return [
