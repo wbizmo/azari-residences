@@ -175,7 +175,7 @@
                     @method('PUT')
                     <label class="az-field az-span-2"><span>Staff review note</span><textarea name="staff_note" maxlength="2000"></textarea></label>
                     <div class="az-form-actions az-span-2">
-                        @if(in_array($requestItem->type, ['date_change', 'add_extras'], true))
+                        @if(in_array($requestItem->type, ['date_change', 'add_extras', 'room_change'], true))
                             <p>Check availability and offer a repriced date change for guest acceptance. This does not reserve inventory.</p>
                             <button type="submit" formaction="{{ route('azari.admin.bookings.modifications.offer', [$booking, $requestItem]) }}"
                                     formmethod="POST" class="az-button az-button--primary">

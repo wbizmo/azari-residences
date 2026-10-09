@@ -17,6 +17,7 @@ class BookingModificationService
 
     private const REQUIRED_FIELDS = [
         'date_change' => ['check_in', 'check_out'],
+        'room_change' => ['accommodation_type_id'],
         'guest_change' => ['adult_count'],
         'arrival_time' => ['arrival_time'],
         'room_preference' => ['room_preference'],
@@ -26,7 +27,7 @@ class BookingModificationService
     ];
 
     private const TYPES = [
-        'date_change', 'guest_change', 'arrival_time', 'room_preference',
+        'date_change', 'room_change', 'guest_change', 'arrival_time', 'room_preference',
         'contact_details', 'add_extras', 'cancellation',
     ];
 
@@ -211,7 +212,7 @@ class BookingModificationService
     private function sanitize(array $changes): array
     {
         $allowed = [
-            'check_in', 'check_out', 'arrival_time', 'guest_count', 'adult_count',
+            'check_in', 'check_out', 'accommodation_type_id', 'arrival_time', 'guest_count', 'adult_count',
             'child_count', 'new_adults', 'new_children', 'room_preference', 'email', 'phone', 'add_on_ids',
             'cancellation_reason',
         ];

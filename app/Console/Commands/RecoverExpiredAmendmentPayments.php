@@ -20,7 +20,7 @@ class RecoverExpiredAmendmentPayments extends Command
         $counts = ['checked' => 0, 'refund_requested' => 0, 'error' => 0];
 
         BookingModificationRequest::query()
-            ->whereIn('type', ['date_change', 'add_extras'])
+            ->whereIn('type', ['date_change', 'add_extras', 'room_change'])
             ->whereNotNull('quote_expires_at')
             ->where('quote_expires_at', '<=', now())
             ->where(function (Builder $query): void {
