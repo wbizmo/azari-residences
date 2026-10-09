@@ -28,7 +28,8 @@ class InventoryBulkUpdateService
         CarbonImmutable $to,
         array $changes,
         ?int $actorId,
-        string $source = 'admin'
+        string $source = 'admin',
+        ?string $expectedVersion = null
     ): InventoryChangeLog {
         if ($to->lessThan($from)) {
             throw ValidationException::withMessages(['to_date' => 'End date must be on or after the start date.']);
@@ -46,7 +47,7 @@ class InventoryBulkUpdateService
 
         $this->validateChanges($type, $changes);
 
-        return DB::transaction(function () use ($type, $from, $to, $changes, $actorId, $source): InventoryChangeLog {
+        return DB::transaction(function () use ($type, $from, $to, $changes, $actorId, $source, $expectedVersion): InventoryChangeLog {
             // Match the hold lock ordering: property, accommodation type, date range.
             Property::query()->whereKey($type->property_id)
                 ->when(DB::connection()->getDriverName() !== 'sqlite', fn (Builder $query) => $query->lockForUpdate())
@@ -68,6 +69,13 @@ class InventoryBulkUpdateService
                 ->orderBy('date')
                 ->get()
                 ->keyBy(fn (InventoryDate $row) => $row->date->toDateString());
+
+            $currentVersion = $this->versionFromRows($existingRows, $from, $to);
+            if ($expectedVersion !== null && ! hash_equals($expectedVersion, $currentVersion)) {
+                throw ValidationException::withMessages([
+                    'inventory' => 'Calendar data changed after your preview. Review the latest values before applying this update.',
+                ]);
+            }
 
             $beforeSnapshot = [];
             for ($snapshotDate = $from; $snapshotDate->lessThanOrEqualTo($to); $snapshotDate = $snapshotDate->addDay()) {
@@ -183,6 +191,7 @@ class InventoryBulkUpdateService
             'changes' => $changes,
             'maximum_committed_units' => (int) ($committed->max() ?? 0),
             'affected_committed_dates' => $committed->filter(fn ($count) => (int) $count > 0)->count(),
+            'version' => $this->currentVersion($type, $from, $to),
         ];
     }
 
@@ -237,6 +246,43 @@ class InventoryBulkUpdateService
 
             return $lockedLog->fresh();
         }, 5);
+    }
+
+    private function currentVersion(
+        AccommodationType $type,
+        CarbonImmutable $from,
+        CarbonImmutable $to
+    ): string {
+        $rows = InventoryDate::query()
+            ->where('accommodation_type_id', $type->getKey())
+            ->whereBetween('date', [$from->toDateString(), $to->toDateString()])
+            ->orderBy('date')
+            ->get()
+            ->keyBy(fn (InventoryDate $row) => $row->date->toDateString());
+
+        return $this->versionFromRows($rows, $from, $to);
+    }
+
+    private function versionFromRows(Collection $rows, CarbonImmutable $from, CarbonImmutable $to): string
+    {
+        $snapshot = [];
+        for ($date = $from; $date->lessThanOrEqualTo($to); $date = $date->addDay()) {
+            $key = $date->toDateString();
+            $row = $rows->get($key);
+            $snapshot[$key] = $row ? [
+                'sellable_inventory' => $row->sellable_inventory,
+                'maintenance_inventory' => $row->maintenance_inventory,
+                'stop_sell' => (bool) $row->stop_sell,
+                'closed_to_arrival' => (bool) $row->closed_to_arrival,
+                'closed_to_departure' => (bool) $row->closed_to_departure,
+                'minimum_stay' => $row->minimum_stay,
+                'maximum_stay' => $row->maximum_stay,
+                'price_override' => $row->price_override,
+                'updated_at' => optional($row->updated_at)->toISOString(),
+            ] : null;
+        }
+
+        return hash('sha256', json_encode($snapshot, JSON_PRESERVE_ZERO_FRACTION | JSON_UNESCAPED_SLASHES));
     }
 
     private function validateChanges(AccommodationType $type, array $changes): void
