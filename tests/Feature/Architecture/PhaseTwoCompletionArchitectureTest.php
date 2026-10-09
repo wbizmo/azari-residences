@@ -22,6 +22,19 @@ class PhaseTwoCompletionArchitectureTest extends TestCase
 
         $this->assertSame('standalone', $manifest['display']);
         $this->assertSame('#052058', $manifest['theme_color']);
+
+        $icons = collect($manifest['icons'] ?? [])->keyBy('sizes');
+        foreach (['192x192' => 192, '512x512' => 512] as $dimensions => $width) {
+            $this->assertTrue($icons->has($dimensions), "Missing square install icon: {$dimensions}");
+            $icon = $icons->get($dimensions);
+            $this->assertSame('image/png', $icon['type']);
+            $path = public_path(ltrim($icon['src'], '/'));
+            $this->assertFileExists($path);
+            $size = getimagesize($path);
+            $this->assertSame($width, $size[0]);
+            $this->assertSame($width, $size[1]);
+        }
+
         $this->assertStringContainsString("request.mode === 'navigate'", $serviceWorker);
         $this->assertStringContainsString("caches.match('/offline.html')", $serviceWorker);
         $this->assertStringContainsString('SAFE_SHELL', $serviceWorker);
