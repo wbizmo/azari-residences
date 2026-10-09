@@ -1564,3 +1564,87 @@ if ('serviceWorker' in navigator && window.isSecureContext) {
         });
     }, { once: true });
 }
+
+
+(() => {
+    document.querySelectorAll('[data-calendar-preview]').forEach((form) => {
+        const version = form.querySelector('[data-calendar-version]');
+        const result = form.querySelector('[data-calendar-preview-result]');
+        const submit = form.querySelector('[data-calendar-submit]');
+        const previewUrl = form.dataset.previewUrl;
+        let previewing = false;
+
+        const resetPreview = () => {
+            if (version) version.value = '';
+            if (result) {
+                result.hidden = true;
+                result.textContent = '';
+            }
+            if (submit) submit.textContent = 'Preview calendar update';
+        };
+
+        form.addEventListener('input', (event) => {
+            if (event.target !== version) resetPreview();
+        });
+
+        form.addEventListener('submit', async (event) => {
+            if (!version || version.value) return;
+
+            event.preventDefault();
+            if (previewing || !previewUrl) return;
+            previewing = true;
+            if (submit) submit.disabled = true;
+
+            try {
+                const body = new FormData(form);
+                body.delete('expected_version');
+
+                const response = await fetch(previewUrl, {
+                    method: 'POST',
+                    body,
+                    headers: {
+                        Accept: 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    credentials: 'same-origin',
+                });
+
+                const payload = await response.json();
+                if (!response.ok) {
+                    const messages = payload?.errors
+                        ? Object.values(payload.errors).flat().join(' ')
+                        : (payload?.message || 'Unable to preview this calendar update.');
+                    throw new Error(messages);
+                }
+
+                version.value = String(payload.version || '');
+                if (!version.value) throw new Error('The server did not return a calendar version.');
+
+                if (result) {
+                    const changes = Object.entries(payload.changes || {})
+                        .map(([key, value]) => key.replaceAll('_', ' ') + ': ' + String(value))
+                        .join(' · ');
+                    result.textContent =
+                        'Preview: ' + payload.days + ' day(s), ' +
+                        payload.affected_committed_dates + ' date(s) with committed stays, ' +
+                        'maximum committed units ' + payload.maximum_committed_units +
+                        (changes ? '. Changes: ' + changes : '.');
+                    result.hidden = false;
+                }
+                if (submit) {
+                    submit.textContent = 'Confirm and apply update';
+                    submit.focus({ preventScroll: true });
+                }
+            } catch (error) {
+                resetPreview();
+                if (result) {
+                    result.textContent = error instanceof Error ? error.message : 'Unable to preview this calendar update.';
+                    result.hidden = false;
+                }
+            } finally {
+                previewing = false;
+                if (submit) submit.disabled = false;
+            }
+        });
+    });
+})();
