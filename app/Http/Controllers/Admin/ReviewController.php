@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\Review;
+use App\Models\ReviewAppeal;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -15,7 +17,7 @@ class ReviewController extends Controller
     public function index(Request $request): View
     {
         $query = Review::query()
-            ->with(['user', 'booking.property', 'property'])
+            ->with(['user', 'booking.property', 'property', 'appeal'])
             ->latest();
 
         if ($request->filled('status')) {
@@ -81,4 +83,55 @@ class ReviewController extends Controller
 
         return back()->with('success', 'Review moderation updated.');
     }
+    public function decideAppeal(Request $request, Review $review): RedirectResponse
+    {
+        $data = $request->validate([
+            'decision' => ['required', Rule::in(['accepted', 'rejected'])],
+            'decision_note' => [
+                Rule::requiredIf($request->input('decision') === 'rejected'),
+                'nullable', 'string', 'min:10', 'max:2000',
+            ],
+        ]);
+
+        DB::transaction(function () use ($request, $review, $data): void {
+            $locked = Review::query()->whereKey($review->id)->lockForUpdate()->firstOrFail();
+            $appeal = ReviewAppeal::query()
+                ->where('review_id', $locked->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            abort_unless($appeal->status === 'pending', 422, 'This appeal has already been decided.');
+
+            if ($data['decision'] === 'accepted') {
+                abort_unless(in_array($locked->status, ['hidden', 'flagged', 'archived'], true),
+                    422, 'This review is no longer hidden or flagged.');
+                $before = $locked->only(['status', 'hidden_at', 'restored_at']);
+                $locked->update([
+                    'status' => 'approved',
+                    'hidden_at' => null,
+                    'restored_at' => now(),
+                    'moderated_by' => $request->user()->id,
+                    'moderated_at' => now(),
+                ]);
+                AuditLog::record('review.appeal_review_restored', $locked, $before,
+                    $locked->only(array_keys($before)), ['appeal_id' => $appeal->id]);
+            }
+
+            $appeal->update([
+                'status' => $data['decision'],
+                'decision_note' => $data['decision_note'] ?? null,
+                'decided_by' => $request->user()->id,
+                'decided_at' => now(),
+            ]);
+
+            AuditLog::record('review.appeal_decided', $locked, [], [
+                'appeal_id' => $appeal->id,
+                'decision' => $data['decision'],
+                'actor_id' => $request->user()->id,
+            ]);
+        }, 3);
+
+        return back()->with('success', 'Review appeal decision recorded.');
+    }
+
 }
