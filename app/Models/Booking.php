@@ -145,8 +145,12 @@ class Booking extends Model
 
     public function successfulRefundsTotal(): float
     {
+        // Refunds of verified-but-unallocated amendment topups are not
+        // booking revenue reversals. Only refunds against payments actually
+        // allocated to this booking reduce its settled balance.
         return (float) $this->refunds()
             ->where('status', 'successful')
+            ->whereHas('payment', fn ($q) => $q->where('status', Payment::SUCCESSFUL))
             ->sum('amount');
     }
 
