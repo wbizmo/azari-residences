@@ -115,7 +115,7 @@ class CmsController extends Controller
             });
         }
 
-        return back()->with('status', 'Resarva theme revision saved.');
+        return back()->with('status', 'Resavar theme revision saved.');
     }
 
     public function navigationStore(Request $request): RedirectResponse
