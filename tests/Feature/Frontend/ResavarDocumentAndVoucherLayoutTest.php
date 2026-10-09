@@ -16,6 +16,7 @@ class ResavarDocumentAndVoucherLayoutTest extends TestCase
         $this->assertStringContainsString('.verification-panel', $document);
         $this->assertStringContainsString('background: #F4F7FC;', $document);
         $this->assertStringContainsString('Dates of stay', $document);
+        $this->assertStringContainsString('Voucher discount', $document);
         $this->assertStringContainsString('page-break-inside: avoid;', $document);
         $this->assertStringContainsString('width: 110px;', $document);
         $this->assertStringContainsString('background: #FFFFFF;', $agreement);
@@ -30,6 +31,8 @@ class ResavarDocumentAndVoucherLayoutTest extends TestCase
         $receipt = file_get_contents(resource_path('views/public/payments/receipt.blade.php'));
 
         $this->assertStringContainsString('--wash:#F2F5FA', $invoice);
+        $this->assertStringContainsString('Voucher discount', $invoice);
+        $this->assertStringContainsString('Booking total', $invoice);
         $this->assertStringContainsString('background:#EEF3FA', $invoice);
         $this->assertStringContainsString('background:#EEF3FA', $receipt);
         $this->assertStringContainsString('background:#052058;color:#FFFFFF', $receipt);
