@@ -6,6 +6,7 @@ use App\Http\Middleware\EnsureDojahVerified;
 use App\Http\Middleware\EnsureAzariStaff;
 use App\Http\Middleware\EnsureStaffPermission;
 use App\Http\Middleware\EnsureRouteModelOwnership;
+use App\Http\Middleware\EnsureRecentPasswordConfirmation;
 use App\Http\Middleware\CorrelationId;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetLocale;
@@ -30,6 +31,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'azari.admin' => EnsureAdmin::class,
             'azari.permission' => EnsureStaffPermission::class,
             'azari.owns-route' => EnsureRouteModelOwnership::class,
+            'azari.step-up' => EnsureRecentPasswordConfirmation::class,
         ]);
         $middleware->validateCsrfTokens(except: [
             'payments/*/webhook',
