@@ -132,6 +132,29 @@ class BookingAmendmentTopupTest extends TestCase
         $this->assertSame('successful_excess', $payment->fresh()->status);
     }
 
+    public function test_expired_paid_offer_creates_one_refund_request_and_never_allocates_money(): void
+    {
+        [$booking, $offer, $guest] = $this->fixture();
+        $this->mockCheckout();
+        $payment = app(BookingAmendmentPaymentService::class)->initiate($booking, $offer, $guest);
+        app(PaymentFinalizer::class)->apply($payment, [
+            'merchant_reference' => $payment->reference,
+            'amount' => (float) $payment->amount, 'currency' => $payment->currency,
+            'status' => 'successful', 'provider_status' => 'succeeded',
+        ]);
+        $offer->forceFill(['quote_expires_at' => now()->subMinutes(2)])->save();
+        $this->assertSame(0, \Illuminate\Support\Facades\Artisan::call('resavar:recover-amendment-payments'));
+        $this->assertSame('expired', $offer->fresh()->status);
+        $this->assertDatabaseHas('refunds', [
+            'payment_id' => $payment->getKey(),
+            'status' => 'requested',
+            'amount' => 50,
+        ]);
+        $this->assertSame(0, \Illuminate\Support\Facades\Artisan::call('resavar:recover-amendment-payments'));
+        $this->assertSame(1, \App\Models\Refund::query()->where('payment_id', $payment->getKey())->count());
+        $this->assertSame('successful_excess', $payment->fresh()->status);
+    }
+
     public function test_stranger_cannot_start_payment_for_another_customer_amendment(): void
     {
         [$booking, $offer] = $this->fixture();
