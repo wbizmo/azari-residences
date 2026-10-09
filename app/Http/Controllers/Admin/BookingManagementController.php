@@ -56,13 +56,17 @@ class BookingManagementController extends Controller
 
         $statusHistory = $booking->statusHistory()->with('changedBy')->paginate(10, ['*'], 'status_page')->withQueryString();
         $allowedTransitions = $lifecycle->allowedTransitions($booking);
+        $earlyDepartureRecorded = $booking->status === 'checked_out'
+            && $booking->statusHistory()->where('to_status', 'checked_out')
+                ->where('metadata->early_departure', true)->exists();
 
         return view('admin.bookings.show', compact(
             'booking',
             'guests',
             'payments',
             'statusHistory',
-            'allowedTransitions'
+            'allowedTransitions',
+            'earlyDepartureRecorded'
         ));
     }
 
@@ -165,6 +169,19 @@ class BookingManagementController extends Controller
         abort_unless(auth()->user()?->hasPermission('bookings.view'), 403);
 
         return response()->json(app(\App\Services\Bookings\BookingCancellationQuoteService::class)->quote($booking));
+    }
+
+    public function recordEarlyDeparture(
+        Request $request,
+        Booking $booking,
+        \App\Services\Bookings\BookingEarlyDepartureService $service
+    ): \Illuminate\Http\RedirectResponse {
+        $data = $request->validate([
+            'reason' => ['required', 'string', 'min:10', 'max:2000'],
+        ]);
+        $service->record($booking, $request->user(), $data['reason']);
+
+        return back()->with('success', 'Early departure recorded. Remaining nights are released by availability rules; any refund requires independent approval.');
     }
 
     public function requestCancellationOverride(
