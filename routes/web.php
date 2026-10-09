@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\CommercialInventoryController;
 use App\Http\Controllers\Admin\ContentBlockController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PropertyController as AdminPropertyController;
+use App\Http\Controllers\Admin\PropertyClaimVerificationController;
 use App\Http\Controllers\Admin\SiteSettingController;
 use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Auth\AzariAdminLoginController;
@@ -58,6 +59,9 @@ Route::prefix('azaridevadmin')->middleware(['auth.session', 'azari.staff'])->gro
     Route::resource('properties', AdminPropertyController::class)
         ->except(['show', 'destroy'])
         ->names('azari.admin.properties');
+    Route::post('/properties/{property}/verified-claims', [PropertyClaimVerificationController::class, 'update'])
+        ->middleware(['azari.staff:administrator', 'throttle:20,1'])
+        ->name('azari.admin.properties.claims.update');
 
     Route::get('/channels', [ChannelConnectionController::class, 'index'])->middleware('azari.permission:system-health.view')->name('azari.admin.channels.index');
     Route::post('/channels', [ChannelConnectionController::class, 'store'])->middleware('azari.permission:system-health.manage')->name('azari.admin.channels.store');
