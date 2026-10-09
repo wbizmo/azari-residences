@@ -154,6 +154,7 @@ class MarketplaceSearchService
                     'id' => $result['property']->getKey(),
                     'name' => $result['property']->name,
                     'slug' => $result['property']->slug,
+                    'url' => route('properties.show', $result['property']),
                     'lat' => (float) $result['property']->latitude,
                     'lng' => (float) $result['property']->longitude,
                     'price' => (float) $result['quote']['total'],
