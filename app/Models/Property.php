@@ -175,6 +175,18 @@ class Property extends Model
         return $this->hasMany(UserFavourite::class);
     }
 
+    public function verifiedClaims(): HasMany
+    {
+        return $this->hasMany(PropertyVerifiedClaim::class);
+    }
+
+    public function publicVerifiedClaims(): HasMany
+    {
+        return $this->verifiedClaims()->where('status', 'verified')
+            ->whereNotNull('verified_at')
+            ->where('expires_at', '>', now());
+    }
+
     public function recentViews(): HasMany
     {
         return $this->hasMany(RecentlyViewedProperty::class);
@@ -269,6 +281,21 @@ class Property extends Model
                 'is_public' => true,
                 'sort_order' => 0,
             ]);
+        });
+
+        // An address proof must not survive a changed property address or
+        // coordinate. Other claim types remain independently evaluated.
+        static::updated(function (self $property): void {
+            if ($property->wasChanged([
+                'formatted_address', 'address_line_1', 'address_city',
+                'address_region', 'address_country_code', 'latitude', 'longitude',
+            ]) && Schema::hasTable('property_verified_claims')) {
+                PropertyVerifiedClaim::query()
+                    ->where('property_id', $property->getKey())
+                    ->where('claim_type', 'address')
+                    ->where('status', 'verified')
+                    ->update(['status' => 'revoked', 'updated_at' => now()]);
+            }
         });
 
         static::saving(function (self $property): void {

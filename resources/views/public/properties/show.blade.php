@@ -163,6 +163,20 @@
                         <div class="prose">{!! nl2br(e($property->description)) !!}</div>
                     </section>
 
+                    @if($property->publicVerifiedClaims->isNotEmpty())
+                        <section class="reserva-property-section" aria-label="Staff-verified property facts">
+                            <h2>Independently verified details</h2>
+                            <p>These specific facts have been checked by Resavar staff within their verification period. Other property details remain property-supplied.</p>
+                            <ul class="reserva-verified-property-claims">
+                                @foreach($property->publicVerifiedClaims as $verifiedClaim)
+                                    <li>{{ \App\Models\PropertyVerifiedClaim::TYPES[$verifiedClaim->claim_type] ?? 'Verified property detail' }}
+                                        <small>Checked {{ $verifiedClaim->verified_at->format('M Y') }}</small>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </section>
+                    @endif
+
                     @if($property->amenities->isNotEmpty())
                         <section class="reserva-property-section">
                             <h2>Amenities</h2>
