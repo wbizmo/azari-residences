@@ -87,21 +87,17 @@ class UserProfileController extends Controller
     {
         $request->validate([
             'email_notifications' => ['nullable', 'boolean'],
-            'sms_notifications' => ['nullable', 'boolean'],
-            'whatsapp_notifications' => ['nullable', 'boolean'],
             'marketing_consent' => ['nullable', 'boolean'],
         ]);
         $user = $request->user();
 
         $email = $request->boolean('email_notifications');
-        $sms = $request->boolean('sms_notifications');
-        $whatsapp = $request->boolean('whatsapp_notifications');
         $marketing = $request->boolean('marketing_consent');
 
         $user->update([
             'email_notifications' => $email,
-            'sms_notifications' => $sms,
-            'whatsapp_notifications' => $whatsapp,
+            'sms_notifications' => false,
+            'whatsapp_notifications' => false,
             'marketing_consent' => $marketing,
         ]);
 
@@ -109,12 +105,12 @@ class UserProfileController extends Controller
             ['user_id' => $user->getKey()],
             [
                 'email_transactional' => $email,
-                'sms_transactional' => $sms,
-                'whatsapp_transactional' => $whatsapp,
+                'sms_transactional' => false,
+                'whatsapp_transactional' => false,
                 'in_app_transactional' => true,
                 'email_marketing' => $marketing && $email,
-                'sms_marketing' => $marketing && $sms,
-                'whatsapp_marketing' => $marketing && $whatsapp,
+                'sms_marketing' => false,
+                'whatsapp_marketing' => false,
                 'locale' => $user->locale ?: app()->getLocale(),
                 'timezone' => $user->timezone,
             ]
