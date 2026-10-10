@@ -20,6 +20,12 @@ $contactEmail=\App\Models\SiteSetting::valueFor('customer_dashboard_contact_emai
                 </a>
             @endif
         @endforeach
+        @if(config('travel.dining_enabled', false))
+            <a class="az-user-nav-link {{ request()->routeIs('user.dining.*') ? 'is-active' : '' }}" href="{{ route('user.dining.index') }}">
+                <span class="material-symbols-outlined" aria-hidden="true">restaurant</span>
+                <span>Dining concierge</span>
+            </a>
+        @endif
         @if(config('travel.requests_enabled'))
             <a class="az-user-nav-link {{ request()->routeIs('user.travel.*') ? 'is-active' : '' }}" href="{{ route('user.travel.index') }}">
                 <span class="material-symbols-outlined" aria-hidden="true">travel_explore</span>

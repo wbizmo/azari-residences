@@ -50,6 +50,17 @@
                     <span class="material-symbols-outlined">travel_explore</span><span>Travel suppliers</span>
                 </a>
             @endif
+            @if($adminActor?->isAdministrator())
+                <a class="az-nav-link" href="{{ route('azari.admin.dining.index') }}">
+                    <span class="material-symbols-outlined">restaurant</span><span>Dining concierge</span>
+                </a>
+                <a class="az-nav-link" href="{{ route('azari.admin.travel.assemblies.index') }}">
+                    <span class="material-symbols-outlined">account_tree</span><span>Trip recovery</span>
+                </a>
+                <a class="az-nav-link" href="{{ route('azari.admin.travel.mobile-demand') }}">
+                    <span class="material-symbols-outlined">smartphone</span><span>Mobile demand gate</span>
+                </a>
+            @endif
             @if(Route::has('azari.admin.staff.index') && $adminActor?->isAdministrator())
                 <a href="{{ route('azari.admin.staff.index') }}" class="az-nav-link {{ request()->routeIs('azari.admin.staff.*') ? 'is-active' : '' }}"><span class="material-symbols-outlined">badge</span><span>Staff</span></a>
             @endif
