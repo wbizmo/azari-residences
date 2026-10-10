@@ -8,6 +8,7 @@ use App\Models\AuditLog;
 use App\Models\OwnerPayoutProfile;
 use App\Models\Property;
 use App\Models\PropertyListing;
+use App\Models\PropertyPhotoModeration;
 use App\Models\SiteSetting;
 use App\Models\WithdrawalRequest;
 use App\Services\Owners\ListingCompletenessService;
@@ -75,6 +76,10 @@ class OwnerMarketplaceController extends Controller
             'feature_now' => ['nullable', 'boolean'],
             'media_reviewed' => ['required', 'accepted'],
             'media_review_note' => ['required', 'string', 'min:12', 'max:1500'],
+            'photo_alt' => ['required', 'array'],
+            'photo_alt.*' => ['required', 'string', 'min:8', 'max:300'],
+            'photo_attribution' => ['required', 'array'],
+            'photo_attribution.*' => ['required', 'string', 'min:3', 'max:300'],
         ]);
 
         DB::transaction(function () use ($listing, $data, $request, $completeness): void {
@@ -117,8 +122,30 @@ class OwnerMarketplaceController extends Controller
             $payload['is_featured'] = (bool) ($data['feature_now'] ?? false);
             $payload['status'] = ($data['publish_now'] ?? false) ? 'available' : 'draft';
 
+            foreach ($files as $image) {
+                $hash = PropertyPhotoModeration::pathHash($image);
+                abort_unless(filled($data['photo_alt'][$hash] ?? null)
+                    && filled($data['photo_attribution'][$hash] ?? null), 422,
+                    'Every submitted photo requires its own description and attribution.');
+            }
+
             $property = Property::query()->create($payload);
             $property->amenities()->sync($locked->amenity_ids ?? []);
+
+            foreach ($files->unique() as $image) {
+                $hash = PropertyPhotoModeration::pathHash($image);
+                PropertyPhotoModeration::query()->create([
+                    'property_id' => $property->id,
+                    'path_hash' => $hash,
+                    'path' => $image,
+                    'status' => 'approved',
+                    'alt_text' => trim($data['photo_alt'][$hash]),
+                    'attribution' => trim($data['photo_attribution'][$hash]),
+                    'review_note' => $data['media_review_note'],
+                    'reviewed_by' => $request->user()->id,
+                    'reviewed_at' => now(),
+                ]);
+            }
 
             $previousStatus = $locked->status;
             $locked->update([
