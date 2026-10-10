@@ -56,6 +56,20 @@ class ReviewController extends Controller
             ]);
         }
 
+        if (filled($data['admin_reply'] ?? null)
+            && app(ReviewPublicationGuard::class)->containsContactDetails(['body' => $data['admin_reply']])) {
+            throw ValidationException::withMessages([
+                'admin_reply' => 'Public responses must not contain contact details or external links.',
+            ]);
+        }
+        if (($data['owner_reply_status'] ?? null) === 'approved'
+            && filled($review->owner_reply)
+            && app(ReviewPublicationGuard::class)->containsContactDetails(['body' => $review->owner_reply])) {
+            throw ValidationException::withMessages([
+                'owner_reply_status' => 'The proposed property response contains contact details and cannot be approved.',
+            ]);
+        }
+
         $old = $review->toArray();
         $replyChanged = (string) ($review->admin_reply ?? '') !== (string) ($data['admin_reply'] ?? '');
         $wasHidden = in_array($review->status, ['hidden', 'flagged', 'archived'], true);
