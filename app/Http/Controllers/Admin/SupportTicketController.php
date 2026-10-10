@@ -2,7 +2,9 @@
 namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Services\Security\SupportAttachmentGuard;
-use App\Models\{AuditLog,SupportTicket,SupportTicketMessage,User};
+use App\Models\{AuditLog,Booking,Payment,SupportTicket,SupportTicketMessage,User};
+use App\Services\Payments\RefundService;
+use Illuminate\Validation\ValidationException;
 use App\Notifications\PremiumMailNotification;
 use Illuminate\Http\{RedirectResponse,Request};
 use Illuminate\Support\Facades\{DB,Storage};
@@ -172,5 +174,77 @@ class SupportTicketController extends Controller {
      });
      return back()->with('success', 'Recovery request escalated for authorized review. No booking or payment was changed.');
  }
+ /**
+  * An authorized finance reviewer may initiate a refund request from a
+  * documented support case. This records a reserved refund intent; it NEVER
+  * claims provider settlement or dispatches money without the existing
+  * step-up protected gateway/reconciliation workflow.
+  */
+ public function requestBookingRefund(
+     Request $request,
+     SupportTicket $ticket,
+     RefundService $refunds
+ ): RedirectResponse {
+     abort_unless($request->user()?->isAdministrator(), 403);
+     $data = $request->validate([
+         'payment_id' => ['required', 'integer', 'exists:payments,id'],
+         'amount' => ['required', 'numeric', 'gt:0', 'max:1000000000'],
+         'reason' => ['required', 'string', 'min:15', 'max:500'],
+     ]);
+     $refund = DB::transaction(function () use ($request, $ticket, $data, $refunds) {
+         // Same lock ordering as RefundService: booking before payment.
+         $booking = Booking::query()->whereKey($ticket->booking_id)
+             ->lockForUpdate()->firstOrFail();
+         $lockedTicket = SupportTicket::query()->whereKey($ticket->id)
+             ->lockForUpdate()->firstOrFail();
+         abort_unless((int) $lockedTicket->booking_id === (int) $booking->id, 404);
+         abort_if(in_array($lockedTicket->status, ['resolved', 'closed'], true),
+             422, 'Reopen this support case before requesting a refund.');
+
+         $payment = Payment::query()->whereKey($data['payment_id'])
+             ->where('booking_id', $booking->id)->firstOrFail();
+         $amount = round((float) $data['amount'], 2);
+         $key = hash('sha256', implode('|', [
+             'resavar-support-refund-v1', $lockedTicket->id, $payment->id,
+             number_format($amount, 2, '.', ''),
+         ]));
+
+         $refund = $refunds->request(
+             $payment, $amount, $request->user()->id,
+             'Support '.$lockedTicket->reference.': '.trim($data['reason']), $key
+         );
+
+         $existingNote = $lockedTicket->messages()->where('internal', true)
+             ->where('body', 'like', '%'.$refund->reference.'%')->exists();
+         if (! $existingNote) {
+             $message = $lockedTicket->messages()->create([
+                 'user_id' => $request->user()->id,
+                 'internal' => true,
+                 'body' => 'Authorized refund request '.$refund->reference.
+                     ' created for payment '.$payment->reference.
+                     '. Amount '.$refund->currency.' '.number_format($amount, 2).
+                     '. Reason: '.trim($data['reason']).
+                     '. Status: '.$refund->status.
+                     '. Provider settlement is NOT confirmed.',
+             ]);
+             AuditLog::record('support_ticket.refund_requested',
+                 $lockedTicket, [], [],
+                 ['refund_id' => $refund->id, 'payment_id' => $payment->id,
+                  'message_id' => $message->id]);
+         }
+
+         $lockedTicket->update([
+             'status' => 'escalated',
+             'priority' => 'urgent',
+             'escalated_at' => $lockedTicket->escalated_at ?: now(),
+         ]);
+         return $refund;
+     }, 3);
+
+     return redirect()->route('azari.admin.payments.show', $refund->payment_id)
+         ->with('warning',
+             'Refund '.$refund->reference.' was requested, not paid. Dispatch or reconcile it through the authorized payment workflow.');
+ }
+
  public function attachment(SupportTicket $ticket,SupportTicketMessage $message):StreamedResponse{abort_unless($message->support_ticket_id===$ticket->id&&$message->attachment_path,404);abort_unless(Storage::disk('private')->exists($message->attachment_path),404);AuditLog::record('support_ticket.attachment_downloaded',$ticket,[],[],['message_id'=>$message->id]);return Storage::disk('private')->download($message->attachment_path,$message->attachment_name?:'attachment');}
 }
