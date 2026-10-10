@@ -118,6 +118,20 @@
         }
     }
 
+    const clearOnline = document.querySelector('[data-offline-clear-online]');
+    if (clearOnline) {
+        clearOnline.addEventListener('click', () => {
+            const feedback = document.querySelector('[data-offline-clear-feedback]');
+            if (!capable) {
+                feedback.textContent = 'Offline storage is not available in this browser.';
+                return;
+            }
+            if (!window.confirm('Permanently delete all encrypted offline stays saved on this browser?')) return;
+            localStorage.removeItem(KEY);
+            feedback.textContent = 'Offline copies were deleted from this browser.';
+        });
+    }
+
     const openForm = document.querySelector('[data-offline-open]');
     if (openForm) {
         const feedback = document.querySelector('[data-offline-open-feedback]');
