@@ -27,6 +27,7 @@ final class TravelSupplierController extends Controller
                 'offers' => TravelOffer::query()->with('supplier')->latest()->limit(100)->get(),
                 'pendingRequests' => TravelRequest::query()
                     ->whereIn('status', ['requested', 'supplier_acknowledged'])
+                    ->where('expires_at', '>', now())
                     ->with('offer:id,title')->latest()->limit(50)->get(),
             ]);
         }
@@ -37,6 +38,7 @@ final class TravelSupplierController extends Controller
                 ->latest()->paginate(30),
             'pending_requests' => TravelRequest::query()
                 ->whereIn('status', ['requested', 'supplier_acknowledged'])
+                ->where('expires_at', '>', now())
                 ->with('offer:id,title')->latest()->limit(30)
                 ->get(['id','travel_offer_id','kind','status','expires_at']),
         ]);

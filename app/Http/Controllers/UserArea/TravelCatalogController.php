@@ -18,14 +18,19 @@ final class TravelCatalogController extends Controller
     {
         abort_unless(config('travel.requests_enabled'), 404);
 
-        $kind = $request->validate([
+        $filters = $request->validate([
             'kind' => ['sometimes', Rule::in(['transfer', 'experience', 'car', 'flight'])],
-        ])['kind'] ?? null;
+            'origin' => ['nullable', 'string', 'max:160'],
+            'destination' => ['nullable', 'string', 'max:160'],
+            'party_size' => ['nullable', 'integer', 'min:1', 'max:12'],
+            'date' => ['nullable', 'date', 'after_or_equal:today'],
+        ]);
+        $kind = $filters['kind'] ?? null;
 
         $certifiedFlightKeys = app(\App\Services\Travel\TravelPartnerGateway::class)->certifiedKeys();
 
         $offers = TravelOffer::query()
-            ->with(['supplier', 'slots' => fn ($q) => $q->where('starts_at', '>', now())])
+            ->with(['supplier', 'slots' => fn ($q) => $q->where('starts_at', '>', now())->limit(12)])
             ->whereHas('supplier', fn ($q) => $q->where('status', 'approved')
                 ->whereNotNull('contract_verified_at')
                 ->whereNotNull('safety_verified_at')
@@ -39,6 +44,12 @@ final class TravelCatalogController extends Controller
             })
             ->whereIn('currency', ['USD', 'EUR', 'GBP', 'NGN', 'CAD'])
             ->when($kind, fn ($q) => $q->where('kind', $kind))
+            ->when(filled($filters['origin'] ?? null), fn ($q) => $q->where('origin', 'like',
+                '%'.str_replace(['%', '_'], ['\\%', '\\_'], trim($filters['origin'])).'%'))
+            ->when(filled($filters['destination'] ?? null), fn ($q) => $q->where('destination', 'like',
+                '%'.str_replace(['%', '_'], ['\\%', '\\_'], trim($filters['destination'])).'%'))
+            ->when(isset($filters['party_size']), fn ($q) => $q->where('max_party', '>=', $filters['party_size']))
+            ->when(isset($filters['date']), fn ($q) => $q->whereDate('starts_at', $filters['date']))
             ->orderBy('starts_at')->orderBy('id')
             ->paginate(12)->withQueryString();
 

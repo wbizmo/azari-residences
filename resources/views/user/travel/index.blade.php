@@ -9,6 +9,14 @@
             href="{{ route('user.travel.index', $slug === 'all' ? [] : ['kind' => $slug]) }}">{{ $label }}</a>
     @endforeach
 </nav>
+<form method="GET" action="{{ route('user.travel.index') }}" class="az-form-grid" style="margin-bottom:18px">
+    @if($kind)<input type="hidden" name="kind" value="{{ $kind }}">@endif
+    <label><span>Origin / pickup</span><input name="origin" value="{{ request('origin') }}" maxlength="160" placeholder="Airport or city"></label>
+    <label><span>Destination / drop-off</span><input name="destination" value="{{ request('destination') }}" maxlength="160" placeholder="City or property"></label>
+    <label><span>Travellers</span><input type="number" name="party_size" value="{{ request('party_size') }}" min="1" max="12"></label>
+    <label><span>Date (UTC)</span><input type="date" name="date" value="{{ request('date') }}"></label>
+    <button class="az-user-button az-user-button--dark" type="submit">Search supplier offers</button>
+</form>
 <section class="az-user-panel" style="margin-bottom:18px">
     <header class="az-user-panel-header">
         <div>
@@ -108,7 +116,7 @@
             <a class="az-user-list-item" href="{{ route('user.travel.show', $travel) }}">
                 <div><h3>{{ $travel->offer?->title ?? ucfirst($travel->kind) }}</h3>
                     <p>{{ $travel->currency }} {{ number_format($travel->quoted_total_minor / 100, 2) }} indicative
-                        · {{ str_replace('_', ' ', $travel->status) }}
+                        · {{ in_array($travel->status, ['requested','supplier_acknowledged']) && $travel->expires_at->isPast() ? 'expired' : str_replace('_', ' ', $travel->status) }}
                         @if($travel->itinerary) · {{ $travel->itinerary->name }} @endif
                     </p>
                 </div><span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
