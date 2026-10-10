@@ -60,6 +60,7 @@ Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer', 'azari.
         Route::get('/payments', [UserPaymentController::class, 'index'])->name('payments.index');
         Route::get('/payments/{payment}', [UserPaymentController::class, 'show'])->name('payments.show');
         Route::post('/payments/{payment}/retry', [UserPaymentController::class, 'retry'])->name('payments.retry');
+        Route::post('/payments/{payment}/resume', [UserPaymentController::class, 'resume'])->middleware('throttle:10,1')->name('payments.resume');
         Route::get('/documents', [UserDocumentController::class, 'index'])->name('documents.index');
 
         Route::get('/additional-guests', [AdditionalGuestController::class, 'index'])
