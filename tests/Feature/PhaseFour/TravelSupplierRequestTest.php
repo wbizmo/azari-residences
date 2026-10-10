@@ -227,6 +227,19 @@ final class TravelSupplierRequestTest extends TestCase
         $this->assertDatabaseCount('travel_requests', 0);
     }
 
+    public function test_guest_supplier_acknowledged_cancellation_remains_pending_until_provider_confirms(): void
+    {
+        $offer = $this->offer('transfer');
+        $guest = User::factory()->create(['email_verified_at' => now()]);
+        $travel = app(TravelRequestService::class)->create($guest, $offer, [
+            'idempotency_key' => (string) Str::uuid(), 'party_size' => 1, 'data_share_consent' => true,
+        ]);
+        $travel->update(['status' => 'supplier_acknowledged', 'supplier_reference' => 'SUPPLIER-REF-123']);
+        $this->actingAs($guest)->post(route('user.travel.cancel', $travel))->assertRedirect();
+        $this->assertSame('cancellation_requested', $travel->fresh()->status);
+        $this->assertNull($travel->fresh()->cancelled_at);
+    }
+
     public function test_staff_review_requires_actual_acknowledgement_and_guest_consent(): void
     {
         $offer = $this->offer('transfer');

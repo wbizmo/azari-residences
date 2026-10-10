@@ -207,8 +207,14 @@ final class TravelRequestService
             }
 
             $before = $locked->status;
-            $locked->update(['status' => 'cancelled', 'cancelled_at' => now()]);
-            $this->event($locked, 'guest_cancelled', $before, 'cancelled', $user->id);
+            // After supplier acknowledgement, only the supplier may
+            // attest actual cancellation. Keep the request visible for support.
+            $next = $before === 'supplier_acknowledged' ? 'cancellation_requested' : 'cancelled';
+            $locked->update([
+                'status' => $next,
+                'cancelled_at' => $next === 'cancelled' ? now() : null,
+            ]);
+            $this->event($locked, 'guest_cancel_requested', $before, $next, $user->id);
 
             // Deliberately no Booking/Payment/Refund mutations.
             return $locked;
@@ -228,10 +234,11 @@ final class TravelRequestService
             if ($locked->status !== 'requested' || $locked->expires_at->lte(now())) {
                 throw ValidationException::withMessages(['request' => 'Only current, pending requests can be reviewed.']);
             }
-            if ($accepted && (! $locked->supplier->isApproved()
-                || ! $locked->data_share_consent || ! filled($supplierReference))) {
+            if ($accepted) {
+                // Staff cannot self-attest a provider response. It must
+                // arrive through the independently authenticated inbox.
                 throw ValidationException::withMessages([
-                    'supplier_reference' => 'Supplier approval, consent and a verified acknowledgment reference are required.',
+                    'supplier_reference' => 'Supplier acknowledgement requires an authenticated provider callback.',
                 ]);
             }
 

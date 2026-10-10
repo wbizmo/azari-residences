@@ -24,6 +24,7 @@ class TravelRequest extends Model
     protected function casts(): array
     {
         return [
+            'quoted_total_minor' => 'integer',
             'quote_snapshot' => 'array', 'preferences' => 'encrypted:array',
             'data_share_consent' => 'boolean', 'expires_at' => 'datetime',
             'cancelled_at' => 'datetime', 'supplier_acknowledged_at' => 'datetime',
@@ -33,6 +34,11 @@ class TravelRequest extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function fulfillment(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(TravelFulfillment::class);
     }
 
     public function offer(): BelongsTo

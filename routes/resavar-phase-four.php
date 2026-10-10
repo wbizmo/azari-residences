@@ -12,6 +12,8 @@ Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer'])
             ->middleware('throttle:10,1')->name('store');
         Route::get('/requests/{travelRequest}', [TravelCatalogController::class, 'show'])
             ->name('show');
+        Route::get('/vouchers/{voucher}/qr', [\App\Http\Controllers\UserArea\TravelVoucherController::class, 'qr'])
+            ->middleware('throttle:20,1')->name('voucher.qr');
         Route::post('/requests/{travelRequest}/cancel', [TravelCatalogController::class, 'cancel'])
             ->middleware('throttle:10,1')->name('cancel');
     });
@@ -35,6 +37,8 @@ Route::middleware(['auth', 'auth.session', 'azari.staff', 'azari.staff:administr
             ->middleware(['azari.step-up', 'throttle:10,1'])->name('offers.unpublish');
         Route::post('/offers/{offer}/slots', [TravelSupplierController::class, 'storeSlot'])
             ->middleware('throttle:10,1')->name('slots.store');
+        Route::post('/vouchers/redeem', \App\Http\Controllers\Admin\TravelVoucherRedemptionController::class)
+            ->middleware(['azari.step-up', 'throttle:15,1'])->name('vouchers.redeem');
         Route::post('/requests/{travelRequest}/review', [TravelSupplierController::class, 'review'])
             ->middleware(['azari.step-up', 'throttle:20,1'])->name('requests.review');
     });
