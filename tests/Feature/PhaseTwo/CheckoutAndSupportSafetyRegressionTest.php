@@ -38,8 +38,9 @@ class CheckoutAndSupportSafetyRegressionTest extends TestCase
     {
         $booking = Booking::factory()->create(['status' => 'pending_payment']);
 
+        // This endpoint is behind authenticated customer middleware.
         $this->post(route('public.payment.initialise', $booking->reference), ['provider' => 'flutterwave'])
-            ->assertNotFound();
+            ->assertRedirect();
 
         $this->assertDatabaseMissing('payments', ['booking_id' => $booking->id]);
     }
