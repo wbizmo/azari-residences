@@ -7,6 +7,7 @@ use App\Jobs\SyncChannelConnection;
 use App\Models\AuditLog;
 use App\Models\ChannelConnection;
 use App\Models\Property;
+use App\Services\Channels\ChannelConnectionLifecycleService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -30,8 +31,15 @@ class ChannelConnectionController extends Controller
         return back()->with('success', 'Channel connection created. It will fail closed until the first successful sync.');
     }
 
-    public function update(Request $request, ChannelConnection $connection): RedirectResponse
+    public function update(Request $request, ChannelConnection $connection, ChannelConnectionLifecycleService $lifecycle): RedirectResponse
     {
+        abort_if(in_array($connection->status, [ChannelConnectionLifecycleService::PENDING,
+            ChannelConnectionLifecycleService::DISCONNECTED], true), 409,
+            'Disconnected channels require a new certified connection.');
+        if (! $request->boolean('is_active', true)) {
+            $lifecycle->disconnect($connection, $request->user()?->getKey());
+            return back()->with('success', 'Channel disconnected without releasing existing reservations.');
+        }
         $old = $connection->only(['name','is_active','fail_closed','stale_after_minutes']);
         $connection->update($this->validatePayload($request, $connection));
         AuditLog::record('channel.connection_updated', $connection, $old, $connection->only(array_keys($old)));
@@ -40,15 +48,16 @@ class ChannelConnectionController extends Controller
 
     public function sync(ChannelConnection $connection): RedirectResponse
     {
+        abort_unless($connection->is_active && ! in_array($connection->status,
+            [ChannelConnectionLifecycleService::PENDING, ChannelConnectionLifecycleService::DISCONNECTED], true), 409);
         SyncChannelConnection::dispatch($connection->getKey());
         return back()->with('success', 'Channel synchronization queued.');
     }
 
-    public function destroy(ChannelConnection $connection): RedirectResponse
+    public function destroy(ChannelConnection $connection, ChannelConnectionLifecycleService $lifecycle): RedirectResponse
     {
-        AuditLog::record('channel.connection_deleted', $connection, $connection->only(['property_id','provider','name']), []);
-        $connection->delete();
-        return back()->with('success', 'Channel connection removed.');
+        $lifecycle->disconnect($connection, auth()->id());
+        return back()->with('success', 'Channel disconnected. Unreconciled reservations remain blocked.');
     }
 
     private function validatePayload(Request $request, ?ChannelConnection $connection = null): array
@@ -65,7 +74,7 @@ class ChannelConnectionController extends Controller
             abort_unless(\App\Models\AccommodationType::query()->whereKey($data['accommodation_type_id'])->where('property_id',$data['property_id'])->exists(), 422);
         }
         $data['is_active'] = $request->boolean('is_active', true);
-        $data['fail_closed'] = $request->boolean('fail_closed', true);
+        $data['fail_closed'] = true; // External inventory must fail closed.
         return $data;
     }
 }

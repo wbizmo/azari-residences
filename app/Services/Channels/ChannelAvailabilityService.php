@@ -27,11 +27,14 @@ class ChannelAvailabilityService
 
         $connections = ChannelConnection::query()
             ->where('property_id', $type->property_id)
-            ->where('is_active', true)
+            ->where(fn ($q) => $q->where('is_active', true)
+                ->orWhere('status', ChannelConnectionLifecycleService::PENDING))
             ->where(fn ($q) => $q->whereNull('accommodation_type_id')->orWhere('accommodation_type_id', $type->id))
             ->get();
 
-        if ($connections->contains(fn (ChannelConnection $connection) => $connection->fail_closed && $this->isStale($connection))) {
+        if ($connections->contains(fn (ChannelConnection $connection) =>
+            $connection->status === ChannelConnectionLifecycleService::PENDING
+            || ($connection->fail_closed && $this->isStale($connection)))) {
             return $dates->map(fn () => max(1, (int) $type->total_inventory));
         }
 

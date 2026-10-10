@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Jobs\SyncChannelConnection;
 use App\Models\ChannelConnection;
 use App\Models\Property;
+use App\Services\Channels\ChannelConnectionLifecycleService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -29,11 +30,17 @@ class OwnerChannelConnectionController extends Controller
     }
     public function sync(Request $request, ChannelConnection $connection): RedirectResponse
     {
-        $this->authorizeConnection($request, $connection); SyncChannelConnection::dispatch($connection->id); return back()->with('success','Synchronization queued.');
+        $this->authorizeConnection($request, $connection);
+        abort_unless($connection->is_active && ! in_array($connection->status,
+            [ChannelConnectionLifecycleService::PENDING, ChannelConnectionLifecycleService::DISCONNECTED], true), 409);
+        SyncChannelConnection::dispatch($connection->id);
+        return back()->with('success','Synchronization queued.');
     }
-    public function destroy(Request $request, ChannelConnection $connection): RedirectResponse
+    public function destroy(Request $request, ChannelConnection $connection, ChannelConnectionLifecycleService $lifecycle): RedirectResponse
     {
-        $this->authorizeConnection($request, $connection); $connection->delete(); return back()->with('success','Channel connection removed.');
+        $this->authorizeConnection($request, $connection);
+        $lifecycle->disconnect($connection, $request->user()->getKey());
+        return back()->with('success', 'Channel disconnected. External bookings remain protected until reconciled.');
     }
     private function payload(Request $request): array
     {
