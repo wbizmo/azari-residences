@@ -31,7 +31,7 @@ class SendAzariTransactionalReminders extends Command
         Booking::query()
             ->with(['property', 'user', 'payments'])
             ->whereIn('status', $active)
-            ->whereBetween('check_in', [$today->subDay()->toDateString(), $today->addDays(2)->toDateString()])
+            ->whereBetween('check_in', [$today->subDay()->toDateString(), $today->addDays(2)->endOfDay()->toDateTimeString()])
             ->chunkById(100, function ($bookings) use (&$counts, $mail): void {
                 foreach ($bookings as $booking) {
                     if ($booking->check_in?->toDateString() !== $this->localToday($booking)->addDay()->toDateString()) continue;
@@ -45,7 +45,7 @@ class SendAzariTransactionalReminders extends Command
         Booking::query()
             ->with(['property', 'user', 'payments'])
             ->whereIn('status', ['confirmed', 'paid'])
-            ->whereBetween('check_in', [$today->subDay()->toDateString(), $today->addDay()->toDateString()])
+            ->whereBetween('check_in', [$today->subDay()->toDateString(), $today->addDay()->endOfDay()->toDateTimeString()])
             ->chunkById(100, function ($bookings) use (&$counts, $mail): void {
                 foreach ($bookings as $booking) {
                     if ($booking->check_in?->toDateString() !== $this->localToday($booking)->toDateString()) continue;
@@ -59,7 +59,7 @@ class SendAzariTransactionalReminders extends Command
         Booking::query()
             ->with(['property', 'user', 'payments'])
             ->whereIn('status', $active)
-            ->whereBetween('check_out', [$today->addDay()->toDateString(), $today->addDays(3)->toDateString()])
+            ->whereBetween('check_out', [$today->addDay()->toDateString(), $today->addDays(3)->endOfDay()->toDateTimeString()])
             ->chunkById(100, function ($bookings) use (&$counts, $mail): void {
                 foreach ($bookings as $booking) {
                     if ($booking->check_out?->toDateString() !== $this->localToday($booking)->addDays(2)->toDateString()) continue;
@@ -73,7 +73,7 @@ class SendAzariTransactionalReminders extends Command
         Booking::query()
             ->with(['property', 'user', 'payments'])
             ->whereIn('status', $active)
-            ->whereBetween('check_out', [$today->toDateString(), $today->addDays(2)->toDateString()])
+            ->whereBetween('check_out', [$today->toDateString(), $today->addDays(2)->endOfDay()->toDateTimeString()])
             ->chunkById(100, function ($bookings) use (&$counts, $mail): void {
                 foreach ($bookings as $booking) {
                     if ($booking->check_out?->toDateString() !== $this->localToday($booking)->addDay()->toDateString()) continue;
