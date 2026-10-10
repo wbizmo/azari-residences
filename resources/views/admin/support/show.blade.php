@@ -93,6 +93,17 @@
     </section>
     @endif
 
+    @if($ticket->booking)
+        <section class="az-admin-card">
+            <div class="az-admin-card__header"><h2>Booking recovery</h2></div>
+            <div class="az-admin-card__body">
+                <a class="button button-secondary" href="{{ route('azari.admin.bookings.show', $ticket->booking) }}">
+                    Open authorized booking, date changes and cancellations
+                </a>
+            </div>
+        </section>
+    @endif
+
     <section class="az-admin-card">
         <div class="az-admin-card__header">
             <div>
