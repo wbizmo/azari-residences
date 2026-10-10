@@ -49,7 +49,7 @@ return new class extends Migration {
         });
         Schema::create('trip_assemblies', function (Blueprint $t) {
             $t->uuid('id')->primary();
-            $t->foreignId('trip_itinerary_id')->constrained()->restrictOnDelete();
+            $t->foreignId('trip_itinerary_id')->nullable()->constrained()->nullOnDelete();
             $t->foreignId('user_id')->constrained()->restrictOnDelete();
             $t->string('idempotency_key', 100);
             $t->char('payload_hash', 64);

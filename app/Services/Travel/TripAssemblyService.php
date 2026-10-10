@@ -54,7 +54,9 @@ final class TripAssemblyService
     {
         return DB::transaction(function () use ($staff,$assembly): TripAssembly {
             $item=TripAssembly::query()->whereKey($assembly->id)->lockForUpdate()->firstOrFail();
-            $current=app(TripAccountingService::class)->snapshot($item->itinerary);
+            $current=$item->itinerary
+                ? app(TripAccountingService::class)->snapshot($item->itinerary)
+                : ['items'=>[],'totals'=>[],'requires_fx_quote'=>false];
             $hash=hash('sha256',json_encode($current,JSON_THROW_ON_ERROR));
             $before=$item->status;
             // Never attempt external payment or change other component states.

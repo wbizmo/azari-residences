@@ -19,7 +19,7 @@ final class TripAccountingService
         $travels = \App\Models\TravelRequest::query()
             ->where('trip_itinerary_id',$itinerary->id)
             ->where('user_id',$itinerary->user_id)
-            ->with(['offer:id,title','fulfillment:id,travel_request_id,status,verified_payment_reference,payment_verified_at,amount_minor,currency'])
+            ->with(['offer:id,title','fulfillment:id,travel_request_id,status,verified_payment_reference,payment_verified_at,amount_minor,currency,provider_confirmation'])
             ->orderBy('id')->get();
         $dining = \App\Models\DiningRequest::query()->where('trip_itinerary_id',$itinerary->id)
             ->where('user_id',$itinerary->user_id)->with('partner:id,name')->orderBy('id')->get();

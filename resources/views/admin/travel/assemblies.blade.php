@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('admin.layouts.app')
 @section('title','Trip recovery queue')
 @section('content')
 <div style="padding:22px">

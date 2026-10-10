@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('admin.layouts.app')
 @section('title','Dining concierge')
 @section('content')
 <div style="padding:22px">

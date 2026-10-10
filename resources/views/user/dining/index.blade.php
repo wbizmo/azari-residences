@@ -28,7 +28,7 @@
                         <input type="hidden" name="dining_partner_id" value="{{ $partner->id }}">
                         <input type="hidden" name="idempotency_key" value="{{ (string)\Illuminate\Support\Str::uuid() }}">
                         <label>Guests <input type="number" name="party_size" min="1" max="12" value="2" required></label>
-                        <label>Preferred time ({{ $partner->timezone }}). Enter in your local device time.
+                        <label>Preferred time (UTC). Restaurant operates in {{ $partner->timezone }}.
                             <input type="datetime-local" name="requested_for" required></label>
                         <label>Trip (optional) <select name="trip_itinerary_id"><option value="">No trip</option>
                             @foreach($itineraries as $trip)<option value="{{ $trip->id }}">{{ $trip->name }}</option>@endforeach
