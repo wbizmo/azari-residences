@@ -17,6 +17,26 @@
         </div>
     @endif
     @if($listing->cover_image)<img class="az-owner-cover" src="{{ Storage::disk('public')->url($listing->cover_image) }}" alt="{{ data_get($listing->property_data,'name','Property cover') }}">@endif
+    <section aria-label="Owner-submitted photography awaiting moderation">
+        <h2>Submitted property photos</h2>
+        <p>Inspect the cover and every gallery photo for accuracy, privacy, prohibited content and mismatch with the advertised room. Broken images must block approval.</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr));gap:14px">
+            @foreach(($listing->gallery ?? []) as $index => $image)
+                <figure style="margin:0;padding:10px;border:1px solid #cbd5e1;border-radius:10px">
+                    <img src="{{ Storage::disk('public')->url($image) }}"
+                        alt="Submitted property photo {{ $index + 1 }} for moderation"
+                        loading="lazy" decoding="async"
+                        style="display:block;width:100%;aspect-ratio:4/3;object-fit:cover">
+                    <figcaption>Gallery photo {{ $index + 1 }} · review required</figcaption>
+                </figure>
+            @endforeach
+        </div>
+        @if($listing->media_reviewed_at)
+            <p>Media reviewed {{ $listing->media_reviewed_at->format('j M Y H:i') }}
+                by {{ $listing->mediaReviewedBy?->name ?? 'authorized reviewer' }}.
+                {{ $listing->media_review_note }}</p>
+        @endif
+    </section>
     <dl class="az-admin-detail-list">@foreach($listing->property_data as $key=>$value)@unless(is_array($value))<dt>{{ ucfirst(str_replace('_',' ',$key)) }}</dt><dd>{{ $value }}</dd>@endunless @endforeach</dl>
     <p><strong>Amenities:</strong> {{ $amenities->join(', ') ?: 'None selected' }}</p>
     <p><strong>Owner revenue:</strong> No Resavar platform commission is deducted from owner-property room sales.</p>
@@ -39,6 +59,12 @@
         <p><strong>Revenue treatment:</strong> Owner receives 100% of applicable owner-property room-sale revenue. Resavar platform commission: 0%.</p>
         <label><input type="checkbox" name="publish_now" value="1"> Publish immediately</label>
         <label><input type="checkbox" name="feature_now" value="1"> Feature immediately</label>
+        <label><input type="checkbox" name="media_reviewed" value="1" required>
+            I examined the cover and all gallery images, confirmed that they depict the listed property and contain no prohibited or private material.
+        </label>
+        <label>Mandatory photo-review note
+            <textarea name="media_review_note" minlength="12" maxlength="1500" required>{{ old('media_review_note') }}</textarea>
+        </label>
         <label>Internal notes<textarea name="admin_notes">{{ old('admin_notes') }}</textarea></label>
         <button class="az-admin-button">Approve and create owner-managed property</button>
     </form>
