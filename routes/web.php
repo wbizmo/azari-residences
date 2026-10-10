@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\ContentBlockController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PropertyController as AdminPropertyController;
 use App\Http\Controllers\Admin\PropertyClaimVerificationController;
+use App\Http\Controllers\Admin\PropertyPhotoModerationController;
 use App\Http\Controllers\Admin\SiteSettingController;
 use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Auth\AzariAdminLoginController;
@@ -59,6 +60,9 @@ Route::prefix('azaridevadmin')->middleware(['auth.session', 'azari.staff'])->gro
     Route::resource('properties', AdminPropertyController::class)
         ->except(['show', 'destroy'])
         ->names('azari.admin.properties');
+    Route::patch('/properties/{property}/photos/{photo}', [PropertyPhotoModerationController::class, 'update'])
+        ->middleware(['azari.staff:administrator', 'throttle:20,1'])
+        ->name('azari.admin.properties.photos.update');
     Route::post('/properties/{property}/verified-claims', [PropertyClaimVerificationController::class, 'update'])
         ->middleware(['azari.staff:administrator', 'throttle:20,1'])
         ->name('azari.admin.properties.claims.update');
