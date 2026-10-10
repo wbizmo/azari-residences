@@ -128,10 +128,8 @@ final class TravelSupplierController extends Controller
             if (! $locked->supplier->isApproved() || $locked->expires_at->lte(now())) {
                 throw ValidationException::withMessages(['offer' => 'Approved and unexpired supplier offers only.']);
             }
-            if ($locked->kind === 'flight' && ! array_key_exists(
-                (string) $locked->supplier->integration_key,
-                (array) config('travel.supplier_adapters', [])
-            )) {
+            if ($locked->kind === 'flight'
+                && ! app(\App\Services\Travel\TravelPartnerGateway::class)->supports($locked->supplier)) {
                 throw ValidationException::withMessages(['offer' => 'A certified airline distribution adapter is required before publication.']);
             }
             $locked->update(['published_at' => now()]);

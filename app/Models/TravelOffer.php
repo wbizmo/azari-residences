@@ -38,10 +38,8 @@ class TravelOffer extends Model
             && $this->expires_at->gt(now()) && $this->supplier->isApproved()
             && $this->kind === $this->supplier->kind
             && in_array($this->currency, ['USD', 'EUR', 'GBP', 'NGN', 'CAD'], true)
-            && ($this->kind !== 'flight' || (
-                filled($this->supplier->integration_key)
-                && array_key_exists($this->supplier->integration_key, (array) config('travel.supplier_adapters', []))
-            ));
+            && ($this->kind !== 'flight'
+                || app(\App\Services\Travel\TravelPartnerGateway::class)->supports($this->supplier));
     }
 
     public function totalMinor(int $partySize): int

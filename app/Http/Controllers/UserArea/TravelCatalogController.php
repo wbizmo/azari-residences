@@ -22,7 +22,7 @@ final class TravelCatalogController extends Controller
             'kind' => ['sometimes', Rule::in(['transfer', 'experience', 'car', 'flight'])],
         ])['kind'] ?? null;
 
-        $certifiedFlightKeys = array_keys((array) config('travel.supplier_adapters', []));
+        $certifiedFlightKeys = app(\App\Services\Travel\TravelPartnerGateway::class)->certifiedKeys();
 
         $offers = TravelOffer::query()
             ->with(['supplier', 'slots' => fn ($q) => $q->where('starts_at', '>', now())])

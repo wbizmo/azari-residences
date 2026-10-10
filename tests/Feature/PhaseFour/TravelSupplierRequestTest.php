@@ -183,7 +183,7 @@ final class TravelSupplierRequestTest extends TestCase
     {
         $offer = $this->offer('flight');
         $offer->supplier->update(['integration_key' => 'missing-provider']);
-        config()->set('travel.supplier_adapters', []);
+        config()->set('travel.supplier_adapters', ['missing-provider' => \stdClass::class]);
 
         $this->assertFalse($offer->fresh()->isRequestable());
         $guest = User::factory()->create(['email_verified_at' => now()]);
