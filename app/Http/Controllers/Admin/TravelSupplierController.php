@@ -9,6 +9,8 @@ use App\Models\TravelRequest;
 use App\Models\TravelSupplier;
 use App\Services\Travel\TravelRequestService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -17,8 +19,18 @@ use Illuminate\Validation\ValidationException;
 final class TravelSupplierController extends Controller
 {
     /** Staff-only operations; no supplier secrets or private traveler documents in responses. */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse|View
     {
+        if (! $request->expectsJson()) {
+            return view('admin.travel.index', [
+                'suppliers' => TravelSupplier::query()->latest()->limit(100)->get(),
+                'offers' => TravelOffer::query()->with('supplier')->latest()->limit(100)->get(),
+                'pendingRequests' => TravelRequest::query()
+                    ->whereIn('status', ['requested', 'supplier_acknowledged'])
+                    ->with('offer:id,title')->latest()->limit(50)->get(),
+            ]);
+        }
+
         return response()->json([
             'suppliers' => TravelSupplier::query()
                 ->select('id', 'kind', 'name', 'status', 'contract_verified_at', 'safety_verified_at')
@@ -30,7 +42,7 @@ final class TravelSupplierController extends Controller
         ]);
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(Request $request): JsonResponse|RedirectResponse
     {
         $data = $request->validate([
             'kind' => ['required', Rule::in(['transfer', 'experience', 'car', 'flight'])],
@@ -42,10 +54,10 @@ final class TravelSupplierController extends Controller
         ]);
         $supplier = TravelSupplier::query()->create($data + ['status' => 'pending']);
 
-        return response()->json(['id' => $supplier->id, 'status' => 'pending'], 201);
+        return $this->respond($request, ['id' => $supplier->id, 'status' => 'pending'], 201);
     }
 
-    public function approve(Request $request, TravelSupplier $supplier): JsonResponse
+    public function approve(Request $request, TravelSupplier $supplier): JsonResponse|RedirectResponse
     {
         $evidence = $request->validate([
             'contract_reference' => ['required', 'string', 'min:8', 'max:160'],
@@ -71,10 +83,10 @@ final class TravelSupplierController extends Controller
                 ['status' => 'pending'], ['status' => 'approved']);
         }, 3);
 
-        return response()->json(['id' => $supplier->id, 'status' => 'approved']);
+        return $this->respond($request, ['id' => $supplier->id, 'status' => 'approved']);
     }
 
-    public function storeOffer(Request $request): JsonResponse
+    public function storeOffer(Request $request): JsonResponse|RedirectResponse
     {
         $data = $request->validate([
             'travel_supplier_id' => ['required', 'integer', 'exists:travel_suppliers,id'],
@@ -105,10 +117,10 @@ final class TravelSupplierController extends Controller
         $offer = TravelOffer::query()->create($data);
         AuditLog::record('travel_offer.created', $offer, [], ['kind' => $offer->kind]);
 
-        return response()->json(['id' => $offer->id, 'status' => 'draft'], 201);
+        return $this->respond($request, ['id' => $offer->id, 'status' => 'draft'], 201);
     }
 
-    public function publish(Request $request, TravelOffer $offer): JsonResponse
+    public function publish(Request $request, TravelOffer $offer): JsonResponse|RedirectResponse
     {
         DB::transaction(function () use ($offer): void {
             $locked = TravelOffer::query()->with('supplier')
@@ -127,10 +139,10 @@ final class TravelSupplierController extends Controller
                 ['published_at' => $locked->published_at?->toIso8601String()]);
         }, 3);
 
-        return response()->json(['id' => $offer->id, 'status' => 'published']);
+        return $this->respond($request, ['id' => $offer->id, 'status' => 'published']);
     }
 
-    public function storeSlot(Request $request, TravelOffer $offer): JsonResponse
+    public function storeSlot(Request $request, TravelOffer $offer): JsonResponse|RedirectResponse
     {
         abort_unless($offer->kind === 'experience', 404);
         $data = $request->validate([
@@ -138,10 +150,10 @@ final class TravelSupplierController extends Controller
             'capacity' => ['required', 'integer', 'min:1', 'max:100000'],
         ]);
         $slot = $offer->slots()->create($data);
-        return response()->json(['id' => $slot->id], 201);
+        return $this->respond($request, ['id' => $slot->id, 'status' => 'slot recorded'], 201);
     }
 
-    public function review(Request $request, TravelRequest $travelRequest, TravelRequestService $service): JsonResponse
+    public function review(Request $request, TravelRequest $travelRequest, TravelRequestService $service): JsonResponse|RedirectResponse
     {
         $data = $request->validate([
             'decision' => ['required', Rule::in(['acknowledge', 'decline'])],
@@ -155,7 +167,16 @@ final class TravelSupplierController extends Controller
             $data['supplier_reference'] ?? null
         );
 
-        return response()->json(['id' => $result->id, 'status' => $result->status,
+        return $this->respond($request, ['id' => $result->id, 'status' => $result->status,
             'confirmation' => null, 'payment_collected' => false]);
+    }
+    private function respond(Request $request, array $data, int $status = 200): JsonResponse|RedirectResponse
+    {
+        if ($request->expectsJson()) {
+            return response()->json($data, $status);
+        }
+
+        return back()->with('success',
+            'Travel supplier operation recorded: '.($data['status'] ?? 'updated').'. No travel payment was taken.');
     }
 }
