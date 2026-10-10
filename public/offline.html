@@ -14,7 +14,13 @@
         h1 { margin: 0 0 16px; font-size: clamp(1.6rem, 5vw, 2.2rem); }
         p { line-height: 1.6; color: #283c61; }
         a { display: inline-block; margin-top: 12px; padding: 12px 18px; border-radius: 8px; background: #052058; color: white; font-weight: 600; text-decoration: none; }
-        a:focus-visible { outline: 3px solid #1b6ff0; outline-offset: 4px; }
+        a:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid #1b6ff0; outline-offset: 4px; }
+        label { display: block; font-weight: 650; margin: 14px 0 6px; }
+        input { width: 100%; min-height: 44px; border: 1px solid #687eaa; border-radius: 8px; padding: 10px; }
+        button { min-height: 44px; margin-top: 12px; border: 0; border-radius: 8px; padding: 10px 18px; background: #052058; color: white; font-weight: 650; cursor: pointer; }
+        article { border-top: 1px solid #cdd6e4; padding: 16px 0; }
+        article h3 { margin-bottom: 8px; }
+        [data-offline-open-feedback] { min-height: 1.5em; }
     </style>
 </head>
 <body>
@@ -22,7 +28,20 @@
         <h1>You're offline</h1>
         <p>Resavar can't load this page without a connection. Availability, booking prices, payments and trip updates must be verified online.</p>
         <p>No reservation or payment has been confirmed by this offline screen. Reconnect before trying again.</p>
+        <section aria-labelledby="saved-stays-title">
+            <h2 id="saved-stays-title">Encrypted stays saved on this device</h2>
+            <p>Unlock only the limited summaries that you explicitly saved on this browser. The passphrase never leaves your device, and details may be outdated.</p>
+            <form data-offline-open>
+                <label for="offline-passphrase">Offline encryption passphrase</label>
+                <input id="offline-passphrase" type="password" name="offline_passphrase" required autocomplete="off">
+                <button type="submit">Unlock saved stays</button>
+            </form>
+            <p role="status" aria-live="polite" data-offline-open-feedback></p>
+            <div data-offline-stays aria-label="Locally saved stay summaries"></div>
+            <button type="button" data-offline-clear>Clear saved offline stays</button>
+        </section>
         <a href="/">Try again</a>
     </main>
+    <script src="/offline-trip.js" defer></script>
 </body>
 </html>
