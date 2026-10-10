@@ -62,7 +62,7 @@ class PhaseTwoGuestController extends Controller
             ->where('booking_id', $booking->id)->first();
 
         $stats = $conversation?->messages()
-            ->selectRaw('MAX(id) AS latest_id, COUNT(*) AS total')
+            ->reorder()->selectRaw('MAX(id) AS latest_id, COUNT(*) AS total')
             ->first();
 
         return response()->json([

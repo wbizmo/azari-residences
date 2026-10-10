@@ -52,7 +52,7 @@ class OwnerBookingMessageController extends Controller
         abort_unless((int) $conversation->property_id === (int) $property->id, 404);
 
         $stats = $conversation->messages()
-            ->selectRaw('MAX(id) AS latest_id, COUNT(*) AS total')
+            ->reorder()->selectRaw('MAX(id) AS latest_id, COUNT(*) AS total')
             ->first();
 
         return response()->json([
