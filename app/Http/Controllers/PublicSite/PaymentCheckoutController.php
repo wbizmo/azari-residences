@@ -73,6 +73,11 @@ class PaymentCheckoutController extends Controller
     ): RedirectResponse {
         $booking = Booking::query()->where('reference', $reference)->firstOrFail();
 
+        // Rendering a redacted payment link never grants permission to create
+        // a charge. Only the authenticated guest, authorized staff or the
+        // browser session which created the guest booking may initiate one.
+        abort_unless($this->hasFullAccess($request, $booking), 404);
+
         if ($eligibility->isCancelled($booking)) {
             abort(404);
         }
