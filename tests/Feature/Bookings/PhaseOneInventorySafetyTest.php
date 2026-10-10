@@ -160,6 +160,33 @@ class PhaseOneInventorySafetyTest extends TestCase
         $this->assertSame(0, app(AzariAvailabilityEngine::class)->availableQuantity($type->fresh(), $start, $start->addDay()));
     }
 
+    public function test_bulk_edit_rejects_maintenance_greater_than_sellable_even_without_bookings(): void
+    {
+        $property = Property::factory()->create(['is_published' => true, 'status' => 'available']);
+        $type = $property->accommodationTypes()->firstOrFail();
+        $type->update(['total_inventory' => 3]);
+        $start = CarbonImmutable::today()->addDays(35);
+
+        $this->expectException(ValidationException::class);
+        app(InventoryBulkUpdateService::class)->apply(
+            $type->fresh(), $start, $start,
+            ['sellable_inventory' => 1, 'maintenance_inventory' => 2], null
+        );
+    }
+
+    public function test_bulk_edit_rejects_maintenance_over_existing_daily_sellable_count(): void
+    {
+        $property = Property::factory()->create(['is_published' => true, 'status' => 'available']);
+        $type = $property->accommodationTypes()->firstOrFail();
+        $type->update(['total_inventory' => 3]);
+        $start = CarbonImmutable::today()->addDays(37);
+        $service = app(InventoryBulkUpdateService::class);
+        $service->apply($type->fresh(), $start, $start, ['sellable_inventory' => 1], null);
+
+        $this->expectException(ValidationException::class);
+        $service->apply($type->fresh(), $start, $start, ['maintenance_inventory' => 2], null);
+    }
+
     public function test_unbounded_stays_are_rejected_before_inventory_range_materialization(): void
     {
         $property = Property::factory()->create(['is_published' => true, 'status' => 'available']);
