@@ -41,7 +41,7 @@ class OwnerMarketplaceController extends Controller
         PropertyListing $listing,
         ListingCompletenessService $completeness
     ): View {
-        $listing->load(['user.ownerPayoutProfile', 'agreement', 'approvedProperty', 'reviewedBy']);
+        $listing->load(['user.ownerPayoutProfile', 'agreement', 'approvedProperty', 'reviewedBy', 'mediaReviewedBy']);
         $completion = $completeness->evaluate($listing);
 
         return view('admin.owner-listings.show', [
