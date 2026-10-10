@@ -219,6 +219,8 @@ final class PhaseFourBatchTwoTest extends TestCase
         $diningStep=$steps->firstWhere('item_type','dining');
         $this->assertSame('needs_provider',$recovery->reconcile($staff,$diningStep)->status);
         $this->assertSame('compensation_requested',$recovery->requestCompensation($staff,$diningStep)->status);
+        $this->assertSame(3,(int)\DB::table('trip_assembly_events')
+            ->where('trip_assembly_id',$assembly->id)->count());
         $this->assertSame('confirmed',$stay->fresh()->status);
         $this->assertDatabaseCount('payments',0);
         $this->assertDatabaseCount('refunds',0);

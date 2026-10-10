@@ -76,7 +76,7 @@ final class TripRecoveryService
 
     public function requestCompensation(User $staff, TripAssemblyStep $step): TripAssemblyStep
     {
-        return DB::transaction(function () use ($step): TripAssemblyStep {
+        return DB::transaction(function () use ($step,$staff): TripAssemblyStep {
             $current=TripAssemblyStep::query()->whereKey($step->id)->lockForUpdate()->firstOrFail();
             if ($current->status==='preexisting_stay') {
                 throw ValidationException::withMessages(['step'=>'Cancel accommodation independently through its own workflow.']);
@@ -84,7 +84,13 @@ final class TripRecoveryService
             if (! in_array($current->status,['verified_provider','needs_provider','reconciliation_required'],true)) {
                 throw ValidationException::withMessages(['step'=>'Compensation cannot begin in this state.']);
             }
+            $before=$current->status;
             $current->update(['status'=>'compensation_requested']);
+            DB::table('trip_assembly_events')->insert([
+                'trip_assembly_id'=>$current->trip_assembly_id,'actor_id'=>$staff->id,
+                'action'=>'compensation_requested','previous_status'=>$before,
+                'new_status'=>'compensation_requested','created_at'=>now(),
+            ]);
             // Only a contracted product adapter may perform external cancellation.
             // No refund/payment mutation and no false canceled status here.
             return $current;
@@ -121,7 +127,16 @@ final class TripRecoveryService
         DB::transaction(function () use ($step,$status,$reference): void {
             $current=TripAssemblyStep::query()->whereKey($step->id)->lockForUpdate()->firstOrFail();
             if ($current->status!=='checking') return;
+            $before=$current->status;
             $current->update(['status'=>$status,'provider_reference'=>$reference]);
+            DB::table('trip_assembly_events')->insert([
+                'trip_assembly_id'=>$current->trip_assembly_id,'actor_id'=>null,
+                'action'=>'supplier_reconciled','previous_status'=>$before,
+                'new_status'=>$status,'details'=>json_encode([
+                    'component_type'=>$current->item_type,
+                    'has_verified_reference'=>$reference !== null,
+                ], JSON_THROW_ON_ERROR),'created_at'=>now(),
+            ]);
         },3);
     }
 }

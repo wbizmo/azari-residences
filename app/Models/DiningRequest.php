@@ -12,7 +12,7 @@ final class DiningRequest extends Model
     protected $fillable = ['id','user_id','dining_partner_id','trip_itinerary_id','booking_id',
         'status','idempotency_key','payload_hash','party_size','requested_for',
         'private_preferences','supplier_share_consent','provider_reference',
-        'provider_confirmed_at','cancelled_at'];
+        'provider_confirmed_at','cancelled_at','arrival_reminder_sent_at'];
     protected $hidden = ['idempotency_key','payload_hash','private_preferences'];
     protected function casts(): array
     {
