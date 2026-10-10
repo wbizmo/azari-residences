@@ -13,6 +13,8 @@ return new class extends Migration
             $table->string('attachment_scan_status', 16)->nullable()->index();
             $table->timestamp('attachment_scanned_at')->nullable();
             $table->timestamp('attachment_scan_claimed_at')->nullable();
+            $table->timestamp('attachment_scan_next_attempt_at')->nullable();
+            $table->unsignedSmallInteger('attachment_scan_attempts')->default(0);
             $table->string('attachment_scan_error', 200)->nullable();
         });
 
@@ -27,7 +29,8 @@ return new class extends Migration
             $table->dropIndex(['attachment_scan_status']);
             $table->dropColumn([
                 'attachment_scan_status', 'attachment_scanned_at',
-                'attachment_scan_claimed_at', 'attachment_scan_error',
+                'attachment_scan_claimed_at', 'attachment_scan_next_attempt_at',
+                'attachment_scan_attempts', 'attachment_scan_error',
             ]);
         });
     }
