@@ -23,6 +23,7 @@ class PublicPropertyReviewsController extends Controller
         $filters = $request->validate([
             'sort' => ['nullable', Rule::in(['recent', 'highest', 'lowest'])],
             'trip_type' => ['nullable', Rule::in(['business', 'couple', 'family', 'friends', 'solo', 'other'])],
+            'language' => ['nullable', Rule::in(['und','en','fr','es','de','pt','ar','hi','zh','it','yo','ig','ha','other'])],
             'page' => ['nullable', 'integer', 'min:1', 'max:1000'],
         ]);
 
@@ -34,7 +35,9 @@ class PublicPropertyReviewsController extends Controller
             ->with(['user:id,name'])
             ->withCount('helpfulVotes')
             ->when($filters['trip_type'] ?? null,
-                fn ($query, $value) => $query->where('trip_type', $value));
+                fn ($query, $value) => $query->where('trip_type', $value))
+            ->when($filters['language'] ?? null,
+                fn ($query, $value) => $query->where('language', $value));
 
         match ($sort) {
             'highest' => $query->orderByDesc('rating')->orderByDesc('created_at')->orderByDesc('id'),
