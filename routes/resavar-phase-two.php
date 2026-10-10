@@ -25,6 +25,8 @@ Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer'])->group
             Route::get('/operations', [OwnerPhaseTwoController::class, 'operations'])->name('operations');
             Route::post('/operations/tasks', [OwnerPhaseTwoController::class, 'createTask'])->name('operations.tasks.store');
             Route::patch('/operations/tasks/{task}', [OwnerPhaseTwoController::class, 'updateTask'])->name('operations.tasks.update');
+            Route::get('/operations/tasks/{task}/evidence', [OwnerPhaseTwoController::class, 'taskEvidence'])
+                ->middleware('throttle:60,1')->name('operations.tasks.evidence');
 
             Route::post('/commercial/{accommodationType}/calendar/preview', [OwnerCommercialInventoryController::class, 'previewBulkUpdate'])->name('calendar.preview');
             Route::post('/commercial/calendar-changes/{log}/undo', [OwnerCommercialInventoryController::class, 'undoBulkUpdate'])->name('calendar.undo');
