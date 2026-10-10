@@ -12,6 +12,9 @@ use App\Models\RatePlan;
 use App\Models\RoomType;
 use App\Services\Bookings\CommercialInventoryManager;
 use App\Services\Bookings\InventoryBulkUpdateService;
+use App\Services\Bookings\OwnerInventoryCalendarService;
+use App\Support\LocalDate;
+use Illuminate\Validation\Rule;
 use App\Services\Owners\PropertyAccessService;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\RedirectResponse;
@@ -21,11 +24,24 @@ use Illuminate\View\View;
 
 class OwnerCommercialInventoryController extends Controller
 {
-    public function edit(Request $request, Property $property): View
-    {
+    public function edit(
+        Request $request,
+        Property $property,
+        OwnerInventoryCalendarService $calendar
+    ): View {
         $this->authorizeOwner($request, $property);
+        $options = $request->validate([
+            'view' => ['nullable', Rule::in(['week', 'month'])],
+            'date' => ['nullable', 'date_format:Y-m-d'],
+        ]);
+        $timezone = LocalDate::propertyTimezone($property);
+        $date = isset($options['date'])
+            ? CarbonImmutable::parse($options['date'], $timezone)->startOfDay()
+            : CarbonImmutable::now($timezone)->startOfDay();
+        $board = $calendar->forProperty($property, $date, $options['view'] ?? 'week');
 
         return view('user.owner.commercial', [
+            'inventoryBoard' => $board,
             'property' => $property->load([
                 'accommodationTypes.ratePlans.cancellationPolicy',
                 'accommodationTypes.ratePlans.paymentPolicy',
