@@ -12,6 +12,35 @@
 @endphp
 
 @if(in_array($booking->status, ['approved','confirmed','paid','check_in','checked_in','checked_out','completed'], true))
+<section class="az-user-panel" aria-label="Encrypted offline itinerary" style="margin-bottom:18px">
+    <header class="az-user-panel-header"><div>
+        <h2 class="az-user-panel-title">Keep an encrypted offline stay summary</h2>
+        <p class="az-user-panel-subtitle">Optional: save the property, address and stay dates on this browser, encrypted with your passphrase. No prices, payments, identity documents or contact details are saved. Shared devices should clear the copy after use.</p>
+    </div></header>
+    <div class="az-user-panel-body">
+        <form data-offline-save class="az-form-grid">
+            <label class="wide"><span>Offline encryption passphrase (minimum 12 characters)</span>
+                <input type="password" name="offline_passphrase" minlength="12" required autocomplete="new-password"
+                    aria-describedby="offline-itinerary-help">
+            </label>
+            <p class="wide" id="offline-itinerary-help">Resavar cannot recover this passphrase. Use the same passphrase for additional offline stays. This does not confirm an active booking or payment.</p>
+            <button class="az-user-button az-user-button--dark" type="submit">Save encrypted offline copy</button>
+            <p class="wide" role="status" aria-live="polite" data-offline-save-feedback></p>
+        </form>
+        <a href="/offline.html">View or clear saved offline stays</a>
+    </div>
+</section>
+<script type="application/json" data-offline-trip-record>@json([
+    'id' => (string) $booking->reference,
+    'property' => (string) ($booking->property_name_snapshot ?: ($booking->property?->name ?? 'Your stay')),
+    'check_in' => $booking->check_in?->toDateString(),
+    'check_out' => $booking->check_out?->toDateString(),
+    'address' => (string) ($booking->property_formatted_address ?: 'Address available from your host'),
+])</script>
+<script src="{{ asset('offline-trip.js') }}" defer></script>
+@endif
+
+@if(in_array($booking->status, ['approved','confirmed','paid','check_in','checked_in','checked_out','completed'], true))
 <section class="az-user-panel" aria-label="Share a limited itinerary" style="margin-bottom:18px">
     <header class="az-user-panel-header">
         <div><h2 class="az-user-panel-title">Share a limited itinerary</h2>
