@@ -141,7 +141,7 @@ final class TravelFulfillmentService
             return $locked->fresh();
         }
 
-        return DB::transaction(function () use ($locked, $result): TravelFulfillment {
+        $confirmed = DB::transaction(function () use ($locked, $result): TravelFulfillment {
             $f = TravelFulfillment::query()->whereKey($locked->id)->lockForUpdate()->firstOrFail();
             if ($f->status !== 'dispatching') {
                 throw ValidationException::withMessages(['fulfillment' => 'Supplier result cannot overwrite the current state.']);
@@ -154,5 +154,13 @@ final class TravelFulfillmentService
             ]);
             return $f;
         }, 3);
+
+        if ($confirmed->travelRequest->kind === 'experience') {
+            // Issue an admission voucher only after provider confirmation and
+            // verified money are both durable. Retrying issuance is safe.
+            app(TravelVoucherService::class)->issue($confirmed);
+        }
+
+        return $confirmed;
     }
 }

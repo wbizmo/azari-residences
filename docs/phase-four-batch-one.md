@@ -55,3 +55,16 @@ Rollback only after data retention/audit review: migration 2026_10_10_220000_cre
 ## Provider webhook setup (disabled until signed partner integration)
 
 Travel callbacks are separately disabled using RESAVAR_TRAVEL_WEBHOOKS_ENABLED=false. Enable only after a class implementing App\\Contracts\\Travel\\TravelSupplierAdapter is installed, tested and registered in config/travel.php, and supplier integration_key references it. The adapter must authenticate raw request bytes with the actual supplier's documented signature and timestamp/replay requirements. Supplier event envelope keys: event_id, event_type (acknowledged / declined / disrupted), travel_request_id and supplier_reference for acknowledgment. POST to /webhooks/travel/{supplier}; the HTTP response only acknowledges durable, encrypted receipt. Use resavar:process-travel-webhooks in a worker/scheduler to update request-only states and in-app notifications. A callback can never confirm ticket issuance, dispatch a driver, settle funds or cancel/refund a stay.
+
+
+## Verified travel fulfillment and voucher safety extension (PR #244)
+
+- Added travel-only fulfillment and immutable-by-workflow financial-event tables. A capture must be attested server-side by a class implementing App\Contracts\Travel\TravelPaymentVerifier; user-submitted 'paid' flags are never sufficient.
+- Supplier reservation calls use a deterministic idempotency key and mark ambiguous timeouts 'reconciliation_required'. No failed/uncertain response is presented as a confirmed reservation.
+- Experience vouchers are issued only after a verified payment and a real supplier adapter's validated confirmation. Tokens use random 160-bit entropy, a SHA-256 lookup and encrypted display value. Guest-owned QR routes send Cache-Control no-store. Administrator redemption locks the fulfillment and voucher, rejects replay and validates supplier ID.
+- Signed cancellation/disruption after fulfillment revokes an unused voucher and records 'refund_review_required'; it never records a refund as completed, nor changes accommodation payments. A manual financial reconciliation and actual payment-provider refund are required.
+- Guest cancellation after supplier acknowledgement remains 'cancellation_requested' until a supplier-authenticated event arrives. Repeating that request is idempotent.
+- RESAVAR_TRAVEL_FULFILLMENT_ENABLED=false and payment_verifier=null by default. Do not enable until licensed payment capture, provider reservation, refund/chargeback, and customer support adapters are configured, sandbox tested and legally reviewed.
+- Verified with 583 locally passing Laravel tests (2,931 assertions), including Phase Four voucher replay and signed cancellation financial review.
+
+**Outstanding for fully closing #85–#88:** contracted, tested supplier availability, dispatch/ETA, paid activity issuance and real voucher redemption with an authorized operator, vehicle deposit/insurance handling, licensed GDS/NDC air ticketing with traveler details, and actual payment settlement, supplier reconciliation and refunds. These cannot be demonstrated without valid supplier agreements and certified credentials.

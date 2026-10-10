@@ -68,12 +68,16 @@ final class TravelVoucherService
         }
 
         return DB::transaction(function () use ($staff, $token, $supplierId): TravelVoucher {
-            $voucher = TravelVoucher::query()->where('token_hash', hash('sha256', $token))
-                ->lockForUpdate()->first();
-            if (! $voucher) {
+            $candidate = TravelVoucher::query()->where('token_hash', hash('sha256', $token))->first();
+            if (! $candidate) {
                 throw ValidationException::withMessages(['voucher' => 'Voucher not found.']);
             }
-            $fulfillment = TravelFulfillment::query()->whereKey($voucher->travel_fulfillment_id)
+            // The issuer locks fulfillment -> voucher. Use that order here too
+            // to avoid an opposing lock order under simultaneous scans/refunds.
+            $fulfillment = TravelFulfillment::query()->whereKey($candidate->travel_fulfillment_id)
+                ->lockForUpdate()->firstOrFail();
+            $voucher = TravelVoucher::query()->whereKey($candidate->id)
+                ->where('token_hash', hash('sha256', $token))
                 ->lockForUpdate()->firstOrFail();
             if ((int) $fulfillment->travel_supplier_id !== $supplierId
                 || $fulfillment->status !== 'confirmed'

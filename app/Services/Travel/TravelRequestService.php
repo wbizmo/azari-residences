@@ -197,7 +197,7 @@ final class TravelRequestService
             }
             $locked = TravelRequest::query()->whereKey($request->id)
                 ->where('user_id', $user->id)->lockForUpdate()->firstOrFail();
-            if ($locked->status === 'cancelled') {
+            if (in_array($locked->status, ['cancelled', 'cancellation_requested'], true)) {
                 return $locked;
             }
             if (! in_array($locked->status, ['requested', 'supplier_acknowledged', 'expired'], true)) {

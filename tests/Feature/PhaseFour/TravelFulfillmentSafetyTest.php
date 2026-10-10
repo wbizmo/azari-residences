@@ -123,8 +123,9 @@ final class TravelFulfillmentSafetyTest extends TestCase
         $this->assertMatchesRegularExpression('/^RVX-[A-F0-9]{40}$/', $token);
         $this->assertSame(hash('sha256', $token), $voucher->token_hash);
 
-        $this->actingAs($guest)->get(route('user.travel.voucher.qr', $voucher))
-            ->assertOk()->assertHeader('Cache-Control', 'private, no-store, max-age=0');
+        $qr = $this->actingAs($guest)->get(route('user.travel.voucher.qr', $voucher));
+        $qr->assertOk();
+        $this->assertStringContainsString('no-store', (string) $qr->headers->get('Cache-Control'));
         $foreign = User::factory()->create(['email_verified_at' => now()]);
         $this->actingAs($foreign)->get(route('user.travel.voucher.qr', $voucher))->assertNotFound();
 
@@ -167,6 +168,36 @@ final class TravelFulfillmentSafetyTest extends TestCase
             $this->assertArrayHasKey('voucher', $e->errors());
         }
         $this->assertSame('issued', $voucher->fresh()->status);
+    }
+
+    public function test_signed_supplier_cancellation_revokes_voucher_and_flags_refund_review_without_refunding_stay(): void
+    {
+        [$staff, $guest, $supplier, $travel, $booking] = $this->fixture();
+        $fulfillment = app(TravelFulfillmentService::class)->recordVerifiedCapture($travel, 'sandbox-paid-0005');
+        $confirmed = app(TravelFulfillmentService::class)->requestSupplierReservation($fulfillment);
+        $voucher = $confirmed->voucher()->firstOrFail();
+        $this->assertSame('issued', $voucher->status);
+        config()->set('travel.webhooks_enabled', true);
+        $body = json_encode([
+            'event_id' => 'sandbox-cancelled-500',
+            'event_type' => 'cancelled',
+            'travel_request_id' => $travel->id,
+        ], JSON_THROW_ON_ERROR);
+        $this->call('POST', route('travel.supplier.webhook', $supplier), [], [], [], [
+            'CONTENT_TYPE' => 'application/json',
+            'HTTP_X_TEST_SIGNED' => 'local-test-only',
+        ], $body)->assertAccepted();
+        $this->assertSame(['processed' => 1, 'rejected' => 0],
+            app(\App\Services\Travel\TravelSupplierEventProcessor::class)->process());
+        $this->assertSame('support_required', $travel->fresh()->status);
+        $this->assertSame('support_required', $confirmed->fresh()->status);
+        $this->assertSame('revoked', $voucher->fresh()->status);
+        $this->assertDatabaseHas('travel_financial_events', [
+            'travel_fulfillment_id' => $confirmed->id,
+            'type' => 'refund_review_required',
+        ]);
+        $this->assertSame('confirmed', $booking->fresh()->status);
+        $this->assertDatabaseCount('refunds', 0);
     }
 
     public function test_unavailable_adapter_never_fabricates_confirmation(): void

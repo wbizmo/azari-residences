@@ -13,6 +13,7 @@ final class TravelFulfillment extends Model
     protected function casts(): array
     {
         return [
+            'amount_minor' => 'integer',
             'provider_confirmed_at' => 'datetime',
             'payment_verified_at' => 'datetime',
             'confirmed_at' => 'datetime',
