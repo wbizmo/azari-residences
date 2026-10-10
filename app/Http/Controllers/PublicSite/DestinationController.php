@@ -15,7 +15,7 @@ class DestinationController extends Controller
         abort_unless($location->is_active, 404);
 
         $properties = Property::query()
-            ->with(['roomType', 'locationRecord'])
+            ->with(['roomType', 'locationRecord', 'photoModerations'])
             ->where('location_id', $location->getKey())
             ->where('is_published', true)
             ->whereNotIn('status', ['inactive', 'archived'])
