@@ -38,6 +38,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'payments/*/callback/*',
             'webhooks/twilio/message-status',
             'webhooks/dojah',
+            'webhooks/channels/*',
         ]);
         $middleware->trustProxies(at: '*');
     })

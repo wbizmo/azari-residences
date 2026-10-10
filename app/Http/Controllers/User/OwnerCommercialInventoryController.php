@@ -54,6 +54,22 @@ class OwnerCommercialInventoryController extends Controller
         ]);
     }
 
+    public function yieldPreview(Request $request, Property $property,
+        AccommodationType $accommodationType, \App\Services\PhaseThree\OwnerYieldAdvisor $advisor): JsonResponse
+    {
+        $this->authorizeOwner($request, $property);
+        $this->assertTypeBelongsToProperty($property, $accommodationType);
+        $data = $request->validate([
+            'from_date'=>['required','date_format:Y-m-d'],
+            'to_date'=>['required','date_format:Y-m-d','after_or_equal:from_date'],
+            'minimum'=>['nullable','integer','min:0'],
+            'maximum'=>['nullable','integer','min:0'],
+        ]);
+        return response()->json($advisor->preview($accommodationType,
+            CarbonImmutable::parse($data['from_date']), CarbonImmutable::parse($data['to_date']),
+            (int) ($data['minimum'] ?? 0), (int) ($data['maximum'] ?? 0)));
+    }
+
     public function storeAccommodation(
         AccommodationTypeRequest $request,
         Property $property,

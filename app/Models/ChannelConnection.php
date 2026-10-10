@@ -9,9 +9,9 @@ use Illuminate\Support\Str;
 
 class ChannelConnection extends Model
 {
-    protected $fillable = ['property_id','accommodation_type_id','provider','name','import_url','export_token','is_active','fail_closed','stale_after_minutes','status','last_attempted_at','last_successful_sync_at','next_retry_at','consecutive_failures','last_safe_error','settings'];
-    protected $hidden = ['import_url', 'export_token'];
-    protected function casts(): array { return ['is_active'=>'boolean','fail_closed'=>'boolean','last_attempted_at'=>'datetime','last_successful_sync_at'=>'datetime','next_retry_at'=>'datetime','settings'=>'array']; }
+    protected $fillable = ['property_id','accommodation_type_id','provider','name','import_url','export_token','is_active','fail_closed','stale_after_minutes','status','last_attempted_at','last_successful_sync_at','next_retry_at','consecutive_failures','last_safe_error','settings','webhook_secret'];
+    protected $hidden = ['import_url', 'export_token', 'webhook_secret'];
+    protected function casts(): array { return ['is_active'=>'boolean','fail_closed'=>'boolean','last_attempted_at'=>'datetime','last_successful_sync_at'=>'datetime','next_retry_at'=>'datetime','settings'=>'array','webhook_secret'=>'encrypted']; }
     public function property(): BelongsTo { return $this->belongsTo(Property::class); }
     public function accommodationType(): BelongsTo { return $this->belongsTo(AccommodationType::class); }
     public function reservations(): HasMany { return $this->hasMany(ChannelReservation::class); }

@@ -1,6 +1,10 @@
 <?php
 
 return [
+    'channels' => [
+        // Never enable in production: real providers require certified adapters.
+        'sandbox_webhooks_enabled' => env('RESAVAR_SANDBOX_WEBHOOKS', false),
+    ],
     'search' => [
         // Bound public result hydration until the faceted/paginated search layer lands.
         'max_properties' => (int) env('RESERVA_SEARCH_MAX_PROPERTIES', 60),

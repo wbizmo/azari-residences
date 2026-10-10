@@ -25,6 +25,11 @@
         </div>
     </header>
     <div class="az-user-panel-body">
+        <p>Optional, read-only yield advice from confirmed bookings. Rates never change automatically.</p>
+        <a class="az-user-button az-user-button--outline" target="_blank" rel="noopener"
+           href="{{ route('user.owner.commercial.yield-preview', [$property,$type]) }}?from_date={{ now()->addDays(1)->toDateString() }}&to_date={{ now()->addDays(8)->toDateString() }}">
+            Preview pricing evidence (JSON)
+        </a>
         <form method="POST" action="{{ route('user.owner.commercial.calendar.bulk-update',[$property,$type]) }}" data-inventory-calendar-form data-preview-url="{{ route('user.owner.phase2.calendar.preview', [$property, $type]) }}" class="az-form-grid">
             @csrf
             <label><span>From</span><input type="date" name="from_date" required></label>
