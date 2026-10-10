@@ -1,8 +1,11 @@
 @php
+    $photoReviews = $property->photoModerations()->get()->keyBy('path');
     $images = collect([$property->cover_image])
         ->merge($property->gallery ?? [])
         ->filter()
         ->unique()
+        ->reject(fn ($path) => $photoReviews->has($path)
+            && $photoReviews->get($path)->status !== 'approved')
         ->values();
 
     $mapUrl = null;
@@ -68,7 +71,7 @@
         data-property-name="{{ $property->name }}"
         data-property-url="{{ route('properties.show', $property) }}"
         data-property-location="{{ $property->locationRecord?->name ?? $property->location }}"
-        data-property-image="{{ $property->cover_image ? Storage::url($property->cover_image) : asset('images/azari-residence-fallback.png') }}"
+        data-property-image="{{ $images->first() ? Storage::url($images->first()) : asset('images/azari-residence-fallback.png') }}"
     >
         <div class="site-container">
             <nav class="reserva-property-breadcrumb" aria-label="Breadcrumb">
@@ -135,7 +138,7 @@
                 <section class="reserva-property-gallery" aria-label="{{ $property->name }} photo gallery">
                     @foreach($images->take(5) as $index => $image)
                         <button type="button" data-modal-open="reserva-property-gallery-modal" aria-label="Open full photo gallery">
-                            <x-public.responsive-image :path="$image" :alt="$property->name.' photo '.($index + 1)" :priority="$index === 0" width="1200" height="800" sizes="(max-width: 760px) 100vw, 60vw" />
+                            <x-public.responsive-image :path="$image" :alt="$photoReviews->get($image)?->alt_text ?: $property->name.' photo '.($index + 1)" :priority="$index === 0" width="1200" height="800" sizes="(max-width: 760px) 100vw, 60vw" />
                             @if($index === min(4, $images->count() - 1))
                                 <span class="reserva-gallery-count">{{ $images->count() }} photos</span>
                             @endif
@@ -544,7 +547,16 @@
                 </header>
                 <div class="reserva-gallery-modal__grid">
                     @foreach($images as $index => $image)
-                        <img src="{{ Storage::url($image) }}" alt="{{ $property->name }} photo {{ $index + 1 }}" loading="lazy" decoding="async">
+                        <figure style="margin:0">
+                            <img src="{{ Storage::url($image) }}"
+                                alt="{{ $photoReviews->get($image)?->alt_text ?: $property->name.' photo '.($index + 1) }}"
+                                loading="lazy" decoding="async">
+                            @if($photoReviews->get($image)?->attribution)
+                                <figcaption style="padding:8px;color:#052058">
+                                    Photo credit: {{ $photoReviews->get($image)->attribution }}
+                                </figcaption>
+                            @endif
+                        </figure>
                     @endforeach
                 </div>
             </div>

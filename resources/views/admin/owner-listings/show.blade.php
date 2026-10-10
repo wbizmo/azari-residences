@@ -59,6 +59,25 @@
         <p><strong>Revenue treatment:</strong> Owner receives 100% of applicable owner-property room-sale revenue. Resavar platform commission: 0%.</p>
         <label><input type="checkbox" name="publish_now" value="1"> Publish immediately</label>
         <label><input type="checkbox" name="feature_now" value="1"> Feature immediately</label>
+        @foreach(collect([$listing->cover_image])->merge($listing->gallery ?? [])->filter()->unique() as $image)
+            @php($photoKey = hash('sha256', $image))
+            <fieldset class="az-span-2" style="padding:14px;border:1px solid #cbd5e1;border-radius:10px">
+                <legend>Photo description and provenance</legend>
+                <img src="{{ Storage::disk('public')->url($image) }}"
+                     alt="Photo under administrative review"
+                     style="display:block;max-height:170px;max-width:100%;object-fit:contain">
+                <label>Accurate, descriptive alternative text
+                    <input type="text" name="photo_alt[{{ $photoKey }}]"
+                        minlength="8" maxlength="300" required
+                        value="{{ old('photo_alt.'.$photoKey) }}">
+                </label>
+                <label>Photo attribution / rights holder
+                    <input type="text" name="photo_attribution[{{ $photoKey }}]"
+                        minlength="3" maxlength="300" required
+                        value="{{ old('photo_attribution.'.$photoKey) }}">
+                </label>
+            </fieldset>
+        @endforeach
         <label><input type="checkbox" name="media_reviewed" value="1" required>
             I examined the cover and all gallery images, confirmed that they depict the listed property and contain no prohibited or private material.
         </label>

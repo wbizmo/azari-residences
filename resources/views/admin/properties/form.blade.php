@@ -102,6 +102,9 @@
     </button>
 </form>
 @if($property->exists && auth()->user()?->is_admin)
+    @include('admin.properties.photo-review', ['property' => $property])
+@endif
+@if($property->exists && auth()->user()?->is_admin)
     <section class="admin-card" aria-label="Independent property claim verification" style="margin-top:24px">
         <h2>Independent claim verification</h2>
         <p>Only record checks supported by staff-reviewed evidence. Evidence references remain private and claims expire automatically.</p>

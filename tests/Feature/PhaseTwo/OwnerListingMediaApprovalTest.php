@@ -71,6 +71,10 @@ class OwnerListingMediaApprovalTest extends TestCase
         $request = $this->requestFor($admin, [
             'media_reviewed' => '1',
             'media_review_note' => 'All submitted property photographs were checked.',
+            'photo_alt' => [hash('sha256', 'owner-listings/covers/review.jpg') =>
+                'Exterior view of the submitted property'],
+            'photo_attribution' => [hash('sha256', 'owner-listings/covers/review.jpg') =>
+                'Owner supplied imagery'],
             'publish_now' => '1',
         ]);
 
