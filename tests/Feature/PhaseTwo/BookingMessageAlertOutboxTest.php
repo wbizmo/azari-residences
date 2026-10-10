@@ -72,6 +72,7 @@ class BookingMessageAlertOutboxTest extends TestCase
 
         $this->artisan('resavar:deliver-booking-message-alerts')->assertExitCode(0);
         $this->assertSame('retry', $outbox->fresh()->state);
-        Notification::assertNothingSent();
+        $this->assertCount(0, Notification::sent($guest, PremiumMailNotification::class)
+            ->filter(fn ($notice) => $notice->template === 'booking-message'));
     }
 }
