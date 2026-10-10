@@ -25,10 +25,14 @@ Route::middleware(['auth', 'auth.session', 'azari.staff:administrator'])
             ->middleware('throttle:10,1')->name('suppliers.store');
         Route::post('/suppliers/{supplier}/approve', [TravelSupplierController::class, 'approve'])
             ->middleware(['azari.step-up', 'throttle:5,1'])->name('suppliers.approve');
+        Route::post('/suppliers/{supplier}/pause', [TravelSupplierController::class, 'pause'])
+            ->middleware(['azari.step-up', 'throttle:10,1'])->name('suppliers.pause');
         Route::post('/offers', [TravelSupplierController::class, 'storeOffer'])
             ->middleware('throttle:10,1')->name('offers.store');
         Route::post('/offers/{offer}/publish', [TravelSupplierController::class, 'publish'])
             ->middleware(['azari.step-up', 'throttle:10,1'])->name('offers.publish');
+        Route::post('/offers/{offer}/unpublish', [TravelSupplierController::class, 'unpublish'])
+            ->middleware(['azari.step-up', 'throttle:10,1'])->name('offers.unpublish');
         Route::post('/offers/{offer}/slots', [TravelSupplierController::class, 'storeSlot'])
             ->middleware('throttle:10,1')->name('slots.store');
         Route::post('/requests/{travelRequest}/review', [TravelSupplierController::class, 'review'])

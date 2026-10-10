@@ -37,6 +37,12 @@
                 @else
                     <p>Supplier approval recorded. No API access or customer PII is automatically granted.</p>
                 @endif
+                @if($supplier->status !== 'paused')
+                    <form method="POST" action="{{ route('azari.admin.travel.suppliers.pause', $supplier) }}">
+                        @csrf
+                        <button class="button" type="submit">Pause supplier (block new requests)</button>
+                    </form>
+                @endif
             </details>
         @empty
             <p>No supplier partners recorded.</p>
@@ -87,6 +93,12 @@
                     <form method="POST" action="{{ route('azari.admin.travel.offers.publish', $offer) }}">
                         @csrf
                         <button class="button button-primary" type="submit">Publish after verification</button>
+                    </form>
+                @endif
+                @if($offer->published_at)
+                    <form method="POST" action="{{ route('azari.admin.travel.offers.unpublish', $offer) }}">
+                        @csrf
+                        <button class="button" type="submit">Unpublish incorrect or unavailable offer</button>
                     </form>
                 @endif
                 @if($offer->kind === 'experience')

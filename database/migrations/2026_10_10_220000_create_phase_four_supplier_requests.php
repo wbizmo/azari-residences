@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('support_email', 180)->nullable();
             $table->string('terms_url', 500)->nullable();
             $table->json('approved_regions')->nullable();
-            $table->json('compliance_evidence')->nullable();
+            $table->longText('compliance_evidence')->nullable(); // encrypted:array requires ciphertext text
             $table->timestamp('contract_verified_at')->nullable();
             $table->timestamp('safety_verified_at')->nullable();
             $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
@@ -74,7 +74,7 @@ return new class extends Migration
             $table->unsignedBigInteger('quoted_total_minor');
             $table->char('currency', 3);
             $table->json('quote_snapshot');
-            $table->json('preferences')->nullable();
+            $table->longText('preferences')->nullable(); // encrypted:array requires ciphertext text
             $table->boolean('data_share_consent')->default(false);
             $table->string('supplier_reference', 160)->nullable();
             $table->timestamp('supplier_acknowledged_at')->nullable();

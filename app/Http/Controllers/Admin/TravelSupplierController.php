@@ -142,6 +142,36 @@ final class TravelSupplierController extends Controller
         return $this->respond($request, ['id' => $offer->id, 'status' => 'published']);
     }
 
+
+    public function pause(Request $request, TravelSupplier $supplier): JsonResponse|RedirectResponse
+    {
+        DB::transaction(function () use ($supplier): void {
+            $locked = TravelSupplier::query()->whereKey($supplier->id)->lockForUpdate()->firstOrFail();
+            if ($locked->status !== 'paused') {
+                $before = $locked->status;
+                $locked->update(['status' => 'paused']);
+                AuditLog::record('travel_supplier.paused', $locked,
+                    ['status' => $before], ['status' => 'paused']);
+            }
+        }, 3);
+
+        return $this->respond($request, ['id' => $supplier->id, 'status' => 'paused']);
+    }
+
+    public function unpublish(Request $request, TravelOffer $offer): JsonResponse|RedirectResponse
+    {
+        DB::transaction(function () use ($offer): void {
+            $locked = TravelOffer::query()->whereKey($offer->id)->lockForUpdate()->firstOrFail();
+            if ($locked->published_at) {
+                $locked->update(['published_at' => null]);
+                AuditLog::record('travel_offer.unpublished', $locked,
+                    ['published' => true], ['published' => false]);
+            }
+        }, 3);
+
+        return $this->respond($request, ['id' => $offer->id, 'status' => 'unpublished']);
+    }
+
     public function storeSlot(Request $request, TravelOffer $offer): JsonResponse|RedirectResponse
     {
         abort_unless($offer->kind === 'experience', 404);

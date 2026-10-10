@@ -191,6 +191,17 @@ final class TravelSupplierRequestTest extends TestCase
             ->assertOk()->assertDontSee('Sample supplier availability enquiry');
     }
 
+    public function test_pausing_supplier_or_unpublishing_offer_blocks_new_enquiries(): void
+    {
+        $offer = $this->offer('car');
+        $guest = User::factory()->create();
+        $offer->supplier->update(['status' => 'paused']);
+        $this->assertFalse($offer->fresh()->isRequestable());
+        $offer->supplier->update(['status' => 'approved']);
+        $offer->update(['published_at' => null]);
+        $this->assertFalse($offer->fresh()->isRequestable());
+    }
+
     public function test_staff_review_requires_actual_acknowledgement_and_guest_consent(): void
     {
         $offer = $this->offer('transfer');
