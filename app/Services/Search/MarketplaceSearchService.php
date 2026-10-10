@@ -9,6 +9,7 @@ use App\Services\Bookings\AzariPricingEngine;
 use App\Services\Reviews\ReviewSummaryService;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Cursor;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Cache;
@@ -160,6 +161,95 @@ class MarketplaceSearchService
                     'price' => (float) $result['quote']['total'],
                     'currency' => $result['quote']['currency'],
                 ])->values(),
+        ];
+    }
+
+    /**
+     * Independently traverse every coordinate-bearing eligible stay with a
+     * stable ID cursor. Numbered result pages may reorder when properties are
+     * added, and the old map endpoint stopped after 100 pages.
+     *
+     * Prices are computed using the same authoritative availability and
+     * pricing engines as the list; unquoted points are never returned.
+     */
+    public function mapCursor(array $filters): array
+    {
+        $encoded = $filters['cursor'] ?? null;
+        $cursor = filled($encoded) ? Cursor::fromEncoded((string) $encoded) : null;
+        if (filled($encoded) && $cursor === null) {
+            throw ValidationException::withMessages(['cursor' => 'The map continuation token is invalid.']);
+        }
+
+        $checkIn = CarbonImmutable::parse($filters['check_in'])->startOfDay();
+        $checkOut = CarbonImmutable::parse($filters['check_out'])->startOfDay();
+        $rooms = max(1, (int) ($filters['rooms'] ?? 1));
+        $adults = max(1, (int) ($filters['adults'] ?? 1));
+        $children = max(0, (int) ($filters['children'] ?? 0));
+        $guests = $adults + $children;
+        $requestedPlan = isset($filters['rate_plan_id']) ? (int) $filters['rate_plan_id'] : null;
+
+        $query = $this->eligibleProperties($filters, $checkIn, $checkOut, $rooms, $guests)
+            ->whereNotNull('properties.latitude')
+            ->whereNotNull('properties.longitude')
+            ->with(['publicAccommodationTypes' => fn ($types) =>
+                $this->applyTypeFilters($types, $filters, $checkIn, $checkOut, $rooms, $guests)
+                    ->with(['ratePlans' => fn ($plans) => $plans
+                        ->where('is_active', true)->where('is_public', true)
+                        ->orderBy('sort_order')->orderBy('id')])
+                    ->orderBy('id')])
+            ->orderBy('properties.id');
+
+        $batch = $query->cursorPaginate(20, ['properties.*'], 'cursor', $cursor);
+        $points = [];
+
+        foreach ($batch->items() as $property) {
+            foreach ($property->publicAccommodationTypes as $type) {
+                // Preserve the legacy base-rate booking path where a room
+                // does not yet have a published independent rate plan.
+                $plans = $type->ratePlans->isEmpty() && $requestedPlan === null
+                    ? [null]
+                    : $type->ratePlans;
+                foreach ($plans as $plan) {
+                    if ($requestedPlan !== null && (int) $plan?->id !== $requestedPlan) {
+                        continue;
+                    }
+
+                    try {
+                        $this->availability->assertRules(
+                            $property, $checkIn, $checkOut, $adults, $children, $rooms, $type, $plan
+                        );
+                        if (! $this->availability->availableForProperty(
+                            $property, $checkIn, $checkOut, $rooms, $type->getKey()
+                        )) {
+                            continue;
+                        }
+
+                        $quote = $this->pricing->quote(
+                            $property, $checkIn, $checkOut, [], $type, $plan, $rooms
+                        );
+                    } catch (ValidationException) {
+                        continue;
+                    }
+
+                    $points[] = [
+                        'id' => $property->getKey(),
+                        'name' => $property->name,
+                        'slug' => $property->slug,
+                        'url' => route('properties.show', $property),
+                        'lat' => (float) $property->latitude,
+                        'lng' => (float) $property->longitude,
+                        'price' => (float) $quote['total'],
+                        'currency' => $quote['currency'],
+                    ];
+                    break 2;
+                }
+            }
+        }
+
+        return [
+            'points' => $points,
+            'next_cursor' => $batch->nextCursor()?->encode(),
+            'batch_size' => 20,
         ];
     }
 
