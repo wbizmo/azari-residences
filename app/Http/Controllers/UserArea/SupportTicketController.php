@@ -97,7 +97,51 @@ class SupportTicketController extends Controller {
  }
  public function show(Request $r,SupportTicket $ticket):View{$this->own($r,$ticket);$ticket->load('booking');$messages=$ticket->publicMessages()->with('user')->oldest()->paginate(15,['*'],'messages_page')->withQueryString();return view('user.support.show',compact('ticket','messages'));}
  public function attachment(Request $r,SupportTicket $ticket,SupportTicketMessage $message):StreamedResponse{$this->own($r,$ticket);abort_unless($message->support_ticket_id===$ticket->id&&!$message->internal&&$message->attachment_path,404);abort_unless(Storage::disk('private')->exists($message->attachment_path),404);AuditLog::record('support_ticket.attachment_downloaded',$ticket,[],[],['message_id'=>$message->id]);return Storage::disk('private')->download($message->attachment_path,$message->attachment_name?:'attachment');}
- public function reply(Request $r,SupportTicket $ticket):RedirectResponse{$this->own($r,$ticket);abort_if($ticket->status==='closed',422);$d=$r->validate(['body'=>'required|string|max:10000','attachment'=>'nullable|file|max:5120|mimes:jpg,jpeg,png,pdf,doc,docx']);$file=$r->file('attachment');$ticket->messages()->create(['user_id'=>$r->user()->id,'body'=>$d['body'],...app(SupportAttachmentGuard::class)->store($file)]);$ticket->update(['status'=>'awaiting_staff']);AuditLog::record('support_ticket.user_replied',$ticket);return back()->with('success','Reply sent.');}
+ public function reply(Request $r, SupportTicket $ticket): RedirectResponse
+ {
+     $this->own($r, $ticket);
+     $d = $r->validate([
+         'body' => 'required|string|max:10000',
+         'attachment' => 'nullable|file|max:5120|mimes:jpg,jpeg,png,pdf,doc,docx',
+     ]);
+     $attachment = app(SupportAttachmentGuard::class)->store($r->file('attachment'));
+
+     try {
+         DB::transaction(function () use ($r, $ticket, $d, $attachment): void {
+             $locked = SupportTicket::query()->whereKey($ticket->id)->lockForUpdate()->firstOrFail();
+             abort_unless((int) $locked->user_id === (int) $r->user()->id, 403);
+             abort_if($locked->status === 'closed', 422, 'Reopen the ticket before replying.');
+
+             $message = $locked->messages()->create([
+                 'user_id' => $r->user()->id,
+                 'body' => $d['body'],
+                 ...$attachment,
+             ]);
+             $update = ['status' => 'awaiting_staff'];
+             if ($locked->status === 'resolved') {
+                 $update['resolved_at'] = null;
+                 $update['sla_alerted_at'] = null;
+                 $update['sla_due_at'] = now()->addMinutes(match ($locked->severity) {
+                     'safety' => 15,
+                     'unable_to_check_in' => 30,
+                     'payment_taken_no_confirmation', 'property_unavailable' => 60,
+                     default => 1440,
+                 });
+             }
+             $locked->update($update);
+             AuditLog::record('support_ticket.user_replied', $locked, [], [], [
+                 'message_id' => $message->id,
+             ]);
+         }, 3);
+     } catch (Throwable $exception) {
+         if ($attachment['attachment_path'] !== null) {
+             Storage::disk('private')->delete($attachment['attachment_path']);
+         }
+         throw $exception;
+     }
+
+     return back()->with('success', 'Reply sent.');
+ }
  public function close(Request $r,SupportTicket $ticket):RedirectResponse{$this->own($r,$ticket);$ticket->update(['status'=>'closed','closed_at'=>now()]);AuditLog::record('support_ticket.closed',$ticket);return back()->with('success','Ticket closed.');}
  public function reopen(Request $r,SupportTicket $ticket):RedirectResponse{$this->own($r,$ticket);abort_unless(in_array($ticket->status,['closed','resolved'],true),422);$ticket->update(['status'=>'open','closed_at'=>null,'resolved_at'=>null,'sla_alerted_at'=>null,'sla_due_at'=>now()->addMinutes(match($ticket->severity){'safety'=>15,'unable_to_check_in'=>30,'payment_taken_no_confirmation','property_unavailable'=>60,default=>1440})]);AuditLog::record('support_ticket.reopened',$ticket);return back()->with('success','Ticket reopened.');}
  private function own(Request $r,SupportTicket $ticket):void{abort_unless($ticket->user_id===$r->user()->id,403);}
