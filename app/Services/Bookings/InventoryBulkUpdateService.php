@@ -206,6 +206,11 @@ class InventoryBulkUpdateService
         }
 
         $changes = collect($changes)->only(self::ALLOWED)->all();
+        if ($changes === []) {
+            throw ValidationException::withMessages([
+                'inventory' => 'Choose at least one inventory or rate field to preview.',
+            ]);
+        }
         $this->validateChanges($type, $changes);
         $this->assertCommittedInventoryPreserved($type, $from, $to, $changes);
 

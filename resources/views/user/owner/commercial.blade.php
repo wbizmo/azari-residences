@@ -65,8 +65,6 @@
     </div>
 </section>
 @endforeach
-@endsection
-
 <script>
 (() => {
     'use strict';
@@ -142,3 +140,4 @@
     });
 })();
 </script>
+@endsection
