@@ -20,6 +20,8 @@ Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer'])->group
             Route::get('/staff', [OwnerPhaseTwoController::class, 'staff'])->name('staff');
             Route::post('/staff/invitations', [OwnerPhaseTwoController::class, 'invite'])
                 ->middleware('throttle:10,10')->name('staff.invite');
+            Route::patch('/staff/{membership}', [OwnerPhaseTwoController::class, 'updateStaffRole'])
+                ->middleware('throttle:15,1')->name('staff.update');
             Route::delete('/staff/{membership}', [OwnerPhaseTwoController::class, 'revoke'])->name('staff.revoke');
 
             Route::get('/operations', [OwnerPhaseTwoController::class, 'operations'])->name('operations');
