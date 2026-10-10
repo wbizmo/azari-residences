@@ -61,6 +61,7 @@
         const invalidate = () => {
             requestSequence++;
             requestController?.abort();
+            preview.disabled = false;
             revision.value = '';
             apply.disabled = true;
             feedback.textContent = 'Changes have not been previewed. Review the proposed dates and inventory before applying.';
