@@ -77,6 +77,59 @@
 </section>
 
 <section class="az-user-panel" style="margin-top:18px">
+    <header class="az-user-panel-header">
+        <div><h2 class="az-user-panel-title">Trip-wide item accounting</h2>
+            <p class="az-user-panel-subtitle">Every product retains independent supplier, payment and cancellation terms. No unsupported currency conversions.</p>
+        </div>
+    </header>
+    <div class="az-user-panel-body">
+        @foreach($tripAccounting['totals'] as $currency=>$amounts)
+            <p><strong>{{ $currency }}</strong> · Quoted {{ number_format($amounts['quoted_minor']/100,2) }}
+              · Verified collected {{ number_format($amounts['collected_minor']/100,2) }}
+              · Refunded {{ number_format($amounts['refunded_minor']/100,2) }}
+              · Net {{ number_format($amounts['net_collected_minor']/100,2) }}</p>
+        @endforeach
+        @if($tripAccounting['requires_fx_quote'])
+            <p><strong>Multiple currencies:</strong> no summed trip total without independently verified exchange rates.</p>
+        @endif
+        @foreach($tripAccounting['items'] as $item)
+            <div class="az-user-list-item"><div>
+                <h3>{{ $item['title'] }}</h3>
+                <p>{{ ucfirst($item['type']) }} · {{ str_replace('_',' ',$item['status']) }}
+                    @if($item['currency']) · {{ $item['currency'] }} {{ number_format($item['quoted_minor']/100,2) }} indicative @endif</p>
+            </div></div>
+        @endforeach
+        @if(config('travel.trip_assembly_enabled', false))
+            <form method="POST" action="{{ route('user.itineraries.review-assembly',$itinerary) }}">
+                @csrf
+                <input type="hidden" name="idempotency_key" value="{{ (string)\Illuminate\Support\Str::uuid() }}">
+                <button class="az-user-button az-user-button--light" type="submit">Prepare independent item review, no charges</button>
+            </form>
+            @foreach($assemblies as $assembly)
+                <p><small>Snapshot {{ $assembly->created_at->format('j M Y') }}: {{ str_replace('_',' ',$assembly->status) }}</small></p>
+            @endforeach
+        @endif
+    </div>
+</section>
+@if($diningRequests)
+<section class="az-user-panel" style="margin-top:18px">
+    <header class="az-user-panel-header">
+        <h2 class="az-user-panel-title">Dining concierge enquiries</h2>
+        <a href="{{ route('user.dining.index') }}">Explore dining</a>
+    </header>
+    <div class="az-user-panel-body">
+        @forelse($diningRequests as $dining)
+            <div class="az-user-list-item"><div>
+                <h3>{{ $dining->partner?->name ?? 'Dining request' }}</h3>
+                <p>{{ $dining->requested_for }} · {{ str_replace('_',' ',$dining->status) }}</p>
+            </div></div>
+        @empty <p>No dining enquiries yet.</p>
+        @endforelse
+        {{ $diningRequests->links() }}
+    </div>
+</section>
+@endif
+<section class="az-user-panel" style="margin-top:18px">
     <div class="az-user-panel-body">
         <form method="POST" action="{{ route('user.itineraries.destroy', $itinerary) }}">
             @csrf

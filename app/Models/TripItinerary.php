@@ -15,6 +15,16 @@ class TripItinerary extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function assemblies(): HasMany
+    {
+        return $this->hasMany(TripAssembly::class);
+    }
+
+    public function diningRequests(): HasMany
+    {
+        return $this->hasMany(DiningRequest::class);
+    }
+
     public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class);

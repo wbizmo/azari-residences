@@ -51,7 +51,18 @@ class TripItineraryController extends Controller
             ->with('offer:id,title')
             ->latest()->paginate(10, ['*'], 'travel_page');
 
-        return view('user.bookings.itinerary', compact('itinerary', 'bookings', 'travelRequests'));
+        $diningRequests = config('travel.dining_enabled', false)
+            ? $itinerary->diningRequests()->where('user_id', $request->user()->id)
+                ->with('partner:id,name')->orderBy('requested_for')
+                ->paginate(10, ['*'], 'dining_page')
+            : null;
+        $tripAccounting = app(\App\Services\Travel\TripAccountingService::class)->snapshot($itinerary);
+        $assemblies = config('travel.trip_assembly_enabled', false)
+            ? $itinerary->assemblies()->where('user_id', $request->user()->id)
+                ->latest()->limit(5)->get() : collect();
+
+        return view('user.bookings.itinerary',
+            compact('itinerary', 'bookings', 'travelRequests', 'diningRequests', 'tripAccounting', 'assemblies'));
     }
 
     public function assign(Request $request, string $reference): RedirectResponse
