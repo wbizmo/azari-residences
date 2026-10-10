@@ -382,6 +382,12 @@
                 @foreach(['rating'=>'Overall','cleanliness'=>'Cleanliness','comfort'=>'Comfort','facilities'=>'Facilities','location_score'=>'Location','staff_service'=>'Staff/service','value_score'=>'Value','wifi_score'=>'Wi-Fi'] as $name=>$label)
                     <label><span>{{ $label }}</span><select name="{{ $name }}" {{ $name==='wifi_score' ? '' : 'required' }}><option value="">Choose</option>@foreach([5,4,3,2,1] as $score)<option value="{{ $score }}" @selected((int)$booking->review->{$name}===$score)>{{ $score }}/5</option>@endforeach</select></label>
                 @endforeach
+                <label><span>Review language</span><select name="language">
+                    @foreach(['und'=>'Unspecified','en'=>'English','fr'=>'French','es'=>'Spanish','de'=>'German','pt'=>'Portuguese','ar'=>'Arabic','hi'=>'Hindi','zh'=>'Chinese','it'=>'Italian','yo'=>'Yoruba','ig'=>'Igbo','ha'=>'Hausa','other'=>'Other'] as $code => $label)
+                        <option value="{{ $code }}" @selected(old('language', $booking->review->language ?? 'und') === $code)>{{ $label }}</option>
+                    @endforeach
+                </select></label>
+                <p class="wide">Remove personal contact details and website links before publishing a review.</p>
                 <label class="wide"><span>Review title</span><input name="title" maxlength="120" value="{{ $booking->review->title }}"></label>
                 <label class="wide"><span>What did you like?</span><textarea name="positive_feedback" maxlength="1500">{{ $booking->review->positive_feedback }}</textarea></label>
                 <label class="wide"><span>What could be better?</span><textarea name="negative_feedback" maxlength="1500">{{ $booking->review->negative_feedback }}</textarea></label>
