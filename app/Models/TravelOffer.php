@@ -17,6 +17,8 @@ class TravelOffer extends Model
     protected function casts(): array
     {
         return [
+            'base_minor' => 'integer', 'tax_minor' => 'integer',
+            'fee_minor' => 'integer', 'deposit_minor' => 'integer',
             'terms' => 'array', 'eligibility' => 'array',
             'starts_at' => 'datetime', 'expires_at' => 'datetime', 'published_at' => 'datetime',
         ];

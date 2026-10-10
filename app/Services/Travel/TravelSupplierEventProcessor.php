@@ -3,6 +3,8 @@
 namespace App\Services\Travel;
 
 use App\Models\TravelExperienceSlot;
+use App\Models\TravelFulfillment;
+use App\Models\TravelVoucher;
 use App\Models\TravelRequest;
 use App\Models\TravelRequestEvent;
 use App\Models\TravelSupplierWebhookEvent;
@@ -52,7 +54,7 @@ final class TravelSupplierEventProcessor
                 $valid = $request
                     && $request->travel_supplier_id === $event->travel_supplier_id
                     && $request->supplier?->isApproved()
-                    && in_array($payload['event_type'] ?? '', ['acknowledged','declined','disrupted'], true);
+                    && in_array($payload['event_type'] ?? '', ['acknowledged','declined','disrupted','cancelled'], true);
 
                 $next = null;
                 if ($valid && $request->status === 'requested' && $request->expires_at->isFuture()) {
@@ -65,6 +67,12 @@ final class TravelSupplierEventProcessor
                     } elseif ($payload['event_type'] === 'declined') {
                         $next = 'supplier_declined';
                     }
+                } elseif ($valid && $request->status === 'cancellation_requested'
+                    && $payload['event_type'] === 'cancelled') {
+                    $next = 'cancelled';
+                } elseif ($valid && $request->status === 'supplier_acknowledged'
+                    && $payload['event_type'] === 'cancelled') {
+                    $next = 'cancelled';
                 } elseif ($valid && $request->status === 'supplier_acknowledged'
                     && in_array($payload['event_type'], ['declined','disrupted'], true)) {
                     $next = 'support_required';
@@ -82,9 +90,39 @@ final class TravelSupplierEventProcessor
                     return 'rejected';
                 }
 
+                // A supplier cancellation or disruption after independently
+                // verified settlement requires a financial review, not a
+                // false 'refunded' state. Suspend any unredeemed voucher.
+                if (in_array($payload['event_type'], ['cancelled', 'disrupted', 'declined'], true)) {
+                    $fulfillment = TravelFulfillment::query()
+                        ->where('travel_request_id', $request->id)
+                        ->lockForUpdate()->first();
+                    if ($fulfillment && in_array($fulfillment->status,
+                        ['payment_verified', 'dispatching', 'confirmed', 'reconciliation_required'], true)) {
+                        $fulfillment->update(['status' => 'support_required']);
+                        $voucher = TravelVoucher::query()
+                            ->where('travel_fulfillment_id', $fulfillment->id)
+                            ->lockForUpdate()->first();
+                        if ($voucher && $voucher->status === 'issued') {
+                            $voucher->update(['status' => 'revoked']);
+                        }
+                        DB::table('travel_financial_events')->insertOrIgnore([
+                            'travel_fulfillment_id' => $fulfillment->id,
+                            'event_key' => 'supplier-event:'.hash('sha256', $event->external_event_id),
+                            'type' => 'refund_review_required',
+                            'currency' => $fulfillment->currency,
+                            'amount_minor' => $fulfillment->amount_minor,
+                            'provider_reference' => $fulfillment->verified_payment_reference,
+                            'created_at' => now(),
+                        ]);
+                        $next = 'support_required';
+                    }
+                }
+
                 $before = $request->status;
                 $request->update([
                     'status' => $next,
+                    'cancelled_at' => $next === 'cancelled' ? now() : $request->cancelled_at,
                     'supplier_reference' => $next === 'supplier_acknowledged'
                         ? $payload['supplier_reference'] : $request->supplier_reference,
                     'supplier_acknowledged_at' => $next === 'supplier_acknowledged'

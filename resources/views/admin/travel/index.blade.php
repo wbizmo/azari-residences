@@ -115,6 +115,24 @@
         @endforelse
     </section>
 
+    @if(config('travel.fulfillment_enabled', false))
+    <section class="az-user-panel" style="padding:20px;margin-bottom:18px">
+        <h2>Redeem an independently verified experience voucher</h2>
+        <p>Only registered voucher codes with confirmed supplier fulfillment and verified payment may be redeemed. Each code works once.</p>
+        <form method="POST" action="{{ route('azari.admin.travel.vouchers.redeem') }}" class="az-form-grid">
+            @csrf
+            <label>Approved supplier <select name="supplier_id" required>
+                @foreach($suppliers as $supplier)
+                    @if($supplier->isApproved() && $supplier->kind === 'experience')
+                        <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
+                    @endif
+                @endforeach
+            </select></label>
+            <label>Voucher code <input name="voucher_code" required maxlength="48" autocomplete="off"></label>
+            <button class="button button-primary" type="submit">Validate and redeem once</button>
+        </form>
+    </section>
+    @endif
     <section class="az-user-panel" style="padding:20px">
         <h2>Outstanding supplier enquiries</h2>
         <p>Recording acknowledgement never confirms a flight, vehicle, activity ticket or travel payment.</p>

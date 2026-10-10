@@ -35,7 +35,7 @@ final class TravelSupplierWebhookService
             || ! is_string($payload['event_id'])
             || ! preg_match('/^[A-Za-z0-9_.:-]{1,128}$/D', $payload['event_id'])
             || ! is_string($payload['event_type'])
-            || ! in_array($payload['event_type'], ['acknowledged', 'declined', 'disrupted'], true)
+            || ! in_array($payload['event_type'], ['acknowledged', 'declined', 'disrupted', 'cancelled'], true)
             || ! is_string($payload['travel_request_id'])
             || ! preg_match('/^[a-f0-9-]{36}$/iD', $payload['travel_request_id'])) {
             abort(422, 'Malformed supplier event envelope.');

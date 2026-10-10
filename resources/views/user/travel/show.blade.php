@@ -19,6 +19,15 @@
         <p><strong>Cancellation terms:</strong> {{ $travelRequest->quote_snapshot['terms']['cancellation'] ?? 'Refer to supplier policy' }}</p>
         <p><strong>Supplier terms:</strong> {{ $travelRequest->quote_snapshot['terms']['disclosure'] ?? '' }}</p>
         @if($travelRequest->itinerary)<p>Travel plan: {{ $travelRequest->itinerary->name }}</p>@endif
+        @if(config('travel.fulfillment_enabled') && $travelRequest->fulfillment?->status === 'confirmed'
+            && $travelRequest->fulfillment?->voucher?->status === 'issued')
+            <section aria-label="Activity admission voucher">
+                <h3>Verified activity voucher</h3>
+                <p>This single-use code is valid only with the approved activity supplier. Do not share it publicly.</p>
+                <img src="{{ route('user.travel.voucher.qr', $travelRequest->fulfillment->voucher) }}"
+                     alt="Single-use activity voucher QR code" width="260" height="260">
+            </section>
+        @endif
         @if($travelRequest->supplier_acknowledged_at)
             <p>The supplier has acknowledged the enquiry. This is not a completed reservation or ticket.</p>
         @endif
@@ -26,7 +35,7 @@
         @if(in_array($travelRequest->status, ['requested', 'supplier_acknowledged', 'expired']))
             <form method="POST" action="{{ route('user.travel.cancel', $travelRequest) }}">
                 @csrf
-                <button class="az-user-button az-user-button--light" type="submit">Cancel travel request only</button>
+                <button class="az-user-button az-user-button--light" type="submit">{{ $travelRequest->status === 'supplier_acknowledged' ? 'Request supplier cancellation' : 'Cancel travel request only' }}</button>
             </form>
         @endif
         <h3>Request history</h3>

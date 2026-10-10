@@ -190,6 +190,22 @@ final class TravelSupplierWebhookTest extends TestCase
         $this->assertDatabaseCount('payments', 0);
     }
 
+    public function test_signed_supplier_cancellation_completes_pending_cancellation(): void
+    {
+        [$guest, $supplier, $travel] = $this->createTravel();
+        $travel->update(['status' => 'supplier_acknowledged']);
+        app(TravelRequestService::class)->cancel($guest, $travel);
+        $this->assertSame('cancellation_requested', $travel->fresh()->status);
+        $this->signedPost($supplier, [
+            'event_id' => 'provider-event-750',
+            'event_type' => 'cancelled',
+            'travel_request_id' => $travel->id,
+        ])->assertAccepted();
+        $this->assertSame(['processed' => 1, 'rejected' => 0],
+            app(TravelSupplierEventProcessor::class)->process());
+        $this->assertSame('cancelled', $travel->fresh()->status);
+    }
+
     public function test_declined_flight_enquiry_does_not_create_ticket_or_charge(): void
     {
         [$guest, $supplier, $travel] = $this->createTravel('flight');
