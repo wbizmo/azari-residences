@@ -214,7 +214,7 @@ class InventoryBulkUpdateService
         return [
             'from' => $from->toDateString(),
             'to' => $to->toDateString(),
-            'days' => $from->diffInDays($to) + 1,
+            'days' => (int) $from->diffInDays($to) + 1,
             'changes' => $changes,
             'revision' => $this->revision($type, $from, $to),
             'maximum_committed_units' => (int) ($committed->max() ?? 0),
@@ -263,6 +263,7 @@ class InventoryBulkUpdateService
             }
             $payload['nights'][$key] = [
                 'exists' => $row !== null,
+                'row_updated_at' => $row?->getRawOriginal('updated_at'),
                 'values' => $values,
                 'committed' => (int) $committed->get($key, 0),
             ];
