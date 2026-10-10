@@ -22,6 +22,11 @@ class OwnerChannelConnectionController extends Controller
             'properties' => $properties,
         ]);
     }
+    public function health(Request $request, ChannelConnection $connection, \App\Services\PhaseThree\ChannelMappingAuditService $audit): \Illuminate\Http\JsonResponse
+    {
+        $this->authorizeConnection($request, $connection);
+        return response()->json($audit->inspect($connection));
+    }
     public function store(Request $request): RedirectResponse
     {
         $data = $this->payload($request);

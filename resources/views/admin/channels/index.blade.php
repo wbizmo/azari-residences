@@ -4,6 +4,7 @@
 <div class="admin-content"><h1>Channel synchronization</h1><p>External calendars are imported as separate inventory blocks. Stale connections fail closed by default.</p>
 <form method="POST" action="{{ route('azari.admin.channels.store') }}" class="az-user-panel" style="padding:20px">@csrf
 <label>Property <select name="property_id" required>@foreach($properties as $property)<option value="{{ $property->id }}">{{ $property->name }}</option>@endforeach</select></label>
+<label>Room mapping <select name="accommodation_type_id"><option value="">Property-wide (review before use)</option>@foreach($properties as $p)<optgroup label="{{ $p->name }}">@foreach($p->accommodationTypes as $type)<option value="{{ $type->id }}">{{ $type->name }} ({{ $type->currency }})</option>@endforeach</optgroup>@endforeach</select></label>
 <label>Name <input name="name" required placeholder="Airbnb iCal"></label><input type="hidden" name="provider" value="ical">
 <label>Import URL <input type="url" name="import_url" required></label><label>Stale after minutes <input type="number" name="stale_after_minutes" value="180" min="15"></label>
 <label><input type="checkbox" name="is_active" value="1" checked> Active</label><label><input type="checkbox" name="fail_closed" value="1" checked> Fail closed when stale</label>

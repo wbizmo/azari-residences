@@ -7,6 +7,8 @@ return [
     'default_currency' => env('APP_CURRENCY', 'USD'),
     'supported_locales' => [
         'en' => 'English',
+        'fr' => 'Français',
+        'es' => 'Español',
     ],
     'supported_currencies' => [
         'USD' => 'US Dollar',

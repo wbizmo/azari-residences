@@ -19,6 +19,11 @@ use App\Http\Controllers\PublicSite\DestinationController;
 use App\Http\Controllers\HealthController;
 use Illuminate\Support\Facades\Route;
 
+// Authenticated, sandbox-gated inbox only. Provider-certified routes are separate.
+Route::post('/webhooks/channels/{connection}', \App\Http\Controllers\PhaseThree\ChannelWebhookController::class)
+    ->middleware('throttle:30,1')->name('channels.webhook');
+Route::post('/language', \App\Http\Controllers\PhaseThree\LanguageController::class)
+    ->middleware('throttle:15,1')->name('language.update');
 Route::get('/', HomeController::class)->name('home');
 Route::get('/health/live', [HealthController::class, 'live'])->middleware('throttle:120,1')->name('health.live');
 Route::get('/health/ready', [HealthController::class, 'ready'])->middleware('throttle:60,1')->name('health.ready');

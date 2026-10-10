@@ -41,8 +41,10 @@ Route::prefix('user/property-centre')
         Route::put('/properties/{property}/commercial/accommodations/{accommodationType}/rate-plans/{ratePlan}', [OwnerCommercialInventoryController::class, 'updateRatePlan'])
             ->name('commercial.rate-plans.update');
 
+        Route::get('/properties/{property}/commercial/accommodations/{accommodationType}/yield-preview', [OwnerCommercialInventoryController::class, 'yieldPreview'])->middleware('throttle:20,1')->name('commercial.yield-preview');
         Route::get('/channels', [OwnerChannelConnectionController::class, 'index'])->name('channels.index');
         Route::post('/channels', [OwnerChannelConnectionController::class, 'store'])->name('channels.store');
+        Route::get('/channels/{connection}/health', [OwnerChannelConnectionController::class, 'health'])->middleware('throttle:20,1')->name('channels.health');
         Route::post('/channels/{connection}/sync', [OwnerChannelConnectionController::class, 'sync'])->name('channels.sync');
         Route::delete('/channels/{connection}', [OwnerChannelConnectionController::class, 'destroy'])->name('channels.destroy');
 

@@ -168,3 +168,7 @@
         gap: 5px;
     }
 }
+
+/* Phase Three: compact accessible locale control on public navigation. */
+.resavar-language-picker { display: inline-flex; align-items: center; max-width: 140px; }
+.resavar-language-picker select { min-width: 0; max-width: 100%; padding: 8px 6px; color: var(--reserva-navy); background: var(--reserva-white); border: 1px solid var(--reserva-navy); border-radius: 8px; }

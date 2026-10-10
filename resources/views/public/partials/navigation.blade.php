@@ -80,6 +80,17 @@
 
 
         <div class="nav-actions">
+            <form action="{{ route('language.update') }}" method="POST" class="resavar-language-picker">
+                @csrf
+                <label for="resavar-language" class="sr-only">Language</label>
+                <select id="resavar-language" name="locale" aria-label="Language"
+                        onchange="this.form.requestSubmit()">
+                    @foreach(config('localization.supported_locales', []) as $code => $name)
+                        <option value="{{ $code }}" @selected(app()->getLocale() === $code)>{{ $name }}</option>
+                    @endforeach
+                </select>
+                <noscript><button type="submit">Change language</button></noscript>
+            </form>
             <a href="{{ route('bookings.verify') }}" class="nav-text-action">{{ __('resarva.nav.verify_booking') }}</a>
 
             @auth
