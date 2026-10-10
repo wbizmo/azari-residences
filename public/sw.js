@@ -1,6 +1,6 @@
 // Offline-capable public shell only. Account, booking, payment and identity
 // documents are ALWAYS fetched online and never persisted by this worker.
-const CACHE = 'resavar-shell-v4';
+const CACHE = 'resavar-shell-v5';
 const SAFE_SHELL = ['/manifest.webmanifest', '/offline.html', '/offline-trip.js'];
 const STATIC_PATH = /^\/build\/assets\/[a-zA-Z0-9_.-]+\.(?:js|css|woff2?|png|webp|svg)$/;
 const PUBLIC_IMAGES = new Set(['/images/resavar-logo-dark.png', '/images/resavar-logo-light.png', '/images/resavar-pwa-192.png', '/images/resavar-pwa-512.png']);

@@ -7,6 +7,8 @@ use App\Models\AuditLog;
 use App\Models\Booking;
 use App\Models\Review;
 use App\Models\ReviewAppeal;
+use App\Services\Reviews\ReviewPublicationGuard;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -39,7 +41,11 @@ class ReviewController extends Controller
             'positive_feedback' => ['nullable', 'string', 'max:1500'],
             'negative_feedback' => ['nullable', 'string', 'max:1500'],
             'trip_type' => ['nullable', Rule::in(['business', 'couple', 'family', 'friends', 'solo', 'other'])],
+            'language' => ['nullable', Rule::in(['und','en','fr','es','de','pt','ar','hi','zh','it','yo','ig','ha','other'])],
         ]);
+
+        $data['language'] = $data['language'] ?? 'und';
+        $this->assertNoContactDetails($data);
 
         // Serialize attempts for one booking before checking eligibility.
         // The database unique constraint is the final defence for retries.
@@ -96,7 +102,11 @@ class ReviewController extends Controller
             'positive_feedback' => ['nullable', 'string', 'max:1500'],
             'negative_feedback' => ['nullable', 'string', 'max:1500'],
             'trip_type' => ['nullable', Rule::in(['business', 'couple', 'family', 'friends', 'solo', 'other'])],
+            'language' => ['nullable', Rule::in(['und','en','fr','es','de','pt','ar','hi','zh','it','yo','ig','ha','other'])],
         ]);
+
+        $data['language'] = $data['language'] ?? 'und';
+        $this->assertNoContactDetails($data);
 
         DB::transaction(function () use ($review, $data): void {
             $locked = Review::query()->whereKey($review->id)->lockForUpdate()->firstOrFail();
@@ -156,6 +166,15 @@ class ReviewController extends Controller
         }, 3);
 
         return back()->with('success', 'Your review moderation appeal was submitted.');
+    }
+
+    private function assertNoContactDetails(array $fields): void
+    {
+        if (app(ReviewPublicationGuard::class)->containsContactDetails($fields)) {
+            throw ValidationException::withMessages([
+                'body' => 'For privacy, remove email addresses, phone numbers and website links before submitting a public review.',
+            ]);
+        }
     }
 
 }

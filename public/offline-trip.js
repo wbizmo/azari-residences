@@ -4,6 +4,7 @@
 (() => {
     'use strict';
     const KEY = 'resavar:offline-stays:v1';
+    const OFFLINE_LIFETIME_MS = 90 * 24 * 60 * 60 * 1000;
     const encoder = new TextEncoder();
     const decoder = new TextDecoder();
     const capable = Boolean(window.crypto?.subtle && window.localStorage);
@@ -39,6 +40,10 @@
             if (raw.length > 150000) throw new Error('Local snapshot is too large');
             const snapshot = JSON.parse(raw);
             if (snapshot.version !== 1) throw new Error('Unsupported snapshot');
+            if (Number.isFinite(snapshot.expires_at) && Date.now() >= snapshot.expires_at) {
+                localStorage.removeItem(KEY);
+                return [];
+            }
             const salt = fromBase64(snapshot.salt);
             const iv = fromBase64(snapshot.iv);
             if (salt.length !== 16 || iv.length !== 12) throw new Error('Invalid snapshot');
@@ -51,9 +56,11 @@
                 !records.every(validRecord)) throw new Error('Invalid snapshot records');
 
             const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
-            return records.filter(record =>
+            const active = records.filter(record =>
                 Date.parse(record.check_out + 'T00:00:00Z') >= thirtyDaysAgo
             );
+            if (!active.length) localStorage.removeItem(KEY);
+            return active;
         } catch {
             throw new Error('Cannot unlock saved stays. Check your passphrase or clear this device’s saved copy.');
         }
@@ -70,6 +77,7 @@
             version: 1,
             salt: toBase64(salt),
             iv: toBase64(iv),
+            expires_at: Date.now() + OFFLINE_LIFETIME_MS,
             ciphertext: toBase64(new Uint8Array(ciphertext))
         }));
     };
@@ -108,6 +116,20 @@
                 }
             });
         }
+    }
+
+    const clearOnline = document.querySelector('[data-offline-clear-online]');
+    if (clearOnline) {
+        clearOnline.addEventListener('click', () => {
+            const feedback = document.querySelector('[data-offline-clear-feedback]');
+            if (!capable) {
+                feedback.textContent = 'Offline storage is not available in this browser.';
+                return;
+            }
+            if (!window.confirm('Permanently delete all encrypted offline stays saved on this browser?')) return;
+            localStorage.removeItem(KEY);
+            feedback.textContent = 'Offline copies were deleted from this browser.';
+        });
     }
 
     const openForm = document.querySelector('[data-offline-open]');

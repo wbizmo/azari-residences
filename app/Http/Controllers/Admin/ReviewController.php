@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\Review;
 use App\Models\ReviewAppeal;
+use App\Services\Reviews\ReviewPublicationGuard;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -47,6 +49,26 @@ class ReviewController extends Controller
                 'max:1000',
             ],
         ]);
+
+        if ($data['status'] === 'approved' && app(ReviewPublicationGuard::class)->containsContactDetails($review->only(['title', 'body', 'positive_feedback', 'negative_feedback']))) {
+            throw ValidationException::withMessages([
+                'status' => 'This review contains contact information. Ask the guest to edit it before publication.',
+            ]);
+        }
+
+        if (filled($data['admin_reply'] ?? null)
+            && app(ReviewPublicationGuard::class)->containsContactDetails(['body' => $data['admin_reply']])) {
+            throw ValidationException::withMessages([
+                'admin_reply' => 'Public responses must not contain contact details or external links.',
+            ]);
+        }
+        if (($data['owner_reply_status'] ?? null) === 'approved'
+            && filled($review->owner_reply)
+            && app(ReviewPublicationGuard::class)->containsContactDetails(['body' => $review->owner_reply])) {
+            throw ValidationException::withMessages([
+                'owner_reply_status' => 'The proposed property response contains contact details and cannot be approved.',
+            ]);
+        }
 
         $old = $review->toArray();
         $replyChanged = (string) ($review->admin_reply ?? '') !== (string) ($data['admin_reply'] ?? '');
@@ -105,6 +127,11 @@ class ReviewController extends Controller
             if ($data['decision'] === 'accepted') {
                 abort_unless(in_array($locked->status, ['hidden', 'flagged', 'archived'], true),
                     422, 'This review is no longer hidden or flagged.');
+                if (app(ReviewPublicationGuard::class)->containsContactDetails($locked->only(['title', 'body', 'positive_feedback', 'negative_feedback']))) {
+                    throw ValidationException::withMessages([
+                        'decision' => 'This review contains contact information and cannot be restored publicly until the guest edits it.',
+                    ]);
+                }
                 $before = $locked->only(['status', 'hidden_at', 'restored_at']);
                 $locked->update([
                     'status' => 'approved',

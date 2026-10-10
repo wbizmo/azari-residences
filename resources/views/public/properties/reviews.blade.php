@@ -37,6 +37,14 @@
                     @endforeach
                 </select>
             </label>
+            <label><span>Review language</span>
+                <select name="language">
+                    <option value="">All languages</option>
+                    @foreach(['und'=>'Unspecified','en'=>'English','fr'=>'French','es'=>'Spanish','de'=>'German','pt'=>'Portuguese','ar'=>'Arabic','hi'=>'Hindi','zh'=>'Chinese','it'=>'Italian','yo'=>'Yoruba','ig'=>'Igbo','ha'=>'Hausa','other'=>'Other'] as $code => $label)
+                        <option value="{{ $code }}" @selected(($filters['language'] ?? '') === $code)>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </label>
             <button class="button button-primary" type="submit">Apply filters</button>
         </form>
 
@@ -49,6 +57,7 @@
                         <span>{{ $review->created_at->format('M Y') }} · {{ $review->rating }}/5</span>
                     </div>
                     @if($review->trip_type)<p>Trip type: {{ Str::headline($review->trip_type) }}</p>@endif
+                    @if($review->language && $review->language !== "und")<p>Language: {{ $review->language === "other" ? "Other" : strtoupper($review->language) }}</p>@endif
                     @if($review->title)<h2>{{ $review->title }}</h2>@endif
                     @if($review->positive_feedback)<p><strong>Liked:</strong> {{ $review->positive_feedback }}</p>@endif
                     @if($review->negative_feedback)<p><strong>Could be better:</strong> {{ $review->negative_feedback }}</p>@endif
