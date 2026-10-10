@@ -67,7 +67,15 @@
                 @foreach($bookings as $booking)
                     @php
                         $paid = (float) $booking->payments->where('status','successful')->sum('amount');
-                        $balance = max(0, round((float)$booking->total - $paid, 2));
+                        // Mirror the legacy-only payment fallback without
+                        // triggering an extra SQL query per booking card.
+                        $legacyPaid = $paid <= 0
+                            && ! $booking->isCancelled()
+                            && in_array($booking->status, ['paid','confirmed','check_in','checked_in','checked_out','completed'], true)
+                            && $booking->paid_at !== null
+                            && (filled($booking->payment_reference) || filled($booking->receipt_number));
+                        if ($legacyPaid) $paid = (float) $booking->total;
+                        $balance = max(0, round((float) $booking->total - $paid, 2));
                     @endphp
                     <a class="az-user-list-item" href="{{ route('user.bookings.show',$booking->reference) }}">
                         <div>

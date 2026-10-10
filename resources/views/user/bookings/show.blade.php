@@ -104,9 +104,12 @@
 @endif
 
 <div class="az-user-actions" style="margin-bottom:18px">
-    <a class="az-user-button az-user-button--dark" href="{{ route('user.bookings.receipt', $booking->reference) }}" target="_blank">
-        <span class="material-symbols-outlined">description</span> Print invoice
-    </a>
+    @if($receiptAvailable)
+        <a class="az-user-button az-user-button--dark"
+            href="{{ route('user.bookings.receipt', $booking->reference) }}" target="_blank" rel="noopener">
+            <span class="material-symbols-outlined" aria-hidden="true">description</span> Print payment receipt
+        </a>
+    @endif
     @if($canPaySecurely)<a class="az-user-button az-user-button--primary" href="{{ route('public.payment.select', $booking->reference) }}">Pay securely</a>@endif
     @if($directionsUrl)<a class="az-user-button az-user-button--primary" href="{{ $directionsUrl }}" target="_blank" rel="noopener noreferrer"><span class="material-symbols-outlined">directions</span> Get directions</a>@endif
 </div>
