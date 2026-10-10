@@ -73,6 +73,11 @@ class PaymentCheckoutController extends Controller
     ): RedirectResponse {
         $booking = Booking::query()->where('reference', $reference)->firstOrFail();
 
+        // Rendering a redacted payment link never grants permission to create
+        // a charge. Only the authenticated guest, authorized staff or the
+        // browser session which created the guest booking may initiate one.
+        abort_unless($this->hasFullAccess($request, $booking), 404);
+
         if ($eligibility->isCancelled($booking)) {
             abort(404);
         }
@@ -115,7 +120,23 @@ class PaymentCheckoutController extends Controller
                 providerOptions: $providerOptions
             );
 
-            return redirect()->away($payment->checkout_url);
+            // The provider callback can settle this payment before its
+            // initialization HTTP response arrives. Never redirect to an
+            // absent checkout URL or imply an already-paid stay needs payment.
+            if ($payment->isSuccessful()) {
+                return redirect()->route('public.payment.receipt', [
+                    $booking->reference, $payment->reference,
+                ]);
+            }
+
+            $checkoutUrl = trim((string) $payment->checkout_url);
+            if ($payment->status !== Payment::PENDING
+                || ! filter_var($checkoutUrl, FILTER_VALIDATE_URL)
+                || strtolower((string) parse_url($checkoutUrl, PHP_URL_SCHEME)) !== 'https') {
+                return back()->with('error', 'Payment checkout is not ready. Check your payment status before retrying.');
+            }
+
+            return redirect()->away($checkoutUrl);
         } catch (ValidationException $e) {
             throw $e;
         } catch (\Throwable $e) {

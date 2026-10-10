@@ -10,5 +10,5 @@ class SupportTicket extends Model {
  public function assignee():BelongsTo{return $this->belongsTo(User::class,'assigned_to');}
  public function messages():HasMany{return $this->hasMany(SupportTicketMessage::class)->oldest();}
  public function publicMessages():HasMany{return $this->messages()->where('internal',false);}
- public static function nextReference():string{return 'AZR-SUP-'.now()->format('ymd').'-'.str_pad((string)(static::query()->whereDate('created_at',today())->count()+1),4,'0',STR_PAD_LEFT);}
+ public static function nextReference(): string { return 'AZR-SUP-'.now()->format('ymd').'-'.strtoupper(\Illuminate\Support\Str::random(10)); }
 }
