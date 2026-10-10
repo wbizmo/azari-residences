@@ -10,6 +10,8 @@
 * Experience holds: DB row lock on the finite slot and a sum of active nonexpired requests, to prevent two writers taking the last available space on databases supporting row-level locks.
 * Travel requests can optionally link to a guest-owned stay or itinerary. Cancelling a request NEVER mutates the existing stay or booking payment.
 * Auditable status transitions; consent is recorded before staff may mark a supplier acknowledgement.
+* Authenticated, encrypted, replay-protected partner webhook inbox with supplier+event deduplication, deferred processing and transactional in-app notices.
+* Genuine certified adapter reprice required even for creating flight enquiries; stale, unavailable or changed fare fails closed without charges.
 * RESAVAR_TRAVEL_REQUESTS_ENABLED=false by default. No supplier receives PII through this module.
 
 ## Deliberately NOT shipped as a live travel-booking product
@@ -49,3 +51,7 @@ All amounts are **minor units** (pennies/cents/kobo). The first UI release is re
 Run php artisan migrate --force after backing up the database. To disable requests immediately, set
 RESAVAR_TRAVEL_REQUESTS_ENABLED=false and run php artisan config:cache.
 Rollback only after data retention/audit review: migration 2026_10_10_220000_create_phase_four_supplier_requests.php drops the new travel-only tables; it never rolls back accommodation or payment history.
+
+## Provider webhook setup (disabled until signed partner integration)
+
+Travel callbacks are separately disabled using RESAVAR_TRAVEL_WEBHOOKS_ENABLED=false. Enable only after a class implementing App\\Contracts\\Travel\\TravelSupplierAdapter is installed, tested and registered in config/travel.php, and supplier integration_key references it. The adapter must authenticate raw request bytes with the actual supplier's documented signature and timestamp/replay requirements. Supplier event envelope keys: event_id, event_type (acknowledged / declined / disrupted), travel_request_id and supplier_reference for acknowledgment. POST to /webhooks/travel/{supplier}; the HTTP response only acknowledges durable, encrypted receipt. Use resavar:process-travel-webhooks in a worker/scheduler to update request-only states and in-app notifications. A callback can never confirm ticket issuance, dispatch a driver, settle funds or cancel/refund a stay.

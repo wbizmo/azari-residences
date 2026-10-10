@@ -11,9 +11,9 @@ final class FakeTravelSupplierAdapter implements TravelSupplierAdapter
     public function reprice(TravelOffer $offer, array $criteria): array
     {
         return [
-            'available' => true,
+            'available' => ! config('travel.test_supplier_unavailable', false),
             'currency' => $offer->currency,
-            'total_minor' => $offer->totalMinor($criteria['party_size']),
+            'total_minor' => $offer->totalMinor($criteria['party_size']) + (int) config('travel.test_fare_increase_minor', 0),
             'provider_offer_id' => 'sandbox-quote-'.$offer->id,
             'expires_at' => now()->addMinutes(4)->toIso8601String(),
         ];

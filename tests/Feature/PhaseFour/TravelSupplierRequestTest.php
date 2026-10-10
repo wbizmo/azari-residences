@@ -203,6 +203,30 @@ final class TravelSupplierRequestTest extends TestCase
         $this->assertFalse($offer->fresh()->isRequestable());
     }
 
+    public function test_guest_cannot_attach_another_itinerarys_stay_to_travel_request(): void
+    {
+        $offer = $this->offer('transfer');
+        $guest = User::factory()->create();
+        $first = TripItinerary::query()->create(['user_id' => $guest->id, 'name' => 'My first trip']);
+        $second = TripItinerary::query()->create(['user_id' => $guest->id, 'name' => 'My second trip']);
+        $stay = Booking::factory()->create([
+            'user_id' => $guest->id,
+            'trip_itinerary_id' => $first->id,
+        ]);
+        try {
+            app(TravelRequestService::class)->create($guest, $offer, [
+                'idempotency_key' => (string) Str::uuid(),
+                'party_size' => 1,
+                'booking_id' => $stay->id,
+                'trip_itinerary_id' => $second->id,
+            ]);
+            $this->fail('Cross-itinerary stays must be rejected');
+        } catch (ValidationException $e) {
+            $this->assertArrayHasKey('booking_id', $e->errors());
+        }
+        $this->assertDatabaseCount('travel_requests', 0);
+    }
+
     public function test_staff_review_requires_actual_acknowledgement_and_guest_consent(): void
     {
         $offer = $this->offer('transfer');

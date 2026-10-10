@@ -121,6 +121,75 @@ final class TravelSupplierWebhookTest extends TestCase
         $this->assertDatabaseCount('payments', 0);
     }
 
+    public function test_late_signed_webhook_does_not_resurrect_cancelled_request(): void
+    {
+        [$guest, $supplier, $travel] = $this->createTravel();
+        app(TravelRequestService::class)->cancel($guest, $travel);
+        $event = [
+            'event_id' => 'provider-event-500',
+            'event_type' => 'acknowledged',
+            'travel_request_id' => $travel->id,
+            'supplier_reference' => 'provider-ack-500',
+        ];
+        $this->signedPost($supplier, $event)->assertAccepted();
+        $this->assertSame(['processed' => 0, 'rejected' => 1],
+            app(TravelSupplierEventProcessor::class)->process());
+        $this->assertSame('cancelled', $travel->fresh()->status);
+        $this->assertSame(0, $guest->fresh()->notifications()->count());
+    }
+
+    public function test_signed_webhook_is_rejected_after_supplier_is_paused(): void
+    {
+        [$guest, $supplier, $travel] = $this->createTravel();
+        $event = [
+            'event_id' => 'provider-event-600', 'event_type' => 'acknowledged',
+            'travel_request_id' => $travel->id,
+            'supplier_reference' => 'provider-ack-600',
+        ];
+        $this->signedPost($supplier, $event)->assertAccepted();
+        $supplier->update(['status' => 'paused']);
+        $this->assertSame(['processed' => 0, 'rejected' => 1],
+            app(TravelSupplierEventProcessor::class)->process());
+        $this->assertSame('requested', $travel->fresh()->status);
+    }
+
+    public function test_flight_fare_increase_or_supplier_outage_fails_closed_without_payment(): void
+    {
+        config()->set('travel.test_fare_increase_minor', 100);
+        $staff = User::factory()->create();
+        $guest = User::factory()->create();
+        $supplier = TravelSupplier::query()->create([
+            'name' => 'Air sandbox', 'kind' => 'flight', 'status' => 'approved',
+            'integration_key' => 'sandbox', 'approved_by' => $staff->id,
+            'contract_verified_at' => now(), 'safety_verified_at' => now(),
+        ]);
+        $offer = TravelOffer::query()->create([
+            'travel_supplier_id' => $supplier->id, 'kind' => 'flight',
+            'title' => 'Sandbox flight', 'timezone' => 'UTC', 'max_party' => 1,
+            'price_basis' => 'per_person', 'currency' => 'USD', 'base_minor' => 10000,
+            'terms' => ['included' => 'Sample', 'cancellation' => 'Sample', 'disclosure' => 'No ticketing'],
+            'expires_at' => now()->addHour(), 'published_at' => now(),
+        ]);
+        try {
+            app(TravelRequestService::class)->create($guest, $offer,
+                ['idempotency_key' => (string) Str::uuid(), 'party_size' => 1]);
+            $this->fail('Changed fares must be rejected');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->assertArrayHasKey('offer_id', $e->errors());
+        }
+        config()->set('travel.test_fare_increase_minor', 0);
+        config()->set('travel.test_supplier_unavailable', true);
+        try {
+            app(TravelRequestService::class)->create($guest, $offer,
+                ['idempotency_key' => (string) Str::uuid(), 'party_size' => 1]);
+            $this->fail('Supplier unavailability must be rejected');
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            $this->assertArrayHasKey('offer_id', $e->errors());
+        }
+        $this->assertDatabaseCount('travel_requests', 0);
+        $this->assertDatabaseCount('payments', 0);
+    }
+
     public function test_declined_flight_enquiry_does_not_create_ticket_or_charge(): void
     {
         [$guest, $supplier, $travel] = $this->createTravel('flight');
