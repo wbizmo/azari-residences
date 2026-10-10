@@ -34,6 +34,7 @@ class EnsureRouteModelOwnership
         'agreement',
         'withdrawal',
         'payoutProfile',
+        'itinerary',
     ];
 
     public function handle(Request $request, Closure $next): Response
@@ -148,6 +149,7 @@ class EnsureRouteModelOwnership
             'agreement' => \App\Models\ListingAgreement::class,
             'withdrawal' => \App\Models\WithdrawalRequest::class,
             'payoutProfile' => \App\Models\OwnerPayoutProfile::class,
+            'itinerary' => \App\Models\TripItinerary::class,
         ];
 
         $class = $modelClasses[$parameter] ?? null;
