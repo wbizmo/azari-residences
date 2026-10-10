@@ -341,7 +341,12 @@ class InventoryBulkUpdateService
                 }
 
                 if (! ($before['exists'] ?? false)) {
-                    if ((int) $committed->get($date, 0) > 0) {
+                    // A price-only calendar override does not change room
+                    // capacity or sale restrictions. Returning to the normal
+                    // base rate is safe even when confirmed stays exist; their
+                    // accepted booking price snapshot is immutable.
+                    if ((int) $committed->get($date, 0) > 0
+                        && array_keys((array) $lockedLog->changes) !== ['price_override']) {
                         throw ValidationException::withMessages([
                             'inventory' => "A room is now committed on {$date}; undo cannot delete its inventory.",
                         ]);

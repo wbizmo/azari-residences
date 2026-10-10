@@ -73,6 +73,8 @@ Route::prefix('azaridevadmin')->middleware(['auth.session', 'azari.staff'])->gro
         ->name('azari.admin.properties.claims.update');
 
     Route::get('/channels', [ChannelConnectionController::class, 'index'])->middleware('azari.permission:system-health.view')->name('azari.admin.channels.index');
+    Route::get('/channels/events/operations', \App\Http\Controllers\Admin\ChannelEventOperationsController::class)
+        ->middleware('azari.permission:system-health.view')->name('azari.admin.channels.events');
     Route::post('/channels', [ChannelConnectionController::class, 'store'])->middleware('azari.permission:system-health.manage')->name('azari.admin.channels.store');
     Route::put('/channels/{connection}', [ChannelConnectionController::class, 'update'])->middleware('azari.permission:system-health.manage')->name('azari.admin.channels.update');
     Route::post('/channels/{connection}/sync', [ChannelConnectionController::class, 'sync'])->middleware('azari.permission:system-health.manage')->name('azari.admin.channels.sync');

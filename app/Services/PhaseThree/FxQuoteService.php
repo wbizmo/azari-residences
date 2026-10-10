@@ -5,6 +5,7 @@ namespace App\Services\PhaseThree;
 use App\Models\FxQuoteLock;
 use App\Models\FxReferenceRate;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 /** Exact fixed-scale quote calculation. Never writes to an existing booking/payment. */
@@ -46,6 +47,30 @@ final class FxQuoteService
         }
         $denominator = 100000000 * $sourceScale;
         return intdiv($amountMinor * $factor + intdiv($denominator, 2), $denominator);
+    }
+
+    /**
+     * Claims one matching, unexpired FX snapshot at most once. Never authorizes
+     * payment by itself; a gateway must explicitly support the charge currency.
+     */
+    public function consumeForCheckout(string $quoteId, int $userId,
+        int $expectedBaseMinor, string $expectedChargeCurrency): FxQuoteLock
+    {
+        if (! config('reserva.fx.checkout_enabled', false)) {
+            throw ValidationException::withMessages(['fx'=>'Multi-currency checkout has not been certified.']);
+        }
+        return DB::transaction(function () use ($quoteId, $userId, $expectedBaseMinor,
+            $expectedChargeCurrency): FxQuoteLock {
+            $quote = FxQuoteLock::query()->whereKey($quoteId)->lockForUpdate()->firstOrFail();
+            if ((int) $quote->user_id !== $userId
+                || (int) $quote->base_minor !== $expectedBaseMinor
+                || ! hash_equals((string) $quote->quote_currency, strtoupper($expectedChargeCurrency))
+                || $quote->expires_at->isPast() || $quote->consumed_at) {
+                throw ValidationException::withMessages(['fx'=>'FX quote is stale, already claimed, or mismatched.']);
+            }
+            $quote->forceFill(['consumed_at'=>now()])->save();
+            return $quote->fresh();
+        }, 3);
     }
 
     public function lock(FxReferenceRate $rate, int $baseMinor, ?int $userId = null): FxQuoteLock

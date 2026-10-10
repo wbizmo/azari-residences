@@ -65,9 +65,30 @@ class OwnerCommercialInventoryController extends Controller
             'minimum'=>['nullable','integer','min:0'],
             'maximum'=>['nullable','integer','min:0'],
         ]);
-        return response()->json($advisor->preview($accommodationType,
+        return response()->json(app(\App\Services\PhaseThree\OwnerYieldApprovalService::class)->preview($accommodationType,
             CarbonImmutable::parse($data['from_date']), CarbonImmutable::parse($data['to_date']),
             (int) ($data['minimum'] ?? 0), (int) ($data['maximum'] ?? 0)));
+    }
+
+    public function yieldApprove(Request $request, Property $property,
+        AccommodationType $accommodationType,
+        \App\Services\PhaseThree\OwnerYieldApprovalService $approval): RedirectResponse
+    {
+        $this->authorizeOwner($request, $property);
+        $this->assertTypeBelongsToProperty($property, $accommodationType);
+        $data = $request->validate([
+            'from_date'=>['required','date_format:Y-m-d'],
+            'to_date'=>['required','date_format:Y-m-d','after_or_equal:from_date'],
+            'minimum'=>['nullable','integer','min:0'],
+            'maximum'=>['nullable','integer','min:0'],
+            'accepted_rate'=>['required','string','max:30'],
+            'expected_revision'=>['required','string','size:64','regex:/^[a-f0-9]{64}$/'],
+        ]);
+        $approval->approve($accommodationType,
+            CarbonImmutable::parse($data['from_date']), CarbonImmutable::parse($data['to_date']),
+            (int) ($data['minimum'] ?? 0), (int) ($data['maximum'] ?? 0),
+            $data['expected_revision'], $data['accepted_rate'], $request->user()->getKey());
+        return back()->with('status', 'Recommended nightly rates were approved, audited, and can be safely undone from the calendar history.');
     }
 
     public function storeAccommodation(

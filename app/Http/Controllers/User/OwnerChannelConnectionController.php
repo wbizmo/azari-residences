@@ -27,6 +27,14 @@ class OwnerChannelConnectionController extends Controller
         $this->authorizeConnection($request, $connection);
         return response()->json($audit->inspect($connection));
     }
+    public function previewImport(Request $request, ChannelConnection $connection,
+        \App\Services\PhaseThree\ChannelImportPreviewService $preview): \Illuminate\Http\JsonResponse
+    {
+        $this->authorizeConnection($request, $connection);
+        $data = $request->validate(['calendar'=>['required','string','max:250000']]);
+        return response()->json($preview->preview($connection, $data['calendar']));
+    }
+
     public function store(Request $request): RedirectResponse
     {
         $data = $this->payload($request);

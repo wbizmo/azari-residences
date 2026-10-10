@@ -42,9 +42,11 @@ Route::prefix('user/property-centre')
             ->name('commercial.rate-plans.update');
 
         Route::get('/properties/{property}/commercial/accommodations/{accommodationType}/yield-preview', [OwnerCommercialInventoryController::class, 'yieldPreview'])->middleware('throttle:20,1')->name('commercial.yield-preview');
+        Route::post('/properties/{property}/commercial/accommodations/{accommodationType}/yield-approve', [OwnerCommercialInventoryController::class, 'yieldApprove'])->middleware('throttle:10,1')->name('commercial.yield-approve');
         Route::get('/channels', [OwnerChannelConnectionController::class, 'index'])->name('channels.index');
         Route::post('/channels', [OwnerChannelConnectionController::class, 'store'])->name('channels.store');
         Route::get('/channels/{connection}/health', [OwnerChannelConnectionController::class, 'health'])->middleware('throttle:20,1')->name('channels.health');
+        Route::post('/channels/{connection}/preview-import', [OwnerChannelConnectionController::class, 'previewImport'])->middleware('throttle:10,1')->name('channels.preview-import');
         Route::post('/channels/{connection}/sync', [OwnerChannelConnectionController::class, 'sync'])->name('channels.sync');
         Route::delete('/channels/{connection}', [OwnerChannelConnectionController::class, 'destroy'])->name('channels.destroy');
 

@@ -1210,7 +1210,8 @@ class AzariTransactionalMailService
             $critical,
             false,
             $eyebrow,
-            ['booking_id' => $booking->id, 'user_id' => $booking->user_id],
+            ['booking_id' => $booking->id, 'user_id' => $booking->user_id,
+                'locale' => $booking->booking_locale ?: $booking->user?->locale],
             $dedupeKey
         );
     }
@@ -1316,6 +1317,12 @@ class AzariTransactionalMailService
             return;
         }
 
+        // Use the traveler/booking locale, not the process or worker locale.
+        $locale = $context['locale'] ?? $user?->locale ?? app()->getLocale();
+        if (! array_key_exists((string) $locale, config('localization.supported_locales', []))) {
+            $locale = config('localization.fallback_locale', 'en');
+        }
+
         $snapshot = [
             'template' => $template,
             'subject' => $subject,
@@ -1347,7 +1354,7 @@ class AzariTransactionalMailService
                 'status' => 'queued',
                 'queued_at' => now(),
                 'classification' => 'transactional',
-                'locale' => app()->getLocale(),
+                'locale' => $locale,
                 'timezone' => $user?->timezone ?: config('localization.platform_timezone', 'UTC'),
                 'payload_hash' => hash('sha256', json_encode($snapshot)),
                 'meta' => array_merge($context, [
@@ -1365,7 +1372,7 @@ class AzariTransactionalMailService
         $notificationContext = array_merge($context, [
             'dedupe_key' => $dedupeKey,
             'classification' => 'transactional',
-            'locale' => app()->getLocale(),
+            'locale' => $locale,
             'timezone' => $user?->timezone ?: config('localization.platform_timezone', 'UTC'),
             'snapshot' => $snapshot,
         ]);
@@ -1390,6 +1397,10 @@ class AzariTransactionalMailService
             mailOnly: $mailOnly,
             eyebrow: $eyebrow,
         );
+
+        // Queue workers may run under another language; attach a stable
+        // recipient locale to the queued notification itself.
+        $notification->locale($locale);
 
         try {
             if ($user && strtolower((string) $user->email) === $email) {
