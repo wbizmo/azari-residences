@@ -40,6 +40,10 @@
             if (raw.length > 150000) throw new Error('Local snapshot is too large');
             const snapshot = JSON.parse(raw);
             if (snapshot.version !== 1) throw new Error('Unsupported snapshot');
+            if (Number.isFinite(snapshot.expires_at) && Date.now() >= snapshot.expires_at) {
+                localStorage.removeItem(KEY);
+                return [];
+            }
             const salt = fromBase64(snapshot.salt);
             const iv = fromBase64(snapshot.iv);
             if (salt.length !== 16 || iv.length !== 12) throw new Error('Invalid snapshot');
