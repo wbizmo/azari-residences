@@ -42,7 +42,7 @@ class OwnerPhaseTwoController extends Controller
 
     public function invite(Request $request, Property $property, PropertyAccessService $access): RedirectResponse
     {
-        $access->assert($request->user(), $property, 'operations.manage');
+        $this->assertStaffAdministrator($request, $property);
 
         $data = $request->validate([
             'email' => ['required', 'email:rfc', 'max:255'],
@@ -122,7 +122,7 @@ class OwnerPhaseTwoController extends Controller
                 ->whereNotNull('owner_id')->firstOrFail();
             $inviter = User::query()->find($invite->invited_by);
             abort_unless(
-                $inviter && app(PropertyAccessService::class)->can($inviter, $property, 'operations.manage'),
+                $inviter && (int) $inviter->id === (int) $property->owner_id,
                 403,
                 'The invitation issuer no longer has property management access.'
             );
@@ -151,7 +151,7 @@ class OwnerPhaseTwoController extends Controller
 
     public function revoke(Request $request, Property $property, PropertyStaffMembership $membership, PropertyAccessService $access): RedirectResponse
     {
-        $access->assert($request->user(), $property, 'operations.manage');
+        $this->assertStaffAdministrator($request, $property);
         abort_unless((int) $membership->property_id === (int) $property->id, 404);
         abort_if((int) $membership->user_id === (int) $property->owner_id, 422);
 
@@ -173,6 +173,62 @@ class OwnerPhaseTwoController extends Controller
         }, 3);
 
         return back()->with('success', 'Collaborator access revoked.');
+    }
+
+    public function updateStaffRole(
+        Request $request,
+        Property $property,
+        PropertyStaffMembership $membership
+    ): RedirectResponse {
+        $this->assertStaffAdministrator($request, $property);
+        $data = $request->validate([
+            'role' => ['required', Rule::in([
+                'manager', 'front_desk', 'inventory_editor', 'finance_viewer', 'support_agent',
+            ])],
+        ]);
+
+        DB::transaction(function () use ($request, $property, $membership, $data): void {
+            $locked = PropertyStaffMembership::query()
+                ->whereKey($membership->id)
+                ->where('property_id', $property->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            abort_unless($locked->accepted_at && ! $locked->revoked_at, 422,
+                'Only active accepted collaborator memberships can be changed.');
+            abort_if((int) $locked->user_id === (int) $property->owner_id, 422);
+            if ($locked->role === $data['role']) {
+                return;
+            }
+
+            $before = $locked->only(['role', 'capabilities']);
+            $locked->update([
+                'role' => $data['role'],
+                // A role change must not carry stale custom grants that could
+                // silently expand authority beyond the newly selected role.
+                'capabilities' => [],
+            ]);
+            $email = User::query()->whereKey($locked->user_id)->value('email');
+            if ($email) {
+                DB::table('property_staff_invitations')
+                    ->where('property_id', $property->id)
+                    ->where('email', $email)
+                    ->whereNull('accepted_at')->delete();
+            }
+            AuditLog::record('property_staff.role_changed', $locked, $before,
+                $locked->only(['role', 'capabilities']),
+                ['property_id' => $property->id, 'changed_by' => $request->user()->id]);
+        }, 3);
+
+        return back()->with('success', 'Collaborator role updated. Permissions take effect immediately.');
+    }
+
+    private function assertStaffAdministrator(Request $request, Property $property): void
+    {
+        // Operational management is deliberately not enough to grant, amend
+        // or revoke finance and inventory roles, even when delegated staff
+        // have a manager title.
+        abort_unless((int) $property->owner_id === (int) $request->user()->id, 404);
     }
 
     public function operations(Request $request, Property $property, PropertyAccessService $access): View
