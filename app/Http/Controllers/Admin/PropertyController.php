@@ -8,6 +8,7 @@ use App\Support\ResponsiveImage;
 use App\Models\Amenity;
 use App\Models\Location;
 use App\Models\Property;
+use App\Models\PropertyPhotoModeration;
 use App\Models\RoomType;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -37,6 +38,8 @@ class PropertyController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $property = Property::query()->create($this->validatedPayload($request));
+        $this->registerPendingPhotos($property, collect([$property->cover_image])
+            ->merge($property->gallery ?? [])->filter()->all());
         $property->amenities()->sync($request->input('amenities', []));
 
         return redirect()->route('azari.admin.properties.edit', $property)
@@ -52,10 +55,26 @@ class PropertyController extends Controller
 
     public function update(Request $request, Property $property): RedirectResponse
     {
+        $previous = collect([$property->cover_image])->merge($property->gallery ?? [])
+            ->filter()->values()->all();
         $property->update($this->validatedPayload($request, $property));
+        $current = collect([$property->cover_image])->merge($property->gallery ?? [])
+            ->filter()->values()->all();
+        $this->registerPendingPhotos($property, array_values(array_diff($current, $previous)));
         $property->amenities()->sync($request->input('amenities', []));
 
         return back()->with('status', 'Property updated.');
+    }
+
+    private function registerPendingPhotos(Property $property, array $paths): void
+    {
+        foreach (array_unique($paths) as $path) {
+            PropertyPhotoModeration::query()->firstOrCreate(
+                ['property_id' => $property->id,
+                 'path_hash' => PropertyPhotoModeration::pathHash($path)],
+                ['path' => $path, 'status' => 'pending']
+            );
+        }
     }
 
     private function formData(Property $property): array
