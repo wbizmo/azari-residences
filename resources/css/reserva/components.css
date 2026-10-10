@@ -31,6 +31,12 @@
     outline-offset: 2px;
 }
 
+/* Reversed hero surfaces need a white focus ring over the navy fill.
+ * Do not weaken the solid navy default for all other form controls. */
+:is(.az-user-welcome,.az-dashboard-hero) :is(a,button,input,select,textarea,[tabindex]):focus-visible {
+    outline-color: var(--reserva-white);
+}
+
 .back-to-top,
 [data-back-to-top] {
     background: var(--reserva-white) !important;
