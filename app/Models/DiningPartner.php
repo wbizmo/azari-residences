@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 final class DiningPartner extends Model
 {
-    protected $fillable = ['name','status','address','city','timezone','support_email','website',
+    protected $fillable = ['name','integration_key','status','address','city','timezone','support_email','website',
         'dietary_options','accessibility','hours','disclosures','details_verified_at','reviewed_by'];
 
     protected function casts(): array

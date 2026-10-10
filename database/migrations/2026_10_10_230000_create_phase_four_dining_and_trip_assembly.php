@@ -10,6 +10,7 @@ return new class extends Migration {
         Schema::create('dining_partners', function (Blueprint $t) {
             $t->id();
             $t->string('name', 160);
+            $t->string('integration_key', 100)->nullable();
             $t->string('status', 24)->default('pending_review');
             $t->string('address', 350);
             $t->string('city', 100);
@@ -47,6 +48,17 @@ return new class extends Migration {
             $t->index(['trip_itinerary_id','requested_for'], 'dining_itinerary_idx');
             $t->index(['status','requested_for'], 'dining_admin_idx');
         });
+        Schema::create('dining_request_events', function (Blueprint $t) {
+            $t->id();
+            $t->uuid('dining_request_id');
+            $t->foreign('dining_request_id')->references('id')->on('dining_requests')->restrictOnDelete();
+            $t->foreignId('actor_id')->nullable()->constrained('users')->nullOnDelete();
+            $t->string('previous_status', 32);
+            $t->string('new_status', 32);
+            $t->string('provider_reference', 160);
+            $t->timestamp('created_at');
+            $t->index(['dining_request_id','id']);
+        });
         Schema::create('trip_assemblies', function (Blueprint $t) {
             $t->uuid('id')->primary();
             $t->foreignId('trip_itinerary_id')->nullable()->constrained()->nullOnDelete();
@@ -79,6 +91,7 @@ return new class extends Migration {
     {
         Schema::dropIfExists('trip_assembly_events');
         Schema::dropIfExists('trip_assemblies');
+        Schema::dropIfExists('dining_request_events');
         Schema::dropIfExists('dining_requests');
         Schema::dropIfExists('dining_partners');
     }

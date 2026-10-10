@@ -66,6 +66,14 @@ final class DiningPartnerController extends Controller
         return back()->with('success','Dining listing unpublished for new enquiries.');
     }
 
+    public function verifyReservation(Request $request,DiningRequest $diningRequest,\App\Services\Travel\DiningReservationVerificationService $service): RedirectResponse
+    {
+        $data=$request->validate(['provider_reference'=>['required','string','min:5','max:160',
+            'regex:/^[A-Za-z0-9_.:-]+$/D']]);
+        $result=$service->verify($request->user(),$diningRequest,$data['provider_reference']);
+        return back()->with('success','Partner evidence verified: '.$result->status.'. No accommodation charge was changed.');
+    }
+
     public function decline(DiningRequest $diningRequest): RedirectResponse
     {
         DB::transaction(function () use ($diningRequest) {

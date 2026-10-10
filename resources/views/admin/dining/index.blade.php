@@ -44,6 +44,13 @@
             <div style="padding:12px;border-bottom:1px solid #ddd">
                 <p><strong>{{ $item->partner?->name }}</strong> · {{ $item->party_size }} guests · {{ $item->requested_for }} · {{ $item->status }}</p>
                 <p>Request ID {{ $item->id }}. Private dietary notes are never displayed or sent automatically.</p>
+                @if(config('travel.dining_provider_confirmation_enabled',false))
+                <form method="POST" action="{{ route('azari.admin.dining.verify',$item) }}">
+                    @csrf
+                    <label>Supplier reservation reference <input name="provider_reference" maxlength="160" required></label>
+                    <button type="submit">Verify independently against partner API</button>
+                </form>
+                @endif
                 <form method="POST" action="{{ route('azari.admin.dining.decline',$item) }}">
                     @csrf <button type="submit">Mark unavailable / needs support</button>
                 </form>

@@ -29,6 +29,8 @@ Route::middleware(['auth','auth.session','azari.staff','azari.staff:administrato
             ->middleware(['azari.step-up','throttle:10,1'])->name('dining.pause');
         Route::post('/dining/requests/{diningRequest}/decline',[DiningPartnerController::class,'decline'])
             ->middleware('throttle:20,1')->name('dining.decline');
+        Route::post('/dining/requests/{diningRequest}/verify',[DiningPartnerController::class,'verifyReservation'])
+            ->middleware(['azari.step-up','throttle:10,1'])->name('dining.verify');
         Route::get('/travel/assemblies',[TripAssemblyRecoveryController::class,'index'])
             ->name('travel.assemblies.index');
         Route::post('/travel/assemblies/{assembly}/review',[TripAssemblyRecoveryController::class,'review'])
