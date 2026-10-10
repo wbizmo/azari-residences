@@ -16,5 +16,9 @@ final class TripAssembly extends Model
     {
         return ['item_snapshot'=>'array','currency_totals'=>'array','reviewed_at'=>'datetime'];
     }
+    public function steps(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(TripAssemblyStep::class,'trip_assembly_id');
+    }
     public function itinerary(): BelongsTo { return $this->belongsTo(TripItinerary::class,'trip_itinerary_id'); }
 }

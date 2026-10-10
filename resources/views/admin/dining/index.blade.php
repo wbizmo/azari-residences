@@ -11,6 +11,8 @@
             <label>Name <input name="name" required maxlength="160"></label>
             <label>Full address <input name="address" required maxlength="350"></label>
             <label>City <input name="city" required maxlength="100"></label>
+            <label>Verified latitude <input type="number" name="latitude" step="0.0000001" min="-90" max="90" required></label>
+            <label>Verified longitude <input type="number" name="longitude" step="0.0000001" min="-180" max="180" required></label>
             <label>IANA timezone <input name="timezone" value="Africa/Lagos" required></label>
             <label>HTTPS website <input type="url" name="website"></label>
             <label>Support email <input type="email" name="support_email"></label>

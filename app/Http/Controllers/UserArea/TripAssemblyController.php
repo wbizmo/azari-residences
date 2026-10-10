@@ -14,7 +14,8 @@ final class TripAssemblyController extends Controller
     {
         abort_unless(config('travel.trip_assembly_enabled',false),404);
         $data=$request->validate(['idempotency_key'=>['required','uuid']]);
-        $service->prepare($request->user(),$itinerary,$data['idempotency_key']);
+        $assembly=$service->prepare($request->user(),$itinerary,$data['idempotency_key']);
+        app(\App\Services\Travel\TripRecoveryService::class)->prepare($assembly);
         return back()->with('success','Trip review snapshot created. Every item retains separate provider confirmation and payment.');
     }
 }

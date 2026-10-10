@@ -13,6 +13,24 @@
                     verified paid {{ number_format($amounts['collected_minor']/100,2) }} ·
                     verified refunded {{ number_format($amounts['refunded_minor']/100,2) }}</p>
             @endforeach
+            <form method="POST" action="{{ route('azari.admin.travel.assemblies.prepare',$assembly) }}">
+                @csrf <button type="submit">Prepare item recovery checkpoints</button>
+            </form>
+            @foreach($assembly->steps as $step)
+                <div style="padding:10px;border-top:1px solid #ddd">
+                    <strong>{{ ucfirst($step->item_type) }}</strong> #{{ $step->item_id }} · {{ $step->status }}
+                    @if($step->status!=='preexisting_stay')
+                        <form method="POST" action="{{ route('azari.admin.travel.steps.reconcile',$step) }}">
+                            @csrf <button type="submit">Verify supplier result (no charge)</button>
+                        </form>
+                        @if(in_array($step->status,['verified_provider','needs_provider','reconciliation_required'],true))
+                            <form method="POST" action="{{ route('azari.admin.travel.steps.compensate',$step) }}">
+                                @csrf <button type="submit">Queue product-specific compensation</button>
+                            </form>
+                        @endif
+                    @endif
+                </div>
+            @endforeach
             <form method="POST" action="{{ route('azari.admin.travel.assemblies.review',$assembly) }}">
                 @csrf <button type="submit">Reconcile current item snapshot (no charges)</button>
             </form>

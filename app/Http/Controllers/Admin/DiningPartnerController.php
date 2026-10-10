@@ -34,6 +34,8 @@ final class DiningPartnerController extends Controller
             'website'=>['nullable','url','starts_with:https://','max:500'],
             'support_email'=>['nullable','email','max:180'],
             'disclosures'=>['required','string','max:1500'],
+            'latitude'=>['nullable','numeric','between:-90,90','required_with:longitude'],
+            'longitude'=>['nullable','numeric','between:-180,180','required_with:latitude'],
             'dietary_options'=>['nullable','array','max:15'],
             'dietary_options.*'=>['string','max:100'],
             'accessibility'=>['nullable','array','max:15'],
@@ -49,6 +51,11 @@ final class DiningPartnerController extends Controller
         $request->validate(['review_attestation'=>['required',Rule::in(['DETAILS_AND_TERMS_VERIFIED'])]]);
         DB::transaction(function () use ($partner,$request) {
             $locked=DiningPartner::query()->whereKey($partner->id)->lockForUpdate()->firstOrFail();
+            if ($locked->latitude === null || $locked->longitude === null) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'location'=>'Verify the partner geographic coordinates before publication.',
+                ]);
+            }
             $locked->update(['status'=>'published','details_verified_at'=>now(),
                 'reviewed_by'=>$request->user()->id]);
             AuditLog::record('dining.partner_published',$locked,[],['status'=>'published']);

@@ -11,6 +11,13 @@
     <div class="az-user-panel-body">
         <form method="GET" class="az-form-grid">
             <label>City <input name="city" value="{{ request('city') }}" maxlength="100"></label>
+            <label>Approximate area near a stay
+                <select name="near_stay"><option value="">All verified locations</option>
+                @foreach($stays as $stay)
+                    <option value="{{ $stay->id }}" @selected((string)request('near_stay')===(string)$stay->id)>{{ $stay->reference }}</option>
+                @endforeach
+                </select>
+            </label>
             <button type="submit" class="az-user-button az-user-button--dark">Find dining</button>
         </form>
         @forelse($partners as $partner)
