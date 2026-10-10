@@ -142,7 +142,46 @@ class SupportTicketController extends Controller {
 
      return back()->with('success', 'Reply sent.');
  }
- public function close(Request $r,SupportTicket $ticket):RedirectResponse{$this->own($r,$ticket);$ticket->update(['status'=>'closed','closed_at'=>now()]);AuditLog::record('support_ticket.closed',$ticket);return back()->with('success','Ticket closed.');}
- public function reopen(Request $r,SupportTicket $ticket):RedirectResponse{$this->own($r,$ticket);abort_unless(in_array($ticket->status,['closed','resolved'],true),422);$ticket->update(['status'=>'open','closed_at'=>null,'resolved_at'=>null,'sla_alerted_at'=>null,'sla_due_at'=>now()->addMinutes(match($ticket->severity){'safety'=>15,'unable_to_check_in'=>30,'payment_taken_no_confirmation','property_unavailable'=>60,default=>1440})]);AuditLog::record('support_ticket.reopened',$ticket);return back()->with('success','Ticket reopened.');}
+ public function close(Request $r, SupportTicket $ticket): RedirectResponse
+ {
+     $this->own($r, $ticket);
+     DB::transaction(function () use ($r, $ticket): void {
+         $locked = SupportTicket::query()->whereKey($ticket->id)->lockForUpdate()->firstOrFail();
+         abort_unless((int) $locked->user_id === (int) $r->user()->id, 403);
+         if ($locked->status === 'closed') {
+             return;
+         }
+         $locked->update(['status' => 'closed', 'closed_at' => now()]);
+         AuditLog::record('support_ticket.closed', $locked);
+     }, 3);
+     return back()->with('success', 'Ticket closed.');
+ }
+
+ public function reopen(Request $r, SupportTicket $ticket): RedirectResponse
+ {
+     $this->own($r, $ticket);
+     DB::transaction(function () use ($r, $ticket): void {
+         $locked = SupportTicket::query()->whereKey($ticket->id)->lockForUpdate()->firstOrFail();
+         abort_unless((int) $locked->user_id === (int) $r->user()->id, 403);
+         abort_unless(in_array($locked->status, ['closed', 'resolved'], true), 422);
+
+         $deadline = now()->addMinutes(match ($locked->severity) {
+             'safety' => 15,
+             'unable_to_check_in' => 30,
+             'payment_taken_no_confirmation', 'property_unavailable' => 60,
+             default => 1440,
+         });
+         $locked->update([
+             'status' => 'open',
+             'closed_at' => null,
+             'resolved_at' => null,
+             'sla_alerted_at' => null,
+             'sla_due_at' => $deadline,
+             'response_due_at' => $deadline,
+         ]);
+         AuditLog::record('support_ticket.reopened', $locked);
+     }, 3);
+     return back()->with('success', 'Ticket reopened.');
+ }
  private function own(Request $r,SupportTicket $ticket):void{abort_unless($ticket->user_id===$r->user()->id,403);}
 }
