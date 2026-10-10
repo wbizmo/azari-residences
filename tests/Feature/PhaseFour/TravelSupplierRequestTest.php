@@ -179,6 +179,18 @@ final class TravelSupplierRequestTest extends TestCase
         $this->assertDatabaseCount('refunds', 0);
     }
 
+    public function test_unconfigured_flight_adapter_cannot_make_a_quote_requestable(): void
+    {
+        $offer = $this->offer('flight');
+        $offer->supplier->update(['integration_key' => 'missing-provider']);
+        config()->set('travel.supplier_adapters', []);
+
+        $this->assertFalse($offer->fresh()->isRequestable());
+        $guest = User::factory()->create(['email_verified_at' => now()]);
+        $this->actingAs($guest)->get(route('user.travel.index', ['kind' => 'flight']))
+            ->assertOk()->assertDontSee('Sample supplier availability enquiry');
+    }
+
     public function test_staff_review_requires_actual_acknowledgement_and_guest_consent(): void
     {
         $offer = $this->offer('transfer');

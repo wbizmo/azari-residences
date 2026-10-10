@@ -82,6 +82,7 @@ return new class extends Migration
             $table->timestamp('cancelled_at')->nullable();
             $table->timestamps();
             $table->unique(['user_id', 'idempotency_key'], 'travel_request_idempotency_unique');
+            $table->unique(['travel_supplier_id', 'supplier_reference'], 'travel_supplier_ref_unique');
             $table->index(['travel_experience_slot_id', 'status', 'expires_at'], 'travel_slot_hold_idx');
             $table->index(['user_id', 'created_at'], 'travel_guest_requests_idx');
             $table->index(['trip_itinerary_id', 'created_at'], 'travel_itinerary_requests_idx');

@@ -22,6 +22,8 @@ final class TravelCatalogController extends Controller
             'kind' => ['sometimes', Rule::in(['transfer', 'experience', 'car', 'flight'])],
         ])['kind'] ?? null;
 
+        $certifiedFlightKeys = array_keys((array) config('travel.supplier_adapters', []));
+
         $offers = TravelOffer::query()
             ->with(['supplier', 'slots' => fn ($q) => $q->where('starts_at', '>', now())])
             ->whereHas('supplier', fn ($q) => $q->where('status', 'approved')
@@ -30,6 +32,12 @@ final class TravelCatalogController extends Controller
                 ->whereNotNull('approved_by'))
             ->whereNotNull('published_at')->where('published_at', '<=', now())
             ->where('expires_at', '>', now())
+            ->where(function ($q) use ($certifiedFlightKeys): void {
+                $q->where('kind', '!=', 'flight')
+                    ->orWhereHas('supplier',
+                        fn ($supplier) => $supplier->whereIn('integration_key', $certifiedFlightKeys));
+            })
+            ->whereIn('currency', ['USD', 'EUR', 'GBP', 'NGN', 'CAD'])
             ->when($kind, fn ($q) => $q->where('kind', $kind))
             ->orderBy('starts_at')->orderBy('id')
             ->paginate(12)->withQueryString();

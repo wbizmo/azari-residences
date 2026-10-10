@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\AuditLog;
 use App\Models\TravelOffer;
 use App\Models\TravelRequest;
 use App\Models\TravelSupplier;
@@ -66,6 +67,8 @@ final class TravelSupplierController extends Controller
                 'approved_by' => $request->user()->id,
                 'status' => 'approved',
             ]);
+            AuditLog::record('travel_supplier.approved', $locked,
+                ['status' => 'pending'], ['status' => 'approved']);
         }, 3);
 
         return response()->json(['id' => $supplier->id, 'status' => 'approved']);
@@ -80,7 +83,7 @@ final class TravelSupplierController extends Controller
             'destination' => ['nullable', 'string', 'max:160'],
             'timezone' => ['required', 'timezone'],
             'max_party' => ['required', 'integer', 'min:1', 'max:12'],
-            'currency' => ['required', 'regex:/^[A-Z]{3}$/'],
+            'currency' => ['required', Rule::in(['USD','EUR','GBP','NGN','CAD'])],
             'base_minor' => ['required', 'integer', 'min:0', 'max:1000000000'],
             'tax_minor' => ['required', 'integer', 'min:0', 'max:1000000000'],
             'fee_minor' => ['required', 'integer', 'min:0', 'max:1000000000'],
@@ -100,6 +103,7 @@ final class TravelSupplierController extends Controller
         $data['kind'] = $supplier->kind;
         $data['deposit_minor'] = $data['deposit_minor'] ?? 0;
         $offer = TravelOffer::query()->create($data);
+        AuditLog::record('travel_offer.created', $offer, [], ['kind' => $offer->kind]);
 
         return response()->json(['id' => $offer->id, 'status' => 'draft'], 201);
     }
@@ -119,6 +123,8 @@ final class TravelSupplierController extends Controller
                 throw ValidationException::withMessages(['offer' => 'A certified airline distribution adapter is required before publication.']);
             }
             $locked->update(['published_at' => now()]);
+            AuditLog::record('travel_offer.published', $locked, [],
+                ['published_at' => $locked->published_at?->toIso8601String()]);
         }, 3);
 
         return response()->json(['id' => $offer->id, 'status' => 'published']);
