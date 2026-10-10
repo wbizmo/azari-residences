@@ -172,6 +172,12 @@ class InventoryBulkUpdateService
                 : (int) ($existing?->maintenance_inventory ?? 0);
             $reserved = (int) $committed->get($key, 0);
 
+            if ($maintenance > $sellable) {
+                throw ValidationException::withMessages([
+                    'maintenance_inventory' => "Maintenance units ({$maintenance}) cannot exceed sellable inventory ({$sellable}) on {$key}.",
+                ]);
+            }
+
             if ($sellable - $maintenance < $reserved) {
                 throw ValidationException::withMessages([
                     'sellable_inventory' => "Cannot reduce rooms below {$reserved} committed unit(s) on {$key}.",
