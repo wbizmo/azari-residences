@@ -26,5 +26,34 @@ class SupportTicketController extends Controller {
  public function show(SupportTicket $ticket):View{$ticket->load(['booking.property','user','assignee']);$messages=$ticket->messages()->with('user')->oldest()->paginate(15,['*'],'messages_page')->withQueryString();$staff=User::where('is_active',true)->where(fn($q)=>$q->where('is_admin',true)->orWhereNotNull('staff_role'))->orderBy('name')->get();return view('admin.support.show',compact('ticket','staff','messages'));}
  public function update(Request $r,SupportTicket $ticket):RedirectResponse{$d=$r->validate(['status'=>'required|in:open,awaiting_staff,awaiting_guest,in_progress,escalated,resolved,closed','priority'=>'required|in:low,normal,high,urgent','assigned_to'=>['nullable','integer',Rule::exists('users','id')->where('is_active',true)->where(fn($query)=>$query->where('is_admin',true)->orWhereNotNull('staff_role'))],'resolution_note'=>'nullable|string|max:5000']);$old=$ticket->only(['status','priority','assigned_to','resolution_note']);$ticket->fill($d);if(in_array($old['status'],['resolved','closed'],true)&&!in_array($d['status'],['resolved','closed'],true))$ticket->sla_alerted_at=null;if($d['status']==='escalated'&&!$ticket->escalated_at)$ticket->escalated_at=now();if($d['status']==='resolved')$ticket->resolved_at=now();if($d['status']==='closed')$ticket->closed_at=now();$ticket->save();AuditLog::record('support_ticket.updated',$ticket,$old,$ticket->only(array_keys($old)));return back()->with('success','Ticket updated.');}
  public function reply(Request $r,SupportTicket $ticket):RedirectResponse{$d=$r->validate(['body'=>'required|string|max:10000','internal'=>'nullable|boolean','attachment'=>'nullable|file|max:5120|mimes:jpg,jpeg,png,pdf,doc,docx']);$internal=$r->boolean('internal');$file=$r->file('attachment');$message=$ticket->messages()->create(['user_id'=>$r->user()->id,'body'=>$d['body'],'internal'=>$internal,...app(SupportAttachmentGuard::class)->store($file)]);if(!$internal){$ticket->update(['status'=>'awaiting_guest','first_responded_at'=>$ticket->first_responded_at?:now()]);$ticket->user->notify(new PremiumMailNotification('support-ticket-reply','A reply is waiting on your support request',["Our team replied to {$ticket->reference}.",'Sign in to review and respond.'],'View reply',route('user.support.show',$ticket),['support_ticket_id'=>$ticket->id]));}AuditLog::record($internal?'support_ticket.internal_note':'support_ticket.staff_replied',$ticket,[],[],['message_id'=>$message->id]);return back()->with('success',$internal?'Internal note saved.':'Reply sent.');}
+ public function recovery(Request $r, SupportTicket $ticket): RedirectResponse
+ {
+     $data = $r->validate([
+         'recovery_action' => 'required|in:rebooking_assistance,refund_review,owner_contact,safety_escalation',
+         'reason' => 'required|string|min:10|max:2000',
+     ]);
+     abort_unless($ticket->booking_id !== null, 422, 'Link this support ticket to a booking before requesting recovery.');
+     \Illuminate\Support\Facades\DB::transaction(function () use ($r, $ticket, $data): void {
+         $locked = SupportTicket::query()->whereKey($ticket->id)->lockForUpdate()->firstOrFail();
+         abort_if(in_array($locked->status, ['resolved', 'closed'], true), 422, 'Reopen this ticket before requesting recovery.');
+         $before = $locked->only(['status', 'priority', 'escalated_at', 'assigned_to']);
+         $locked->status = 'escalated';
+         $locked->priority = 'urgent';
+         $locked->escalated_at ??= now();
+         $locked->save();
+         $note = 'Recovery request: '.str_replace('_', ' ', $data['recovery_action'])."\n".trim($data['reason'])."\nBooking ID: ".$locked->booking_id;
+         $message = $locked->messages()->create([
+             'user_id' => $r->user()->id,
+             'internal' => true,
+             'body' => $note,
+         ]);
+         AuditLog::record('support_ticket.recovery_requested', $locked, $before, $locked->only(array_keys($before)), [
+             'recovery_action' => $data['recovery_action'],
+             'message_id' => $message->id,
+             'booking_id' => $locked->booking_id,
+         ]);
+     });
+     return back()->with('success', 'Recovery request escalated for authorized review. No booking or payment was changed.');
+ }
  public function attachment(SupportTicket $ticket,SupportTicketMessage $message):StreamedResponse{abort_unless($message->support_ticket_id===$ticket->id&&$message->attachment_path,404);abort_unless(Storage::disk('private')->exists($message->attachment_path),404);AuditLog::record('support_ticket.attachment_downloaded',$ticket,[],[],['message_id'=>$message->id]);return Storage::disk('private')->download($message->attachment_path,$message->attachment_name?:'attachment');}
 }
