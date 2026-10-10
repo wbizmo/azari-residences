@@ -11,6 +11,7 @@ Schedule::command('azari:send-transactional-reminders')->hourly()->withoutOverla
 Schedule::command('resavar:escalate-overdue-support --limit=50')->everyFiveMinutes()->name('critical-support-escalation')->withoutOverlapping();
 Schedule::command('resavar:deliver-booking-message-alerts --limit=100')->everyMinute()->name('booking-message-alert-outbox')->withoutOverlapping();
 Schedule::command('resavar:scan-booking-attachments --limit=25')->everyMinute()->name('booking-attachment-scanner')->withoutOverlapping();
+Schedule::command('resavar:purge-booking-attachments --limit=200')->dailyAt('03:50')->name('booking-attachment-retention')->withoutOverlapping();
 Schedule::command('azari:send-unpaid-booking-reminders')->everyFiveMinutes()->withoutOverlapping();
 Schedule::command('azari:provision-successful-booking-accounts')->hourly()->withoutOverlapping();
 if (config('filesystems.media_backup_schedule_enabled', false)) {
