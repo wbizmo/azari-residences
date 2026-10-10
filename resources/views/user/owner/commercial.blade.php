@@ -14,6 +14,8 @@
 
 @include('partials.commercial-inventory-manager', ['property' => $property, 'roomTypes' => $roomTypes, 'ownerMode' => true])
 
+@include('user.owner.partials.inventory-calendar', ['property' => $property, 'board' => $inventoryBoard])
+
 @foreach($property->accommodationTypes as $type)
 <section class="az-user-panel" style="margin-top:18px">
     <header class="az-user-panel-header">
