@@ -206,7 +206,7 @@
     gap:8px;
     min-height:36px;
     padding:8px 12px;
-    color:#052058;
+    color:#FFFFFF;
     background:#052058;
     border:1px solid rgba(255, 255, 255, .7);
     border-radius:0;
@@ -218,7 +218,7 @@
 }
 
 .az-offer-card__badge .material-symbols-outlined{
-    color:#052058;
+    color:#FFFFFF;
     font-size:18px;
 }
 

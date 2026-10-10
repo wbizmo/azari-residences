@@ -20,7 +20,7 @@ final class Money
             }
         }
 
-        return $currency.' '.number_format($value, 2, '.', ',');
+        return $currency.' '.number_format($value, app(\App\Services\PhaseThree\FxQuoteService::class)->minorDigits($currency), '.', ',');
     }
 
     public static function currency(?string $currency): string

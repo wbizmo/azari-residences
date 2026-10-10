@@ -7,17 +7,17 @@
 <section style="min-height:70vh;background:#052058;padding:148px 20px 72px;">
     <div style="max-width:760px;margin:0 auto;background:#FFFFFF;border:1px solid #052058;border-radius:24px;padding:36px;box-shadow:0 18px 50px rgba(5, 32, 88, .08);">
         <p style="margin:0 0 10px;color:#052058;font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:12px;">Privacy & account controls</p>
-        <h1 style="margin:0;color:#052058;font-size:38px;line-height:1.15;">Account & Data Deletion</h1>
+        <h1 style="margin:0;color:#052058;font-size:38px;line-height:1.15;">Account &amp; Data Deletion</h1>
         <p style="margin:18px 0 0;color:#052058;font-size:16px;line-height:1.75;">Use this page to request deletion of your Resavar account and associated personal data. You can submit this request without installing or signing in to the app.</p>
 
         @if (session('account_deletion_reference'))
-            <div style="margin-top:28px;padding:18px 20px;border-radius:16px;background:#052058;color:#052058;">
+            <div style="margin-top:28px;padding:18px 20px;border-radius:16px;background:#EEF3FA;color:#052058;">
                 <strong>Request received.</strong><br>
                 Your reference is {{ session('account_deletion_reference') }}. We will verify account ownership before processing the request.
             </div>
         @else
             @if ($errors->any())
-                <div style="margin-top:28px;padding:18px 20px;border-radius:16px;background:#052058;color:#052058;">
+                <div style="margin-top:28px;padding:18px 20px;border-radius:16px;background:#EEF3FA;color:#052058;">
                     {{ $errors->first() }}
                 </div>
             @endif
@@ -55,8 +55,8 @@
         </div>
 
         @auth
-            <div style="margin-top:24px;padding:18px 20px;border-radius:16px;background:#052058;color:#052058;">
-                You are currently signed in. You may also delete your account directly from your <a href="{{ route('profile.edit') }}" style="color:#052058;font-weight:700;">Profile</a>.
+            <div style="margin-top:24px;padding:18px 20px;border-radius:16px;background:#EEF3FA;color:#052058;">
+                You are currently signed in. You may also delete your account directly from your <a href="{{ route('profile.edit') }}" style="color:#052058;font-weight:700;text-decoration:underline;">Profile</a>.
             </div>
         @endauth
     </div>

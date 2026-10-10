@@ -1,6 +1,6 @@
 <?php
 
-$azariContactDomain = parse_url((string) env('APP_URL', 'https://theazariresidence.com'), PHP_URL_HOST) ?: 'theazariresidence.com';
+$azariContactDomain = parse_url((string) env('APP_URL', 'https://resavar.com'), PHP_URL_HOST) ?: 'resavar.com';
 
 return [
 

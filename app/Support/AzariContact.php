@@ -8,10 +8,10 @@ final class AzariContact
     {
         $host = request()?->getHost();
         if (! is_string($host) || $host === '') {
-            $host = parse_url((string) config('app.url'), PHP_URL_HOST) ?: 'theazariresidence.com';
+            $host = parse_url((string) config('app.url'), PHP_URL_HOST) ?: 'resavar.com';
         }
 
-        return preg_replace('/^www\./i', '', strtolower($host)) ?: 'theazariresidence.com';
+        return preg_replace('/^www\./i', '', strtolower($host)) ?: 'resavar.com';
     }
 
     public static function email(): string { return 'hello@'.self::domain(); }

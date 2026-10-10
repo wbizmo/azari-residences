@@ -1,6 +1,6 @@
 <!doctype html>
 <html>
-<body style="margin:0;padding:32px;background:#052058;font-family:Montserrat,Arial,sans-serif;color:#052058;line-height:1.6">
+<body style="margin:0;padding:32px;background:#F2F5FA;font-family:Montserrat,Arial,sans-serif;color:#052058;line-height:1.6">
     <div style="max-width:600px;margin:0 auto;padding:32px;background:#FFFFFF;border-radius:16px;border-top:4px solid #052058">
         <h2 style="margin-top:0;color:#052058">Continue your Resavar booking</h2>
         <p>Hello {{ $user->name }},</p>
