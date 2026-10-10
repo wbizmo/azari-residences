@@ -24,6 +24,11 @@ Route::post('/webhooks/channels/{connection}', \App\Http\Controllers\PhaseThree\
     ->middleware('throttle:30,1')->name('channels.webhook');
 Route::post('/language', \App\Http\Controllers\PhaseThree\LanguageController::class)
     ->middleware('throttle:15,1')->name('language.update');
+Route::prefix('api/partners/v1')->name('partner.v1.')
+    ->middleware('throttle:30,1')->group(function (): void {
+        Route::get('/stays', [\App\Http\Controllers\PhaseThree\PartnerApiController::class, 'search'])->name('stays');
+        Route::post('/intents', [\App\Http\Controllers\PhaseThree\PartnerApiController::class, 'intent'])->name('intents');
+    });
 Route::get('/', HomeController::class)->name('home');
 Route::get('/health/live', [HealthController::class, 'live'])->middleware('throttle:120,1')->name('health.live');
 Route::get('/health/ready', [HealthController::class, 'ready'])->middleware('throttle:60,1')->name('health.ready');
@@ -72,6 +77,19 @@ Route::prefix('azaridevadmin')->middleware(['auth.session', 'azari.staff'])->gro
         ->middleware(['azari.staff:administrator', 'throttle:20,1'])
         ->name('azari.admin.properties.claims.update');
 
+    Route::middleware('azari.staff:administrator')->group(function (): void {
+        Route::get('/marketing-campaigns', [\App\Http\Controllers\PhaseThree\MarketingCampaignController::class, 'index'])
+            ->name('azari.admin.marketing-campaigns.index');
+        Route::post('/marketing-campaigns', [\App\Http\Controllers\PhaseThree\MarketingCampaignController::class, 'store'])
+            ->middleware('throttle:10,1')->name('azari.admin.marketing-campaigns.store');
+        Route::post('/marketing-campaigns/{campaign}/approve', [\App\Http\Controllers\PhaseThree\MarketingCampaignController::class, 'approve'])
+            ->middleware(['azari.step-up','throttle:10,1'])->name('azari.admin.marketing-campaigns.approve');
+        Route::post('/marketing-campaigns/{campaign}/pause', [\App\Http\Controllers\PhaseThree\MarketingCampaignController::class, 'pause'])
+            ->middleware('throttle:10,1')->name('azari.admin.marketing-campaigns.pause');
+    });
+    Route::post('/properties/{property}/commission-agreements', \App\Http\Controllers\PhaseThree\CommissionAgreementController::class)
+        ->middleware(['azari.staff:administrator','azari.step-up','throttle:10,1'])
+        ->name('azari.admin.commission-agreements.approve');
     Route::get('/channels', [ChannelConnectionController::class, 'index'])->middleware('azari.permission:system-health.view')->name('azari.admin.channels.index');
     Route::get('/channels/events/operations', \App\Http\Controllers\Admin\ChannelEventOperationsController::class)
         ->middleware('azari.permission:system-health.view')->name('azari.admin.channels.events');

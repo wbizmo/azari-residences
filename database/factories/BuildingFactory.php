@@ -15,7 +15,7 @@ class BuildingFactory extends Factory
         return [
             'location_id' => Location::factory(),
             'name' => fake()->company().' Building',
-            'code' => strtoupper(fake()->lexify('BLD???')),
+            'code' => 'BLD'.strtoupper(\Illuminate\Support\Str::random(12)),
             'description' => fake()->sentence(),
             'floors' => fake()->numberBetween(1,15),
             'is_active' => true,
