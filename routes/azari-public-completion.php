@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
 use App\Http\Controllers\PublicSite\AvailabilitySearchController;
 use App\Http\Controllers\PublicSite\DestinationSearchController;
 use App\Http\Controllers\PublicSite\AzariAvailabilityController;
+use App\Http\Controllers\PublicSite\PropertyStayPriceCalendarController;
 use App\Http\Controllers\PublicSite\PublicPageController;
 use App\Http\Controllers\UserArea\BookingShareController;
 use App\Http\Controllers\PublicSite\PublicPropertyReviewsController;
@@ -18,6 +19,9 @@ Route::get('/availability', [PublicPageController::class, 'availability'])
     ->name('availability.index');
 Route::get('/residences/{property}/availability', [PublicPageController::class, 'propertyAvailability'])
     ->name('availability.property');
+Route::get('/residences/{property}/price-calendar', PropertyStayPriceCalendarController::class)
+    ->middleware('throttle:12,1')->name('properties.price-calendar');
+
 Route::get('/residences/{property}/reviews', PublicPropertyReviewsController::class)
     ->middleware('throttle:60,1')->name('properties.reviews');
 

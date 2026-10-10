@@ -301,6 +301,18 @@
                                                     Check dates
                                                 </a>
                                             @endif
+                                            <a class="button button-secondary"
+                                                href="{{ route('properties.price-calendar', [
+                                                    'property' => $property,
+                                                    'accommodation_type_id' => $type->id,
+                                                    'rate_plan_id' => $plan->id,
+                                                    'nights' => min(14, max(1, \Carbon\CarbonImmutable::parse($searchState['check_in'])->diffInDays(\Carbon\CarbonImmutable::parse($searchState['check_out'])))),
+                                                    'adults' => $searchState['adults'] ?? 2,
+                                                    'children' => $searchState['children'] ?? 0,
+                                                    'rooms' => $searchState['rooms'] ?? 1,
+                                                ]) }}">
+                                                Month price calendar
+                                            </a>
                                         </div>
                                     </article>
                                 @endforeach
