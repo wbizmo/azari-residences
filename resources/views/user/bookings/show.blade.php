@@ -27,7 +27,9 @@
             <button class="az-user-button az-user-button--dark" type="submit">Save encrypted offline copy</button>
             <p class="wide" role="status" aria-live="polite" data-offline-save-feedback></p>
         </form>
-        <a href="/offline.html">View or clear saved offline stays</a>
+        <button class="az-user-button az-user-button--outline" type="button" data-offline-clear-online>Delete all locally saved offline stays</button>
+        <p class="wide" role="status" aria-live="polite" data-offline-clear-feedback></p>
+        <a href="/offline.html">Open the offline stay viewer</a>
     </div>
 </section>
 <script type="application/json" data-offline-trip-record>@json([
