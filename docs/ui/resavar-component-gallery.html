@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Resavar UI component gallery (local verification)</title>
+  <link rel="stylesheet" href="../../resources/css/reserva/tokens.css">
+  <link rel="stylesheet" href="../../resources/css/reserva/components.css">
+  <link rel="stylesheet" href="../../resources/css/reserva/toggles.css">
+  <style>
+    * { box-sizing: border-box }
+    body { margin: 0; background: #eef2f8; color: #052058; font: 16px/1.5 Montserrat, Arial, sans-serif }
+    main { width: min(1200px, 100%); margin: auto; padding: clamp(16px, 3vw, 40px) }
+    h1 { font-size: clamp(1.75rem, 4vw, 2.8rem); margin: 0 0 12px }
+    h2 { margin: 0 0 12px; font-size: 1.2rem }
+    section { margin: 24px 0; background: white; border: 1px solid #cbd5e1; border-radius: 16px; padding: clamp(16px, 3vw, 32px) }
+    .samples { display: flex; flex-wrap: wrap; align-items: center; gap: 12px }
+    .button-primary, .button-secondary { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; border-radius: 8px; padding: 10px 16px; font-weight: 700; font: inherit; cursor: pointer; text-decoration: none }
+    label.field { display: grid; gap: 6px; flex: 1 1 230px }
+    input[type=text], select { min-width: 0; width: 100%; border: 1px solid #526483; border-radius: 8px; background: #fff; color: #052058; font: inherit; padding: 12px }
+    .inverse { color: #fff; background: #052058; border-color: #052058 }
+    .inverse .button-secondary { background: white; color: #052058 }
+    .note { border-left: 4px solid #052058; padding: 12px 16px; background: #eef2f8; margin: 10px 0 }
+    .error { border-left-color: #8f1d1d; color: #8f1d1d }
+    .receipt { max-width: 590px; background: white; padding: 24px; border: 1px solid #cbd5e1 }
+    .receipt table { width: 100%; border-collapse: collapse }
+    .receipt td, .receipt th { border-bottom: 1px solid #b8c7df; padding: 10px 5px; text-align: left }
+    .receipt td:last-child, .receipt th:last-child { text-align: right }
+    .scroll-frame { max-width: 100%; overflow-x: auto; border: 1px solid #cbd5e1; border-radius: 8px }
+    .calendar { border-collapse: collapse; min-width: 850px; width: 100% }
+    .calendar td, .calendar th { border: 1px solid #cbd5e1; padding: 12px }
+    .calendar th { background: #eaf0fa }
+    @media print { @page { size: A4; margin: 15mm } body { background: white } main { padding: 0 } section { break-inside: avoid; box-shadow: none } }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Resavar component gallery</h1>
+    <p>Local-only visual fixture. Review navy/white contrast, focus outlines, mobile overflow, labels and A4 layout. No real guest data.</p>
+  </header>
+  <section aria-labelledby="buttons">
+    <h2 id="buttons">Primary, secondary and focus</h2>
+    <div class="samples">
+      <button type="button" class="button-primary">Check availability</button>
+      <button type="button" class="button-secondary">Change dates</button>
+      <a class="button-secondary" href="#forms">Edit guest details</a>
+    </div>
+  </section>
+  <section class="inverse" aria-labelledby="inverse">
+    <h2 id="inverse">Inverse navy surface</h2>
+    <p>White copy must remain readable on navy, including keyboard focus and icon labels.</p>
+    <div class="samples">
+      <button type="button" class="button-secondary">Continue booking</button>
+    </div>
+  </section>
+  <section id="forms" aria-labelledby="fields">
+    <h2 id="fields">Inputs and status messaging</h2>
+    <div class="samples">
+      <label class="field"><span>Destination</span><input type="text" value="Lagos" autocomplete="off"></label>
+      <label class="field"><span>Guests</span><select><option>2 adults</option><option>1 adult</option></select></label>
+      <label><input type="checkbox" checked> Allow selected rate</label>
+      <label><input type="checkbox"> Stop sell</label>
+    </div>
+    <p class="note" role="status">Your selected rate includes known taxes and service fees.</p>
+    <p class="note error" role="alert">The booking price has changed. Review the new total before proceeding.</p>
+  </section>
+  <section aria-labelledby="calendar">
+    <h2 id="calendar">Owner calendar and bounded mobile scrolling</h2>
+    <div class="scroll-frame" tabindex="0" role="region" aria-label="Sample inventory calendar">
+      <table class="calendar">
+        <thead><tr><th scope="col">Room type</th><th scope="col">Mon</th><th scope="col">Tue</th><th scope="col">Wed</th><th scope="col">Thu</th><th scope="col">Fri</th><th scope="col">Sat</th><th scope="col">Sun</th></tr></thead>
+        <tbody><tr><th scope="row">Classic room</th><td>3 available</td><td>2 available</td><td>Maintenance</td><td>3 available</td><td>Fully booked</td><td>1 available</td><td>3 available</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+  <section aria-labelledby="receipts">
+    <h2 id="receipts">A4 receipt and document sample</h2>
+    <div class="receipt">
+      <strong>Resavar</strong><p>Booking summary · sample only</p>
+      <table><thead><tr><th scope="col">Description</th><th scope="col">Amount</th></tr></thead>
+      <tbody><tr><td>Accommodation</td><td>NGN 120,000.00</td></tr><tr><td>Taxes and fees</td><td>NGN 12,000.00</td></tr></tbody>
+      <tfoot><tr><th scope="row">Total</th><th>NGN 132,000.00</th></tr></tfoot></table>
+      <p>This fixture does not constitute proof of payment or a booking confirmation.</p>
+    </div>
+  </section>
+</main>
+</body>
+</html>
