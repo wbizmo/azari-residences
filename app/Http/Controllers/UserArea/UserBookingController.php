@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\UserArea;
 
 use App\Http\Controllers\Controller;
+use App\Models\TripItinerary;
 use App\Services\Bookings\BookingModificationService;
 use App\Services\Payments\PaymentScheduleService;
 use Illuminate\Http\Request;
@@ -20,6 +21,7 @@ class UserBookingController extends Controller
             'property',
             'accommodationType',
             'ratePlan',
+            'tripItinerary:id,name',
             'payments',
             'modificationRequests' => fn ($q) => $q->where('status', 'pending'),
         ]);
@@ -55,7 +57,14 @@ class UserBookingController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('user.bookings.index', compact('bookings', 'status'));
+        $tripItineraries = TripItinerary::query()
+            ->where('user_id', $request->user()->id)
+            ->withCount('bookings')
+            ->latest()
+            ->limit(30)
+            ->get();
+
+        return view('user.bookings.index', compact('bookings', 'status', 'tripItineraries'));
     }
 
     public function show(
@@ -76,6 +85,7 @@ class UserBookingController extends Controller
                 'modificationRequests',
                 'serviceRequests',
                 'supportTickets',
+                'tripItinerary',
                 'review',
             ])
             ->withCount('payments')
@@ -109,7 +119,15 @@ class UserBookingController extends Controller
             ? app(\App\Services\Bookings\BookingCancellationQuoteService::class)->quote($booking)
             : null;
 
-        return view('user.bookings.show', compact('booking', 'timeline', 'selfService', 'schedule', 'canCancel', 'cancellationQuote'));
+        $tripItineraries = TripItinerary::query()
+            ->where('user_id', $request->user()->id)
+            ->orderBy('name')
+            ->limit(100)
+            ->get(['id', 'name']);
+
+        return view('user.bookings.show', compact(
+            'booking', 'timeline', 'selfService', 'schedule', 'canCancel', 'cancellationQuote', 'tripItineraries'
+        ));
     }
 
     public function receipt(Request $request, string $reference): Response
