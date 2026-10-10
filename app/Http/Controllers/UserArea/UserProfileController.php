@@ -116,6 +116,10 @@ class UserProfileController extends Controller
             ]
         );
 
+        if (! $marketing) {
+            app(\App\Services\PhaseThree\LifecycleCampaignService::class)->suppressOnOptOut($user);
+        }
+
         return back()->with('success', __('resarva.account.preferences_updated'));
     }
 }

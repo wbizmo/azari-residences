@@ -34,6 +34,14 @@ Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer', 'azari.
 
         Route::post('/favourites/{property}', [UserDiscoveryController::class, 'toggleFavourite'])
             ->name('favourites.toggle');
+        Route::get('/recommendations', [\App\Http\Controllers\PhaseThree\RecommendationController::class, 'index'])
+            ->middleware('throttle:20,1')->name('recommendations.index');
+        Route::patch('/recommendations/preferences', [\App\Http\Controllers\PhaseThree\RecommendationController::class, 'preferences'])
+            ->middleware('throttle:10,1')->name('recommendations.preferences');
+        Route::delete('/recommendations/recent', [\App\Http\Controllers\PhaseThree\RecommendationController::class, 'clear'])
+            ->middleware('throttle:10,1')->name('recommendations.clear');
+        Route::get('/owner-statement.csv', \App\Http\Controllers\PhaseThree\OwnerStatementController::class)
+            ->middleware('throttle:10,1')->name('owner-statement.csv');
         Route::post('/saved-searches', [UserDiscoveryController::class, 'storeSearch'])
             ->name('saved-searches.store');
         Route::delete('/saved-searches/{savedSearch}', [UserDiscoveryController::class, 'destroySearch'])

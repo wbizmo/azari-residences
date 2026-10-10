@@ -58,6 +58,7 @@ class PropertyController extends Controller
                 ->where('property_id', $property->getKey())
                 ->exists();
 
+            if (! $request->user()->personalization_opt_out) {
             RecentlyViewedProperty::query()->updateOrCreate(
                 [
                     'user_id' => $request->user()->getKey(),
@@ -77,6 +78,7 @@ class PropertyController extends Controller
                     ->where('user_id', $request->user()->getKey())
                     ->whereNotIn('id', $keepIds)
                     ->delete();
+            }
             }
         }
 

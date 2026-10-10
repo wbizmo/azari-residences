@@ -13,6 +13,7 @@ class AnalyticsTracker
         'homepage_viewed', 'search_started', 'search_submitted', 'results_viewed',
         'property_viewed', 'rate_selected', 'checkout_started', 'payment_started',
         'payment_failed', 'booking_confirmed', 'booking_cancelled',
+        'booking_refunded', 'saved_search_alerted', 'recommendation_shown',
     ];
 
     private const BLOCKED_KEYS = [

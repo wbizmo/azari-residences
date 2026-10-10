@@ -101,7 +101,7 @@
                         <p>{{ $saved->parameters['check_in'] ?? 'Dates' }} to {{ $saved->parameters['check_out'] ?? 'flexible' }}</p>
                     </div>
                     <div class="az-user-actions">
-                        <a class="az-user-button az-user-button--light" href="{{ route('availability.results',$saved->parameters) }}">Continue</a>
+                        <a class="az-user-button az-user-button--light" href="{{ route('availability.results',$saved->parameters) }}">Continue</a><a class="az-user-button az-user-button--light" href="{{ route('user.recommendations.index',$saved->parameters) }}">Suggested stays</a>
                         <form method="POST" action="{{ route('user.saved-searches.destroy',$saved) }}">@csrf @method('DELETE')<button class="az-user-button az-user-button--light" type="submit">Remove</button></form>
                     </div>
                 </div>
