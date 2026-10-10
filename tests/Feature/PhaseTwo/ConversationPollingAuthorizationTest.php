@@ -13,6 +13,19 @@ class ConversationPollingAuthorizationTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_both_polling_queries_clear_relationship_order_before_aggregation(): void
+    {
+        foreach ([
+            app_path('Http/Controllers/UserArea/PhaseTwoGuestController.php'),
+            app_path('Http/Controllers/User/OwnerBookingMessageController.php'),
+        ] as $source) {
+            $this->assertStringContainsString(
+                "->reorder()->selectRaw('MAX(id) AS latest_id, COUNT(*) AS total')",
+                file_get_contents($source)
+            );
+        }
+    }
+
     public function test_guest_polls_own_booking_only(): void
     {
         $guest = User::factory()->create(['email_verified_at' => now()]);
