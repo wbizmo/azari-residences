@@ -174,10 +174,22 @@ class MarketplaceSearchService
      */
     public function mapCursor(array $filters): array
     {
-        $encoded = $filters['cursor'] ?? null;
-        $cursor = filled($encoded) ? Cursor::fromEncoded((string) $encoded) : null;
-        if (filled($encoded) && $cursor === null) {
-            throw ValidationException::withMessages(['cursor' => 'The map continuation token is invalid.']);
+        // Bound continuation to the exact filter set. A cursor from another
+        // date, occupancy or viewport cannot silently return mismatched pins.
+        $encoded = (string) ($filters['cursor'] ?? '');
+        $cursor = null;
+        $scope = collect($filters)->except(['cursor', 'page'])->sortKeys()->all();
+        $fingerprint = hash('sha256', json_encode($scope, JSON_THROW_ON_ERROR));
+        if ($encoded !== '') {
+            $parts = explode('.', $encoded, 2);
+            if (count($parts) !== 2 ||
+                ! hash_equals(hash_hmac('sha256', $parts[0].'|'.$fingerprint, (string) config('app.key')), $parts[1])) {
+                throw ValidationException::withMessages(['cursor' => 'The map continuation token is invalid for this search.']);
+            }
+            $cursor = Cursor::fromEncoded($parts[0]);
+            if ($cursor === null) {
+                throw ValidationException::withMessages(['cursor' => 'The map continuation token is invalid.']);
+            }
         }
 
         $checkIn = CarbonImmutable::parse($filters['check_in'])->startOfDay();
@@ -196,6 +208,8 @@ class MarketplaceSearchService
                     ->with(['ratePlans' => fn ($plans) => $plans
                         ->where('is_active', true)->where('is_public', true)
                         ->orderBy('sort_order')->orderBy('id')])
+                    ->orderBy('base_rate')
+                    ->orderBy('sort_order')
                     ->orderBy('id')])
             ->orderBy('properties.id');
 
@@ -203,52 +217,54 @@ class MarketplaceSearchService
         $points = [];
 
         foreach ($batch->items() as $property) {
-            foreach ($property->publicAccommodationTypes as $type) {
-                // Preserve the legacy base-rate booking path where a room
-                // does not yet have a published independent rate plan.
-                $plans = $type->ratePlans->isEmpty() && $requestedPlan === null
-                    ? [null]
-                    : $type->ratePlans;
-                foreach ($plans as $plan) {
-                    if ($requestedPlan !== null && (int) $plan?->id !== $requestedPlan) {
-                        continue;
-                    }
-
-                    try {
-                        $this->availability->assertRules(
-                            $property, $checkIn, $checkOut, $adults, $children, $rooms, $type, $plan
-                        );
-                        if (! $this->availability->availableForProperty(
-                            $property, $checkIn, $checkOut, $rooms, $type->getKey()
-                        )) {
-                            continue;
-                        }
-
-                        $quote = $this->pricing->quote(
-                            $property, $checkIn, $checkOut, [], $type, $plan, $rooms
-                        );
-                    } catch (ValidationException) {
-                        continue;
-                    }
-
-                    $points[] = [
-                        'id' => $property->getKey(),
-                        'name' => $property->name,
-                        'slug' => $property->slug,
-                        'url' => route('properties.show', $property),
-                        'lat' => (float) $property->latitude,
-                        'lng' => (float) $property->longitude,
-                        'price' => (float) $quote['total'],
-                        'currency' => $quote['currency'],
-                    ];
-                    break 2;
-                }
+            // Mirror search(): do not silently show a different room/rate
+            // or a lower price on the map for the same stay.
+            $type = $property->publicAccommodationTypes->first();
+            if (! $type) {
+                continue;
             }
+            $plan = $requestedPlan !== null
+                ? $type->ratePlans->first(fn ($rate) => (int) $rate->id === $requestedPlan)
+                : $type->ratePlans->first();
+
+            if ($requestedPlan !== null && ! $plan) {
+                continue;
+            }
+
+            try {
+                $this->availability->assertRules(
+                    $property, $checkIn, $checkOut, $adults, $children,
+                    $rooms, $type, $plan
+                );
+                $quote = $this->pricing->quote(
+                    $property, $checkIn, $checkOut, [], $type, $plan, $rooms
+                );
+            } catch (ValidationException) {
+                continue;
+            }
+
+            $points[] = [
+                'id' => $property->getKey(),
+                'name' => $property->name,
+                'slug' => $property->slug,
+                'url' => route('properties.show', $property),
+                'lat' => (float) $property->latitude,
+                'lng' => (float) $property->longitude,
+                'price' => (float) $quote['total'],
+                'currency' => $quote['currency'],
+            ];
         }
+
+        $rawNextCursor = $batch->nextCursor()?->encode();
+        $nextCursor = $rawNextCursor === null
+            ? null
+            : $rawNextCursor.'.'.hash_hmac(
+                'sha256', $rawNextCursor.'|'.$fingerprint, (string) config('app.key')
+            );
 
         return [
             'points' => $points,
-            'next_cursor' => $batch->nextCursor()?->encode(),
+            'next_cursor' => $nextCursor,
             'batch_size' => 20,
         ];
     }
