@@ -154,7 +154,7 @@ class PublicPageController extends Controller
     public function rooms(): View
     {
         $properties = Property::query()
-            ->with(['locationRecord', 'roomType', 'amenities'])
+            ->with(['locationRecord', 'roomType', 'amenities', 'photoModerations'])
             ->where('is_published', true)
             ->whereIn('status', ['available', 'published', 'active'])
             ->whereNotNull('room_type_id')
@@ -215,7 +215,7 @@ class PublicPageController extends Controller
     private function collection(string $title, string $type, string $image, string $intro): View
     {
         $properties = Property::query()
-            ->with(['locationRecord', 'roomType', 'amenities'])
+            ->with(['locationRecord', 'roomType', 'amenities', 'photoModerations'])
             ->where('is_published', true)
             ->where('status', '!=', 'inactive')
             ->where(function ($query) use ($type): void {
