@@ -139,14 +139,23 @@ class PaymentInitiator
                 );
             }
 
-            $payment->update([
-                'status' => 'pending',
-                'checkout_url' => $checkoutUrl,
-                'provider_reference' => filled($result['provider_reference'] ?? null)
-                    ? $result['provider_reference']
-                    : null,
-                'provider_response_summary' => $result['safe_response'] ?? null,
-            ]);
+            // A fast provider webhook may finalize this payment while the
+            // initialisation HTTP request is still returning. Never overwrite
+            // the terminal status with "pending" (or a late "failed").
+            $updated = Payment::query()->whereKey($payment->id)
+                ->where('status', 'initiated')
+                ->update([
+                    'status' => 'pending',
+                    'checkout_url' => $checkoutUrl,
+                    'provider_reference' => filled($result['provider_reference'] ?? null)
+                        ? $result['provider_reference']
+                        : null,
+                    'provider_response_summary' => $result['safe_response'] ?? null,
+                    'updated_at' => now(),
+                ]);
+            if ($updated !== 1) {
+                return $payment->refresh();
+            }
             AuditLog::record(
                 'payment.initialised',
                 $payment,
@@ -161,11 +170,15 @@ class PaymentInitiator
 
             return $payment->refresh();
         } catch (\Throwable $e) {
-            $payment->update([
-                'status' => 'failed',
-                'failed_at' => now(),
-                'provider_response_summary' => ['error' => 'Provider initialization failed.'],
-            ]);
+            Payment::query()->whereKey($payment->id)
+                ->where('status', 'initiated')
+                ->update([
+                    'status' => 'failed',
+                    'failed_at' => now(),
+                    'provider_response_summary' => ['error' => 'Provider initialization failed.'],
+                    'updated_at' => now(),
+                ]);
+            $payment->refresh();
             AuditLog::record(
                 'payment.initialisation_failed',
                 $payment,
