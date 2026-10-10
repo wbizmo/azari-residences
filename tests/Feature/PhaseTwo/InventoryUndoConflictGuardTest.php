@@ -58,6 +58,55 @@ class InventoryUndoConflictGuardTest extends TestCase
         $this->assertNull($log->fresh()->reverted_at);
     }
 
+    public function test_preview_revision_rejects_stale_staff_editor_after_calendar_change(): void
+    {
+        $room = $this->room();
+        $day = CarbonImmutable::today()->addDays(22);
+        $service = app(InventoryBulkUpdateService::class);
+        $preview = $service->preview($room, $day, $day, ['price_override' => 180]);
+
+        $this->assertMatchesRegularExpression('/^[a-f0-9]{64}$/', $preview['revision']);
+        $service->apply($room, $day, $day, ['price_override' => 150], null, 'owner');
+
+        try {
+            $service->apply($room, $day, $day, ['price_override' => 180],
+                null, 'owner', $preview['revision']);
+            $this->fail('A stale preview must not overwrite another calendar edit.');
+        } catch (ValidationException $exception) {
+            $this->assertArrayHasKey('expected_revision', $exception->errors());
+        }
+
+        $this->assertSame('150.00', InventoryDate::query()
+            ->where('accommodation_type_id', $room->id)->firstOrFail()->price_override);
+    }
+
+    public function test_unchanged_preview_revision_allows_atomic_calendar_update(): void
+    {
+        $room = $this->room();
+        $day = CarbonImmutable::today()->addDays(25);
+        $service = app(InventoryBulkUpdateService::class);
+        $preview = $service->preview($room, $day, $day, ['stop_sell' => true]);
+
+        $log = $service->apply($room, $day, $day,
+            ['stop_sell' => true], null, 'owner', $preview['revision']);
+
+        $this->assertNotNull($log->id);
+        $this->assertTrue((bool) InventoryDate::query()
+            ->where('accommodation_type_id', $room->id)->firstOrFail()->stop_sell);
+    }
+
+    public function test_preview_revision_covers_full_calendar_horizon(): void
+    {
+        $room = $this->room();
+        $from = CarbonImmutable::today()->addDays(10);
+        $to = $from->addDays(366);
+        $service = app(InventoryBulkUpdateService::class);
+        $preview = $service->preview($room, $from, $to, ['stop_sell' => true]);
+
+        $this->assertSame(367, $preview['days']);
+        $this->assertSame($service->revision($room, $from, $to), $preview['revision']);
+    }
+
     public function test_untouched_new_inventory_date_can_be_undone_once(): void
     {
         $room = $this->room();
