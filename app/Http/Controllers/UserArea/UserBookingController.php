@@ -43,9 +43,20 @@ class UserBookingController extends Controller
             'cancelled' => $query->where('status', 'cancelled'),
             'pending-payment' => $query
                 ->whereNotIn('status', ['cancelled', 'completed', 'checked_out', 'no_show'])
+                // A historical failed payment must not make an already paid
+                // booking appear to owe money. Use verified settled amounts.
+                ->whereRaw(
+                    'COALESCE((SELECT SUM(p.amount) FROM payments p WHERE p.booking_id = bookings.id AND p.status = ?), 0) + 0.009 < COALESCE(bookings.total, 0)',
+                    ['successful']
+                )
+                // Respect the same legacy-only receipt fallback as Booking::isPaid().
                 ->where(function ($q): void {
-                    $q->whereIn('status', ['pending', 'pending_payment', 'confirmed'])
-                        ->orWhereHas('payments', fn ($payments) => $payments->whereNot('status', 'successful'));
+                    $q->whereNotIn('status', ['paid', 'confirmed', 'check_in', 'checked_in', 'checked_out', 'completed'])
+                        ->orWhereNull('paid_at')
+                        ->orWhere(function ($legacy): void {
+                            $legacy->whereNull('payment_reference')->whereNull('receipt_number');
+                        })
+                        ->orWhereHas('payments', fn ($payments) => $payments->where('status', 'successful'));
                 }),
             'all' => null,
             default => $status = 'upcoming',
