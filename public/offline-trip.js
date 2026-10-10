@@ -56,9 +56,11 @@
                 !records.every(validRecord)) throw new Error('Invalid snapshot records');
 
             const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
-            return records.filter(record =>
+            const active = records.filter(record =>
                 Date.parse(record.check_out + 'T00:00:00Z') >= thirtyDaysAgo
             );
+            if (!active.length) localStorage.removeItem(KEY);
+            return active;
         } catch {
             throw new Error('Cannot unlock saved stays. Check your passphrase or clear this device’s saved copy.');
         }
