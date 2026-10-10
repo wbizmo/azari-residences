@@ -60,9 +60,11 @@ class SupportTicketController extends Controller {
          if ($nextStatus === 'escalated' && ! $locked->escalated_at) {
              $locked->escalated_at = now();
          }
-         $locked->resolved_at = $nextStatus === 'resolved'
-             ? ($locked->resolved_at ?: now())
-             : null;
+         if ($nextStatus === 'resolved') {
+             $locked->resolved_at ??= now();
+         } elseif ($nextStatus !== 'closed') {
+             $locked->resolved_at = null;
+         }
          $locked->closed_at = $nextStatus === 'closed'
              ? ($locked->closed_at ?: now())
              : null;
@@ -96,11 +98,21 @@ class SupportTicketController extends Controller {
                  ...$attachment,
              ]);
              if (! $internal) {
-                 $locked->update([
+                 $update = [
                      'status' => 'awaiting_guest',
                      'first_responded_at' => $locked->first_responded_at ?: now(),
-                     'resolved_at' => null,
-                 ]);
+                 ];
+                 if ($locked->status === 'resolved') {
+                     $update['resolved_at'] = null;
+                     $update['sla_alerted_at'] = null;
+                     $update['sla_due_at'] = now()->addMinutes(match ($locked->severity) {
+                         'safety' => 15,
+                         'unable_to_check_in' => 30,
+                         'payment_taken_no_confirmation', 'property_unavailable' => 60,
+                         default => 1440,
+                     });
+                 }
+                 $locked->update($update);
              }
              AuditLog::record(
                  $internal ? 'support_ticket.internal_note' : 'support_ticket.staff_replied',
