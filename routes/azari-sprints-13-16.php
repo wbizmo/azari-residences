@@ -29,6 +29,7 @@ Route::prefix('azaridevadmin')->name('azari.admin.')->middleware(['auth.session'
     });
     Route::put('/support/{ticket}',[AdminSupportTicketController::class,'update'])->middleware('azari.permission:support-tickets.edit')->name('support.update');
     Route::post('/support/{ticket}/reply',[AdminSupportTicketController::class,'reply'])->middleware('azari.permission:support-tickets.edit')->name('support.reply');
+    Route::post('/support/{ticket}/recovery',[AdminSupportTicketController::class,'recovery'])->middleware(['azari.permission:support-tickets.edit', 'throttle:10,1'])->name('support.recovery');
     Route::get('/reviews',[AdminReviewController::class,'index'])->middleware('azari.permission:reviews.view')->name('reviews.index');
     Route::put('/reviews/{review}',[AdminReviewController::class,'update'])->middleware('azari.permission:reviews.edit')->name('reviews.update');
     Route::get('/cms/customer-communications',[CustomerContentController::class,'edit'])->middleware('azari.permission:cms.view')->name('cms.customer-content.edit');
