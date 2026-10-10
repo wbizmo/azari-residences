@@ -30,6 +30,11 @@ class TravelRequest extends Model
         ];
     }
 
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function offer(): BelongsTo
     {
         return $this->belongsTo(TravelOffer::class, 'travel_offer_id');

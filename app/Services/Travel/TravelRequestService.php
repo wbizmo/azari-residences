@@ -22,7 +22,19 @@ final class TravelRequestService
      */
     public function create(User $user, TravelOffer $offer, array $input): TravelRequest
     {
-        return DB::transaction(function () use ($user, $offer, $input): TravelRequest {
+        $liveFlightQuote = null;
+        // Live air fares must be verified by an authorized adapter before
+        // recording even an enquiry. Never charge or issue a ticket here.
+        if ($offer->kind === 'flight'
+            && ! TravelRequest::query()->where('user_id', $user->id)
+                ->where('idempotency_key', $input['idempotency_key'])->exists()) {
+            if (! $offer->isRequestable()) {
+                throw ValidationException::withMessages(['offer_id' => 'This air partner is unavailable.']);
+            }
+            $liveFlightQuote = app(TravelLiveQuoteService::class)->verify($offer, $input);
+        }
+
+        return DB::transaction(function () use ($user, $offer, $input, $liveFlightQuote): TravelRequest {
             User::query()->whereKey($user->id)->lockForUpdate()->firstOrFail();
 
             $payload = [
@@ -62,6 +74,15 @@ final class TravelRequestService
                 ]);
             }
 
+            if ($lockedOffer->kind === 'flight'
+                && ($liveFlightQuote === null
+                    || $liveFlightQuote['expires_at']->lte(now())
+                    || $liveFlightQuote['total_minor'] !== $lockedOffer->totalMinor($payload['party_size']))) {
+                throw ValidationException::withMessages([
+                    'offer_id' => 'The verified air fare has changed or expired.',
+                ]);
+            }
+
             if ($payload['party_size'] > $lockedOffer->max_party) {
                 throw ValidationException::withMessages(['party_size' => 'The requested party exceeds the published limit.']);
             }
@@ -77,7 +98,7 @@ final class TravelRequestService
                 if (! $booking) {
                     throw ValidationException::withMessages(['booking_id' => 'Invalid associated stay.']);
                 }
-                if ($payload['trip_itinerary_id'] && $booking->trip_itinerary_id
+                if ($payload['trip_itinerary_id']
                     && (int) $booking->trip_itinerary_id !== $payload['trip_itinerary_id']) {
                     throw ValidationException::withMessages(['booking_id' => 'This stay belongs to another itinerary.']);
                 }
@@ -116,6 +137,9 @@ final class TravelRequestService
             if ($lockedOffer->expires_at->lt($expires)) {
                 $expires = $lockedOffer->expires_at;
             }
+            if ($liveFlightQuote && $liveFlightQuote['expires_at']->lt($expires)) {
+                $expires = $liveFlightQuote['expires_at'];
+            }
 
             $request = TravelRequest::query()->create([
                 'id' => (string) Str::uuid(),
@@ -140,6 +164,8 @@ final class TravelRequestService
                     'starts_at' => $slot?->starts_at?->toIso8601String()
                         ?? $lockedOffer->starts_at?->toIso8601String(),
                     'price_basis' => $lockedOffer->price_basis,
+                    'live_air_offer_id' => $liveFlightQuote['provider_offer_id'] ?? null,
+                    'live_air_fare_verified_at' => $liveFlightQuote ? now()->toIso8601String() : null,
                     'unit_base_minor' => $lockedOffer->base_minor,
                     'unit_tax_minor' => $lockedOffer->tax_minor,
                     'unit_fee_minor' => $lockedOffer->fee_minor,
