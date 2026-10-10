@@ -1,7 +1,9 @@
 :root {
     --reserva-navy: #052058;
     --reserva-blue: #0577F5;
+    --reserva-blue-text: #005CBD; /* WCAG AA on white; vivid blue remains decorative. */
     --reserva-orange: #F58F07;
+    --reserva-orange-text: #8A4700; /* Orange for readable copy on white. */
     --reserva-black: #000000;
     --reserva-white: #FFFFFF;
     --reserva-surface-muted: #EEF2F8;
@@ -18,7 +20,7 @@
     --reserva-action: #052058;
     --reserva-action-hover: #000000;
     --reserva-on-action: #FFFFFF;
-    --reserva-focus: rgba(5, 32, 88, .24);
+    --reserva-focus: #052058; /* Solid, visible keyboard focus ring. */
     --reserva-success: #1f6f4a;
     --reserva-warning: #7a4b00;
     --reserva-danger: #8f1d1d;
