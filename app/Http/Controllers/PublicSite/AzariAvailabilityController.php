@@ -170,6 +170,25 @@ class AzariAvailabilityController extends Controller
      * Progressive map pages use the exact same SQL eligibility and canonical
      * server-priced quotes as the accessible list. No fabricated map prices.
      */
+    public function mapCursor(
+        MarketplaceSearchRequest $request,
+        MarketplaceSearchService $marketplace
+    ): JsonResponse {
+        $filters = $request->validated();
+
+        if (($filters['destination_type'] ?? null) === 'location' && ! empty($filters['destination_id'])) {
+            $filters['location_id'] = (int) $filters['destination_id'];
+        }
+        if (($filters['destination_type'] ?? null) === 'property' && ! empty($filters['destination_id'])) {
+            $filters['property_id'] = (int) $filters['destination_id'];
+        }
+        $filters['children'] = (int) ($filters['children'] ?? 0);
+        $filters['rooms'] = (int) ($filters['rooms'] ?? 1);
+
+        return response()->json($marketplace->mapCursor($filters))
+            ->header('Cache-Control', 'private, no-store');
+    }
+
     public function mapPoints(
         MarketplaceSearchRequest $request,
         MarketplaceSearchService $marketplace
