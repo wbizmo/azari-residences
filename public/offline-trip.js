@@ -4,6 +4,7 @@
 (() => {
     'use strict';
     const KEY = 'resavar:offline-stays:v1';
+    const OFFLINE_LIFETIME_MS = 90 * 24 * 60 * 60 * 1000;
     const encoder = new TextEncoder();
     const decoder = new TextDecoder();
     const capable = Boolean(window.crypto?.subtle && window.localStorage);
