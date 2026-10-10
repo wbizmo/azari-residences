@@ -18,7 +18,7 @@ Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer'])
 
 // Admin operations are hidden behind the existing administrator + step-up
 // gates. Approval does not grant supplier access to traveler PII.
-Route::middleware(['auth', 'auth.session', 'azari.staff:administrator'])
+Route::middleware(['auth', 'auth.session', 'azari.staff', 'azari.staff:administrator'])
     ->prefix('azaridevadmin/travel')->name('azari.admin.travel.')->group(function (): void {
         Route::get('/', [TravelSupplierController::class, 'index'])->name('index');
         Route::post('/suppliers', [TravelSupplierController::class, 'store'])
