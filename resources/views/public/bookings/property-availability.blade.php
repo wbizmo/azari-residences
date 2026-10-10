@@ -4,7 +4,7 @@
 
 @section('content')
 @php
-    $image = $property->featured_image ?: $property->cover_image ?: $property->image ?: 'images/azari-residence-fallback.png';
+    $image = $property->featured_image ?: $property->publicCoverImage() ?: $property->image ?: 'images/azari-residence-fallback.png';
     $imageUrl = \Illuminate\Support\Str::startsWith($image, ['http://', 'https://', '/']) ? $image : asset($image);
     $sameDay = (bool) ($property->same_day_booking ?? config('azari.booking.same_day_booking'));
 @endphp
