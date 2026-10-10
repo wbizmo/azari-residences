@@ -17,6 +17,8 @@ use App\Services\Travel\TripAssemblyService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Tests\Support\FakeDiningReservationVerifier;
+use App\Services\Travel\DiningReservationVerificationService;
 use Tests\TestCase;
 
 final class PhaseFourBatchTwoTest extends TestCase
@@ -33,7 +35,7 @@ final class PhaseFourBatchTwoTest extends TestCase
     private function partner(): DiningPartner
     {
         return DiningPartner::query()->create([
-            'name'=>'Example dining partner','status'=>'published','address'=>'15 Market Street',
+            'name'=>'Example dining partner','integration_key'=>'sandbox','status'=>'published','address'=>'15 Market Street',
             'city'=>'Lagos','timezone'=>'Africa/Lagos','disclosures'=>'Reservation not guaranteed.',
             'dietary_options'=>['vegetarian'],'accessibility'=>['step-free'],
             'details_verified_at'=>now(),'reviewed_by'=>User::factory()->create()->id,
@@ -129,6 +131,57 @@ final class PhaseFourBatchTwoTest extends TestCase
         $trip=TripItinerary::query()->create(['user_id'=>$guest->id,'name'=>'Private trip']);
         $this->expectException(\Symfony\Component\HttpKernel\Exception\HttpException::class);
         app(TripAssemblyService::class)->prepare($other,$trip,(string)Str::uuid());
+    }
+
+    public function test_real_provider_confirmation_requires_certified_adapter_consent_and_matching_record(): void
+    {
+        $staff=User::factory()->create(['is_admin'=>true]);
+        $guest=User::factory()->create();
+        $partner=$this->partner();
+        $service=app(DiningConciergeService::class);
+        $input=['idempotency_key'=>(string)Str::uuid(),'party_size'=>2,
+            'requested_for'=>now()->addDays(2)->toDateTimeString()];
+        $request=$service->create($guest,$partner,$input);
+        config()->set('travel.dining_provider_confirmation_enabled',true);
+        config()->set('travel.dining_adapters',['sandbox'=>FakeDiningReservationVerifier::class]);
+        try {
+            app(DiningReservationVerificationService::class)->verify($staff,$request,'partner-table-009');
+            $this->fail('Cannot confirm before customer consents to supplier handoff');
+        } catch (ValidationException $e) {
+            $this->assertArrayHasKey('provider',$e->errors());
+        }
+        $this->assertSame('pending_concierge',$request->fresh()->status);
+        $request->update(['supplier_share_consent'=>true]);
+        $confirmed=app(DiningReservationVerificationService::class)->verify($staff,$request,'partner-table-009');
+        $this->assertSame('confirmed',$confirmed->status);
+        $again=app(DiningReservationVerificationService::class)->verify($staff,$request,'partner-table-009');
+        $this->assertSame('confirmed',$again->status);
+        $this->assertDatabaseCount('dining_request_events',1);
+
+        $service->cancel($guest,$request);
+        $this->assertSame('cancellation_requested',$request->fresh()->status);
+        config()->set('travel.dining_test_state','cancelled');
+        $cancelled=app(DiningReservationVerificationService::class)->verify($staff,$request,'partner-cancelled-009');
+        $this->assertSame('cancelled',$cancelled->status);
+        $this->assertDatabaseCount('dining_request_events',2);
+        $this->assertDatabaseCount('payments',0);
+        $this->assertDatabaseCount('refunds',0);
+    }
+
+    public function test_unlicensed_dining_partner_cannot_be_marked_confirmed(): void
+    {
+        $staff=User::factory()->create(['is_admin'=>true]);
+        $guest=User::factory()->create();
+        $partner=$this->partner();
+        $request=app(DiningConciergeService::class)->create($guest,$partner,[
+            'idempotency_key'=>(string)Str::uuid(),'party_size'=>2,
+            'requested_for'=>now()->addDay()->toDateTimeString(),
+            'supplier_share_consent'=>true,
+        ]);
+        config()->set('travel.dining_provider_confirmation_enabled',true);
+        config()->set('travel.dining_adapters',[]);
+        $this->expectException(ValidationException::class);
+        app(DiningReservationVerificationService::class)->verify($staff,$request,'uncertified-reference');
     }
 
     public function test_mobile_native_gate_fails_closed_without_measured_pwa_demand(): void
