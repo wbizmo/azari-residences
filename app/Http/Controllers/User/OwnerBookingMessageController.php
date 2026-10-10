@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\BookingConversation;
 use App\Models\BookingMessage;
+use App\Models\BookingMessageAlertOutbox;
 use App\Models\Booking;
 use App\Models\User;
 use App\Notifications\PremiumMailNotification;
@@ -79,6 +80,18 @@ class OwnerBookingMessageController extends Controller
                     'attachment_name' => $safeAttachmentName,
                 ]);
 
+                $recipientId = Booking::query()
+                    ->whereKey($locked->booking_id)
+                    ->where('property_id', $property->getKey())
+                    ->value('user_id');
+                if ($recipientId && (int) $recipientId !== (int) $request->user()->id) {
+                    BookingMessageAlertOutbox::query()->create([
+                        'booking_message_id' => $message->id,
+                        'booking_id' => $locked->booking_id,
+                        'recipient_id' => $recipientId,
+                    ]);
+                }
+
                 $locked->update(['last_message_at' => $message->created_at]);
                 AuditLog::record('booking_message.property_sent', $locked, [], [
                     'message_id' => $message->id,
@@ -97,28 +110,6 @@ class OwnerBookingMessageController extends Controller
 
         if (! $created && $attachmentPath) {
             Storage::disk('private')->delete($attachmentPath);
-        }
-
-        if ($created) {
-            $booking = Booking::query()
-                ->whereKey($conversation->booking_id)
-                ->where('property_id', $property->getKey())
-                ->first();
-            $recipient = $booking?->user_id ? User::query()->find($booking->user_id) : null;
-            if ($recipient && (int) $recipient->id !== (int) $request->user()->id) {
-                try {
-                    $recipient->notify(new PremiumMailNotification(
-                        'booking-message',
-                        'Your property team sent a Resavar message',
-                        ['A new message is available for your reservation. Sign in to read it securely.'],
-                        'Read message',
-                        route('user.bookings.phase2.messages', ['reference' => $booking->reference]),
-                        ['booking_id' => $booking->id]
-                    ));
-                } catch (\Throwable $exception) {
-                    report($exception);
-                }
-            }
         }
 
         return back()->with('success', $created ? 'Message sent.' : 'This message was already sent.');
