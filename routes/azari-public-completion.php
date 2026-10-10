@@ -23,6 +23,9 @@ Route::get('/residences/{property}/reviews', PublicPropertyReviewsController::cl
 
 Route::get('/availability/results', [AzariAvailabilityController::class, 'index'])
     ->name('availability.results');
+Route::get('/availability/map-cursor', [AzariAvailabilityController::class, 'mapCursor'])
+    ->middleware('throttle:30,1')
+    ->name('availability.map-cursor');
 Route::get('/availability/map-points', [AzariAvailabilityController::class, 'mapPoints'])
     ->middleware('throttle:30,1')
     ->name('availability.map-points');
