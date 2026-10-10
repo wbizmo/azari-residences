@@ -352,6 +352,12 @@
                     @endforeach
                 </select>
             </label>
+            <label><span>Review language</span><select name="language">
+                @foreach(['und'=>'Unspecified','en'=>'English','fr'=>'French','es'=>'Spanish','de'=>'German','pt'=>'Portuguese','ar'=>'Arabic','hi'=>'Hindi','zh'=>'Chinese','it'=>'Italian','yo'=>'Yoruba','ig'=>'Igbo','ha'=>'Hausa','other'=>'Other'] as $code => $label)
+                    <option value="{{ $code }}" @selected(old('language', 'und') === $code)>{{ $label }}</option>
+                @endforeach
+            </select></label>
+            <p class="wide">For everyone's privacy, do not include phone numbers, email addresses or external links in your review.</p>
             <label class="wide"><span>Review title</span><input name="title" maxlength="120"></label>
             <label class="wide"><span>What did you like?</span><textarea name="positive_feedback" maxlength="1500"></textarea></label>
             <label class="wide"><span>What could be better?</span><textarea name="negative_feedback" maxlength="1500"></textarea></label>
