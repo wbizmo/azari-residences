@@ -7,10 +7,22 @@ use InvalidArgumentException;
 
 class ChannelAdapterManager
 {
-    public function __construct(private readonly ICalChannelAdapter $ical) {}
+    public function __construct(
+        private readonly ICalChannelAdapter $ical,
+        private readonly ChannelCapabilityRegistry $capabilities
+    ) {}
+
+    public function capabilities(string $provider): array
+    {
+        return $this->capabilities->manifest($provider);
+    }
     public function for(string $provider): ChannelAdapter
     {
-        return match (strtolower($provider)) {
+        if (! $this->capabilities->manifest($provider)['enabled']) {
+            throw new InvalidArgumentException('Provider connector is not approved or installed.');
+        }
+
+        return match (strtolower(trim($provider))) {
             'ical' => $this->ical,
             default => throw new InvalidArgumentException('Unsupported channel provider.'),
         };

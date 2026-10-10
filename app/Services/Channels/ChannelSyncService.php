@@ -17,6 +17,19 @@ class ChannelSyncService
 
     public function sync(ChannelConnection $connection): ChannelSyncRun
     {
+        // Never revive an operator-disconnected feed, even via a queued job.
+        $current = $connection->fresh();
+        if (! $current || ! $current->is_active
+            || in_array($current->status, [
+                ChannelConnectionLifecycleService::PENDING,
+                ChannelConnectionLifecycleService::DISCONNECTED,
+            ], true)) {
+            return $connection->runs()->create([
+                'status' => 'skipped', 'started_at' => now(), 'finished_at' => now(),
+                'safe_error' => 'Channel is disconnected; manual reconciliation is required.',
+            ]);
+        }
+
         // A provider request must be single-flight across scheduler and
         // operator-triggered syncs. Otherwise the older response can arrive
         // last and overwrite a fresher calendar snapshot.
@@ -34,13 +47,40 @@ class ChannelSyncService
             try {
                 $events = $this->adapters->for($connection->provider)->import($connection);
                 $counts = $this->applySnapshot($connection, $events);
+                // A disconnect may commit after applySnapshot but before this
+                // bookkeeping. Never overwrite its fail-closed status.
+                $stillConnected = ChannelConnection::query()
+                    ->whereKey($connection->getKey())
+                    ->where('is_active', true)
+                    ->whereNotIn('status', [
+                        ChannelConnectionLifecycleService::PENDING,
+                        ChannelConnectionLifecycleService::DISCONNECTED,
+                    ])
+                    ->update([
+                        'status' => 'healthy', 'last_successful_sync_at' => now(),
+                        'next_retry_at' => null, 'consecutive_failures' => 0,
+                        'last_safe_error' => null,
+                    ]);
+                if (! $stillConnected) {
+                    $run->update(['status' => 'skipped',
+                        'safe_error' => 'Channel disconnected during synchronization.',
+                        'finished_at' => now()]);
+                    return $run->fresh();
+                }
                 $run->update([...$counts, 'status' => 'succeeded', 'finished_at' => now()]);
-                $connection->forceFill([
-                    'status' => 'healthy', 'last_successful_sync_at' => now(),
-                    'next_retry_at' => null, 'consecutive_failures' => 0, 'last_safe_error' => null,
-                ])->save();
                 AuditLog::record('channel.sync_succeeded', $connection, [], $counts);
             } catch (\Throwable $e) {
+                $latest = $connection->fresh();
+                if ($latest && in_array($latest->status, [
+                    ChannelConnectionLifecycleService::PENDING,
+                    ChannelConnectionLifecycleService::DISCONNECTED,
+                ], true)) {
+                    $run->update([
+                        'status' => 'skipped', 'safe_error' => 'Channel was disconnected during synchronization.',
+                        'finished_at' => now(),
+                    ]);
+                    return $run->fresh();
+                }
                 $failures = ((int) $connection->consecutive_failures) + 1;
                 $minutes = min(360, 5 * (2 ** min(6, $failures - 1)));
                 // Provider exception messages can contain signed calendar URLs.
@@ -69,6 +109,12 @@ class ChannelSyncService
         return DB::transaction(function () use ($connection, $events): array {
             $lockedConnection = ChannelConnection::query()->whereKey($connection->getKey())
                 ->lockForUpdate()->firstOrFail();
+            if (! $lockedConnection->is_active || in_array($lockedConnection->status, [
+                ChannelConnectionLifecycleService::PENDING,
+                ChannelConnectionLifecycleService::DISCONNECTED,
+            ], true)) {
+                throw new \UnexpectedValueException('Disconnected provider snapshots cannot mutate inventory.');
+            }
 
             // A truncated/invalid empty feed must not silently release every
             // external reservation. Legitimate empty snapshots need explicit

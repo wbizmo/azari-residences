@@ -526,12 +526,19 @@ class MarketplaceSearchService
             WHERE cr.property_id = accommodation_types.property_id
               AND (cr.accommodation_type_id IS NULL OR cr.accommodation_type_id = accommodation_types.id)
               AND cr.status = 'active'
-              AND cc.is_active = 1
+              AND (cc.is_active = 1 OR cc.status = 'disconnected_pending_reconciliation')
               AND cr.starts_on <= ?
               AND cr.ends_on > ?
         ),
         0
     )
+    - CASE WHEN EXISTS (
+        SELECT 1 FROM channel_connections pending_cc
+        WHERE pending_cc.property_id = accommodation_types.property_id
+          AND (pending_cc.accommodation_type_id IS NULL
+               OR pending_cc.accommodation_type_id = accommodation_types.id)
+          AND pending_cc.status = 'disconnected_pending_reconciliation'
+    ) THEN accommodation_types.total_inventory ELSE 0 END
 ) >= ?
 SQL;
 
