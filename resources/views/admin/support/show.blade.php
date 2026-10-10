@@ -63,6 +63,36 @@
         </form>
     </section>
 
+    @if($ticket->booking_id && !in_array($ticket->status, ['resolved', 'closed'], true))
+    <section class="az-admin-card">
+        <div class="az-admin-card__header">
+            <div>
+                <h2>Recovery escalation</h2>
+                <p>Request a reviewed intervention. This does not directly issue refunds, cancel bookings or reserve inventory.</p>
+            </div>
+        </div>
+        <form method="POST" action="{{ route('azari.admin.support.recovery', $ticket) }}" class="az-form-grid az-admin-card__body">
+            @csrf
+            <label class="az-field">
+                <span>Intervention</span>
+                <select name="recovery_action" required>
+                    <option value="rebooking_assistance">Rebooking assistance</option>
+                    <option value="refund_review">Refund review</option>
+                    <option value="owner_contact">Contact property owner</option>
+                    <option value="safety_escalation">Safety escalation</option>
+                </select>
+            </label>
+            <label class="az-field az-span-2">
+                <span>Reason and requested next action</span>
+                <textarea name="reason" required minlength="10" maxlength="2000" rows="3" placeholder="Document the issue and the action a reviewer should take."></textarea>
+            </label>
+            <div class="az-form-actions az-span-2">
+                <button class="button button-primary" type="submit">Escalate for review</button>
+            </div>
+        </form>
+    </section>
+    @endif
+
     <section class="az-admin-card">
         <div class="az-admin-card__header">
             <div>
