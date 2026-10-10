@@ -38,4 +38,24 @@ class UserPaymentController extends Controller
         $newPayment = $initiator->create($payment->booking, $payment->provider);
         return redirect()->away($newPayment->checkout_url);
     }
+    public function resume(Request $request, Payment $payment): RedirectResponse
+    {
+        $payment = Payment::query()->with('booking')->whereKey($payment->id)->firstOrFail();
+        abort_unless((int) $payment->booking?->user_id === (int) $request->user()->id, 403);
+        abort_unless($payment->status === 'pending' && filled($payment->checkout_url), 422,
+            'This payment is not awaiting checkout.');
+
+        // Do not redirect to a stale gateway session or imply a paid booking
+        // still requires payment. A new attempt must follow provider checks.
+        abort_unless($payment->initiated_at && $payment->initiated_at->gt(now()->subMinutes(30))
+            && ! $payment->booking->isPaid(), 422, 'This checkout link is no longer active.');
+
+        $url = trim((string) $payment->checkout_url);
+        abort_unless(filter_var($url, FILTER_VALIDATE_URL)
+            && strtolower((string) parse_url($url, PHP_URL_SCHEME)) === 'https'
+            && filled(parse_url($url, PHP_URL_HOST)), 422, 'The payment provider link is invalid.');
+
+        return redirect()->away($url);
+    }
+
 }
