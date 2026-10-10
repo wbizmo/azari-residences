@@ -25,6 +25,11 @@ class Review extends Model
     }
 
     public function appeal(): \Illuminate\Database\Eloquent\Relations\HasOne { return $this->hasOne(ReviewAppeal::class); }
+    public function helpfulVotes(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(ReviewHelpfulVote::class);
+    }
+
     public function booking(): BelongsTo { return $this->belongsTo(Booking::class); }
     public function property(): BelongsTo { return $this->belongsTo(Property::class); }
     public function user(): BelongsTo { return $this->belongsTo(User::class); }

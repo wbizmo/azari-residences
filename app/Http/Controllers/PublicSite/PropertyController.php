@@ -40,6 +40,7 @@ class PropertyController extends Controller
                 ->where('verified_stay', true)
                 ->where('status', 'approved')
                 ->with(['user', 'managementReplyBy'])
+                ->withCount('helpfulVotes')
                 ->latest()
                 ->limit(12),
             'publicAccommodationTypes.ratePlans' => fn ($query) => $query

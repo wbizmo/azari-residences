@@ -98,20 +98,27 @@ class ReviewController extends Controller
             'trip_type' => ['nullable', Rule::in(['business', 'couple', 'family', 'friends', 'solo', 'other'])],
         ]);
 
-        $before = $review->only(array_keys($data));
-        $review->update([
-            ...$data,
-            'edited_at' => now(),
-            'status' => 'pending',
-            // A property response approved for the old guest text must be
-            // reconsidered if the guest substantially rewrites the review.
-            'owner_reply_status' => 'pending',
-        ]);
+        DB::transaction(function () use ($review, $data): void {
+            $locked = Review::query()->whereKey($review->id)->lockForUpdate()->firstOrFail();
+            $before = $locked->only(array_keys($data));
+            $locked->update([
+                ...$data,
+                'edited_at' => now(),
+                'status' => 'pending',
+                // A property response to the old guest text must be moderated
+                // again after review content changes.
+                'owner_reply_status' => 'pending',
+            ]);
 
-        AuditLog::record('review.updated', $review, $before, [
-            ...$review->only(array_keys($data)),
-            'edited_at' => $review->edited_at?->toIso8601String(),
-        ]);
+            // Helpfulness belongs to the text readers evaluated. A rewritten
+            // review starts with a clean tally when it is reapproved.
+            $locked->helpfulVotes()->delete();
+
+            AuditLog::record('review.updated', $locked, $before, [
+                ...$locked->only(array_keys($data)),
+                'edited_at' => $locked->edited_at?->toIso8601String(),
+            ]);
+        }, 3);
 
         return back()->with('success', 'Your review was updated and returned to moderation.');
     }

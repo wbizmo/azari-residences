@@ -5,6 +5,7 @@ use App\Http\Controllers\User\OwnerCommercialInventoryController;
 use App\Http\Controllers\User\OwnerPhaseTwoController;
 use App\Http\Controllers\UserArea\PhaseTwoGuestController;
 use App\Http\Controllers\UserArea\ReviewController;
+use App\Http\Controllers\UserArea\ReviewHelpfulController;
 use App\Http\Controllers\UserArea\BookingShareController;
 use Illuminate\Support\Facades\Route;
 
@@ -55,6 +56,9 @@ Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer'])->group
         ->middleware('throttle:5,60')->name('user.bookings.share.create');
     Route::delete('/account/bookings/{reference}/share', [BookingShareController::class, 'revoke'])
         ->middleware('throttle:10,60')->name('user.bookings.share.revoke');
+
+    Route::post('/reviews/{review}/helpful', [ReviewHelpfulController::class, 'store'])
+        ->middleware('throttle:20,1')->name('user.reviews.helpful');
 
     Route::patch('/account/bookings/{booking}/review', [ReviewController::class, 'update'])->name('user.reviews.update');
     Route::post('/account/bookings/{booking}/review/appeal', [ReviewController::class, 'appeal'])
