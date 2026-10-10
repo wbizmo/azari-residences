@@ -25,11 +25,21 @@
         </div>
     </header>
     <div class="az-user-panel-body">
-        <p>Optional, read-only yield advice from confirmed bookings. Rates never change automatically.</p>
-        <a class="az-user-button az-user-button--outline" target="_blank" rel="noopener"
-           href="{{ route('user.owner.commercial.yield-preview', [$property,$type]) }}?from_date={{ now()->addDays(1)->toDateString() }}&to_date={{ now()->addDays(8)->toDateString() }}">
-            Preview pricing evidence (JSON)
-        </a>
+        <p>Owner-controlled, evidence-based pricing. Preview first, then approve the exact recommended nightly override. Existing confirmed booking totals stay unchanged.</p>
+        <form method="POST" action="{{ route('user.owner.commercial.yield-approve', [$property,$type]) }}"
+              data-yield-form data-preview-url="{{ route('user.owner.commercial.yield-preview', [$property,$type]) }}"
+              class="az-form-grid">
+            @csrf
+            <label><span>Start date</span><input type="date" name="from_date" value="{{ now()->addDays(10)->toDateString() }}" required></label>
+            <label><span>End date</span><input type="date" name="to_date" value="{{ now()->addDays(17)->toDateString() }}" required></label>
+            <label><span>Minimum permitted rate (optional)</span><input type="number" name="minimum" min="0" step="1"></label>
+            <label><span>Maximum permitted rate (optional)</span><input type="number" name="maximum" min="0" step="1"></label>
+            <label><span>Recommended {{ $type->currency }} nightly rate</span><input type="text" name="accepted_rate" readonly required></label>
+            <input type="hidden" name="expected_revision" value="">
+            <button type="button" class="az-user-button az-user-button--outline" data-yield-preview>Preview evidence and recommendation</button>
+            <button type="submit" class="az-user-button az-user-button--dark" data-yield-apply disabled>Approve exact recommended rate</button>
+            <p class="wide" role="status" aria-live="polite" data-yield-feedback>Recommendations require sufficient confirmed bookings, open inventory, and an explicit owner approval.</p>
+        </form>
         <form method="POST" action="{{ route('user.owner.commercial.calendar.bulk-update',[$property,$type]) }}" data-inventory-calendar-form data-preview-url="{{ route('user.owner.phase2.calendar.preview', [$property, $type]) }}" class="az-form-grid">
             @csrf
             <label><span>From</span><input type="date" name="from_date" required></label>
@@ -70,6 +80,66 @@
     </div>
 </section>
 @endforeach
+<script>
+(() => {
+    'use strict';
+    document.querySelectorAll('[data-yield-form]').forEach(form => {
+        const preview = form.querySelector('[data-yield-preview]');
+        const submit = form.querySelector('[data-yield-apply]');
+        const revision = form.querySelector('[name="expected_revision"]');
+        const rate = form.querySelector('[name="accepted_rate"]');
+        const feedback = form.querySelector('[data-yield-feedback]');
+        let currentRequest = null;
+        let sequence = 0;
+        const invalidate = () => {
+            sequence++;
+            currentRequest?.abort();
+            revision.value = '';
+            rate.value = '';
+            submit.disabled = true;
+            feedback.textContent = 'Re-preview the latest inventory and confirmed booking evidence before approval.';
+        };
+        form.addEventListener('input', event => { if (event.target !== rate && event.target !== revision) invalidate(); });
+        form.addEventListener('change', event => { if (event.target !== rate && event.target !== revision) invalidate(); });
+        form.addEventListener('submit', event => {
+            if (!/^[a-f0-9]{64}$/.test(revision.value) || !rate.value) event.preventDefault();
+        });
+        preview.addEventListener('click', async () => {
+            invalidate();
+            const ticket = ++sequence;
+            currentRequest = new AbortController();
+            preview.disabled = true;
+            feedback.textContent = 'Checking confirmed room nights and daily restrictions…';
+            try {
+                // Never place CSRF tokens, accepted amounts or revision hashes
+                // into a GET query string (browser history and access logs).
+                const query = new URLSearchParams();
+                ['from_date', 'to_date', 'minimum', 'maximum'].forEach(field => {
+                    const value = form.elements.namedItem(field)?.value;
+                    if (value) query.set(field, value);
+                });
+                const response = await fetch(form.dataset.previewUrl + '?' + query, {
+                    credentials: 'same-origin', headers: {'Accept': 'application/json'},
+                    signal: currentRequest.signal
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(Object.values(data.errors || {}).flat()[0] || data.message || 'Pricing preview failed.');
+                if (sequence !== ticket) return;
+                feedback.textContent = data.reason + ' Booked room nights: ' + data.booked_room_nights +
+                    '; capacity room nights: ' + data.capacity_room_nights +
+                    '; confirmed bookings sampled: ' + data.sample_bookings + '.';
+                if (data.eligible && /^[a-f0-9]{64}$/.test(data.revision || '') && data.suggested_rate !== null) {
+                    revision.value = data.revision;
+                    rate.value = data.suggested_rate;
+                    submit.disabled = false;
+                }
+            } catch (error) {
+                if (sequence === ticket && error.name !== 'AbortError') feedback.textContent = error.message;
+            } finally { if (sequence === ticket) preview.disabled = false; }
+        });
+    });
+})();
+</script>
 <script>
 (() => {
     'use strict';

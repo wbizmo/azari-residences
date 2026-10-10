@@ -1,6 +1,10 @@
 <?php
 
 return [
+    'fx' => [
+        // Explicitly false until a gateway-certified charge/refund/ledger path exists.
+        'checkout_enabled' => env('RESAVAR_FX_CHECKOUT_ENABLED', false),
+    ],
     'channels' => [
         // Never enable in production: real providers require certified adapters.
         'sandbox_webhooks_enabled' => env('RESAVAR_SANDBOX_WEBHOOKS', false),

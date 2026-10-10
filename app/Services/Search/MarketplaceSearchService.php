@@ -537,7 +537,7 @@ class MarketplaceSearchService
         WHERE pending_cc.property_id = accommodation_types.property_id
           AND (pending_cc.accommodation_type_id IS NULL
                OR pending_cc.accommodation_type_id = accommodation_types.id)
-          AND pending_cc.status = 'disconnected_pending_reconciliation'
+          AND pending_cc.status IN ('disconnected_pending_reconciliation','conflict')
     ) THEN accommodation_types.total_inventory ELSE 0 END
 ) >= ?
 SQL;

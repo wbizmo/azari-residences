@@ -20,7 +20,7 @@ final class ChannelOutboxService
             $locked = ChannelConnection::query()->whereKey($connection->id)->lockForUpdate()->firstOrFail();
             if (! $locked->is_active || $locked->provider !== 'resavar_sandbox'
                 || ! config('reserva.channels.sandbox_webhooks_enabled', false)
-                || in_array($locked->status, ['disconnected','disconnected_pending_reconciliation'], true)) {
+                || in_array($locked->status, ['disconnected','disconnected_pending_reconciliation','conflict'], true)) {
                 throw ValidationException::withMessages(['provider' => 'Provider publication is not approved.']);
             }
             $encoded = json_encode($payload, JSON_THROW_ON_ERROR);
