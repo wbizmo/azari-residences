@@ -139,6 +139,35 @@ class Property extends Model
         return $this->belongsToMany(Amenity::class);
     }
 
+    /**
+     * All public surfaces share one visibility rule. A moderation record
+     * explicitly marked pending/rejected hides the path, including the cover.
+     * Old images with no record remain visible for backwards compatibility.
+     */
+    public function publicPhotoPaths(): \Illuminate\Support\Collection
+    {
+        $paths = collect([$this->cover_image])->merge($this->gallery ?? [])
+            ->filter()->unique()->values();
+        if ($paths->isEmpty()) {
+            return $paths;
+        }
+
+        $reviews = ($this->relationLoaded('photoModerations')
+            ? $this->photoModerations
+            : $this->photoModerations()->whereIn('path', $paths->all())->get())
+            ->keyBy('path');
+
+        return $paths->reject(
+            fn (string $path) => $reviews->has($path)
+                && $reviews->get($path)->status !== 'approved'
+        )->values();
+    }
+
+    public function publicCoverImage(): ?string
+    {
+        return $this->publicPhotoPaths()->first();
+    }
+
     public function photoModerations(): HasMany
     {
         return $this->hasMany(PropertyPhotoModeration::class);

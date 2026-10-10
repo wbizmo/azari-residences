@@ -34,6 +34,7 @@ class MarketplaceSearchService
 
         $query = $this->eligibleProperties($filters, $checkIn, $checkOut, $rooms, $guests)
             ->with([
+                'photoModerations',
                 'locationRecord',
                 'roomType',
                 'amenities:id,name,icon',

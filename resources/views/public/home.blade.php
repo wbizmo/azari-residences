@@ -402,8 +402,8 @@
                     @foreach($newResidences as $property)
                         <a class="reserva-new-card" href="{{ route('properties.show', $property) }}">
                             <span class="reserva-new-card__media">
-                                @if($property->cover_image)
-                                    <img src="{{ Storage::url($property->cover_image) }}" alt="{{ $property->name }}" loading="lazy" decoding="async">
+                                @if($property->publicCoverImage())
+                                    <img src="{{ Storage::url($property->publicCoverImage()) }}" alt="{{ $property->name }}" loading="lazy" decoding="async">
                                 @else
                                     <img src="{{ asset('images/azari-residence-fallback.png') }}" alt="" loading="lazy" decoding="async">
                                 @endif
@@ -483,9 +483,9 @@
                             href="{{ route('properties.show', $property) }}"
                             class="residence-image"
                         >
-                            @if($property->cover_image)
+                            @if($property->publicCoverImage())
                                 <img
-                                    src="{{ Storage::url($property->cover_image) }}"
+                                    src="{{ Storage::url($property->publicCoverImage()) }}"
                                     alt="{{ $property->name }}"
                                     loading="lazy"
                                 >

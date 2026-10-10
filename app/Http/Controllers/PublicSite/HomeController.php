@@ -32,7 +32,7 @@ class HomeController extends Controller
             'content' => Cache::remember('public:content-blocks', now()->addMinutes(5), fn () => ContentBlock::query()->where('is_active', true)->pluck('value', 'key')->all()),
 
             'featuredResidences' => Property::query()
-                ->with(['locationRecord', 'roomType', 'amenities'])
+                ->with(['locationRecord', 'roomType', 'amenities', 'photoModerations'])
                 ->where('is_published', true)
                 ->where('is_featured', true)
                 ->where('status', '!=', 'inactive')
@@ -79,7 +79,7 @@ class HomeController extends Controller
                 ->get(),
 
             'newResidences' => Property::query()
-                ->with(['locationRecord', 'roomType'])
+                ->with(['locationRecord', 'roomType', 'photoModerations'])
                 ->where('is_published', true)
                 ->whereNotIn('status', ['inactive', 'unavailable', 'maintenance', 'archived'])
                 ->latest('id')

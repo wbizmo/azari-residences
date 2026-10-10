@@ -211,8 +211,8 @@
                             <article class="reserva-results-card" data-property-card="{{ $property->id }}">
                                 <div class="reserva-results-card__image">
                                     <a href="{{ route('properties.show', $property) }}" aria-label="View {{ $property->name }}">
-                                        @if($property->cover_image)
-                                            <img src="{{ Storage::url($property->cover_image) }}" alt="{{ $property->name }}" loading="lazy" decoding="async">
+                                        @if($property->publicCoverImage())
+                                            <img src="{{ Storage::url($property->publicCoverImage()) }}" alt="{{ $property->name }}" loading="lazy" decoding="async">
                                         @else
                                             <img src="{{ asset('images/azari-residence-fallback.png') }}" alt="{{ $property->name }}" loading="lazy" decoding="async">
                                         @endif

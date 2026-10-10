@@ -38,7 +38,7 @@
                 @forelse($properties as $property)
                     <article class="az-luxury-property-card">
                         <a class="az-luxury-property-card__media" href="{{ route('properties.show', $property) }}">
-                            <img src="{{ $property->cover_image ? Storage::url($property->cover_image) : asset('images/azari-residence-fallback.png') }}" alt="{{ $property->name }}">
+                            <img src="{{ $property->publicCoverImage() ? Storage::url($property->publicCoverImage()) : asset('images/azari-residence-fallback.png') }}" alt="{{ $property->name }}">
                             <span>{{ $property->property_type }}</span>
                         </a>
                         <div class="az-luxury-property-card__body">
