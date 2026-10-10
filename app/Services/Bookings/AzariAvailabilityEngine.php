@@ -387,12 +387,30 @@ class AzariAvailabilityEngine
             $dates->push($cursor->toDateString());
         }
 
-        if ($this->propertyMaintenanceBlocks(
-            $accommodationType->property_id,
-            $start,
-            $end
-        )) {
-            return $dates->mapWithKeys(fn (string $date) => [$date => 0]);
+        // Maintenance can cover only part of a requested calendar window.
+        // Apply exact half-open blocked intervals per day, not one blanket
+        // zero for every date whenever any interval intersects the window.
+        $maintenanceEvents = [];
+        if (Schema::hasTable('maintenance_periods')) {
+            $periods = MaintenancePeriod::query()
+                ->where('property_id', $accommodationType->property_id)
+                ->where('blocks_booking', true)
+                ->whereDate('starts_on', '<', $end->toDateString())
+                ->whereDate('ends_on', '>', $start->toDateString())
+                ->get(['starts_on', 'ends_on']);
+
+            foreach ($periods as $period) {
+                $blockedFrom = CarbonImmutable::parse($period->starts_on->toDateString())->startOfDay();
+                $blockedTo = CarbonImmutable::parse($period->ends_on->toDateString())->startOfDay();
+                $blockedFrom = $blockedFrom->lessThan($start) ? $start : $blockedFrom;
+                $blockedTo = $blockedTo->greaterThan($end) ? $end : $blockedTo;
+                if ($blockedFrom->lessThan($blockedTo)) {
+                    $first = $blockedFrom->toDateString();
+                    $last = $blockedTo->toDateString();
+                    $maintenanceEvents[$first] = ($maintenanceEvents[$first] ?? 0) + 1;
+                    $maintenanceEvents[$last] = ($maintenanceEvents[$last] ?? 0) - 1;
+                }
+            }
         }
 
         $inventory = Schema::hasTable('inventory_dates')
@@ -409,7 +427,14 @@ class AzariAvailabilityEngine
         $remaining = collect();
         $baseInventory = max(0, (int) $accommodationType->total_inventory);
 
+        $activeMaintenanceBlocks = 0;
         foreach ($dates as $date) {
+            $activeMaintenanceBlocks += (int) ($maintenanceEvents[$date] ?? 0);
+            if ($activeMaintenanceBlocks > 0) {
+                $remaining->put($date, 0);
+                continue;
+            }
+
             $row = $inventory->get($date);
 
             $sellable = $row?->sellable_inventory;
