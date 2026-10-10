@@ -32,7 +32,6 @@ class PublicPropertyReviewsController extends Controller
             ->where('property_id', $property->id)
             ->where('verified_stay', true)
             ->where('status', 'approved')
-            ->with(['user:id,name'])
             ->withCount('helpfulVotes')
             ->when($filters['trip_type'] ?? null,
                 fn ($query, $value) => $query->where('trip_type', $value))

@@ -53,7 +53,7 @@
             @forelse($reviews as $review)
                 <article class="reserva-review-card">
                     <div class="reserva-review-card__meta">
-                        <strong>{{ $review->user?->name ? Str::before($review->user->name, ' ') : 'Verified guest' }}</strong>
+                        <strong>Verified guest</strong>
                         <span>{{ $review->created_at->format('M Y') }} · {{ $review->rating }}/5</span>
                     </div>
                     @if($review->trip_type)<p>Trip type: {{ Str::headline($review->trip_type) }}</p>@endif
