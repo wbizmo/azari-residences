@@ -11,6 +11,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
+use Tests\Support\UploadedTestImage;
 
 class OperationsChecklistEvidenceTest extends TestCase
 {
@@ -56,7 +57,7 @@ class OperationsChecklistEvidenceTest extends TestCase
             'status' => 'completed',
             'version' => 0,
             'checklist_completed' => [0, 1, 2],
-            'evidence' => UploadedFile::fake()->image('room.png', 640, 480),
+            'evidence' => UploadedTestImage::make('room.png'),
         ])->assertRedirect()->assertSessionHasNoErrors();
 
         $task->refresh();

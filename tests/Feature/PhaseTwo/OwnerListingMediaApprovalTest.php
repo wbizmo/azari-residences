@@ -30,8 +30,18 @@ class OwnerListingMediaApprovalTest extends TestCase
         $listing = PropertyListing::query()->create([
             'reference' => 'LST-MEDIA-1',
             'user_id' => $owner->id,
+            'listing_agreement_id' => $owner->listingAgreements()->create([
+                'version' => 'test',
+                'legal_name' => $owner->name,
+                'agreement_text' => 'Test listing agreement',
+                'signature_hash' => hash('sha256', 'listing-media-test'),
+                'signed_at' => now(),
+            ])->id,
             'status' => 'submitted',
-            'property_data' => $source->only($source->getFillable()),
+            'property_data' => array_merge($source->fresh()->only($source->getFillable()), [
+                'code' => 'MEDIA-'.$source->id,
+                'slug' => 'media-approval-'.$source->id,
+            ]),
             'cover_image' => 'owner-listings/covers/review.jpg',
             'gallery' => [],
             'amenity_ids' => [],
@@ -42,6 +52,7 @@ class OwnerListingMediaApprovalTest extends TestCase
 
     private function requestFor(User $reviewer, array $fields): Request
     {
+        $this->actingAs($reviewer);
         $request = Request::create('/owner-listing-approval', 'POST', $fields);
         $request->setUserResolver(static fn () => $reviewer);
         $this->app->instance('request', $request);

@@ -16,7 +16,6 @@ class SupportRefundServicingTest extends TestCase
 
     public function test_support_case_refund_is_idempotent_and_never_claims_paid_provider_settlement(): void
     {
-        $this->withoutMiddleware();
         $admin = User::factory()->create(['is_admin' => true, 'is_active' => true]);
         $guest = User::factory()->create();
         $booking = Booking::factory()->create(['user_id' => $guest->id]);
@@ -47,9 +46,9 @@ class SupportRefundServicingTest extends TestCase
             'amount' => 12000,
             'reason' => 'Eligible partial refund following guest-reported room maintenance.',
         ];
-        $this->actingAs($admin)->post($route, $form)
+        $this->actingAs($admin)->withSession(['auth.password_confirmed_at' => time()])->post($route, $form)
             ->assertRedirect(route('azari.admin.payments.show', $payment));
-        $this->actingAs($admin)->post($route, $form)->assertRedirect();
+        $this->actingAs($admin)->withSession(['auth.password_confirmed_at' => time()])->post($route, $form)->assertRedirect();
 
         $this->assertSame(1, Refund::query()->where('payment_id', $payment->id)->count());
         $this->assertSame('requested', Refund::query()->firstOrFail()->status);
@@ -59,7 +58,6 @@ class SupportRefundServicingTest extends TestCase
 
     public function test_finance_case_cannot_request_a_refund_for_an_unrelated_booking(): void
     {
-        $this->withoutMiddleware();
         $admin = User::factory()->create(['is_admin' => true, 'is_active' => true]);
         $guest = User::factory()->create();
         $booking = Booking::factory()->create(['user_id' => $guest->id]);
@@ -81,7 +79,7 @@ class SupportRefundServicingTest extends TestCase
             'category' => 'payment', 'subject' => 'Foreign payment',
         ]);
 
-        $this->actingAs($admin)->post(route('azari.admin.support.refund-request', $ticket), [
+        $this->actingAs($admin)->withSession(['auth.password_confirmed_at' => time()])->post(route('azari.admin.support.refund-request', $ticket), [
             'payment_id' => $payment->id,
             'amount' => 1000,
             'reason' => 'This payment is unrelated to the current booking.',

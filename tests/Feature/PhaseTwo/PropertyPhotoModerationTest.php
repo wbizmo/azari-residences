@@ -15,7 +15,6 @@ class PropertyPhotoModerationTest extends TestCase
 
     public function test_photo_requires_approved_metadata_and_current_property_ownership(): void
     {
-        $this->withoutMiddleware();
         Storage::fake('public');
         Storage::disk('public')->put('properties/gallery/photo.jpg', 'image');
         $property = Property::factory()->create([
@@ -46,7 +45,6 @@ class PropertyPhotoModerationTest extends TestCase
 
     public function test_approved_photo_cannot_belong_to_another_property_or_missing_file(): void
     {
-        $this->withoutMiddleware();
         Storage::fake('public');
         $property = Property::factory()->create([
             'gallery' => ['properties/gallery/removed.jpg'],
