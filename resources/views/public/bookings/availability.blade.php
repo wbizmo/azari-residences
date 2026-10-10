@@ -366,7 +366,7 @@
                         <div
                             class="reserva-map-shell"
                             data-reserva-results-map
-                            data-map-endpoint="{{ route('availability.map-points') }}"
+                            data-map-endpoint="{{ route('availability.map-cursor') }}"
                             data-map-page="{{ $results->currentPage() }}"
                             data-map-pages="{{ $results->lastPage() }}"
                             role="region"
