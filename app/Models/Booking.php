@@ -49,6 +49,7 @@ class Booking extends Model
         ];
     }
 
+    public function tripItinerary(): BelongsTo { return $this->belongsTo(TripItinerary::class); }
     public function property(): BelongsTo { return $this->belongsTo(Property::class); }
     public function accommodationType(): BelongsTo { return $this->belongsTo(AccommodationType::class); }
     public function ratePlan(): BelongsTo { return $this->belongsTo(RatePlan::class); }

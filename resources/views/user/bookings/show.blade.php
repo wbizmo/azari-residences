@@ -11,6 +11,40 @@
     $directionsUrl = $showLocation ? $booking->directionsUrl() : null;
 @endphp
 
+<section class="az-user-panel" aria-label="Private itinerary grouping" style="margin-bottom:18px">
+    <header class="az-user-panel-header">
+        <div>
+            <h2 class="az-user-panel-title">Your travel plan</h2>
+            <p class="az-user-panel-subtitle">Group this stay with other bookings on your account. Each stay keeps its own booking status, payment and cancellation policy.</p>
+        </div>
+    </header>
+    <div class="az-user-panel-body">
+        @if($booking->tripItinerary)
+            <p>Currently in
+                <a href="{{ route('user.itineraries.show', $booking->tripItinerary) }}">
+                    {{ $booking->tripItinerary->name }}
+                </a>
+            </p>
+        @endif
+        <form method="POST" action="{{ route('user.bookings.itineraries.assign', $booking->reference) }}" class="az-form-grid">
+            @csrf
+            <label>
+                <span>Itinerary</span>
+                <select name="trip_itinerary_id" aria-label="Choose an itinerary for this stay">
+                    <option value="">No itinerary</option>
+                    @foreach($tripItineraries as $itinerary)
+                        <option value="{{ $itinerary->id }}" @selected((int) $booking->trip_itinerary_id === (int) $itinerary->id)>
+                            {{ $itinerary->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </label>
+            <button class="az-user-button az-user-button--dark" type="submit">Save grouping</button>
+        </form>
+        <p><a href="{{ route('user.bookings.index', ['status' => 'all']) }}">Create a new itinerary from Trips</a></p>
+    </div>
+</section>
+
 @if(in_array($booking->status, ['approved','confirmed','paid','check_in','checked_in','checked_out','completed'], true))
 <section class="az-user-panel" aria-label="Encrypted offline itinerary" style="margin-bottom:18px">
     <header class="az-user-panel-header"><div>

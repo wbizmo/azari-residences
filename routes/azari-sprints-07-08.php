@@ -12,6 +12,7 @@ use App\Http\Controllers\UserArea\BookingSelfServiceController;
 use App\Http\Controllers\UserArea\UserDiscoveryController;
 use App\Http\Controllers\UserArea\PhoneVerificationController;
 use App\Http\Controllers\UserArea\UserBookingController;
+use App\Http\Controllers\UserArea\TripItineraryController;
 use App\Http\Controllers\UserArea\UserContactController;
 use App\Http\Controllers\UserArea\UserDashboardController;
 use App\Http\Controllers\UserArea\DojahVerificationController;
@@ -37,6 +38,15 @@ Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer', 'azari.
             ->name('saved-searches.store');
         Route::delete('/saved-searches/{savedSearch}', [UserDiscoveryController::class, 'destroySearch'])
             ->name('saved-searches.destroy');
+
+        Route::post('/itineraries', [TripItineraryController::class, 'store'])
+            ->middleware('throttle:10,1')->name('itineraries.store');
+        Route::get('/itineraries/{itinerary}', [TripItineraryController::class, 'show'])
+            ->name('itineraries.show');
+        Route::delete('/itineraries/{itinerary}', [TripItineraryController::class, 'destroy'])
+            ->middleware('throttle:10,1')->name('itineraries.destroy');
+        Route::post('/bookings/{reference}/itinerary', [TripItineraryController::class, 'assign'])
+            ->middleware('throttle:20,1')->name('bookings.itineraries.assign');
 
         Route::get('/bookings', [UserBookingController::class, 'index'])->name('bookings.index');
         Route::get('/bookings/{reference}', [UserBookingController::class, 'show'])->name('bookings.show');
