@@ -204,8 +204,13 @@ class MarketplaceSearchService
 
         foreach ($batch->items() as $property) {
             foreach ($property->publicAccommodationTypes as $type) {
-                foreach ($type->ratePlans as $plan) {
-                    if ($requestedPlan !== null && (int) $plan->id !== $requestedPlan) {
+                // Preserve the legacy base-rate booking path where a room
+                // does not yet have a published independent rate plan.
+                $plans = $type->ratePlans->isEmpty() && $requestedPlan === null
+                    ? [null]
+                    : $type->ratePlans;
+                foreach ($plans as $plan) {
+                    if ($requestedPlan !== null && (int) $plan?->id !== $requestedPlan) {
                         continue;
                     }
 
