@@ -3,6 +3,8 @@
 namespace Tests\Feature\PhaseTwo;
 
 use App\Models\Property;
+use App\Services\Security\BookingAttachmentScanner;
+use Mockery;
 use App\Models\PropertyOperationsTask;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -17,6 +19,9 @@ class OperationsChecklistEvidenceTest extends TestCase
     public function test_task_requires_checklist_completion_and_keeps_evidence_private(): void
     {
         Storage::fake('private');
+        $scanner = Mockery::mock(BookingAttachmentScanner::class);
+        $scanner->shouldReceive('scan')->once()->andReturn('clean');
+        $this->app->instance(BookingAttachmentScanner::class, $scanner);
 
         $owner = User::factory()->create(['email_verified_at' => now()]);
         $property = Property::factory()->create(['owner_id' => $owner->id]);
