@@ -33,6 +33,8 @@ class MessageDeliveryNotificationTest extends TestCase
         $this->actingAs($guest)->post($route, $payload)->assertRedirect();
 
         $this->assertDatabaseCount('booking_messages', 1);
+        $this->assertDatabaseCount('booking_message_alert_outboxes', 1);
+        $this->artisan('resavar:deliver-booking-message-alerts')->assertExitCode(0);
         $this->assertCount(1, Notification::sent($owner, PremiumMailNotification::class)
             ->filter(fn ($notice) => $notice->template === 'booking-message'));
         $this->assertCount(0, Notification::sent($guest, PremiumMailNotification::class)
@@ -60,6 +62,8 @@ class MessageDeliveryNotificationTest extends TestCase
         $this->actingAs($owner)->post($route, $payload)->assertRedirect();
 
         $this->assertDatabaseCount('booking_messages', 1);
+        $this->assertDatabaseCount('booking_message_alert_outboxes', 1);
+        $this->artisan('resavar:deliver-booking-message-alerts')->assertExitCode(0);
         $this->assertCount(1, Notification::sent($guest, PremiumMailNotification::class)
             ->filter(fn ($notice) => $notice->template === 'booking-message'));
         $this->assertCount(0, Notification::sent($owner, PremiumMailNotification::class)
