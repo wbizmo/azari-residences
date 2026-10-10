@@ -90,6 +90,36 @@ class CheckoutAndSupportSafetyRegressionTest extends TestCase
         $this->assertNotSame(SupportTicket::nextReference(), SupportTicket::nextReference());
     }
 
+    public function test_staff_reply_to_closed_ticket_cannot_leave_an_orphan_attachment(): void
+    {
+        Storage::fake('private');
+        $scanner = Mockery::mock(BookingAttachmentScanner::class);
+        $scanner->shouldReceive('scan')->once()->andReturn('clean');
+        $this->app->instance(BookingAttachmentScanner::class, $scanner);
+        $admin = User::factory()->create([
+            'email_verified_at' => now(),
+            'is_admin' => true,
+            'is_active' => true,
+        ]);
+        $guest = User::factory()->create(['email_verified_at' => now()]);
+        $ticket = SupportTicket::query()->create([
+            'reference' => SupportTicket::nextReference(),
+            'user_id' => $guest->id,
+            'category' => 'booking',
+            'subject' => 'Already closed',
+            'status' => 'closed',
+            'severity' => 'general',
+        ]);
+
+        $this->actingAs($admin)->post(route('azari.admin.support.reply', $ticket), [
+            'body' => 'This ticket needs to be reopened first.',
+            'attachment' => UploadedFile::fake()->image('staff-proof.jpg'),
+        ])->assertUnprocessable();
+
+        $this->assertSame(0, $ticket->messages()->count());
+        $this->assertEmpty(Storage::disk('private')->allFiles('support-attachments'));
+    }
+
     public function test_guest_reply_to_closed_ticket_cannot_leave_scanned_orphan_attachment(): void
     {
         Storage::fake('private');
