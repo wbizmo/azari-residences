@@ -24,7 +24,7 @@ The bright blue and orange brand tokens are **not** used for small body text on 
 Run the gallery browser specs on a machine with Playwright installed:
 
 ```bash
-npx playwright test tests/browser/resavar-component-gallery.spec.js --project=chromium
+npx playwright test tests/browser/resavar-component-gallery.spec.js --browser=chromium
 ```
 
 The test records `playwright-artifacts/resavar-gallery-320.png`, `resavar-gallery-390.png`, `resavar-gallery-768.png`, `resavar-gallery-1280.png` and the A4 PDF. Those screenshots are generated **only when tests run** and must be reviewed before accepting layout changes.
