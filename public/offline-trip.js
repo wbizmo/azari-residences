@@ -77,6 +77,7 @@
             version: 1,
             salt: toBase64(salt),
             iv: toBase64(iv),
+            expires_at: Date.now() + OFFLINE_LIFETIME_MS,
             ciphertext: toBase64(new Uint8Array(ciphertext))
         }));
     };
