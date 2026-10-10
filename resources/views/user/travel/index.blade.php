@@ -34,10 +34,10 @@
                         @if($offer->origin) · {{ $offer->origin }} @endif
                         @if($offer->destination) → {{ $offer->destination }} @endif
                     </p>
-                    <p><strong>{{ $offer->currency }} {{ number_format($offer->totalMinor(1) / 100, 2) }} per participant</strong>
+                    <p><strong>{{ $offer->currency }} {{ number_format($offer->totalMinor(1) / 100, 2) }} per {{ $offer->price_basis === 'per_vehicle' ? 'vehicle' : 'traveller' }}</strong>
                         · includes disclosed taxes and fees
                         @if($offer->deposit_minor)
-                            · separate potential refundable deposit: {{ $offer->currency }} {{ number_format($offer->deposit_minor / 100, 2) }}
+                            · separate potential refundable deposit: {{ $offer->currency }} {{ number_format($offer->deposit_minor / 100, 2) }} per {{ $offer->price_basis === 'per_vehicle' ? 'vehicle' : 'traveller' }}
                         @endif
                     </p>
                     <details>

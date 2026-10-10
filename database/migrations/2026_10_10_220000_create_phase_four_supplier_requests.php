@@ -34,6 +34,7 @@ return new class extends Migration
             $table->string('destination', 160)->nullable();
             $table->string('timezone', 64)->default('UTC');
             $table->unsignedSmallInteger('max_party')->default(1);
+            $table->string('price_basis', 24)->default('per_person');
             $table->char('currency', 3);
             $table->unsignedBigInteger('base_minor');
             $table->unsignedBigInteger('tax_minor')->default(0);

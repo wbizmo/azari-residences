@@ -88,7 +88,7 @@
             <details style="border-bottom:1px solid #d5dfe7;padding:12px 0">
                 <summary><strong>{{ $offer->title }}</strong> · {{ $offer->kind }} · {{ $offer->supplier?->name }}
                     · {{ $offer->published_at ? 'Published' : 'Draft' }}</summary>
-                <p>{{ $offer->currency }} {{ number_format($offer->totalMinor(1) / 100, 2) }} indicative per participant. Deposit: {{ number_format($offer->deposit_minor / 100, 2) }}.</p>
+                <p>{{ $offer->currency }} {{ number_format($offer->totalMinor(1) / 100, 2) }} indicative per {{ $offer->price_basis === 'per_vehicle' ? 'vehicle' : 'traveller' }}. Deposit: {{ number_format($offer->deposit_minor / 100, 2) }}.</p>
                 @if(!$offer->published_at)
                     <form method="POST" action="{{ route('azari.admin.travel.offers.publish', $offer) }}">
                         @csrf

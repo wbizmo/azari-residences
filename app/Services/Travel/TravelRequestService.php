@@ -139,6 +139,7 @@ final class TravelRequestService
                     'timezone' => $lockedOffer->timezone,
                     'starts_at' => $slot?->starts_at?->toIso8601String()
                         ?? $lockedOffer->starts_at?->toIso8601String(),
+                    'price_basis' => $lockedOffer->price_basis,
                     'unit_base_minor' => $lockedOffer->base_minor,
                     'unit_tax_minor' => $lockedOffer->tax_minor,
                     'unit_fee_minor' => $lockedOffer->fee_minor,

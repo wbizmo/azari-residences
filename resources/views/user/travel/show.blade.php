@@ -11,7 +11,7 @@
     </div></header>
     <div class="az-user-panel-body">
         <p><strong>State:</strong> {{ in_array($travelRequest->status, ['requested','supplier_acknowledged']) && $travelRequest->expires_at->isPast() ? 'Expired' : str_replace('_', ' ', ucfirst($travelRequest->status)) }}</p>
-        <p><strong>Indicative total:</strong> {{ $travelRequest->currency }} {{ number_format($travelRequest->quoted_total_minor / 100, 2) }} for {{ $travelRequest->party_size }} traveller(s), including tax and fees.</p>
+        <p><strong>Indicative total:</strong> {{ $travelRequest->currency }} {{ number_format($travelRequest->quoted_total_minor / 100, 2) }} for {{ $travelRequest->party_size }} traveller(s), {{ ($travelRequest->quote_snapshot['price_basis'] ?? 'per_person') === 'per_vehicle' ? 'per vehicle' : 'per traveller' }} pricing, including tax and fees.</p>
         @if(($travelRequest->quote_snapshot['refundable_deposit_minor'] ?? 0) > 0)
             <p>Possible separate refundable deposit: {{ $travelRequest->currency }} {{ number_format($travelRequest->quote_snapshot['refundable_deposit_minor'] / 100, 2) }} per traveller.</p>
         @endif

@@ -10,7 +10,7 @@ class TravelOffer extends Model
 {
     protected $fillable = [
         'travel_supplier_id', 'kind', 'title', 'origin', 'destination', 'timezone',
-        'max_party', 'currency', 'base_minor', 'tax_minor', 'fee_minor', 'deposit_minor',
+        'max_party', 'price_basis', 'currency', 'base_minor', 'tax_minor', 'fee_minor', 'deposit_minor',
         'terms', 'eligibility', 'starts_at', 'expires_at', 'published_at',
     ];
 
@@ -45,6 +45,7 @@ class TravelOffer extends Model
     public function totalMinor(int $partySize): int
     {
         // Deposits are displayed separately, not silently charged as rental revenue.
-        return ($this->base_minor + $this->tax_minor + $this->fee_minor) * $partySize;
+        $units = $this->price_basis === 'per_vehicle' ? 1 : $partySize;
+        return ($this->base_minor + $this->tax_minor + $this->fee_minor) * $units;
     }
 }

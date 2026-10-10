@@ -46,6 +46,7 @@ final class TravelSupplierRequestTest extends TestCase
             'destination' => 'Hotel',
             'timezone' => 'Africa/Lagos',
             'max_party' => 5,
+            'price_basis' => in_array($kind, ['transfer', 'car'], true) ? 'per_vehicle' : 'per_person',
             'currency' => 'USD',
             'base_minor' => 1500,
             'tax_minor' => 100,
@@ -92,7 +93,7 @@ final class TravelSupplierRequestTest extends TestCase
         $this->assertSame(1, TravelRequest::query()->where('user_id', $guest->id)->count());
         $request = TravelRequest::query()->firstOrFail();
         $this->assertSame('requested', $request->status);
-        $this->assertSame(3600, (int) $request->quoted_total_minor);
+        $this->assertSame(1800, (int) $request->quoted_total_minor);
         $this->assertSame($itinerary->id, $request->trip_itinerary_id);
         $this->assertNull($request->supplier_reference);
         $this->assertDatabaseCount('travel_request_events', 1);

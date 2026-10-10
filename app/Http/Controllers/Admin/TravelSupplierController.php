@@ -115,6 +115,8 @@ final class TravelSupplierController extends Controller
             throw ValidationException::withMessages(['travel_supplier_id' => 'Supplier must pass contract and safety review first.']);
         }
         $data['kind'] = $supplier->kind;
+        $data['price_basis'] = in_array($supplier->kind, ['car', 'transfer'], true)
+            ? 'per_vehicle' : 'per_person';
         $data['deposit_minor'] = $data['deposit_minor'] ?? 0;
         $offer = TravelOffer::query()->create($data);
         AuditLog::record('travel_offer.created', $offer, [], ['kind' => $offer->kind]);
