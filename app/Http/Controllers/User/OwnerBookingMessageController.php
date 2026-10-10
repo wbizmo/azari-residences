@@ -13,6 +13,7 @@ use App\Notifications\PremiumMailNotification;
 use App\Models\Property;
 use App\Services\Owners\PropertyAccessService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Support\BookingAttachmentName;
@@ -39,6 +40,26 @@ class OwnerBookingMessageController extends Controller
         }
 
         return view('user.owner.conversation-show', compact('property', 'conversation', 'messages'));
+    }
+
+    public function poll(
+        Request $request,
+        Property $property,
+        BookingConversation $conversation,
+        PropertyAccessService $access
+    ): JsonResponse {
+        $access->assert($request->user(), $property, 'messages.manage');
+        abort_unless((int) $conversation->property_id === (int) $property->id, 404);
+
+        $stats = $conversation->messages()
+            ->selectRaw('MAX(id) AS latest_id, COUNT(*) AS total')
+            ->first();
+
+        return response()->json([
+            'latest_id' => (int) ($stats?->latest_id ?? 0),
+            'last_page' => max(1, (int) ceil((int) ($stats?->total ?? 0) / 40)),
+            'closed' => (bool) $conversation->closed_at,
+        ])->header('Cache-Control', 'private, no-store');
     }
 
     public function store(Request $request, Property $property, BookingConversation $conversation, PropertyAccessService $access): RedirectResponse
