@@ -21,7 +21,7 @@ class UserBookingController extends Controller
             'property',
             'accommodationType',
             'ratePlan',
-            'tripItinerary:id,name',
+            'tripItinerary' => fn ($q) => $q->where('user_id', $request->user()->id)->select(['id','name','user_id']),
             'payments',
             'modificationRequests' => fn ($q) => $q->where('status', 'pending'),
         ]);
@@ -85,7 +85,7 @@ class UserBookingController extends Controller
                 'modificationRequests',
                 'serviceRequests',
                 'supportTickets',
-                'tripItinerary',
+                'tripItinerary' => fn ($q) => $q->where('user_id', $request->user()->id),
                 'review',
             ])
             ->withCount('payments')
