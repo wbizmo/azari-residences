@@ -58,14 +58,11 @@ if (mapRoot) {
 
     const loadMore = document.querySelector('[data-map-load-more]');
     const status = document.querySelector('[data-map-status]');
-    const pageCount = Math.min(100, Number(mapRoot.dataset.mapPages) || 1);
-    const loadedPages = new Set([Number(mapRoot.dataset.mapPage) || 1]);
-    const nextUnloadedPage = () => {
-        for (let page = 1; page <= pageCount; page++) {
-            if (!loadedPages.has(page)) return page;
-        }
-        return null;
-    };
+    const pageCount = Number(mapRoot.dataset.mapPages) || 1;
+    let nextCursor = null;
+    let startedCursor = false;
+    let exhaustedCursor = pageCount <= 1;
+    let loadedBatches = 0;
 
     if (valid.length || pageCount > 1) {
         mapRoot.replaceChildren();
@@ -268,24 +265,25 @@ if (mapRoot) {
             destination.searchParams.delete('page');
             window.location.assign(destination.toString());
         });
-        // Explicit progressive loading avoids N pages of quote work on mobile
-        // until the visitor requests more. Each page is independently server
-        // validated and carries a canonical priced eligibility check.
+        // Walk server-side eligible property IDs with a stable cursor.
+        // The current list page remains visible while distinct map pins are
+        // added incrementally, regardless of page-number or sort changes.
         if (loadMore) {
             const updateStatus = () => {
-                if (status) status.textContent = valid.length + ' known-coordinate, server-quoted stays shown on map across ' +
-                    loadedPages.size + ' result ' + (loadedPages.size === 1 ? 'page' : 'pages') + '.';
-                loadMore.hidden = nextUnloadedPage() === null;
+                if (status) status.textContent = valid.length + ' known-coordinate, server-quoted stays shown on map. ' +
+                    loadedBatches + ' additional map ' + (loadedBatches === 1 ? 'batch' : 'batches') + ' checked.';
+                loadMore.hidden = exhaustedCursor;
             };
             updateStatus();
             loadMore.addEventListener('click', async () => {
-                const page = nextUnloadedPage();
-                if (page === null || loadMore.disabled) return;
+                if (exhaustedCursor || loadMore.disabled) return;
                 const endpoint = new URL(mapRoot.dataset.mapEndpoint, window.location.origin);
                 if (endpoint.origin !== window.location.origin) return;
                 const current = new URL(window.location.href);
-                current.searchParams.forEach((value, key) => endpoint.searchParams.append(key, value));
-                endpoint.searchParams.set('page', String(page));
+                current.searchParams.forEach((value, key) => {
+                    if (key !== 'page' && key !== 'cursor') endpoint.searchParams.append(key, value);
+                });
+                if (startedCursor && nextCursor) endpoint.searchParams.set('cursor', nextCursor);
                 loadMore.disabled = true;
                 loadMore.textContent = 'Loading map stays…';
                 try {
@@ -295,21 +293,28 @@ if (mapRoot) {
                     });
                     if (!response.ok) throw new Error('Map results unavailable');
                     const payload = await response.json();
-                    if (!Array.isArray(payload.points) || Number(payload.page) !== page) {
+                    if (!Array.isArray(payload.points) ||
+                        (payload.next_cursor !== null && typeof payload.next_cursor !== 'string')) {
                         throw new Error('Invalid map response');
                     }
                     const seen = new Set(valid.map(point => String(point.id)));
-                    const additional = payload.points.filter(point =>
-                        Number.isFinite(Number(point.lat)) &&
-                        Number.isFinite(Number(point.lng)) &&
-                        Math.abs(Number(point.lat)) <= 85.05112878 &&
-                        Math.abs(Number(point.lng)) <= 180 &&
-                        !seen.has(String(point.id)));
+                    const additional = payload.points.filter(point => {
+                        const id = String(point.id);
+                        if (!Number.isFinite(Number(point.lat)) ||
+                            !Number.isFinite(Number(point.lng)) ||
+                            Math.abs(Number(point.lat)) > 85.05112878 ||
+                            Math.abs(Number(point.lng)) > 180 || seen.has(id)) return false;
+                        seen.add(id);
+                        return true;
+                    });
                     if (valid.length === 0 && additional.length > 0) {
                         center = {lat: Number(additional[0].lat), lng: Number(additional[0].lng)};
                     }
                     valid.push(...additional);
-                    loadedPages.add(page);
+                    startedCursor = true;
+                    nextCursor = payload.next_cursor;
+                    exhaustedCursor = nextCursor === null;
+                    loadedBatches++;
                     updateStatus();
                     render();
                 } catch {
