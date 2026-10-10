@@ -139,6 +139,11 @@ class Property extends Model
         return $this->belongsToMany(Amenity::class);
     }
 
+    public function photoModerations(): HasMany
+    {
+        return $this->hasMany(PropertyPhotoModeration::class);
+    }
+
     public function images(): HasMany
     {
         return $this->hasMany(PropertyImage::class)->orderBy('sort_order');
