@@ -25,7 +25,55 @@ class SupportTicketController extends Controller {
             'metrics' => $metrics,
         ]);}
  public function show(SupportTicket $ticket):View{$ticket->load(['booking.property','user','assignee']);$messages=$ticket->messages()->with('user')->oldest()->paginate(15,['*'],'messages_page')->withQueryString();$staff=User::where('is_active',true)->where(fn($q)=>$q->where('is_admin',true)->orWhereNotNull('staff_role'))->orderBy('name')->get();return view('admin.support.show',compact('ticket','staff','messages'));}
- public function update(Request $r,SupportTicket $ticket):RedirectResponse{$d=$r->validate(['status'=>'required|in:open,awaiting_staff,awaiting_guest,in_progress,escalated,resolved,closed','priority'=>'required|in:low,normal,high,urgent','assigned_to'=>['nullable','integer',Rule::exists('users','id')->where('is_active',true)->where(fn($query)=>$query->where('is_admin',true)->orWhereNotNull('staff_role'))],'resolution_note'=>'nullable|string|max:5000']);$old=$ticket->only(['status','priority','assigned_to','resolution_note']);$ticket->fill($d);if(in_array($old['status'],['resolved','closed'],true)&&!in_array($d['status'],['resolved','closed'],true))$ticket->sla_alerted_at=null;if($d['status']==='escalated'&&!$ticket->escalated_at)$ticket->escalated_at=now();if($d['status']==='resolved')$ticket->resolved_at=now();if($d['status']==='closed')$ticket->closed_at=now();$ticket->save();AuditLog::record('support_ticket.updated',$ticket,$old,$ticket->only(array_keys($old)));return back()->with('success','Ticket updated.');}
+ public function update(Request $r, SupportTicket $ticket): RedirectResponse
+ {
+     $data = $r->validate([
+         'status' => 'required|in:open,awaiting_staff,awaiting_guest,in_progress,escalated,resolved,closed',
+         'priority' => 'required|in:low,normal,high,urgent',
+         'assigned_to' => [
+             'nullable', 'integer',
+             Rule::exists('users', 'id')->where('is_active', true)
+                 ->where(fn ($query) => $query->where('is_admin', true)->orWhereNotNull('staff_role')),
+         ],
+         'resolution_note' => 'nullable|string|max:5000',
+     ]);
+
+     DB::transaction(function () use ($ticket, $data): void {
+         $locked = SupportTicket::query()->whereKey($ticket->id)->lockForUpdate()->firstOrFail();
+         $before = $locked->only(['status', 'priority', 'assigned_to', 'resolution_note']);
+         $previousStatus = $locked->status;
+         $nextStatus = $data['status'];
+         $locked->fill($data);
+
+         if (in_array($previousStatus, ['resolved', 'closed'], true)
+             && ! in_array($nextStatus, ['resolved', 'closed'], true)) {
+             $locked->sla_alerted_at = null;
+             $locked->sla_due_at = now()->addMinutes(match ($locked->severity) {
+                 'safety' => 15,
+                 'unable_to_check_in' => 30,
+                 'payment_taken_no_confirmation', 'property_unavailable' => 60,
+                 default => 1440,
+             });
+             $locked->response_due_at = $locked->sla_due_at;
+         }
+
+         if ($nextStatus === 'escalated' && ! $locked->escalated_at) {
+             $locked->escalated_at = now();
+         }
+         $locked->resolved_at = $nextStatus === 'resolved'
+             ? ($locked->resolved_at ?: now())
+             : null;
+         $locked->closed_at = $nextStatus === 'closed'
+             ? ($locked->closed_at ?: now())
+             : null;
+         $locked->save();
+
+         AuditLog::record('support_ticket.updated', $locked, $before,
+             $locked->only(array_keys($before)));
+     }, 3);
+
+     return back()->with('success', 'Ticket updated.');
+ }
  public function reply(Request $r, SupportTicket $ticket): RedirectResponse
  {
      $d = $r->validate([
