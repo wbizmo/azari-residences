@@ -26,6 +26,20 @@ class ProgressiveMapQuoteEndpointTest extends TestCase
         $this->assertSame([], $response->json('points'));
     }
 
+    public function test_cursor_map_returns_stable_continuation_contract_without_deep_offset(): void
+    {
+        $response = $this->getJson(route('availability.map-cursor', $this->filters()))
+            ->assertOk()
+            ->assertJsonStructure(['points', 'next_cursor', 'batch_size']);
+        $this->assertSame([], $response->json('points'));
+        $this->assertNull($response->json('next_cursor'));
+        $this->assertSame(20, $response->json('batch_size'));
+
+        $this->getJson(route('availability.map-cursor', [
+            ...$this->filters(), 'cursor' => 'bad<>token',
+        ]))->assertUnprocessable();
+    }
+
     public function test_map_endpoint_limits_deep_offset_and_invalid_geography(): void
     {
         $this->getJson(route('availability.map-points', [...$this->filters(), 'page' => 101]))
