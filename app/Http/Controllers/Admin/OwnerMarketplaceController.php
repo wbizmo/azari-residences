@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Amenity;
+use App\Models\AuditLog;
 use App\Models\OwnerPayoutProfile;
 use App\Models\Property;
 use App\Models\PropertyListing;
@@ -68,41 +69,59 @@ class OwnerMarketplaceController extends Controller
         PropertyListing $listing,
         ListingCompletenessService $completeness
     ): RedirectResponse {
-        $completion = $completeness->sync($listing->load('user.ownerPayoutProfile'));
-
-        abort_unless(
-            $completion['publishable'],
-            422,
-            'This listing is incomplete: '.implode(', ', $completion['blockers']).'.'
-        );
-        abort_unless(in_array($listing->status, ['submitted', 'under_review'], true), 422);
-
         $data = $request->validate([
             'admin_notes' => ['nullable', 'string', 'max:3000'],
             'publish_now' => ['nullable', 'boolean'],
             'feature_now' => ['nullable', 'boolean'],
+            'media_reviewed' => ['required', 'accepted'],
+            'media_review_note' => ['required', 'string', 'min:12', 'max:1500'],
         ]);
 
-        DB::transaction(function () use ($listing, $data, $request): void {
-            $payload = $listing->property_data;
+        DB::transaction(function () use ($listing, $data, $request, $completeness): void {
+            // Recheck under the row lock: two administrators must never
+            // publish duplicate properties from the same owner submission.
+            $locked = PropertyListing::query()->whereKey($listing->id)
+                ->lockForUpdate()->firstOrFail();
+            abort_unless(in_array($locked->status, ['submitted', 'under_review'], true), 422,
+                'This listing has already been reviewed.');
+
+            $completion = $completeness->sync($locked->load('user.ownerPayoutProfile'));
+            abort_unless(
+                $completion['publishable'],
+                422,
+                'This listing is incomplete: '.implode(', ', $completion['blockers']).'.'
+            );
+
+            $files = collect([$locked->cover_image])
+                ->merge($locked->gallery ?? [])
+                ->filter()->values();
+            abort_unless($files->isNotEmpty(), 422,
+                'The owner must provide property imagery for moderation.');
+            foreach ($files as $image) {
+                abort_unless(is_string($image)
+                    && Str::startsWith($image, 'owner-listings/')
+                    && Storage::disk('public')->exists($image),
+                    422, 'All owner-submitted photographs must still exist before approval.');
+            }
+
+            $payload = $locked->property_data;
             $payload['slug'] = Str::slug($payload['name']).'-'.Str::lower(Str::random(5));
-            $payload['cover_image'] = $listing->cover_image;
-            $payload['gallery'] = $listing->gallery ?? [];
-            $payload['owner_id'] = $listing->user_id;
-            $payload['owner_listing_id'] = $listing->id;
-            // Azari platform commission on owner-property room sales is
-            // disabled. Approved owner properties retain 100% revenue.
+            $payload['cover_image'] = $locked->cover_image;
+            $payload['gallery'] = $locked->gallery ?? [];
+            $payload['owner_id'] = $locked->user_id;
+            $payload['owner_listing_id'] = $locked->id;
             $payload['owner_share_percentage'] = 100.00;
             $payload['managed_for_owner'] = true;
             $payload['currency'] = (string) config('azari.currency', 'USD');
-            $payload['is_published'] = $request->boolean('publish_now');
-            $payload['is_featured'] = $request->boolean('feature_now');
-            $payload['status'] = $request->boolean('publish_now') ? 'available' : 'draft';
+            $payload['is_published'] = (bool) ($data['publish_now'] ?? false);
+            $payload['is_featured'] = (bool) ($data['feature_now'] ?? false);
+            $payload['status'] = ($data['publish_now'] ?? false) ? 'available' : 'draft';
 
             $property = Property::query()->create($payload);
-            $property->amenities()->sync($listing->amenity_ids ?? []);
+            $property->amenities()->sync($locked->amenity_ids ?? []);
 
-            $listing->update([
+            $previousStatus = $locked->status;
+            $locked->update([
                 'status' => 'approved',
                 'approved_property_id' => $property->id,
                 'approved_owner_share_percentage' => 100.00,
@@ -110,12 +129,23 @@ class OwnerMarketplaceController extends Controller
                 'decline_reason' => null,
                 'reviewed_by' => $request->user()->id,
                 'reviewed_at' => now(),
+                'media_reviewed_by' => $request->user()->id,
+                'media_reviewed_at' => now(),
+                'media_review_note' => $data['media_review_note'],
                 'approved_at' => now(),
                 'declined_at' => null,
             ]);
+
+            AuditLog::record('owner_listing.media_reviewed_and_approved',
+                $locked,
+                ['status' => $previousStatus],
+                ['status' => 'approved', 'property_id' => $property->id],
+                ['media_count' => $files->count(), 'published' => (bool) ($data['publish_now'] ?? false)]
+            );
         }, 3);
 
-        return redirect()->route('azari.admin.owner-listings.show', $listing)->with('status', 'Listing approved and added to property inventory.');
+        return redirect()->route('azari.admin.owner-listings.show', $listing)
+            ->with('status', 'Listing and its media reviewed and approved.');
     }
 
     public function declineListing(Request $request, PropertyListing $listing): RedirectResponse
