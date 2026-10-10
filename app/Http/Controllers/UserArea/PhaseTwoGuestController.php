@@ -55,6 +55,23 @@ class PhaseTwoGuestController extends Controller
         return view('user.bookings.messages', compact('booking', 'conversation', 'messages'));
     }
 
+    public function poll(Request $request, string $reference): JsonResponse
+    {
+        $booking = $this->booking($request, $reference);
+        $conversation = BookingConversation::query()
+            ->where('booking_id', $booking->id)->first();
+
+        $stats = $conversation?->messages()
+            ->selectRaw('MAX(id) AS latest_id, COUNT(*) AS total')
+            ->first();
+
+        return response()->json([
+            'latest_id' => (int) ($stats?->latest_id ?? 0),
+            'last_page' => max(1, (int) ceil((int) ($stats?->total ?? 0) / 40)),
+            'closed' => (bool) ($conversation?->closed_at),
+        ])->header('Cache-Control', 'private, no-store');
+    }
+
     public function sendMessage(Request $request, string $reference): RedirectResponse
     {
         $booking = $this->booking($request, $reference);

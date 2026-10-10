@@ -4,6 +4,10 @@
 @section('page_title','Message '.$booking->property?->name)
 @section('content')
 <section class="az-user-panel"><div class="az-user-panel-body"><p>Conversation for booking <strong>{{ $booking->reference }}</strong>. Messages stay attached to this booking for support and dispute traceability.</p>
+@include('user.partials.message-poll', [
+    'pollUrl' => route('user.bookings.phase2.messages.poll', $booking->reference),
+    'lastKnown' => $conversation->messages()->max('id'),
+])
 <div class="az-user-list">@foreach($messages as $message)<article class="az-user-list-item"><div><strong>{{ $message->sender_type === 'guest' ? 'You' : 'Property team' }}</strong><p>{!! nl2br(e($message->body)) !!}</p><small>{{ $message->created_at->format('j M Y, H:i') }}</small>@if($message->attachment_path)
     @if($message->attachment_scan_status === 'clean')
         <p><a href="{{ route('user.bookings.phase2.messages.attachment',[$booking->reference,$message]) }}">Download attachment</a></p>

@@ -38,6 +38,8 @@ Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer'])->group
 
             Route::get('/messages', [OwnerPhaseTwoController::class, 'conversations'])->name('messages');
             Route::get('/messages/{conversation}', [OwnerBookingMessageController::class, 'show'])->name('messages.show');
+            Route::get('/messages/{conversation}/poll', [OwnerBookingMessageController::class, 'poll'])
+                ->middleware('throttle:15,1')->name('messages.poll');
             Route::post('/messages/{conversation}', [OwnerBookingMessageController::class, 'store'])
                 ->middleware('throttle:30,1')->name('messages.store');
             Route::get('/messages/{conversation}/attachments/{message}', [OwnerBookingMessageController::class, 'attachment'])
@@ -46,6 +48,8 @@ Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer'])->group
 
     Route::prefix('account/bookings/{reference}')->name('user.bookings.phase2.')->group(function (): void {
         Route::get('/messages', [PhaseTwoGuestController::class, 'messages'])->name('messages');
+        Route::get('/messages/poll', [PhaseTwoGuestController::class, 'poll'])
+            ->middleware('throttle:15,1')->name('messages.poll');
         Route::post('/messages', [PhaseTwoGuestController::class, 'sendMessage'])
             ->middleware('throttle:30,1')->name('messages.store');
         Route::get('/messages/attachments/{message}', [PhaseTwoGuestController::class, 'messageAttachment'])->name('messages.attachment');
