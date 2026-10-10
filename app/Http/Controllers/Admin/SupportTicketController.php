@@ -26,7 +26,7 @@ class SupportTicketController extends Controller {
             'tickets' => $q->paginate(10)->withQueryString(),
             'metrics' => $metrics,
         ]);}
- public function show(SupportTicket $ticket):View{$ticket->load(['booking.property','user','assignee']);$messages=$ticket->messages()->with('user')->oldest()->paginate(15,['*'],'messages_page')->withQueryString();$staff=User::where('is_active',true)->where(fn($q)=>$q->where('is_admin',true)->orWhereNotNull('staff_role'))->orderBy('name')->get();return view('admin.support.show',compact('ticket','staff','messages'));}
+ public function show(SupportTicket $ticket):View{$ticket->load(['booking.property','booking.payments','user','assignee']);$messages=$ticket->messages()->with('user')->oldest()->paginate(15,['*'],'messages_page')->withQueryString();$staff=User::where('is_active',true)->where(fn($q)=>$q->where('is_admin',true)->orWhereNotNull('staff_role'))->orderBy('name')->get();return view('admin.support.show',compact('ticket','staff','messages'));}
  public function update(Request $r, SupportTicket $ticket): RedirectResponse
  {
      $data = $r->validate([
