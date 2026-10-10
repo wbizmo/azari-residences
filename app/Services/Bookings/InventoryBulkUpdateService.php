@@ -28,7 +28,8 @@ class InventoryBulkUpdateService
         CarbonImmutable $to,
         array $changes,
         ?int $actorId,
-        string $source = 'admin'
+        string $source = 'admin',
+        ?string $expectedRevision = null
     ): InventoryChangeLog {
         if ($to->lessThan($from)) {
             throw ValidationException::withMessages(['to_date' => 'End date must be on or after the start date.']);
@@ -46,7 +47,7 @@ class InventoryBulkUpdateService
 
         $this->validateChanges($type, $changes);
 
-        return DB::transaction(function () use ($type, $from, $to, $changes, $actorId, $source): InventoryChangeLog {
+        return DB::transaction(function () use ($type, $from, $to, $changes, $actorId, $source, $expectedRevision): InventoryChangeLog {
             // Match the hold lock ordering: property, accommodation type, date range.
             Property::query()->whereKey($type->property_id)
                 ->when(DB::connection()->getDriverName() !== 'sqlite', fn (Builder $query) => $query->lockForUpdate())
@@ -59,6 +60,13 @@ class InventoryBulkUpdateService
                     fn (Builder $query) => $query->lockForUpdate()
                 )
                 ->firstOrFail();
+
+            if ($expectedRevision !== null
+                && ! hash_equals($this->revision($lockedType, $from, $to), $expectedRevision)) {
+                throw ValidationException::withMessages([
+                    'expected_revision' => 'The calendar changed after your preview. Preview again before applying.',
+                ]);
+            }
 
             $this->assertCommittedInventoryPreserved($lockedType, $from, $to, $changes);
 
@@ -206,11 +214,62 @@ class InventoryBulkUpdateService
         return [
             'from' => $from->toDateString(),
             'to' => $to->toDateString(),
-            'days' => $from->diffInDays($to) + 1,
+            'days' => (int) $from->diffInDays($to) + 1,
             'changes' => $changes,
+            'revision' => $this->revision($type, $from, $to),
             'maximum_committed_units' => (int) ($committed->max() ?? 0),
             'affected_committed_dates' => $committed->filter(fn ($count) => (int) $count > 0)->count(),
         ];
+    }
+
+    /**
+     * O(number of affected nights). This revision covers both explicit daily
+     * overrides and committed stays. Applying it under the normal property ->
+     * type row locks prevents stale staff forms from silently overwriting a
+     * colleague's calendar changes or an intervening booking hold.
+     */
+    public function revision(
+        AccommodationType $type,
+        CarbonImmutable $from,
+        CarbonImmutable $to
+    ): string {
+        if ($to->lessThan($from) || $from->diffInDays($to) > 366) {
+            throw ValidationException::withMessages([
+                'to_date' => 'Calendar revision range must be between 1 and 367 days.',
+            ]);
+        }
+
+        $rows = InventoryDate::query()
+            ->where('accommodation_type_id', $type->getKey())
+            ->whereBetween('date', [$from->toDateString(), $to->toDateString()])
+            ->orderBy('date')
+            ->get()
+            ->keyBy(fn (InventoryDate $row) => $row->date->toDateString());
+        $committed = $this->availability->committedQuantityByDate($type, $from, $to->addDay());
+        $payload = [
+            'type' => $type->getKey(),
+            'capacity' => (int) $type->total_inventory,
+            'from' => $from->toDateString(),
+            'to' => $to->toDateString(),
+            'nights' => [],
+        ];
+
+        for ($date = $from; $date->lessThanOrEqualTo($to); $date = $date->addDay()) {
+            $key = $date->toDateString();
+            $row = $rows->get($key);
+            $values = [];
+            foreach (self::ALLOWED as $field) {
+                $values[$field] = $row?->getRawOriginal($field);
+            }
+            $payload['nights'][$key] = [
+                'exists' => $row !== null,
+                'row_updated_at' => $row?->getRawOriginal('updated_at'),
+                'values' => $values,
+                'committed' => (int) $committed->get($key, 0),
+            ];
+        }
+
+        return hash('sha256', json_encode($payload, JSON_THROW_ON_ERROR));
     }
 
     public function undo(InventoryChangeLog $log, ?int $actorId): InventoryChangeLog

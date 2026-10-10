@@ -111,6 +111,7 @@ class OwnerCommercialInventoryController extends Controller
             'minimum_stay' => ['nullable', 'integer', 'min:1', 'max:730'],
             'maximum_stay' => ['nullable', 'integer', 'min:1', 'max:730'],
             'price_override' => ['nullable', 'numeric', 'min:0'],
+            'expected_revision' => ['required', 'string', 'size:64', 'regex:/^[a-f0-9]{64}$/'],
         ]);
 
         $changes = collect($data)->only([
@@ -122,7 +123,7 @@ class OwnerCommercialInventoryController extends Controller
         ])->filter(fn ($value) => $value !== null && $value !== '')->all();
 
         foreach (['stop_sell', 'closed_to_arrival', 'closed_to_departure'] as $boolean) {
-            if ($request->has($boolean)) {
+            if ($request->filled($boolean)) {
                 $changes[$boolean] = $request->boolean($boolean);
             }
         }
@@ -133,7 +134,8 @@ class OwnerCommercialInventoryController extends Controller
             CarbonImmutable::parse($data['to_date']),
             $changes,
             $request->user()->getKey(),
-            'owner'
+            'owner',
+            $data['expected_revision']
         );
 
         return back()->with('status', 'Inventory calendar updated and audited.');
@@ -168,7 +170,7 @@ class OwnerCommercialInventoryController extends Controller
         ])->filter(fn ($value) => $value !== null && $value !== '')->all();
 
         foreach (['stop_sell', 'closed_to_arrival', 'closed_to_departure'] as $boolean) {
-            if ($request->has($boolean)) {
+            if ($request->filled($boolean)) {
                 $changes[$boolean] = $request->boolean($boolean);
             }
         }
