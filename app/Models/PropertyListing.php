@@ -19,6 +19,7 @@ class PropertyListing extends Model
             'gallery' => 'array',
             'submitted_at' => 'datetime',
             'reviewed_at' => 'datetime',
+            'media_reviewed_at' => 'datetime',
             'approved_at' => 'datetime',
             'declined_at' => 'datetime',
             'proposed_owner_share_percentage' => 'decimal:2',
@@ -41,6 +42,7 @@ class PropertyListing extends Model
     public function agreement(): BelongsTo { return $this->belongsTo(ListingAgreement::class, 'listing_agreement_id'); }
     public function approvedProperty(): BelongsTo { return $this->belongsTo(Property::class, 'approved_property_id'); }
     public function reviewedBy(): BelongsTo { return $this->belongsTo(User::class, 'reviewed_by'); }
+    public function mediaReviewedBy(): BelongsTo { return $this->belongsTo(User::class, 'media_reviewed_by'); }
 
     public function isEditable(): bool
     {
