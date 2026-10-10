@@ -123,7 +123,7 @@ class OwnerCommercialInventoryController extends Controller
         ])->filter(fn ($value) => $value !== null && $value !== '')->all();
 
         foreach (['stop_sell', 'closed_to_arrival', 'closed_to_departure'] as $boolean) {
-            if ($request->has($boolean)) {
+            if ($request->filled($boolean)) {
                 $changes[$boolean] = $request->boolean($boolean);
             }
         }
@@ -170,7 +170,7 @@ class OwnerCommercialInventoryController extends Controller
         ])->filter(fn ($value) => $value !== null && $value !== '')->all();
 
         foreach (['stop_sell', 'closed_to_arrival', 'closed_to_departure'] as $boolean) {
-            if ($request->has($boolean)) {
+            if ($request->filled($boolean)) {
                 $changes[$boolean] = $request->boolean($boolean);
             }
         }
