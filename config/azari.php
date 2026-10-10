@@ -11,6 +11,10 @@ return [
         'default_owner_share_percentage' => 100.00,
     ],
 
+    'messaging' => [
+        'attachment_retention_days' => max(30, (int) env('RESAVAR_BOOKING_ATTACHMENT_RETENTION_DAYS', 180)),
+    ],
+
     'booking' => [
         'hold_minutes' => (int) env('AZARI_BOOKING_HOLD_MINUTES', 15),
         'max_stay_nights' => max(1, min(730, (int) env('RESAVAR_MAX_STAY_NIGHTS', 366))),
