@@ -121,4 +121,34 @@ class InventoryUndoConflictGuardTest extends TestCase
         ]);
         $this->assertNotNull($log->fresh()->reverted_at);
     }
+
+    public function test_preview_rejects_an_empty_update_instead_of_enabling_apply(): void
+    {
+        $room = $this->room();
+        $day = CarbonImmutable::today()->addDays(14);
+        $service = app(InventoryBulkUpdateService::class);
+
+        try {
+            $service->preview($room, $day, $day, []);
+            $this->fail('Empty inventory edits must not produce an applicable preview.');
+        } catch (ValidationException $exception) {
+            $this->assertArrayHasKey('inventory', $exception->errors());
+        }
+    }
+
+    public function test_owner_calendar_preview_script_is_inside_rendered_blade_content(): void
+    {
+        $source = file_get_contents(resource_path('views/user/owner/commercial.blade.php'));
+        $formPosition = strpos($source, 'data-inventory-calendar-form');
+        $scriptPosition = strpos($source, '<script>');
+        $endSectionPosition = strrpos($source, '@endsection');
+
+        $this->assertNotFalse($formPosition);
+        $this->assertNotFalse($scriptPosition);
+        $this->assertNotFalse($endSectionPosition);
+        $this->assertGreaterThan($formPosition, $scriptPosition,
+            'The script must execute after the calendar form has rendered.');
+        $this->assertGreaterThan($scriptPosition, $endSectionPosition,
+            'The script must be included in the Blade content section, not emitted before its layout.');
+    }
 }

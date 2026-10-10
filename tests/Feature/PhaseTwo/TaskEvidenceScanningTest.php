@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Mockery;
 use Tests\TestCase;
+use Tests\Support\UploadedTestImage;
 
 class TaskEvidenceScanningTest extends TestCase
 {
@@ -19,7 +20,7 @@ class TaskEvidenceScanningTest extends TestCase
         $scanner->shouldReceive('scan')->once()->andReturn('clean');
 
         $result = (new TaskEvidenceGuard($scanner))
-            ->store(UploadedFile::fake()->image('proof.png'), 42);
+            ->store(UploadedTestImage::make('proof.png'), 42);
 
         $this->assertSame('task-evidence-42.png', $result['evidence_name']);
         $this->assertSame('image/png', $result['evidence_mime']);
@@ -34,7 +35,7 @@ class TaskEvidenceScanningTest extends TestCase
 
         try {
             (new TaskEvidenceGuard($scanner))
-                ->store(UploadedFile::fake()->image('bad.png'), 42);
+                ->store(UploadedTestImage::make('bad.png'), 42);
             $this->fail('Infected evidence must not be stored.');
         } catch (ValidationException $exception) {
             $this->assertArrayHasKey('evidence', $exception->errors());
@@ -52,7 +53,7 @@ class TaskEvidenceScanningTest extends TestCase
         $this->expectException(ValidationException::class);
         try {
             (new TaskEvidenceGuard($scanner))
-                ->store(UploadedFile::fake()->image('proof.jpg'), 42);
+                ->store(UploadedTestImage::make('proof.jpg'), 42);
         } finally {
             $this->assertEmpty(Storage::disk('private')->allFiles('property-operations/evidence'));
         }

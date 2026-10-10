@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Mockery;
 use Tests\TestCase;
+use Tests\Support\UploadedTestImage;
 
 class SupportAttachmentGuardTest extends TestCase
 {
@@ -18,7 +19,7 @@ class SupportAttachmentGuardTest extends TestCase
         $scanner = Mockery::mock(BookingAttachmentScanner::class);
         $scanner->shouldReceive('scan')->once()->andReturn('clean');
 
-        $result = (new SupportAttachmentGuard($scanner))->store(UploadedFile::fake()->image('proof.png'));
+        $result = (new SupportAttachmentGuard($scanner))->store(UploadedTestImage::make('proof.png'));
 
         $this->assertNotNull($result['attachment_path']);
         $this->assertSame('proof.png', $result['attachment_name']);
@@ -32,7 +33,7 @@ class SupportAttachmentGuardTest extends TestCase
         $scanner->shouldReceive('scan')->once()->andReturn('infected');
 
         try {
-            (new SupportAttachmentGuard($scanner))->store(UploadedFile::fake()->image('bad.png'));
+            (new SupportAttachmentGuard($scanner))->store(UploadedTestImage::make('bad.png'));
             $this->fail('An infected attachment must be rejected.');
         } catch (ValidationException $exception) {
             $this->assertArrayHasKey('attachment', $exception->errors());
@@ -49,7 +50,7 @@ class SupportAttachmentGuardTest extends TestCase
 
         $this->expectException(ValidationException::class);
         try {
-            (new SupportAttachmentGuard($scanner))->store(UploadedFile::fake()->image('proof.png'));
+            (new SupportAttachmentGuard($scanner))->store(UploadedTestImage::make('proof.png'));
         } finally {
             $this->assertEmpty(Storage::disk('private')->allFiles('support-attachments'));
         }

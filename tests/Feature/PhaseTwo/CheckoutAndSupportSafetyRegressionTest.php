@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Mockery;
 use Tests\TestCase;
+use Tests\Support\UploadedTestImage;
 
 class CheckoutAndSupportSafetyRegressionTest extends TestCase
 {
@@ -59,7 +60,7 @@ class CheckoutAndSupportSafetyRegressionTest extends TestCase
             'severity' => 'safety',
             'subject' => 'Unable to get into the property',
             'description' => 'I arrived but cannot check in and need help.',
-            'attachment' => UploadedFile::fake()->image('arrival-proof.jpg'),
+            'attachment' => UploadedTestImage::make('arrival-proof.jpg'),
         ])->assertSessionHasErrors('attachment');
 
         $this->assertDatabaseCount('support_tickets', 0);
@@ -114,7 +115,7 @@ class CheckoutAndSupportSafetyRegressionTest extends TestCase
 
         $this->actingAs($admin)->post(route('azari.admin.support.reply', $ticket), [
             'body' => 'This ticket needs to be reopened first.',
-            'attachment' => UploadedFile::fake()->image('staff-proof.jpg'),
+            'attachment' => UploadedTestImage::make('staff-proof.jpg'),
         ])->assertUnprocessable();
 
         $this->assertSame(0, $ticket->messages()->count());
@@ -139,7 +140,7 @@ class CheckoutAndSupportSafetyRegressionTest extends TestCase
 
         $this->actingAs($guest)->post(route('user.support.reply', $ticket), [
             'body' => 'This ticket has already been closed.',
-            'attachment' => UploadedFile::fake()->image('proof.jpg'),
+            'attachment' => UploadedTestImage::make('proof.jpg'),
         ])->assertUnprocessable();
 
         $this->assertSame(0, $ticket->messages()->count());

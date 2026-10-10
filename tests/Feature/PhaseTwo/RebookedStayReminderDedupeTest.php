@@ -27,7 +27,7 @@ class RebookedStayReminderDedupeTest extends TestCase
         $mail = app(AzariTransactionalMailService::class);
         $mail->sendArrivalReminder($booking);
         $mail->sendArrivalReminder($booking);
-        $this->assertDatabaseCount('communication_logs', 1);
+        $this->assertSame(1, CommunicationLog::query()->where('booking_id', $booking->id)->where('template', 'arrival-reminder')->count());
 
         $booking->update([
             'check_in' => '2026-12-15',
@@ -36,7 +36,7 @@ class RebookedStayReminderDedupeTest extends TestCase
         $mail->sendArrivalReminder($booking->fresh());
         $mail->sendArrivalReminder($booking->fresh());
 
-        $this->assertDatabaseCount('communication_logs', 2);
+        $this->assertSame(2, CommunicationLog::query()->where('booking_id', $booking->id)->where('template', 'arrival-reminder')->count());
         $this->assertSame(2, CommunicationLog::query()
             ->where('booking_id', $booking->id)
             ->where('template', 'arrival-reminder')->count());

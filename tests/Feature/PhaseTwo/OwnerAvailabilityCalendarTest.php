@@ -76,7 +76,8 @@ class OwnerAvailabilityCalendarTest extends TestCase
 
         $calendar = app(OwnerInventoryCalendarService::class);
         $week = $calendar->forProperty($property, $start, 'week');
-        $cell = $week['types'][0]['dates'][$start->toDateString()];
+        $weekType = collect($week['types'])->first(fn (array $row) => (int) $row['type']->id === (int) $room->id);
+        $cell = $weekType['dates'][$start->toDateString()];
 
         $this->assertSame('week', $week['view']);
         $this->assertCount(7, $week['weeks'][0]);
@@ -87,6 +88,6 @@ class OwnerAvailabilityCalendarTest extends TestCase
         $month = $calendar->forProperty($property, $start, 'month');
         $this->assertGreaterThanOrEqual(4, count($month['weeks']));
         $this->assertLessThanOrEqual(6, count($month['weeks']));
-        $this->assertSame(2, $month['types'][0]['dates'][$start->toDateString()]['remaining']);
+        $this->assertSame(2, collect($month['types'])->first(fn (array $row) => (int) $row['type']->id === (int) $room->id)['dates'][$start->toDateString()]['remaining']);
     }
 }

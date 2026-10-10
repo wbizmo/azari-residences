@@ -309,7 +309,9 @@
                                                     'property' => $property,
                                                     'accommodation_type_id' => $type->id,
                                                     'rate_plan_id' => $plan->id,
-                                                    'nights' => min(14, max(1, \Carbon\CarbonImmutable::parse($searchState['check_in'])->diffInDays(\Carbon\CarbonImmutable::parse($searchState['check_out'])))),
+                                                    'nights' => $hasStayDates
+                                                        ? min(14, max(1, \Carbon\CarbonImmutable::parse($searchState['check_in'])->diffInDays(\Carbon\CarbonImmutable::parse($searchState['check_out']))))
+                                                        : 1,
                                                     'adults' => $searchState['adults'] ?? 2,
                                                     'children' => $searchState['children'] ?? 0,
                                                     'rooms' => $searchState['rooms'] ?? 1,
