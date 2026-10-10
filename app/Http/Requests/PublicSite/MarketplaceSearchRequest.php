@@ -85,6 +85,7 @@ class MarketplaceSearchRequest extends AzariFormRequest
             'east' => ['nullable', 'numeric', 'between:-180,180'],
             'west' => ['nullable', 'numeric', 'between:-180,180'],
             'page' => ['nullable', 'integer', 'min:1', 'max:10000'],
+            'cursor' => ['nullable', 'string', 'min:1', 'max:1024', 'regex:/^[A-Za-z0-9_+\/=-]+$/'],
         ];
     }
 }
