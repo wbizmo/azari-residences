@@ -16,6 +16,36 @@
     @endforeach
 </nav>
 
+
+<section class="az-user-panel" aria-label="Your itineraries" style="margin-bottom:18px">
+    <header class="az-user-panel-header">
+        <div>
+            <h2 class="az-user-panel-title">Your itineraries</h2>
+            <p class="az-user-panel-subtitle">Organize multiple stays into one private travel plan without combining payments or changing reservations.</p>
+        </div>
+    </header>
+    <div class="az-user-panel-body">
+        <form method="POST" action="{{ route('user.itineraries.store') }}" class="az-form-grid">
+            @csrf
+            <label><span>New itinerary name</span>
+                <input type="text" name="name" maxlength="120" minlength="2"
+                    placeholder="e.g. October holiday" required>
+            </label>
+            <button class="az-user-button az-user-button--dark" type="submit">Create itinerary</button>
+        </form>
+        @if($tripItineraries->isNotEmpty())
+            <nav aria-label="Saved itineraries" class="az-user-list" style="margin-top:16px">
+                @foreach($tripItineraries as $itinerary)
+                    <a class="az-user-list-item" href="{{ route('user.itineraries.show', $itinerary) }}">
+                        <span>{{ $itinerary->name }}</span>
+                        <span>{{ $itinerary->bookings_count }} {{ Str::plural('stay', $itinerary->bookings_count) }}</span>
+                    </a>
+                @endforeach
+            </nav>
+        @endif
+    </div>
+</section>
+
 <section class="az-user-panel">
     <header class="az-user-panel-header">
         <div>
@@ -54,6 +84,7 @@
                                 · Paid {{ number_format($paid,2) }}
                                 @if($balance > 0) · Balance {{ number_format($balance,2) }} @endif
                                 @if($booking->modificationRequests->isNotEmpty()) · Change request pending @endif
+                                @if($booking->tripItinerary) · Itinerary: {{ $booking->tripItinerary->name }} @endif
                             </p>
                         </div>
                         <span class="az-user-status {{ in_array($booking->status,['pending','pending_payment'])?'az-user-status--warning':($booking->status==='cancelled'?'az-user-status--danger':'') }}">
