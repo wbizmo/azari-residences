@@ -32,9 +32,27 @@
             <label><span>Minimum stay</span><input type="number" name="minimum_stay" min="1" max="730"></label>
             <label><span>Maximum stay</span><input type="number" name="maximum_stay" min="1" max="730"></label>
             <label><span>Nightly override</span><input type="number" name="price_override" min="0" step="0.01"></label>
-            <label><input type="checkbox" name="stop_sell" value="1"> Stop sell</label>
-            <label><input type="checkbox" name="closed_to_arrival" value="1"> Closed to arrival</label>
-            <label><input type="checkbox" name="closed_to_departure" value="1"> Closed to departure</label>
+            <label><span>Stop sell</span>
+                <select name="stop_sell">
+                    <option value="">Keep existing setting</option>
+                    <option value="1">Yes</option>
+                    <option value="0">No</option>
+                </select>
+            </label>
+            <label><span>Closed to arrival</span>
+                <select name="closed_to_arrival">
+                    <option value="">Keep existing setting</option>
+                    <option value="1">Yes</option>
+                    <option value="0">No</option>
+                </select>
+            </label>
+            <label><span>Closed to departure</span>
+                <select name="closed_to_departure">
+                    <option value="">Keep existing setting</option>
+                    <option value="1">Yes</option>
+                    <option value="0">No</option>
+                </select>
+            </label>
             <input type="hidden" name="expected_revision" value="">
             <button class="az-user-button az-user-button--outline" type="button" data-inventory-preview>Preview proposed changes</button>
             <button class="az-user-button az-user-button--dark" type="submit" data-inventory-apply disabled>Apply reviewed calendar update</button>
