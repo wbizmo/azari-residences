@@ -43,7 +43,7 @@ class PendingCheckoutResumeTest extends TestCase
             'checkout_url' => 'https://checkout.paystack.com/expired',
             'initiated_at' => now()->subHour(),
         ]);
-        $this->actingAs($other)->post(route('user.payments.resume', $payment))->assertForbidden();
+        $this->actingAs($other)->post(route('user.payments.resume', $payment))->assertNotFound();
         $this->actingAs($guest)->post(route('user.payments.resume', $payment))->assertUnprocessable();
     }
 }
