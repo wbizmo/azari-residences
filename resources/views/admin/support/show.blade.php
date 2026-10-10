@@ -93,6 +93,39 @@
     </section>
     @endif
 
+    @if($ticket->booking)
+        <section class="az-admin-card">
+            <div class="az-admin-card__header"><h2>Booking recovery</h2></div>
+            <div class="az-admin-card__body">
+                <a class="button button-secondary" href="{{ route('azari.admin.bookings.show', $ticket->booking) }}">
+                    Open authorized booking, date changes and cancellations
+                </a>
+                @if(auth()->user()?->isAdministrator() && !in_array($ticket->status, ['resolved','closed'], true))
+                <form method="POST" action="{{ route('azari.admin.support.refund-request', $ticket) }}"
+                    class="az-form-grid">
+                    @csrf
+                    <label class="az-field"><span>Verified payment</span>
+                        <select name="payment_id" required>
+                            @foreach($ticket->booking->payments->where('status','successful') as $payment)
+                                <option value="{{ $payment->id }}">{{ $payment->reference }} · {{ $payment->currency }}
+                                    {{ number_format((float) $payment->amount, 2) }}</option>
+                            @endforeach
+                        </select>
+                    </label>
+                    <label class="az-field"><span>Amount</span>
+                        <input type="number" name="amount" min="0.01" step="0.01" required>
+                    </label>
+                    <label class="az-field az-span-2"><span>Reviewed reason</span>
+                        <textarea name="reason" minlength="15" maxlength="500" required></textarea>
+                    </label>
+                    <button class="button button-primary" type="submit">Request refund for review</button>
+                    <p>Requests do not prove a provider refund was settled. Financial authorization and step-up are required.</p>
+                </form>
+                @endif
+            </div>
+        </section>
+    @endif
+
     <section class="az-admin-card">
         <div class="az-admin-card__header">
             <div>
