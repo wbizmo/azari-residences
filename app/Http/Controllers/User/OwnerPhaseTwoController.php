@@ -13,6 +13,7 @@ use App\Models\Review;
 use App\Models\User;
 use App\Notifications\PremiumMailNotification;
 use App\Services\Owners\PropertyAccessService;
+use App\Services\Security\TaskEvidenceGuard;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -362,27 +363,20 @@ class OwnerPhaseTwoController extends Controller
             return back()->withErrors(['status' => 'Complete every checklist item before marking this task completed.'])->withInput();
         }
 
-        $evidence = $request->file('evidence');
-        $newEvidencePath = null;
-        $newEvidenceName = null;
-        $newEvidenceMime = null;
-        if ($evidence) {
-            $newEvidenceMime = (string) $evidence->getMimeType();
-            $extension = $newEvidenceMime === 'image/png' ? 'png' : 'jpg';
-            $newEvidenceName = 'task-evidence-'.$task->getKey().'.'.$extension;
-            $newEvidencePath = $evidence->store('property-operations/evidence', 'private');
-        }
+        $scannedEvidence = app(TaskEvidenceGuard::class)->store(
+            $request->file('evidence'), (int) $task->getKey()
+        );
+        $newEvidencePath = $scannedEvidence['evidence_path'] ?? null;
 
         unset($data['version'], $data['checklist_completed'], $data['evidence']);
         $data['checklist'] = $checklist ?: null;
-        if ($newEvidencePath) {
-            $data['evidence_path'] = $newEvidencePath;
-            $data['evidence_name'] = $newEvidenceName;
-            $data['evidence_mime'] = $newEvidenceMime;
+        if ($scannedEvidence !== null) {
+            $data = [...$data, ...$scannedEvidence];
         }
 
         $oldEvidencePath = $task->evidence_path;
-        $changed = DB::transaction(function () use ($property, $task, $data, $expected, $before): bool {
+        try {
+            $changed = DB::transaction(function () use ($property, $task, $data, $expected, $before): bool {
             // SQL compare-and-swap avoids a stale form overwriting an edit made
             // by another property collaborator. Only a successful update is audited.
             $updated = PropertyOperationsTask::query()
@@ -410,6 +404,12 @@ class OwnerPhaseTwoController extends Controller
 
             return true;
         }, 3);
+        } catch (\Throwable $exception) {
+            if ($newEvidencePath) {
+                Storage::disk('private')->delete($newEvidencePath);
+            }
+            throw $exception;
+        }
 
         if (! $changed) {
             if ($newEvidencePath) {
