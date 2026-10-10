@@ -99,7 +99,8 @@ final class TravelFulfillmentService
         $locked = DB::transaction(function () use ($fulfillment): TravelFulfillment {
             $f = TravelFulfillment::query()->whereKey($fulfillment->id)->lockForUpdate()->firstOrFail();
             $travel = $f->travelRequest;
-            if (! $travel->supplier->isApproved()
+            if ($travel->status !== 'supplier_acknowledged'
+                || ! $travel->supplier->isApproved()
                 || ! app(TravelPartnerGateway::class)->supports($travel->supplier)) {
                 throw ValidationException::withMessages(['fulfillment' => 'Supplier integration is not approved.']);
             }
@@ -119,11 +120,16 @@ final class TravelFulfillmentService
 
         // The remote request is never made with a transaction/row lock held.
         $travel = $locked->travelRequest;
-        $adapter = app(TravelPartnerGateway::class)->resolve($travel->supplier);
         try {
+            $adapter = app(TravelPartnerGateway::class)->resolve($travel->supplier);
             $result = $adapter->reserve($travel, 'resavar-travel-'.$locked->id);
         } catch (Throwable) {
-            $locked->update(['status' => 'reconciliation_required']);
+            // Ambiguous remote result: do not fabricate confirmation or retry.
+            DB::transaction(function () use ($locked): void {
+                TravelFulfillment::query()->whereKey($locked->id)
+                    ->where('status', 'dispatching')
+                    ->update(['status' => 'reconciliation_required']);
+            }, 3);
             return $locked->fresh();
         }
         if (! is_array($result) || ($result['confirmed'] ?? false) !== true
@@ -137,12 +143,20 @@ final class TravelFulfillmentService
                 || ! is_array($result['ticket_numbers'] ?? null)
                 || count($result['ticket_numbers']) !== (int) $travel->party_size
             ))) {
-            $locked->update(['status' => 'reconciliation_required']);
+            TravelFulfillment::query()->whereKey($locked->id)
+                ->where('status', 'dispatching')
+                ->update(['status' => 'reconciliation_required']);
             return $locked->fresh();
         }
 
         $confirmed = DB::transaction(function () use ($locked, $result): TravelFulfillment {
             $f = TravelFulfillment::query()->whereKey($locked->id)->lockForUpdate()->firstOrFail();
+            // A signed disruption/cancellation may arrive while the provider
+            // request is in flight. Do not overwrite it with a confirmation.
+            if ($f->travelRequest->status !== 'supplier_acknowledged') {
+                $f->update(['status' => 'reconciliation_required']);
+                return $f;
+            }
             if ($f->status !== 'dispatching') {
                 throw ValidationException::withMessages(['fulfillment' => 'Supplier result cannot overwrite the current state.']);
             }
@@ -154,6 +168,10 @@ final class TravelFulfillmentService
             ]);
             return $f;
         }, 3);
+
+        if ($confirmed->status !== 'confirmed') {
+            return $confirmed;
+        }
 
         if ($confirmed->travelRequest->kind === 'experience') {
             // Issue an admission voucher only after provider confirmation and

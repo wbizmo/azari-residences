@@ -17,6 +17,8 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Tests\Support\FakeConfirmingTravelAdapter;
 use Tests\Support\FakeTravelPaymentVerifier;
+use Tests\Support\FakeTravelRefundVerifier;
+use App\Services\Travel\TravelRefundReconciliationService;
 use Tests\TestCase;
 
 final class TravelFulfillmentSafetyTest extends TestCase
@@ -198,6 +200,72 @@ final class TravelFulfillmentSafetyTest extends TestCase
         ]);
         $this->assertSame('confirmed', $booking->fresh()->status);
         $this->assertDatabaseCount('refunds', 0);
+    }
+
+    public function test_provider_verified_partial_and_full_refunds_are_idempotent_and_never_refund_the_stay(): void
+    {
+        [$staff, $guest, $supplier, $travel, $booking] = $this->fixture();
+        $fulfillment = app(TravelFulfillmentService::class)
+            ->recordVerifiedCapture($travel, 'sandbox-paid-0001');
+        $confirmed = app(TravelFulfillmentService::class)->requestSupplierReservation($fulfillment);
+        $voucher = $confirmed->voucher()->firstOrFail();
+        $confirmed->update(['status' => 'support_required']);
+        config()->set('travel.refund_verifier', FakeTravelRefundVerifier::class);
+        config()->set('travel.test_original_capture', 'sandbox-paid-0001');
+        config()->set('travel.test_refund_minor', 600);
+        $service = app(TravelRefundReconciliationService::class);
+
+        $first = $service->recordVerifiedRefund($confirmed, 'sandbox-refund-1');
+        $this->assertSame('partially_refunded', $first->status);
+        $this->assertSame('revoked', $voucher->fresh()->status);
+        $service->recordVerifiedRefund($confirmed, 'sandbox-refund-1');
+        $this->assertSame(1, \DB::table('travel_financial_events')
+            ->where('type', 'verified_refund')->count());
+
+        $second = $service->recordVerifiedRefund($confirmed, 'sandbox-refund-2');
+        $this->assertSame('refunded', $second->status);
+        $this->assertDatabaseCount('travel_refund_receipts', 2);
+        $this->assertSame('confirmed', $booking->fresh()->status);
+        $this->assertDatabaseCount('refunds', 0);
+    }
+
+    public function test_unverified_wrong_currency_or_over_refund_cannot_create_financial_credit(): void
+    {
+        [$staff, $guest, $supplier, $travel] = $this->fixture('transfer');
+        $fulfillment = app(TravelFulfillmentService::class)
+            ->recordVerifiedCapture($travel, 'sandbox-paid-0001');
+        $fulfillment->update(['status' => 'support_required']);
+        config()->set('travel.refund_verifier', FakeTravelRefundVerifier::class);
+        config()->set('travel.test_original_capture', 'sandbox-paid-0001');
+        config()->set('travel.test_refund_minor', 1201);
+        try {
+            app(TravelRefundReconciliationService::class)->recordVerifiedRefund($fulfillment, 'sandbox-refund-over');
+            $this->fail('Refund may never exceed capture');
+        } catch (ValidationException $e) {
+            $this->assertArrayHasKey('refund', $e->errors());
+        }
+        $this->assertDatabaseCount('travel_refund_receipts', 0);
+        config()->set('travel.test_refund_minor', 600);
+        config()->set('travel.test_refund_currency', 'EUR');
+        try {
+            app(TravelRefundReconciliationService::class)->recordVerifiedRefund($fulfillment, 'sandbox-refund-wrong');
+            $this->fail('Wrong refund currency should be denied');
+        } catch (ValidationException $e) {
+            $this->assertArrayHasKey('refund', $e->errors());
+        }
+        $this->assertDatabaseCount('travel_refund_receipts', 0);
+        $this->assertDatabaseCount('refunds', 0);
+    }
+
+    public function test_no_travel_refunds_are_accepted_without_live_verified_provider_proof(): void
+    {
+        [$staff, $guest, $supplier, $travel] = $this->fixture('car');
+        $fulfillment = app(TravelFulfillmentService::class)
+            ->recordVerifiedCapture($travel, 'sandbox-paid-0001');
+        $fulfillment->update(['status' => 'support_required']);
+        config()->set('travel.refund_verifier', null);
+        $this->expectException(ValidationException::class);
+        app(TravelRefundReconciliationService::class)->recordVerifiedRefund($fulfillment, 'sandbox-refund-absent');
     }
 
     public function test_unavailable_adapter_never_fabricates_confirmation(): void
