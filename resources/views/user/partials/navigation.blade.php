@@ -20,6 +20,12 @@ $contactEmail=\App\Models\SiteSetting::valueFor('customer_dashboard_contact_emai
                 </a>
             @endif
         @endforeach
+        @if(config('travel.requests_enabled'))
+            <a class="az-user-nav-link {{ request()->routeIs('user.travel.*') ? 'is-active' : '' }}" href="{{ route('user.travel.index') }}">
+                <span class="material-symbols-outlined" aria-hidden="true">travel_explore</span>
+                <span>Travel extras</span>
+            </a>
+        @endif
     </nav>
 </section>
 

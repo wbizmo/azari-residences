@@ -35,7 +35,13 @@ class TravelOffer extends Model
     public function isRequestable(): bool
     {
         return $this->published_at !== null && $this->published_at->lte(now())
-            && $this->expires_at->gt(now()) && $this->supplier->isApproved();
+            && $this->expires_at->gt(now()) && $this->supplier->isApproved()
+            && $this->kind === $this->supplier->kind
+            && in_array($this->currency, ['USD', 'EUR', 'GBP', 'NGN', 'CAD'], true)
+            && ($this->kind !== 'flight' || (
+                filled($this->supplier->integration_key)
+                && array_key_exists($this->supplier->integration_key, (array) config('travel.supplier_adapters', []))
+            ));
     }
 
     public function totalMinor(int $partySize): int

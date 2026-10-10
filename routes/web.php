@@ -144,6 +144,7 @@ require __DIR__.'/azari-sprints-13-16.php';
 
 require __DIR__.'/azari-property-owner-extension.php';
 require __DIR__.'/resavar-phase-two.php';
+require __DIR__.'/resavar-phase-four.php';
 
 /*
 |--------------------------------------------------------------------------

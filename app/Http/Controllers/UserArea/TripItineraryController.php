@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\Booking;
 use App\Models\TripItinerary;
+use App\Models\TravelRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -44,7 +45,13 @@ class TripItineraryController extends Controller
             ->orderBy('id')
             ->paginate(20);
 
-        return view('user.bookings.itinerary', compact('itinerary', 'bookings'));
+        $travelRequests = TravelRequest::query()
+            ->where('user_id', $request->user()->id)
+            ->where('trip_itinerary_id', $itinerary->id)
+            ->with('offer:id,title')
+            ->latest()->paginate(10, ['*'], 'travel_page');
+
+        return view('user.bookings.itinerary', compact('itinerary', 'bookings', 'travelRequests'));
     }
 
     public function assign(Request $request, string $reference): RedirectResponse

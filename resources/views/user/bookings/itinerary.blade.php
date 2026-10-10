@@ -47,6 +47,35 @@
     </div>
 </section>
 
+
+<section class="az-user-panel" style="margin-top:18px">
+    <header class="az-user-panel-header">
+        <div>
+            <h2 class="az-user-panel-title">Travel extras linked to this itinerary</h2>
+            <p class="az-user-panel-subtitle">Travel supplier enquiries are separate from stays and cannot change accommodation payments.</p>
+        </div>
+        @if(config('travel.requests_enabled'))
+            <a class="az-user-button az-user-button--dark" href="{{ route('user.travel.index') }}">Explore extras</a>
+        @endif
+    </header>
+    <div class="az-user-panel-body az-user-list">
+        @forelse($travelRequests as $travel)
+            <div class="az-user-list-item">
+                <div>
+                    <h3>{{ $travel->offer?->title ?? ucfirst($travel->kind) }}</h3>
+                    <p>{{ $travel->currency }} {{ number_format($travel->quoted_total_minor / 100, 2) }} indicative · {{ str_replace('_', ' ', $travel->status) }}</p>
+                </div>
+                @if(config('travel.requests_enabled'))
+                    <a href="{{ route('user.travel.show', $travel) }}">View request</a>
+                @endif
+            </div>
+        @empty
+            <p>No travel extras attached yet.</p>
+        @endforelse
+        {{ $travelRequests->links() }}
+    </div>
+</section>
+
 <section class="az-user-panel" style="margin-top:18px">
     <div class="az-user-panel-body">
         <form method="POST" action="{{ route('user.itineraries.destroy', $itinerary) }}">

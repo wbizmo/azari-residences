@@ -1,0 +1,155 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\TravelOffer;
+use App\Models\TravelRequest;
+use App\Models\TravelSupplier;
+use App\Services\Travel\TravelRequestService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
+
+final class TravelSupplierController extends Controller
+{
+    /** Staff-only operations; no supplier secrets or private traveler documents in responses. */
+    public function index(): JsonResponse
+    {
+        return response()->json([
+            'suppliers' => TravelSupplier::query()
+                ->select('id', 'kind', 'name', 'status', 'contract_verified_at', 'safety_verified_at')
+                ->latest()->paginate(30),
+            'pending_requests' => TravelRequest::query()
+                ->whereIn('status', ['requested', 'supplier_acknowledged'])
+                ->with('offer:id,title')->latest()->limit(30)
+                ->get(['id','travel_offer_id','kind','status','expires_at']),
+        ]);
+    }
+
+    public function store(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'kind' => ['required', Rule::in(['transfer', 'experience', 'car', 'flight'])],
+            'name' => ['required', 'string', 'min:3', 'max:160'],
+            'support_email' => ['required', 'email', 'max:180'],
+            'terms_url' => ['required', 'url', 'starts_with:https://', 'max:500'],
+            'approved_regions' => ['required', 'array', 'min:1', 'max:50'],
+            'approved_regions.*' => ['required', 'string', 'max:100'],
+        ]);
+        $supplier = TravelSupplier::query()->create($data + ['status' => 'pending']);
+
+        return response()->json(['id' => $supplier->id, 'status' => 'pending'], 201);
+    }
+
+    public function approve(Request $request, TravelSupplier $supplier): JsonResponse
+    {
+        $evidence = $request->validate([
+            'contract_reference' => ['required', 'string', 'min:8', 'max:160'],
+            'licence_reference' => ['required', 'string', 'min:8', 'max:160'],
+            'insurance_reference' => ['required', 'string', 'min:8', 'max:160'],
+            'operating_jurisdiction' => ['required', 'string', 'min:2', 'max:120'],
+            'review_attestation' => ['required', Rule::in(['CONTRACT_AND_SAFETY_VERIFIED'])],
+        ]);
+
+        DB::transaction(function () use ($supplier, $request, $evidence): void {
+            $locked = TravelSupplier::query()->whereKey($supplier->id)->lockForUpdate()->firstOrFail();
+            if ($locked->status !== 'pending') {
+                throw ValidationException::withMessages(['supplier' => 'Supplier must be pending review.']);
+            }
+            $locked->update([
+                'compliance_evidence' => $evidence,
+                'contract_verified_at' => now(),
+                'safety_verified_at' => now(),
+                'approved_by' => $request->user()->id,
+                'status' => 'approved',
+            ]);
+        }, 3);
+
+        return response()->json(['id' => $supplier->id, 'status' => 'approved']);
+    }
+
+    public function storeOffer(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'travel_supplier_id' => ['required', 'integer', 'exists:travel_suppliers,id'],
+            'title' => ['required', 'string', 'min:5', 'max:180'],
+            'origin' => ['nullable', 'string', 'max:160'],
+            'destination' => ['nullable', 'string', 'max:160'],
+            'timezone' => ['required', 'timezone'],
+            'max_party' => ['required', 'integer', 'min:1', 'max:12'],
+            'currency' => ['required', 'regex:/^[A-Z]{3}$/'],
+            'base_minor' => ['required', 'integer', 'min:0', 'max:1000000000'],
+            'tax_minor' => ['required', 'integer', 'min:0', 'max:1000000000'],
+            'fee_minor' => ['required', 'integer', 'min:0', 'max:1000000000'],
+            'deposit_minor' => ['sometimes', 'integer', 'min:0', 'max:1000000000'],
+            'starts_at' => ['nullable', 'date', 'after:now'],
+            'expires_at' => ['required', 'date', 'after:now'],
+            'terms' => ['required', 'array'],
+            'terms.cancellation' => ['required', 'string', 'max:2500'],
+            'terms.included' => ['required', 'string', 'max:2500'],
+            'terms.disclosure' => ['required', 'string', 'max:2500'],
+            'eligibility' => ['nullable', 'array', 'max:12'],
+        ]);
+        $supplier = TravelSupplier::query()->findOrFail($data['travel_supplier_id']);
+        if (! $supplier->isApproved()) {
+            throw ValidationException::withMessages(['travel_supplier_id' => 'Supplier must pass contract and safety review first.']);
+        }
+        $data['kind'] = $supplier->kind;
+        $data['deposit_minor'] = $data['deposit_minor'] ?? 0;
+        $offer = TravelOffer::query()->create($data);
+
+        return response()->json(['id' => $offer->id, 'status' => 'draft'], 201);
+    }
+
+    public function publish(Request $request, TravelOffer $offer): JsonResponse
+    {
+        DB::transaction(function () use ($offer): void {
+            $locked = TravelOffer::query()->with('supplier')
+                ->whereKey($offer->id)->lockForUpdate()->firstOrFail();
+            if (! $locked->supplier->isApproved() || $locked->expires_at->lte(now())) {
+                throw ValidationException::withMessages(['offer' => 'Approved and unexpired supplier offers only.']);
+            }
+            if ($locked->kind === 'flight' && ! array_key_exists(
+                (string) $locked->supplier->integration_key,
+                (array) config('travel.supplier_adapters', [])
+            )) {
+                throw ValidationException::withMessages(['offer' => 'A certified airline distribution adapter is required before publication.']);
+            }
+            $locked->update(['published_at' => now()]);
+        }, 3);
+
+        return response()->json(['id' => $offer->id, 'status' => 'published']);
+    }
+
+    public function storeSlot(Request $request, TravelOffer $offer): JsonResponse
+    {
+        abort_unless($offer->kind === 'experience', 404);
+        $data = $request->validate([
+            'starts_at' => ['required', 'date', 'after:now'],
+            'capacity' => ['required', 'integer', 'min:1', 'max:100000'],
+        ]);
+        $slot = $offer->slots()->create($data);
+        return response()->json(['id' => $slot->id], 201);
+    }
+
+    public function review(Request $request, TravelRequest $travelRequest, TravelRequestService $service): JsonResponse
+    {
+        $data = $request->validate([
+            'decision' => ['required', Rule::in(['acknowledge', 'decline'])],
+            'supplier_reference' => ['required_if:decision,acknowledge', 'nullable', 'string', 'min:5', 'max:160'],
+        ]);
+
+        $result = $service->review(
+            $travelRequest,
+            $request->user(),
+            $data['decision'] === 'acknowledge',
+            $data['supplier_reference'] ?? null
+        );
+
+        return response()->json(['id' => $result->id, 'status' => $result->status,
+            'confirmation' => null, 'payment_collected' => false]);
+    }
+}
