@@ -163,6 +163,9 @@ final class PhaseFourBatchTwoTest extends TestCase
         config()->set('travel.dining_test_state','cancelled');
         $cancelled=app(DiningReservationVerificationService::class)->verify($staff,$request,'partner-cancelled-009');
         $this->assertSame('cancelled',$cancelled->status);
+        $this->assertSame('partner-table-009',$cancelled->provider_reference);
+        $this->assertSame('cancelled',app(DiningReservationVerificationService::class)
+            ->verify($staff,$request,'partner-cancelled-009')->status);
         $this->assertDatabaseCount('dining_request_events',2);
         $this->assertDatabaseCount('payments',0);
         $this->assertDatabaseCount('refunds',0);

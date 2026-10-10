@@ -49,7 +49,12 @@ final class DiningReservationVerificationService
                 throw ValidationException::withMessages(['provider'=>'Dining provider has been suspended.']);
             }
             $next=$states[$proof['state']];
-            if ($item->status===$next && $item->provider_reference===$reference) return $item;
+            if ($item->status===$next &&
+                ($item->provider_reference===$reference ||
+                DB::table('dining_request_events')->where('dining_request_id',$item->id)
+                    ->where('provider_reference',$reference)->where('new_status',$next)->exists())) {
+                return $item;
+            }
 
             if (($next==='confirmed' && ($item->status!=='pending_concierge' || ! $item->supplier_share_consent))
                 || ($next==='unavailable' && $item->status!=='pending_concierge')
@@ -58,7 +63,7 @@ final class DiningReservationVerificationService
             }
             $before=$item->status;
             $item->update([
-                'status'=>$next,'provider_reference'=>$reference,
+                'status'=>$next,'provider_reference'=>$next==='cancelled' ? $item->provider_reference : $reference,
                 'provider_confirmed_at'=>$next==='confirmed'?now():$item->provider_confirmed_at,
                 'cancelled_at'=>$next==='cancelled'?now():$item->cancelled_at,
             ]);
