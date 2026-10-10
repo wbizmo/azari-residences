@@ -37,6 +37,14 @@
                     @endforeach
                 </select>
             </label>
+            <label><span>Review language</span>
+                <select name="language">
+                    <option value="">All languages</option>
+                    @foreach(['und'=>'Unspecified','en'=>'English','fr'=>'French','es'=>'Spanish','de'=>'German','pt'=>'Portuguese','ar'=>'Arabic','hi'=>'Hindi','zh'=>'Chinese','it'=>'Italian','yo'=>'Yoruba','ig'=>'Igbo','ha'=>'Hausa','other'=>'Other'] as $code => $label)
+                        <option value="{{ $code }}" @selected(($filters['language'] ?? '') === $code)>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </label>
             <button class="button button-primary" type="submit">Apply filters</button>
         </form>
 
