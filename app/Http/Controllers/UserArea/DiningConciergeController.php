@@ -17,9 +17,22 @@ final class DiningConciergeController extends Controller
     public function index(Request $request): View
     {
         abort_unless(config('travel.dining_enabled', false),404);
-        $filter = $request->validate(['city'=>['nullable','string','max:100']]);
+        $filter = $request->validate(['city'=>['nullable','string','max:100'],'near_stay'=>['nullable','integer']]);
+        $nearStay = null;
+        if (! empty($filter['near_stay'])) {
+            $nearStay = \App\Models\Booking::query()->whereKey($filter['near_stay'])
+                ->where('user_id',$request->user()->id)->firstOrFail();
+            abort_unless($nearStay->property_latitude !== null
+                && $nearStay->property_longitude !== null,422,'This stay has no verified location.');
+        }
+        $lat = $nearStay ? (float)$nearStay->property_latitude : null;
+        $lon = $nearStay ? (float)$nearStay->property_longitude : null;
+        $latRadius=30/111.2;
+        $lonRadius=$lat===null?null:min(180,30/(111.2*max(0.1,cos(deg2rad($lat)))));
         $partners = DiningPartner::query()->where('status','published')
             ->where('details_verified_at','>=',now()->subDays(90))
+            ->when($lat!==null,fn($q)=>$q->whereBetween('latitude',[$lat-$latRadius,$lat+$latRadius])
+                ->whereBetween('longitude',[$lon-$lonRadius,$lon+$lonRadius]))
             ->when(filled($filter['city']??null), fn($q)=>$q->where('city','like',
                 '%'.str_replace(['%','_'],['\%','\_'],trim($filter['city'])).'%'))
             ->orderBy('name')->paginate(12);
@@ -27,7 +40,10 @@ final class DiningConciergeController extends Controller
             ->orderBy('name')->limit(100)->get(['id','name']);
         $diningRequests = DiningRequest::query()->where('user_id',$request->user()->id)
             ->with('partner:id,name,timezone')->latest()->limit(30)->get();
-        return view('user.dining.index', compact('partners','itineraries','diningRequests'));
+        $stays = $request->user()->bookings()->whereNotNull('property_latitude')
+            ->whereNotNull('property_longitude')->latest()->limit(30)
+            ->get(['id','reference']);
+        return view('user.dining.index', compact('partners','itineraries','diningRequests','stays'));
     }
 
     public function store(Request $request, DiningConciergeService $service): RedirectResponse

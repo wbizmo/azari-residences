@@ -14,6 +14,7 @@ use App\Services\Travel\DiningConciergeService;
 use App\Services\Travel\MobileDemandGate;
 use App\Services\Travel\TripAccountingService;
 use App\Services\Travel\TripAssemblyService;
+use App\Services\Travel\TripRecoveryService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -35,7 +36,8 @@ final class PhaseFourBatchTwoTest extends TestCase
     private function partner(): DiningPartner
     {
         return DiningPartner::query()->create([
-            'name'=>'Example dining partner','integration_key'=>'sandbox','status'=>'published','address'=>'15 Market Street',
+            'name'=>'Example dining partner','integration_key'=>'sandbox','status'=>'published',
+            'latitude'=>6.5244,'longitude'=>3.3792,'address'=>'15 Market Street',
             'city'=>'Lagos','timezone'=>'Africa/Lagos','disclosures'=>'Reservation not guaranteed.',
             'dietary_options'=>['vegetarian'],'accessibility'=>['step-free'],
             'details_verified_at'=>now(),'reviewed_by'=>User::factory()->create()->id,
@@ -185,6 +187,78 @@ final class PhaseFourBatchTwoTest extends TestCase
         config()->set('travel.dining_adapters',[]);
         $this->expectException(ValidationException::class);
         app(DiningReservationVerificationService::class)->verify($staff,$request,'uncertified-reference');
+    }
+
+    public function test_trip_recovery_protects_preexisting_stay_and_never_confirms_unconfigured_supplier(): void
+    {
+        $guest=User::factory()->create();
+        $staff=User::factory()->create();
+        $trip=TripItinerary::query()->create(['user_id'=>$guest->id,'name'=>'Recovery trip']);
+        $stay=Booking::factory()->create(['user_id'=>$guest->id,
+            'trip_itinerary_id'=>$trip->id,'status'=>'confirmed']);
+        $partner=$this->partner();
+        app(DiningConciergeService::class)->create($guest,$partner,[
+            'idempotency_key'=>(string)Str::uuid(),'party_size'=>2,
+            'requested_for'=>now()->addDays(2)->toDateTimeString(),
+            'trip_itinerary_id'=>$trip->id,
+        ]);
+        $assembly=app(TripAssemblyService::class)->prepare($guest,$trip,(string)Str::uuid());
+        $recovery=app(TripRecoveryService::class);
+        $this->assertSame(2,$recovery->prepare($assembly));
+        $this->assertSame(0,$recovery->prepare($assembly));
+        $steps=$assembly->steps()->get();
+        $this->assertCount(2,$steps);
+        $stayStep=$steps->firstWhere('item_type','stay');
+        $this->assertSame('preexisting_stay',$stayStep->status);
+        try {
+            $recovery->reconcile($staff,$stayStep);
+            $this->fail('Accommodation may not be changed by package recovery');
+        } catch (ValidationException $e) {
+            $this->assertArrayHasKey('step',$e->errors());
+        }
+        $diningStep=$steps->firstWhere('item_type','dining');
+        $this->assertSame('needs_provider',$recovery->reconcile($staff,$diningStep)->status);
+        $this->assertSame('compensation_requested',$recovery->requestCompensation($staff,$diningStep)->status);
+        $this->assertSame(3,(int)\DB::table('trip_assembly_events')
+            ->where('trip_assembly_id',$assembly->id)->count());
+        $this->assertSame('confirmed',$stay->fresh()->status);
+        $this->assertDatabaseCount('payments',0);
+        $this->assertDatabaseCount('refunds',0);
+    }
+
+    public function test_dining_reminders_are_once_only_and_only_for_verified_reservations(): void
+    {
+        $guest=User::factory()->create();
+        $partner=$this->partner();
+        $item=app(DiningConciergeService::class)->create($guest,$partner,[
+            'idempotency_key'=>(string)Str::uuid(),'party_size'=>2,
+            'requested_for'=>now()->addHours(4)->toDateTimeString(),
+            'supplier_share_consent'=>true,
+        ]);
+        \Illuminate\Support\Facades\Artisan::call('resavar:dining-arrival-reminders');
+        $this->assertSame(0,$guest->fresh()->notifications()->count());
+        $item->update(['status'=>'confirmed','provider_confirmed_at'=>now(),
+            'provider_reference'=>'partner-table-123']);
+        \Illuminate\Support\Facades\Artisan::call('resavar:dining-arrival-reminders');
+        $this->assertSame(1,$guest->fresh()->notifications()->count());
+        \Illuminate\Support\Facades\Artisan::call('resavar:dining-arrival-reminders');
+        $this->assertSame(1,$guest->fresh()->notifications()->count());
+        $this->assertNotNull($item->fresh()->arrival_reminder_sent_at);
+    }
+
+    public function test_nearby_dining_recommendations_enforce_stay_ownership(): void
+    {
+        $guest=User::factory()->create(['email_verified_at'=>now()]);
+        $stranger=User::factory()->create(['email_verified_at'=>now()]);
+        $stay=Booking::factory()->create(['user_id'=>$guest->id,
+            'property_latitude'=>6.5244,'property_longitude'=>3.3792]);
+        $near=$this->partner();
+        $far=$this->partner();
+        $far->update(['name'=>'Far-away venue','latitude'=>9.0765,'longitude'=>7.3986]);
+        $this->actingAs($guest)->get(route('user.dining.index',['near_stay'=>$stay->id]))
+            ->assertOk()->assertSee($near->name)->assertDontSee('Far-away venue');
+        $this->actingAs($stranger)->get(route('user.dining.index',['near_stay'=>$stay->id]))
+            ->assertNotFound();
     }
 
     public function test_mobile_native_gate_fails_closed_without_measured_pwa_demand(): void

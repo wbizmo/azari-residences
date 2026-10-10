@@ -35,6 +35,12 @@ Route::middleware(['auth','auth.session','azari.staff','azari.staff:administrato
             ->name('travel.assemblies.index');
         Route::post('/travel/assemblies/{assembly}/review',[TripAssemblyRecoveryController::class,'review'])
             ->middleware(['azari.step-up','throttle:10,1'])->name('travel.assemblies.review');
+        Route::post('/travel/assemblies/{assembly}/prepare',[TripAssemblyRecoveryController::class,'prepareSteps'])
+            ->middleware(['azari.step-up','throttle:10,1'])->name('travel.assemblies.prepare');
+        Route::post('/travel/steps/{step}/reconcile',[TripAssemblyRecoveryController::class,'reconcileStep'])
+            ->middleware(['azari.step-up','throttle:10,1'])->name('travel.steps.reconcile');
+        Route::post('/travel/steps/{step}/compensate',[TripAssemblyRecoveryController::class,'requestCompensation'])
+            ->middleware(['azari.step-up','throttle:10,1'])->name('travel.steps.compensate');
         Route::get('/travel/mobile-demand',[MobileDemandController::class,'__invoke'])
             ->name('travel.mobile-demand');
     });

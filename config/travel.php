@@ -14,6 +14,8 @@ return [
     'dining_provider_confirmation_enabled' => env('RESAVAR_DINING_PROVIDER_CONFIRMATION_ENABLED',false),
     'dining_adapters' => [],
     'trip_assembly_enabled' => env('RESAVAR_TRIP_ASSEMBLY_ENABLED', false),
+    'trip_provider_recovery_enabled' => env('RESAVAR_TRIP_PROVIDER_RECOVERY_ENABLED',false),
+    'trip_recovery_adapters' => [],
     'native_product_approved' => env('RESAVAR_NATIVE_PRODUCT_APPROVED', false),
     'native_min_installs' => 250,
     'native_min_returning' => 75,
