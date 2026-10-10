@@ -4,6 +4,10 @@
 @section('page_title','Guest conversation')
 @section('content')
 <section class="az-user-panel"><div class="az-user-panel-body">
+@include('user.partials.message-poll', [
+    'pollUrl' => route('user.owner.phase2.messages.poll', [$property, $conversation]),
+    'lastKnown' => $conversation->messages()->max('id'),
+])
 <div class="az-user-list">@foreach($messages as $message)<article class="az-user-list-item"><div><strong>{{ $message->sender_type === 'property' ? 'Property team' : 'Guest' }}</strong><p>{!! nl2br(e($message->body)) !!}</p><small>{{ $message->created_at->format('j M Y, H:i') }}</small>@if($message->attachment_path)
     @if($message->attachment_scan_status === 'clean')
         <p><a href="{{ route('user.owner.phase2.messages.attachment',[$property,$conversation,$message]) }}">Download attachment</a></p>
