@@ -956,7 +956,7 @@ class AzariTransactionalMailService
             null,
             false,
             'Arrival reminder',
-            'arrival-reminder:'.$booking->id
+            'arrival-reminder:'.$booking->id.':'.$booking->check_in?->toDateString()
         );
     }
 
@@ -979,7 +979,7 @@ class AzariTransactionalMailService
             null,
             false,
             'Arrival day',
-            'check-in-notice:'.$booking->id
+            'check-in-notice:'.$booking->id.':'.$booking->check_in?->toDateString()
         );
     }
 
@@ -1002,7 +1002,7 @@ class AzariTransactionalMailService
             null,
             false,
             'Stay extension',
-            'stay-extension-reminder:'.$booking->id
+            'stay-extension-reminder:'.$booking->id.':'.$booking->check_out?->toDateString()
         );
     }
 
@@ -1025,7 +1025,7 @@ class AzariTransactionalMailService
             null,
             false,
             'Departure reminder',
-            'checkout-reminder:'.$booking->id
+            'checkout-reminder:'.$booking->id.':'.$booking->check_out?->toDateString()
         );
     }
 
