@@ -47,9 +47,15 @@ final class TripRecoveryService
             if ($current->status==='preexisting_stay') {
                 throw ValidationException::withMessages(['step'=>'Accommodation remains independently managed.']);
             }
-            if (! in_array($current->status,
+            // Crash/restart recovery: only reclaim expired provider-check leases.
+            $staleChecking=$current->status==='checking'
+                && $current->last_checked_at?->lte(now()->subMinutes(5));
+            if (! $staleChecking && ! in_array($current->status,
                 ['awaiting_partner','needs_provider','reconciliation_required','compensation_requested'],true)) {
                 throw ValidationException::withMessages(['step'=>'This component cannot be retried in its present state.']);
+            }
+            if ((int)$current->attempts >= 8) {
+                throw ValidationException::withMessages(['step'=>'Manual review required after eight attempts.']);
             }
             $current->update(['status'=>'checking','attempts'=>$current->attempts+1,
                 'last_checked_at'=>now()]);
@@ -126,7 +132,10 @@ final class TripRecoveryService
     {
         DB::transaction(function () use ($step,$status,$reference): void {
             $current=TripAssemblyStep::query()->whereKey($step->id)->lockForUpdate()->firstOrFail();
-            if ($current->status!=='checking') return;
+            // Outdated remote response may not overwrite a newer lease holder.
+            if ($current->status!=='checking'
+                || $current->attempts !== $step->attempts
+                || ! $current->last_checked_at?->equalTo($step->last_checked_at)) return;
             $before=$current->status;
             $current->update(['status'=>$status,'provider_reference'=>$reference]);
             DB::table('trip_assembly_events')->insert([

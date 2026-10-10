@@ -35,6 +35,7 @@ return new class extends Migration {
     {
         Schema::dropIfExists('trip_assembly_steps');
         Schema::table('dining_requests', function (Blueprint $t) {
+            $t->dropIndex('dining_requests_arrival_reminder_sent_at_index');
             $t->dropColumn('arrival_reminder_sent_at');
         });
         Schema::table('dining_partners', function (Blueprint $t) {

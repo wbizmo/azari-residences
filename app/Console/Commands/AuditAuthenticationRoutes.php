@@ -11,6 +11,16 @@ class AuditAuthenticationRoutes extends Command
 
     protected $description = 'Audit authentication routes, protected-area middleware and production session safety.';
 
+    private function hasSafeThrottle(array $middleware, int $maximumPerMinute): bool
+    {
+        foreach ($middleware as $entry) {
+            if (! preg_match('/^throttle:(\d+),(\d+)$/D', $entry, $match)) continue;
+            if ((int)$match[2] > 0 && (int)$match[1] > 0
+                && (int)$match[1] <= $maximumPerMinute * (int)$match[2]) return true;
+        }
+        return false;
+    }
+
     public function handle(): int
     {
         $issues = [];
@@ -20,10 +30,10 @@ class AuditAuthenticationRoutes extends Command
         $required = [
             'login' => ['guest'],
             'register' => ['guest'],
-            'password.email' => ['guest', 'throttle:5,1'],
-            'password.store' => ['guest', 'throttle:5,1'],
+            'password.email' => ['guest'],
+            'password.store' => ['guest'],
             'logout' => ['auth', 'auth.session'],
-            'azari.admin.login.store' => ['throttle:5,1'],
+            'azari.admin.login.store' => [],
             'azari.admin.dashboard' => ['auth.session', 'azari.staff'],
             'user.dashboard' => ['auth', 'auth.session', 'verified', 'azari.customer'],
         ];
@@ -45,6 +55,13 @@ class AuditAuthenticationRoutes extends Command
             }
         }
 
+        foreach (['password.email' => 5, 'password.store' => 5, 'azari.admin.login.store' => 5] as $name => $max) {
+            $candidate = $routes->first(fn ($route) => $route->getName() === $name);
+            if ($candidate && ! $this->hasSafeThrottle($candidate->gatherMiddleware(), $max)) {
+                $issues[] = "Route [{$name}] needs an effective throttle capped at {$max} requests/minute.";
+            }
+        }
+
         $customerLoginPost = $routes->first(
             fn ($candidate) => in_array('POST', $candidate->methods(), true)
                 && $candidate->uri() === 'login'
@@ -52,8 +69,8 @@ class AuditAuthenticationRoutes extends Command
 
         if (! $customerLoginPost) {
             $issues[] = 'Customer POST /login route is missing.';
-        } elseif (! in_array('throttle:10,1', $customerLoginPost->gatherMiddleware(), true)) {
-            $issues[] = 'Customer POST /login route is missing middleware [throttle:10,1].';
+        } elseif (! $this->hasSafeThrottle($customerLoginPost->gatherMiddleware(), 20)) {
+            $issues[] = 'Customer POST /login needs an effective rate limit.';
         }
 
         foreach ($routes as $route) {
@@ -61,7 +78,12 @@ class AuditAuthenticationRoutes extends Command
             $uri = $route->uri();
             $middleware = $route->gatherMiddleware();
 
-            $customerArea = str_starts_with($name, 'user.') || str_starts_with($uri, 'account');
+            // Account deletion is a reviewed public SUPPORT REQUEST only; it never
+            // deletes data without independent ownership verification.
+            $publicDeletionRequest = in_array($name, ['account-deletion.show', 'account-deletion.store'], true)
+                && $uri === 'account-deletion';
+            $customerArea = ! $publicDeletionRequest
+                && (str_starts_with($name, 'user.') || str_starts_with($uri, 'account')); 
             $staffArea = str_starts_with($name, 'azari.admin.') && ! str_contains($name, '.login');
 
             if ($customerArea && ! in_array('azari.customer', $middleware, true)) {

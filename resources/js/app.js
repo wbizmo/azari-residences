@@ -1060,7 +1060,7 @@ document.addEventListener('DOMContentLoaded', () => {
          *   always    -> logo-dark.png
          */
         const requiredLogo =
-            isHomepage && hasScrolled
+            (!isHomepage || hasScrolled)
                 ? lightLogo
                 : darkLogo;
 
@@ -1072,7 +1072,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         logo.dataset.logoVariant =
-            isHomepage && hasScrolled
+            (!isHomepage || hasScrolled)
                 ? 'light'
                 : 'dark';
     };
@@ -1175,11 +1175,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const requiredLogo =
                 isHomepageTop
                     ? publicLogo.dataset.darkLogo
-                    : (
-                        isHomepage
-                            ? publicLogo.dataset.lightLogo
-                            : publicLogo.dataset.darkLogo
-                    );
+                    : publicLogo.dataset.lightLogo;
 
             if (
                 requiredLogo &&

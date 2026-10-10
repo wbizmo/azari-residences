@@ -125,7 +125,7 @@
         min-height: 105px;
         padding: 15px 10px;
         border: 2px dashed #052058;
-        background: #052058;
+        background: #EEF3FA;
         color: #052058;
         text-align: center;
         font-size: 9px;
@@ -141,7 +141,7 @@
         margin-top: 18px;
         padding: 10px 12px;
         border-left: 3px solid #052058;
-        background: #052058;
+        background: #EEF3FA;
         color: #052058;
     }
 
@@ -161,7 +161,7 @@
     width: 100%;
     margin-top: 24px;
     border: 1px solid #052058;
-    background: #052058;
+    background: #F4F7FC;
     border-collapse: collapse;
     page-break-inside: avoid;
 }
@@ -174,7 +174,7 @@
     width: 68%;
     padding: 22px 24px;
     border-right: 1px solid #052058;
-    background: #052058;
+    background: #F4F7FC;
 }
 
 .verification-eyebrow {
@@ -259,7 +259,7 @@
     margin: 0 auto;
     padding: 18px 8px;
     border: 2px dashed #052058;
-    background: #052058;
+    background: #EEF3FA;
     color: #052058;
     text-align: center;
     font-size: 8px;

@@ -1,7 +1,8 @@
 @php
     $documentType = $documentType ?? 'Invoice';
     $documentReference = $invoiceNumber ?? ($booking->reference ?? '');
-    $documentTotal = $total ?? (($booking->currency ?? 'NGN').' '.number_format((float) ($booking->total ?? 0), 2));
+    $documentTotal = $total ?? (($booking->currency ?? 'NGN').' '.number_format(
+        $documentType === 'Receipt' && isset($booking) ? (float) $booking->netPaidTotal() : (float) ($booking->total ?? 0), 2));
     $documentFooter = $footer ?? 'Generated from the current Resavar booking record.';
 @endphp
 @push('head')
@@ -12,21 +13,21 @@
 .resavar-doc-brand{font-size:20px;font-weight:800;color:#052058}
 .resavar-doc-type{text-align:right;min-width:140px}
 .resavar-doc-type h1{margin:0 0 7px;color:#052058;font-size:23px;letter-spacing:.02em}
-.resavar-doc-type small{color:#526581;overflow-wrap:anywhere}
+.resavar-doc-type small{color:#526581;overflow-wrap:anywhere;word-break:break-word}
 .resavar-doc-data{width:100%;border-collapse:collapse;margin-top:24px}
 .resavar-doc-data th,.resavar-doc-data td{padding:12px 10px;text-align:left;border-bottom:1px solid #DCE5F0;vertical-align:top;overflow-wrap:anywhere}
-.resavar-doc-data th{width:38%;color:#526581;font-weight:600}
+.resavar-doc-data th{width:38%;white-space:normal;color:#526581;font-weight:600}
 .resavar-doc-data td{color:#052058;font-weight:700}
 .resavar-doc-total{margin-top:24px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;border-top:2px solid #052058;padding-top:20px;font-size:18px;font-weight:800}
 .resavar-doc-footer{margin-top:30px;padding-top:14px;border-top:1px solid #DCE5F0;color:#526581;font-size:12px}
 .resavar-doc-print-button{display:inline-flex;margin:0 0 14px;padding:10px 18px;border-radius:9px;background:#052058;color:#fff;cursor:pointer;border:0}
-@media(max-width:600px){.resavar-doc-type{text-align:left}.resavar-doc-preview{padding:20px}.resavar-doc-total{font-size:15px}}
+@media(max-width:600px){.resavar-doc-head{display:block}.resavar-doc-data th{width:43%}.resavar-doc-type{text-align:left}.resavar-doc-preview{padding:20px}.resavar-doc-total{font-size:15px}}
 @media print{
     @page{size:A4 portrait;margin:16mm}
     body.az-admin-body{background:#fff!important;color:#052058!important}
     .az-admin-sidebar,.az-admin-topbar,.az-skip-link,.resavar-doc-print-button{display:none!important}
     .az-admin-app,.az-admin-main,.az-admin-content{display:block!important;width:100%!important;min-height:0!important;margin:0!important;padding:0!important;background:#fff!important}
-    .resavar-doc-preview{max-width:none;border:0;margin:0;padding:0}
+    .resavar-doc-preview{max-width:none;border:0;margin:0;padding:0;box-shadow:none}.resavar-doc-data{page-break-inside:auto}.resavar-doc-data tr{page-break-inside:avoid;break-inside:avoid}
     .resavar-doc-head,.resavar-doc-total{break-inside:avoid}
 }
 </style>

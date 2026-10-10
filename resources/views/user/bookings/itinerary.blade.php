@@ -63,7 +63,7 @@
             <div class="az-user-list-item">
                 <div>
                     <h3>{{ $travel->offer?->title ?? ucfirst($travel->kind) }}</h3>
-                    <p>{{ $travel->currency }} {{ number_format($travel->quoted_total_minor / 100, 2) }} indicative · {{ str_replace('_', ' ', $travel->status) }}</p>
+                    <p>{{ $travel->currency }} {{ \App\Support\MinorMoney::display($travel->quoted_total_minor, $travel->currency) }} indicative · {{ str_replace('_', ' ', $travel->status) }}</p>
                 </div>
                 @if(config('travel.requests_enabled'))
                     <a href="{{ route('user.travel.show', $travel) }}">View request</a>
@@ -84,10 +84,10 @@
     </header>
     <div class="az-user-panel-body">
         @foreach($tripAccounting['totals'] as $currency=>$amounts)
-            <p><strong>{{ $currency }}</strong> · Quoted {{ number_format($amounts['quoted_minor']/100,2) }}
-              · Verified collected {{ number_format($amounts['collected_minor']/100,2) }}
-              · Refunded {{ number_format($amounts['refunded_minor']/100,2) }}
-              · Net {{ number_format($amounts['net_collected_minor']/100,2) }}</p>
+            <p><strong>{{ $currency }}</strong> · Quoted {{ \App\Support\MinorMoney::display($amounts['quoted_minor'], $currency) }}
+              · Verified collected {{ \App\Support\MinorMoney::display($amounts['collected_minor'], $currency) }}
+              · Refunded {{ \App\Support\MinorMoney::display($amounts['refunded_minor'], $currency) }}
+              · Net {{ \App\Support\MinorMoney::display($amounts['net_collected_minor'], $currency) }}</p>
         @endforeach
         @if($tripAccounting['requires_fx_quote'])
             <p><strong>Multiple currencies:</strong> no summed trip total without independently verified exchange rates.</p>
@@ -96,7 +96,7 @@
             <div class="az-user-list-item"><div>
                 <h3>{{ $item['title'] }}</h3>
                 <p>{{ ucfirst($item['type']) }} · {{ str_replace('_',' ',$item['status']) }}
-                    @if($item['currency']) · {{ $item['currency'] }} {{ number_format($item['quoted_minor']/100,2) }} indicative @endif</p>
+                    @if($item['currency']) · {{ $item['currency'] }} {{ \App\Support\MinorMoney::display($item['quoted_minor'], $item['currency']) }} indicative @endif</p>
             </div></div>
         @endforeach
         @if(config('travel.trip_assembly_enabled', false))

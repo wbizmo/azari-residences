@@ -3,6 +3,8 @@
 namespace App\Services\Travel;
 
 use App\Models\TripItinerary;
+use App\Models\Payment;
+use App\Support\MinorMoney;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -32,9 +34,12 @@ final class TripAccountingService
             ->whereIn('booking_id',$stayIds)->where('status','successful')
             ->groupBy('booking_id')->pluck('total','booking_id');
         $refundedByStay=$stayIds->isEmpty() ? collect() : DB::table('refunds')
-            ->select('booking_id')->selectRaw('SUM(amount) AS total')
-            ->whereIn('booking_id',$stayIds)->where('status','successful')
-            ->groupBy('booking_id')->pluck('total','booking_id');
+            ->join('payments', 'payments.id', '=', 'refunds.payment_id')
+            ->select('refunds.booking_id')->selectRaw('SUM(refunds.amount) AS total')
+            ->whereIn('refunds.booking_id',$stayIds)
+            ->where('refunds.status','successful')
+            ->where('payments.status', Payment::SUCCESSFUL)
+            ->groupBy('refunds.booking_id')->pluck('total','booking_id');
         $travelFulfillmentIds=$travels->pluck('fulfillment.id')->filter()->values();
         $refundsByTravel=$travelFulfillmentIds->isEmpty() ? collect() : DB::table('travel_financial_events')
             ->select('travel_fulfillment_id')->selectRaw('SUM(amount_minor) AS total')
@@ -52,14 +57,22 @@ final class TripAccountingService
         };
         foreach($stays as $stay){
             $currency=(string)$stay->currency;
-            $quoted=(int)round(((float)$stay->total)*100);
-            $collected=(int)round(((float)$paidByStay->get($stay->id,0))*100);
-            // Capture historical refunds independently via verified refund rows.
-            $refunds=(int)round(((float)$refundedByStay->get($stay->id,0))*100);
+            $quoted=MinorMoney::toMinor($stay->total, $currency);
+            $paid=(string)$paidByStay->get($stay->id, '0');
+            // Historical settled stays use the same evidence requirements as
+            // Booking::hasLegacyPaidRecord; do not invent a recent capture.
+            $legacy = (float)$paid <= 0
+                && ! $stay->isCancelled()
+                && in_array($stay->status, ['paid','confirmed','check_in','checked_in','checked_out','completed'], true)
+                && $stay->paid_at !== null
+                && (filled($stay->payment_reference) || filled($stay->receipt_number));
+            $collected=$legacy ? $quoted : MinorMoney::toMinor($paid,$currency);
+            $refunds=MinorMoney::toMinor((string)$refundedByStay->get($stay->id,'0'),$currency);
             $record($currency,$quoted,$collected,$refunds);
             $items[]=['type'=>'stay','id'=>$stay->id,'title'=>$stay->property_name_snapshot ?: 'Resavar stay',
                 'status'=>$stay->status,'currency'=>$currency,'quoted_minor'=>$quoted,
-                'collected_minor'=>$collected,'refunded_minor'=>$refunds,'reference'=>$stay->reference];
+                'collected_minor'=>$collected,'refunded_minor'=>$refunds,'reference'=>$stay->reference,
+                'collection_evidence'=>$legacy ? 'legacy_record' : 'verified_payment'];
         }
         foreach($travels as $travel){
             $f=$travel->fulfillment;
