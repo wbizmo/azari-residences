@@ -3,6 +3,8 @@
 namespace App\Console\Commands;
 
 use App\Models\Booking;
+use App\Support\LocalDate;
+use Carbon\CarbonImmutable;
 use App\Services\Communications\AzariTransactionalMailService;
 use Illuminate\Console\Command;
 
@@ -14,7 +16,7 @@ class SendAzariTransactionalReminders extends Command
     public function handle(AzariTransactionalMailService $mail): int
     {
         $timezone = config('localization.platform_timezone', 'UTC');
-        $today = now($timezone)->startOfDay();
+        $today = CarbonImmutable::now($timezone)->startOfDay();
 
         $counts = [
             'arrival' => 0,
@@ -29,9 +31,10 @@ class SendAzariTransactionalReminders extends Command
         Booking::query()
             ->with(['property', 'user', 'payments'])
             ->whereIn('status', $active)
-            ->whereDate('check_in', $today->copy()->addDay()->toDateString())
+            ->whereBetween('check_in', [$today->subDay()->toDateString(), $today->addDays(2)->toDateString()])
             ->chunkById(100, function ($bookings) use (&$counts, $mail): void {
                 foreach ($bookings as $booking) {
+                    if ($booking->check_in?->toDateString() !== $this->localToday($booking)->addDay()->toDateString()) continue;
                     $counts['arrival']++;
                     if (! $this->option('dry-run')) {
                         $mail->sendArrivalReminder($booking);
@@ -42,9 +45,10 @@ class SendAzariTransactionalReminders extends Command
         Booking::query()
             ->with(['property', 'user', 'payments'])
             ->whereIn('status', ['confirmed', 'paid'])
-            ->whereDate('check_in', $today->toDateString())
+            ->whereBetween('check_in', [$today->subDay()->toDateString(), $today->addDay()->toDateString()])
             ->chunkById(100, function ($bookings) use (&$counts, $mail): void {
                 foreach ($bookings as $booking) {
+                    if ($booking->check_in?->toDateString() !== $this->localToday($booking)->toDateString()) continue;
                     $counts['check_in']++;
                     if (! $this->option('dry-run')) {
                         $mail->sendCheckInNotice($booking);
@@ -55,9 +59,10 @@ class SendAzariTransactionalReminders extends Command
         Booking::query()
             ->with(['property', 'user', 'payments'])
             ->whereIn('status', $active)
-            ->whereDate('check_out', $today->copy()->addDays(2)->toDateString())
+            ->whereBetween('check_out', [$today->addDay()->toDateString(), $today->addDays(3)->toDateString()])
             ->chunkById(100, function ($bookings) use (&$counts, $mail): void {
                 foreach ($bookings as $booking) {
+                    if ($booking->check_out?->toDateString() !== $this->localToday($booking)->addDays(2)->toDateString()) continue;
                     $counts['extension']++;
                     if (! $this->option('dry-run')) {
                         $mail->sendExtensionReminder($booking);
@@ -68,9 +73,10 @@ class SendAzariTransactionalReminders extends Command
         Booking::query()
             ->with(['property', 'user', 'payments'])
             ->whereIn('status', $active)
-            ->whereDate('check_out', $today->copy()->addDay()->toDateString())
+            ->whereBetween('check_out', [$today->toDateString(), $today->addDays(2)->toDateString()])
             ->chunkById(100, function ($bookings) use (&$counts, $mail): void {
                 foreach ($bookings as $booking) {
+                    if ($booking->check_out?->toDateString() !== $this->localToday($booking)->addDay()->toDateString()) continue;
                     $counts['checkout']++;
                     if (! $this->option('dry-run')) {
                         $mail->sendCheckoutReminder($booking);
@@ -105,4 +111,16 @@ class SendAzariTransactionalReminders extends Command
 
         return self::SUCCESS;
     }
+    private function localToday(Booking $booking): CarbonImmutable
+    {
+        // Preserve the booking's captured property timezone even when the
+        // listing's location or the platform default is updated later.
+        $zone = LocalDate::timezone(
+            $booking->property_timezone
+                ?: ($booking->property ? LocalDate::propertyTimezone($booking->property) : null)
+        );
+
+        return CarbonImmutable::now($zone)->startOfDay();
+    }
+
 }
