@@ -36,7 +36,17 @@ class UserPaymentController extends Controller
         abort_unless($payment->canRetry(), 422);
         $eligibility->assertCanInitiate($payment->booking);
         $newPayment = $initiator->create($payment->booking, $payment->provider);
-        return redirect()->away($newPayment->checkout_url);
+        if ($newPayment->isSuccessful()) {
+            return redirect()->route('user.payments.show', $newPayment);
+        }
+
+        $checkoutUrl = trim((string) $newPayment->checkout_url);
+        abort_unless($newPayment->status === Payment::PENDING
+            && filter_var($checkoutUrl, FILTER_VALIDATE_URL)
+            && strtolower((string) parse_url($checkoutUrl, PHP_URL_SCHEME)) === 'https',
+            422, 'Payment checkout is not ready. Check your payment status before retrying.');
+
+        return redirect()->away($checkoutUrl);
     }
     public function resume(Request $request, Payment $payment): RedirectResponse
     {
