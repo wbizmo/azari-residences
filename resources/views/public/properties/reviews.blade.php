@@ -57,6 +57,7 @@
                         <span>{{ $review->created_at->format('M Y') }} · {{ $review->rating }}/5</span>
                     </div>
                     @if($review->trip_type)<p>Trip type: {{ Str::headline($review->trip_type) }}</p>@endif
+                    @if($review->language && $review->language !== "und")<p>Language: {{ $review->language === "other" ? "Other" : strtoupper($review->language) }}</p>@endif
                     @if($review->title)<h2>{{ $review->title }}</h2>@endif
                     @if($review->positive_feedback)<p><strong>Liked:</strong> {{ $review->positive_feedback }}</p>@endif
                     @if($review->negative_feedback)<p><strong>Could be better:</strong> {{ $review->negative_feedback }}</p>@endif
