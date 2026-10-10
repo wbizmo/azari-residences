@@ -80,12 +80,12 @@ class MarketplaceSearchRequest extends AzariFormRequest
             'latitude' => ['nullable', 'numeric', 'between:-90,90'],
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
             'flex_days' => ['nullable', Rule::in([1, 3, 7])],
-            'north' => ['nullable', 'numeric', 'between:-90,90'],
-            'south' => ['nullable', 'numeric', 'between:-90,90', 'lte:north'],
-            'east' => ['nullable', 'numeric', 'between:-180,180'],
-            'west' => ['nullable', 'numeric', 'between:-180,180'],
+            'north' => ['nullable', 'required_with:north,south,east,west', 'numeric', 'between:-90,90'],
+            'south' => ['nullable', 'required_with:north,south,east,west', 'numeric', 'between:-90,90', 'lte:north'],
+            'east' => ['nullable', 'required_with:north,south,east,west', 'numeric', 'between:-180,180'],
+            'west' => ['nullable', 'required_with:north,south,east,west', 'numeric', 'between:-180,180'],
             'page' => ['nullable', 'integer', 'min:1', 'max:10000'],
-            'cursor' => ['nullable', 'string', 'min:1', 'max:1024', 'regex:/^[A-Za-z0-9_+\/=-]+$/'],
+            'cursor' => ['nullable', 'string', 'min:1', 'max:1024', 'regex:/^[A-Za-z0-9_+\/=.\-]+$/'],
         ];
     }
 }
