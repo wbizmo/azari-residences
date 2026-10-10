@@ -99,6 +99,7 @@ class PhaseTwoGuestController extends Controller
                     'locale' => app()->getLocale(),
                     'attachment_path' => $attachmentPath,
                     'attachment_name' => $safeAttachmentName,
+                    'attachment_scan_status' => $attachmentPath ? 'pending' : null,
                 ]);
 
                 $recipientId = $booking->property?->owner_id;
@@ -136,6 +137,7 @@ class PhaseTwoGuestController extends Controller
         $booking = $this->booking($request, $reference);
         $conversation = BookingConversation::query()->where('booking_id', $booking->id)->firstOrFail();
         abort_unless((int) $message->conversation_id === (int) $conversation->id && $message->attachment_path, 404);
+        abort_unless($message->attachment_scan_status === 'clean', 404);
         abort_unless(Storage::disk('private')->exists($message->attachment_path), 404);
 
         return Storage::disk('private')->download($message->attachment_path, BookingAttachmentName::forDownload($message->attachment_name, $message->attachment_path));
