@@ -78,6 +78,7 @@ class OwnerBookingMessageController extends Controller
                     'locale' => app()->getLocale(),
                     'attachment_path' => $attachmentPath,
                     'attachment_name' => $safeAttachmentName,
+                    'attachment_scan_status' => $attachmentPath ? 'pending' : null,
                 ]);
 
                 $recipientId = Booking::query()
@@ -125,6 +126,7 @@ class OwnerBookingMessageController extends Controller
         $access->assert($request->user(), $property, 'messages.manage');
         abort_unless((int) $conversation->property_id === (int) $property->id, 404);
         abort_unless((int) $message->conversation_id === (int) $conversation->id && $message->attachment_path, 404);
+        abort_unless($message->attachment_scan_status === 'clean', 404);
         abort_unless(Storage::disk('private')->exists($message->attachment_path), 404);
 
         AuditLog::record('booking_message.attachment_downloaded', $conversation, [], [

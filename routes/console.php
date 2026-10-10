@@ -10,6 +10,7 @@ Schedule::command('resavar:recover-amendment-payments --limit=50')->everyFiveMin
 Schedule::command('azari:send-transactional-reminders')->hourly()->withoutOverlapping();
 Schedule::command('resavar:escalate-overdue-support --limit=50')->everyFiveMinutes()->name('critical-support-escalation')->withoutOverlapping();
 Schedule::command('resavar:deliver-booking-message-alerts --limit=100')->everyMinute()->name('booking-message-alert-outbox')->withoutOverlapping();
+Schedule::command('resavar:scan-booking-attachments --limit=25')->everyMinute()->name('booking-attachment-scanner')->withoutOverlapping();
 Schedule::command('azari:send-unpaid-booking-reminders')->everyFiveMinutes()->withoutOverlapping();
 Schedule::command('azari:provision-successful-booking-accounts')->hourly()->withoutOverlapping();
 if (config('filesystems.media_backup_schedule_enabled', false)) {
