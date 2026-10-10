@@ -11,5 +11,6 @@ class BookingMessage extends Model
         'attachment_scanned_at' => 'datetime',
         'attachment_scan_claimed_at' => 'datetime',
         'attachment_scan_next_attempt_at' => 'datetime',
+        'attachment_purged_at' => 'datetime',
     ];
 }

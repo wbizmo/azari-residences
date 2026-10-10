@@ -17,9 +17,11 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class OwnerPhaseTwoController extends Controller
 {
@@ -230,7 +232,11 @@ class OwnerPhaseTwoController extends Controller
             'notes' => ['nullable', 'string', 'max:5000'],
             'due_at' => ['nullable', 'date'],
             'assigned_to' => ['nullable', 'integer', 'exists:users,id'],
+            'checklist_items' => ['nullable', 'string', 'max:5000'],
         ]);
+
+        $checklist = $this->parseChecklist((string) ($data['checklist_items'] ?? ''));
+        unset($data['checklist_items']);
 
         if (! empty($data['booking_id'])) {
             abort_unless(Booking::query()->whereKey($data['booking_id'])->where('property_id', $property->id)->exists(), 422);
@@ -252,6 +258,7 @@ class OwnerPhaseTwoController extends Controller
             'property_id' => $property->id,
             'created_by' => $request->user()->id,
             'status' => 'open',
+            'checklist' => $checklist ?: null,
         ]);
 
         AuditLog::record('property_operations.task_created', $task);
@@ -269,6 +276,9 @@ class OwnerPhaseTwoController extends Controller
             'notes' => ['nullable', 'string', 'max:5000'],
             'assigned_to' => ['nullable', 'integer', 'exists:users,id'],
             'version' => ['required', 'integer', 'min:0'],
+            'checklist_completed' => ['nullable', 'array', 'max:20'],
+            'checklist_completed.*' => ['integer', 'min:0', 'max:19'],
+            'evidence' => ['nullable', 'file', 'max:5120', 'mimes:jpg,jpeg,png', 'mimetypes:image/jpeg,image/png'],
         ]);
 
         if (! empty($data['assigned_to'])) {
@@ -282,10 +292,40 @@ class OwnerPhaseTwoController extends Controller
             abort_unless($assignable, 422);
         }
 
-        $before = $task->only(['status', 'notes', 'assigned_to']);
+        $before = $task->only(['status', 'notes', 'assigned_to', 'checklist', 'evidence_name']);
         $expected = $data['version'];
-        unset($data['version']);
+        $completedIndexes = collect($data['checklist_completed'] ?? [])->map(fn ($value) => (int) $value)->unique();
+        $checklist = collect($task->checklist ?? [])->values()->map(
+            fn (array $item, int $index) => [
+                'label' => mb_substr(trim((string) ($item['label'] ?? '')), 0, 160),
+                'done' => $completedIndexes->contains($index),
+            ]
+        )->filter(fn (array $item) => $item['label'] !== '')->values()->all();
 
+        if ($data['status'] === 'completed' && collect($checklist)->contains(fn (array $item) => ! $item['done'])) {
+            return back()->withErrors(['status' => 'Complete every checklist item before marking this task completed.'])->withInput();
+        }
+
+        $evidence = $request->file('evidence');
+        $newEvidencePath = null;
+        $newEvidenceName = null;
+        $newEvidenceMime = null;
+        if ($evidence) {
+            $newEvidenceMime = (string) $evidence->getMimeType();
+            $extension = $newEvidenceMime === 'image/png' ? 'png' : 'jpg';
+            $newEvidenceName = 'task-evidence-'.$task->getKey().'.'.$extension;
+            $newEvidencePath = $evidence->store('property-operations/evidence', 'private');
+        }
+
+        unset($data['version'], $data['checklist_completed'], $data['evidence']);
+        $data['checklist'] = $checklist ?: null;
+        if ($newEvidencePath) {
+            $data['evidence_path'] = $newEvidencePath;
+            $data['evidence_name'] = $newEvidenceName;
+            $data['evidence_mime'] = $newEvidenceMime;
+        }
+
+        $oldEvidencePath = $task->evidence_path;
         $changed = DB::transaction(function () use ($property, $task, $data, $expected, $before): bool {
             // SQL compare-and-swap avoids a stale form overwriting an edit made
             // by another property collaborator. Only a successful update is audited.
@@ -305,16 +345,59 @@ class OwnerPhaseTwoController extends Controller
             }
 
             $task->refresh();
-            AuditLog::record('property_operations.task_updated', $task, $before, $task->only(['status', 'notes', 'assigned_to']));
+            AuditLog::record(
+                'property_operations.task_updated',
+                $task,
+                $before,
+                $task->only(['status', 'notes', 'assigned_to', 'checklist', 'evidence_name'])
+            );
 
             return true;
         }, 3);
 
         if (! $changed) {
+            if ($newEvidencePath) {
+                Storage::disk('private')->delete($newEvidencePath);
+            }
             return back()->withErrors(['status' => 'This task was changed by another team member. Reload the operations board before updating.']);
         }
 
+        if ($newEvidencePath && $oldEvidencePath && $oldEvidencePath !== $newEvidencePath) {
+            Storage::disk('private')->delete($oldEvidencePath);
+        }
+
         return back()->with('success', 'Task updated.');
+    }
+
+    public function taskEvidence(
+        Request $request,
+        Property $property,
+        PropertyOperationsTask $task,
+        PropertyAccessService $access
+    ): StreamedResponse {
+        $access->assert($request->user(), $property, 'operations.manage');
+        abort_unless((int) $task->property_id === (int) $property->id && filled($task->evidence_path), 404);
+        abort_unless(Storage::disk('private')->exists($task->evidence_path), 404);
+
+        AuditLog::record('property_operations.evidence_downloaded', $task);
+
+        return Storage::disk('private')->download(
+            $task->evidence_path,
+            $task->evidence_name ?: 'task-evidence.jpg',
+            ['Content-Type' => $task->evidence_mime ?: 'application/octet-stream']
+        );
+    }
+
+    private function parseChecklist(string $input): array
+    {
+        return collect(preg_split('/\\R/u', $input) ?: [])
+            ->map(fn (string $line) => trim($line))
+            ->filter()
+            ->unique()
+            ->take(20)
+            ->map(fn (string $label) => ['label' => mb_substr($label, 0, 160), 'done' => false])
+            ->values()
+            ->all();
     }
 
 
