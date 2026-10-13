@@ -146,8 +146,12 @@
 </div>
 
 <div class="az-user-actions" style="margin-bottom:18px">
-    <a class="az-user-button az-user-button--light" target="_blank" href="{{ route('user.bookings.documents', [$booking->reference, 'confirmation']) }}">Booking confirmation</a>
-    <a class="az-user-button az-user-button--light" target="_blank" href="{{ route('user.bookings.documents', [$booking->reference, 'invoice']) }}">Invoice PDF</a>
+    @if($booking->hasBookingApproval() && in_array($booking->status, ['confirmed', 'paid', 'checked_in', 'checked_out', 'completed'], true))
+        <a class="az-user-button az-user-button--light" target="_blank" href="{{ route('user.bookings.documents', [$booking->reference, 'confirmation']) }}">Booking confirmation</a>
+    @endif
+    @if($booking->hasBookingApproval())
+        <a class="az-user-button az-user-button--light" target="_blank" href="{{ route('user.bookings.documents', [$booking->reference, 'invoice']) }}">Invoice PDF</a>
+    @endif
     <a class="az-user-button az-user-button--light" href="{{ route('user.bookings.phase2.messages', $booking->reference) }}">Messages</a>
     <a class="az-user-button az-user-button--light" href="{{ route('user.bookings.phase2.arrival', $booking->reference) }}">Arrival</a>
     @if($receiptAvailable)<a class="az-user-button az-user-button--light" target="_blank" href="{{ route('user.bookings.documents', [$booking->reference, 'receipt']) }}">Receipt PDF</a>@endif
