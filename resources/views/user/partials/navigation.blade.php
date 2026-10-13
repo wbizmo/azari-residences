@@ -47,6 +47,13 @@ $contactEmail=\App\Models\SiteSetting::valueFor('customer_dashboard_contact_emai
             </a>
         @endif
 
+        @if(Route::has('user.owner.booking-requests.index'))
+            <a class="az-user-nav-link {{ request()->routeIs('user.owner.booking-requests.*') ? 'is-active' : '' }}"
+               href="{{ route('user.owner.booking-requests.index') }}">
+                <span class="material-symbols-outlined" aria-hidden="true">fact_check</span>
+                <span>Booking requests</span>
+            </a>
+        @endif
         @if(Route::has('user.owner.earnings'))
             <a class="az-user-nav-link {{ request()->routeIs('user.owner.earnings') ? 'is-active' : '' }}" href="{{ route('user.owner.earnings') }}">
                 <span class="material-symbols-outlined" aria-hidden="true">payments</span>
