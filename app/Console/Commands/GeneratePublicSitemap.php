@@ -63,12 +63,8 @@ class GeneratePublicSitemap extends Command
             ['availability.index',           'daily',   '0.9'],
             ['public.apartments',            'daily',   '0.9'],
             ['public.rooms',                 'daily',   '0.9'],
-
-            ['public.services',              'weekly',  '0.8'],
             ['public.concierge',             'weekly',  '0.8'],
-            ['public.housekeeping',          'weekly',  '0.8'],
             ['public.restaurant',            'weekly',  '0.8'],
-            ['public.airport-transfers',     'weekly',  '0.8'],
             ['public.local-guide',           'weekly',  '0.8'],
 
             ['public.about',                 'monthly', '0.8'],
