@@ -609,10 +609,9 @@ SQL;
         int $rooms,
         int $guests
     ): array {
-        $keyFilters = collect($filters)->except(['page', 'sort'])->sortKeys()->all();
-        $key = 'reserva:search-facets:'.hash('sha256', json_encode($keyFilters));
-
-        return Cache::remember($key, now()->addSeconds(60), function () use ($filters, $checkIn, $checkOut, $rooms, $guests): array {
+        // Dynamic counts depend on inventory, holds, moderation and listing
+        // updates. A time-based cache can advertise stale availability and
+        // misleading filters. Keep these indexed aggregations authoritative.
             $base = $this->eligibleProperties($filters, $checkIn, $checkOut, $rooms, $guests);
 
             $propertyTypes = (clone $base)
@@ -653,7 +652,6 @@ SQL;
                 'locations' => $locations,
                 'amenities' => $amenities,
             ];
-        });
     }
 
     private function cleanPrefix(string $value): string
