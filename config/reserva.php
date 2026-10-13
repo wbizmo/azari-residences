@@ -4,6 +4,12 @@ return [
     // Retire travel and channel-provider features without destroying their history.
     // Restore only through an explicit operator-approved scope rollback.
     'accommodation_only' => filter_var(env('RESAVAR_ACCOMMODATION_ONLY', true), FILTER_VALIDATE_BOOL),
+    'bookings' => [
+        // New accommodation bookings are REQUESTS until owner/admin review.
+        // An explicit false preserves the pre-refocus instant-booking contract.
+        'require_approval' => filter_var(env('RESAVAR_BOOKINGS_REQUIRE_APPROVAL', true), FILTER_VALIDATE_BOOL),
+        'review_hours' => max(1, min(168, (int) env('RESAVAR_BOOKING_REVIEW_HOURS', 24))),
+    ],
     'fx' => [
         // Explicitly false until a gateway-certified charge/refund/ledger path exists.
         'checkout_enabled' => env('RESAVAR_FX_CHECKOUT_ENABLED', false),
