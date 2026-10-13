@@ -168,6 +168,7 @@ class MarketplaceSearchService
                 $this->applyTypeFilters($types, $filters, $checkIn, $checkOut, $rooms, $guests)
                     ->with(['ratePlans' => fn ($plans) => $plans
                         ->where('is_active', true)->where('is_public', true)
+                        ->with('paymentPolicy')
                         ->orderBy('sort_order')->orderBy('id')])
                     ->orderBy('base_rate')
                     ->orderBy('sort_order')
@@ -235,6 +236,20 @@ class MarketplaceSearchService
                 : ($type->ratePlans->isEmpty() ? collect([null]) : $type->ratePlans);
 
             foreach ($plans as $plan) {
+                if (! empty($filters['free_cancellation']) && ! $plan?->is_refundable) {
+                    continue;
+                }
+                if (! empty($filters['breakfast'])
+                    && ! str_contains(mb_strtolower((string) ($plan?->meal_plan ?? '')), 'breakfast')) {
+                    continue;
+                }
+                if (! empty($filters['pay_later'])
+                    && (! $plan?->paymentPolicy?->is_active
+                        || ! in_array($plan->paymentPolicy->payment_type,
+                            ['pay_later', 'pay_at_property', 'deposit'], true))) {
+                    continue;
+                }
+
                 try {
                     $this->availability->assertRules(
                         $property, $checkIn, $checkOut,
