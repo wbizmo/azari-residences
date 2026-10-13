@@ -150,6 +150,7 @@ require __DIR__.'/azari-property-owner-extension.php';
 require __DIR__.'/resavar-phase-two.php';
 require __DIR__.'/resavar-phase-four.php';
 require __DIR__.'/resavar-phase-four-batch-two.php';
+require __DIR__.'/resavar-historical-archive.php';
 
 /*
 |--------------------------------------------------------------------------
