@@ -21,15 +21,15 @@ use Illuminate\Support\Facades\Route;
 
 // Signed, provider-certified travel callback inbox. No booking/payment mutation on HTTP delivery.
 Route::post('/webhooks/travel/{supplier}', \App\Http\Controllers\PhaseFour\TravelSupplierWebhookController::class)
-    ->middleware('throttle:60,1')->name('travel.supplier.webhook');
+    ->middleware(['throttle:60,1', 'resavar.non-accommodation'])->name('travel.supplier.webhook');
 
 // Authenticated, sandbox-gated inbox only. Provider-certified routes are separate.
 Route::post('/webhooks/channels/{connection}', \App\Http\Controllers\PhaseThree\ChannelWebhookController::class)
-    ->middleware('throttle:30,1')->name('channels.webhook');
+    ->middleware(['throttle:30,1', 'resavar.non-accommodation'])->name('channels.webhook');
 Route::post('/language', \App\Http\Controllers\PhaseThree\LanguageController::class)
     ->middleware('throttle:15,1')->name('language.update');
 Route::prefix('api/partners/v1')->name('partner.v1.')
-    ->middleware('throttle:30,1')->group(function (): void {
+    ->middleware(['throttle:30,1', 'resavar.non-accommodation'])->group(function (): void {
         Route::get('/stays', [\App\Http\Controllers\PhaseThree\PartnerApiController::class, 'search'])->name('stays');
         Route::post('/intents', [\App\Http\Controllers\PhaseThree\PartnerApiController::class, 'intent'])->name('intents');
     });
@@ -39,7 +39,7 @@ Route::get('/health/ready', [HealthController::class, 'ready'])->middleware('thr
 // Availability routes are registered in azari-public-completion.php
 Route::get('/residences/{property}', [PropertyController::class, 'show'])->name('properties.show');
 Route::get('/destinations/{location:slug}', [DestinationController::class, 'show'])->name('destinations.show');
-Route::get('/calendar/{token}.ics', ChannelCalendarController::class)->middleware('throttle:120,1')->name('channels.export');
+Route::get('/calendar/{token}.ics', ChannelCalendarController::class)->middleware(['throttle:120,1', 'resavar.non-accommodation'])->name('channels.export');
 
 Route::get('/account-deletion', [AccountDeletionRequestController::class, 'show'])
     ->name('account-deletion.show');
@@ -94,13 +94,13 @@ Route::prefix('azaridevadmin')->middleware(['auth.session', 'azari.staff'])->gro
     Route::post('/properties/{property}/commission-agreements', \App\Http\Controllers\PhaseThree\CommissionAgreementController::class)
         ->middleware(['azari.staff:administrator','azari.step-up','throttle:10,1'])
         ->name('azari.admin.commission-agreements.approve');
-    Route::get('/channels', [ChannelConnectionController::class, 'index'])->middleware('azari.permission:system-health.view')->name('azari.admin.channels.index');
+    Route::get('/channels', [ChannelConnectionController::class, 'index'])->middleware('azari.permission:system-health.view')->middleware('resavar.non-accommodation')->name('azari.admin.channels.index');
     Route::get('/channels/events/operations', \App\Http\Controllers\Admin\ChannelEventOperationsController::class)
         ->middleware('azari.permission:system-health.view')->name('azari.admin.channels.events');
-    Route::post('/channels', [ChannelConnectionController::class, 'store'])->middleware('azari.permission:system-health.manage')->name('azari.admin.channels.store');
-    Route::put('/channels/{connection}', [ChannelConnectionController::class, 'update'])->middleware('azari.permission:system-health.manage')->name('azari.admin.channels.update');
-    Route::post('/channels/{connection}/sync', [ChannelConnectionController::class, 'sync'])->middleware('azari.permission:system-health.manage')->name('azari.admin.channels.sync');
-    Route::delete('/channels/{connection}', [ChannelConnectionController::class, 'destroy'])->middleware('azari.permission:system-health.manage')->name('azari.admin.channels.destroy');
+    Route::post('/channels', [ChannelConnectionController::class, 'store'])->middleware('azari.permission:system-health.manage')->middleware('resavar.non-accommodation')->name('azari.admin.channels.store');
+    Route::put('/channels/{connection}', [ChannelConnectionController::class, 'update'])->middleware('azari.permission:system-health.manage')->middleware('resavar.non-accommodation')->name('azari.admin.channels.update');
+    Route::post('/channels/{connection}/sync', [ChannelConnectionController::class, 'sync'])->middleware('azari.permission:system-health.manage')->middleware('resavar.non-accommodation')->name('azari.admin.channels.sync');
+    Route::delete('/channels/{connection}', [ChannelConnectionController::class, 'destroy'])->middleware('azari.permission:system-health.manage')->middleware('resavar.non-accommodation')->name('azari.admin.channels.destroy');
 
     Route::get('/properties/{property}/commercial', [CommercialInventoryController::class, 'edit'])
         ->name('azari.admin.properties.commercial');
