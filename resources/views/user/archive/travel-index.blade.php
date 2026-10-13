@@ -27,6 +27,23 @@
             <p>You have no archived travel requests.</p>
         @endforelse
         {{ $requests->links() }}
+        <h3>Historical dining requests</h3>
+        @forelse($diningRequests as $dining)
+            <p><strong>{{ $dining->partner?->name ?? 'Former dining partner' }}</strong> ·
+                {{ str_replace('_', ' ', $dining->status) }} ·
+                {{ $dining->requested_for?->format('j M Y, H:i') ?? $dining->created_at?->format('j M Y, H:i') }}
+            </p>
+        @empty
+            <p>No historical dining requests.</p>
+        @endforelse
+        <h3>Historical trip records</h3>
+        @forelse($assemblies as $assembly)
+            <p><strong>{{ $assembly->itinerary?->name ?? 'Archived trip plan' }}</strong> ·
+                {{ str_replace('_', ' ', $assembly->status) }} · {{ $assembly->created_at?->format('j M Y') }}
+            </p>
+        @empty
+            <p>No archived trip records.</p>
+        @endforelse
         <p><a href="{{ route('user.bookings.index') }}">Return to accommodation bookings</a></p>
     </div>
 </section>
