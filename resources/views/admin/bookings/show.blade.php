@@ -20,6 +20,20 @@
     </div>
 </section>
 
+@if($booking->approval)
+<section class="az-panel" aria-label="Manual accommodation request review">
+    <h2>Booking request review</h2>
+    <p><strong>Review status:</strong> {{ Str::headline($booking->approval->status) }}</p>
+    <p><strong>Review deadline:</strong> {{ $booking->expires_at?->format('j M Y, H:i') ?? 'Closed' }}</p>
+    @if($booking->approval->review_note)
+        <p><strong>Response:</strong> {{ $booking->approval->review_note }}</p>
+    @endif
+    @if(in_array($booking->approval->status, ['submitted', 'under_review'], true))
+        <a class="az-button" href="{{ route('azari.admin.booking-requests.index') }}">Open approval queue</a>
+    @endif
+    <p>Approval does not mean payment was received. Confirm payment separately using the regular reconciliation workflow.</p>
+</section>
+@endif
 <div class="az-detail-grid">
     <section class="az-panel">
         <h2>Stay details</h2>
