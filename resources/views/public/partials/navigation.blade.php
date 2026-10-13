@@ -38,39 +38,9 @@
                 </div>
             </div>
 
-            <div class="nav-popover" data-popover>
-                <button type="button" class="nav-popover-trigger" data-popover-trigger
-                        aria-expanded="false" aria-controls="services-popover">
-                    {{ __('resarva.nav.services') }}
-                    <span class="material-symbols-outlined" aria-hidden="true">keyboard_arrow_down</span>
-                </button>
-
-                <div class="nav-popover-panel" id="services-popover" data-popover-panel hidden>
-                    @if(Route::has('public.list-property'))
-                        <a href="{{ route('public.list-property') }}"
-                           class="{{ request()->routeIs('public.list-property') ? 'is-active' : '' }}">
-                            <span class="material-symbols-outlined" aria-hidden="true">add_home_work</span>
-                            <span class="nav-popover-label">List my property</span>
-                        </a>
-                    @endif
-                    <a href="{{ route('public.concierge') }}" class="{{ request()->routeIs('public.concierge') ? 'is-active' : '' }}">
-                        <span class="material-symbols-outlined">concierge</span><span class="nav-popover-label">Concierge</span>
-                    </a>
-                    <a href="{{ route('public.housekeeping') }}" class="{{ request()->routeIs('public.housekeeping') ? 'is-active' : '' }}">
-                        <span class="material-symbols-outlined">cleaning_services</span><span class="nav-popover-label">Housekeeping</span>
-                    </a>
-                    <a href="{{ route('public.restaurant') }}" class="{{ request()->routeIs('public.restaurant') ? 'is-active' : '' }}">
-                        <span class="material-symbols-outlined">restaurant</span><span class="nav-popover-label">Restaurant</span>
-                    </a>
-                    <a href="{{ route('public.airport-transfers') }}" class="{{ request()->routeIs('public.airport-transfers') ? 'is-active' : '' }}">
-                        <span class="material-symbols-outlined">airport_shuttle</span><span class="nav-popover-label">Airport transfers</span>
-                    </a>
-                    <a href="{{ route('public.local-guide') }}" class="{{ request()->routeIs('public.local-guide') ? 'is-active' : '' }}">
-                        <span class="material-symbols-outlined" aria-hidden="true">map</span>
-                        <span class="nav-popover-label">{{ __('resarva.nav.local_guide') }}</span>
-                    </a>
-                </div>
-            </div>
+            @if(Route::has('public.list-property'))
+                <a href="{{ route('public.list-property') }}">List your property</a>
+            @endif
 
             <a href="{{ route('public.about') }}">{{ __('resarva.nav.about') }}</a>
 

@@ -29,7 +29,7 @@ class PublicFrontendTest extends TestCase
     {
         $this->get('/')
             ->assertSee('Apartments')
-            ->assertSee('Services')
+            ->assertSee('List your property')
             ->assertSee('Verify booking')
             ->assertSee('Book now');
     }

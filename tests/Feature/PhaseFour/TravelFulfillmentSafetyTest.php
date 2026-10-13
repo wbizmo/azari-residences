@@ -28,6 +28,9 @@ final class TravelFulfillmentSafetyTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        // Exercise the historical adapter contracts only under an explicit
+        // legacy-sandbox opt-out; production remains accommodation-only.
+        config()->set('reserva.accommodation_only', false);
         config()->set('travel.requests_enabled', true);
         config()->set('travel.fulfillment_enabled', true);
         config()->set('travel.payment_verifier', FakeTravelPaymentVerifier::class);

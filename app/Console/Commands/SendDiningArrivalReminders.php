@@ -14,7 +14,7 @@ final class SendDiningArrivalReminders extends Command
 
     public function handle(): int
     {
-        if (! config('travel.dining_enabled',false)) return self::SUCCESS;
+        if (config('reserva.accommodation_only', true) || ! config('travel.dining_enabled',false)) return self::SUCCESS;
         $ids=DiningRequest::query()->where('status','confirmed')
             ->whereNotNull('provider_confirmed_at')
             ->whereNull('arrival_reminder_sent_at')

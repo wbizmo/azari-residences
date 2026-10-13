@@ -65,6 +65,14 @@ foreach ([
     'privacy-policy' => 'privacy-policy',
     'terms-and-conditions' => 'terms',
 ] as $uri => $key) {
+    // Retain existing route names for old bookmarks and cached templates,
+    // but do not advertise or render retired external travel services.
+    if (config('reserva.accommodation_only', true)
+        && in_array($key, ['services', 'concierge', 'housekeeping', 'restaurant', 'airport-transfers', 'local-guide'], true)) {
+        Route::redirect('/'.$uri, '/availability', 301)->name('public.'.$key);
+        continue;
+    }
+
     Route::get('/'.$uri, fn (PublicPageController $controller) => $controller->page($key))
         ->name('public.'.$key);
 }

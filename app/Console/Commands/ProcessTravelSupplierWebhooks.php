@@ -12,7 +12,7 @@ final class ProcessTravelSupplierWebhooks extends Command
 
     public function handle(TravelSupplierEventProcessor $processor): int
     {
-        if (! config('travel.webhooks_enabled', false)) {
+        if (config('reserva.accommodation_only', true) || ! config('travel.webhooks_enabled', false)) {
             $this->components->info('Travel partner callbacks are disabled.');
             return self::SUCCESS;
         }

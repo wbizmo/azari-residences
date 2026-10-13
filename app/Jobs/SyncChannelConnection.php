@@ -15,6 +15,8 @@ class SyncChannelConnection implements ShouldQueue
     public function backoff(): array { return [60, 300, 900]; }
     public function handle(ChannelSyncService $sync): void
     {
+        // Queued before the cutover? Safely acknowledge without external I/O.
+        if (config('reserva.accommodation_only', true)) return;
         $connection = ChannelConnection::query()->find($this->connectionId);
         if ($connection?->is_active) $sync->sync($connection);
     }

@@ -23,12 +23,6 @@ class PublicBookingRoutesTest extends TestCase
             'availability.index',
             'public.apartments',
             'public.rooms',
-            'public.services',
-            'public.concierge',
-            'public.housekeeping',
-            'public.restaurant',
-            'public.airport-transfers',
-            'public.local-guide',
             'public.about',
             'public.contact',
             'public.support',
@@ -38,6 +32,19 @@ class PublicBookingRoutesTest extends TestCase
             'public.terms',
         ] as $route) {
             $this->get(route($route))->assertSuccessful();
+        }
+
+        foreach ([
+            'public.services',
+            'public.concierge',
+            'public.housekeeping',
+            'public.restaurant',
+            'public.airport-transfers',
+            'public.local-guide',
+        ] as $retiredRoute) {
+            $this->get(route($retiredRoute))
+                ->assertStatus(301)
+                ->assertRedirect(route('availability.index'));
         }
     }
 

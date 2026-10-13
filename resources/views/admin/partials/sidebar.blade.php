@@ -12,7 +12,7 @@
         ['azari.admin.properties.index','apartment','Properties','properties.view'],
         ['azari.admin.inventory.index','inventory_2','Inventory & categories','properties.view'],
         ['azari.admin.locations.index','location_on','Locations','properties.view'],
-        ['azari.admin.channels.index','sync_alt','Channel sync','system-health.view'],
+
         ['azari.admin.room-types.index','category','Categories','properties.view'],
         ['azari.admin.owner-listings.index','real_estate_agent','Owner listings','property-owners.view'],
         ['azari.admin.owner-withdrawals.index','payments','Owner withdrawals','owner-withdrawals.view'],
@@ -44,23 +44,6 @@
                     <a href="{{ route($route) }}" class="az-nav-link {{ request()->routeIs(str_replace('.index','.*',$route)) || request()->routeIs($route) ? 'is-active' : '' }}"><span class="material-symbols-outlined" aria-hidden="true">{{ $icon }}</span><span>{{ $label }}</span></a>
                 @endif
             @endforeach
-            @if(Route::has('azari.admin.travel.index') && $adminActor?->isAdministrator())
-                <a href="{{ route('azari.admin.travel.index') }}"
-                   class="az-nav-link {{ request()->routeIs('azari.admin.travel.*') ? 'is-active' : '' }}">
-                    <span class="material-symbols-outlined">travel_explore</span><span>Travel suppliers</span>
-                </a>
-            @endif
-            @if($adminActor?->isAdministrator())
-                <a class="az-nav-link" href="{{ route('azari.admin.dining.index') }}">
-                    <span class="material-symbols-outlined">restaurant</span><span>Dining concierge</span>
-                </a>
-                <a class="az-nav-link" href="{{ route('azari.admin.travel.assemblies.index') }}">
-                    <span class="material-symbols-outlined">account_tree</span><span>Trip recovery</span>
-                </a>
-                <a class="az-nav-link" href="{{ route('azari.admin.travel.mobile-demand') }}">
-                    <span class="material-symbols-outlined">smartphone</span><span>Mobile demand gate</span>
-                </a>
-            @endif
             @if(Route::has('azari.admin.staff.index') && $adminActor?->isAdministrator())
                 <a href="{{ route('azari.admin.staff.index') }}" class="az-nav-link {{ request()->routeIs('azari.admin.staff.*') ? 'is-active' : '' }}"><span class="material-symbols-outlined">badge</span><span>Staff</span></a>
             @endif

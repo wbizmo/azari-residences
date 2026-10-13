@@ -22,6 +22,13 @@ class ChannelConnectionLifecycleTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // These legacy channel cases remain as disabled-path regression fixtures.
+        config()->set('reserva.accommodation_only', false);
+    }
+
     private function fixture(bool $hasFutureReservation = true): array
     {
         $owner = User::factory()->create(['email_verified_at' => now()]);

@@ -1,6 +1,9 @@
 <?php
 
 return [
+    // Retire travel and channel-provider features without destroying their history.
+    // Restore only through an explicit operator-approved scope rollback.
+    'accommodation_only' => filter_var(env('RESAVAR_ACCOMMODATION_ONLY', true), FILTER_VALIDATE_BOOL),
     'fx' => [
         // Explicitly false until a gateway-certified charge/refund/ledger path exists.
         'checkout_enabled' => env('RESAVAR_FX_CHECKOUT_ENABLED', false),

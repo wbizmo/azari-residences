@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 
 // Separate from accommodation payment and booking controllers on purpose.
 Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer'])
+    ->middleware('resavar.non-accommodation')
     ->prefix('account/travel')->name('user.travel.')->group(function (): void {
         Route::get('/', [TravelCatalogController::class, 'index'])->name('index');
         Route::post('/requests', [TravelCatalogController::class, 'store'])
@@ -21,6 +22,7 @@ Route::middleware(['auth', 'auth.session', 'verified', 'azari.customer'])
 // Admin operations are hidden behind the existing administrator + step-up
 // gates. Approval does not grant supplier access to traveler PII.
 Route::middleware(['auth', 'auth.session', 'azari.staff', 'azari.staff:administrator'])
+    ->middleware('resavar.non-accommodation')
     ->prefix('azaridevadmin/travel')->name('azari.admin.travel.')->group(function (): void {
         Route::get('/', [TravelSupplierController::class, 'index'])->name('index');
         Route::post('/suppliers', [TravelSupplierController::class, 'store'])

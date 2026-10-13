@@ -221,13 +221,6 @@
                 <a href="{{ route('public.apartments') }}">Apartments</a>
                 <a href="{{ route('public.rooms') }}">Rooms</a>
                 <a href="{{ route('availability.index') }}">Check availability</a>
-                <a href="{{ route('public.services') }}">Services</a>
-                <a href="{{ route('public.concierge') }}">Concierge</a>
-                <a href="{{ route('public.housekeeping') }}">Housekeeping</a>
-                <a href="{{ route('public.restaurant') }}">Restaurant</a>
-                <a href="{{ route('public.airport-transfers') }}">Airport transfers</a>
-                <!-- <a href="{{ route('user.owner.listings.create') }}">List my property</a> -->
-                <a href="{{ route('public.local-guide') }}">Local guide</a>
                 <a href="{{ route('public.about') }}">About Resavar</a>
 
                 <a href="{{ route('public.contact') }}">Contact</a>

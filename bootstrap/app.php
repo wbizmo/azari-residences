@@ -10,6 +10,7 @@ use App\Http\Middleware\EnsureRecentPasswordConfirmation;
 use App\Http\Middleware\CorrelationId;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetLocale;
+use App\Http\Middleware\RetireNonAccommodationRoutes;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -32,6 +33,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'azari.permission' => EnsureStaffPermission::class,
             'azari.owns-route' => EnsureRouteModelOwnership::class,
             'azari.step-up' => EnsureRecentPasswordConfirmation::class,
+            'resavar.non-accommodation' => RetireNonAccommodationRoutes::class,
         ]);
         $middleware->validateCsrfTokens(except: [
             'payments/*/webhook',

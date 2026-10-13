@@ -8,6 +8,7 @@ use App\Http\Controllers\UserArea\TripAssemblyController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth','auth.session','verified','azari.customer'])
+    ->middleware('resavar.non-accommodation')
     ->prefix('account')->name('user.')->group(function (): void {
         Route::get('/dining',[DiningConciergeController::class,'index'])->name('dining.index');
         Route::post('/dining',[DiningConciergeController::class,'store'])
@@ -19,6 +20,7 @@ Route::middleware(['auth','auth.session','verified','azari.customer'])
     });
 
 Route::middleware(['auth','auth.session','azari.staff','azari.staff:administrator'])
+    ->middleware('resavar.non-accommodation')
     ->prefix('azaridevadmin')->name('azari.admin.')->group(function (): void {
         Route::get('/dining',[DiningPartnerController::class,'index'])->name('dining.index');
         Route::post('/dining',[DiningPartnerController::class,'store'])
