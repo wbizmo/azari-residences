@@ -3,7 +3,6 @@
 namespace Tests\Feature\Search;
 
 use App\Models\AccommodationType;
-use App\Models\Booking;
 use App\Models\Property;
 use App\Models\RatePlan;
 use App\Services\Search\MarketplaceSearchService;
@@ -115,6 +114,36 @@ final class AccommodationOnlySearchRegressionTest extends TestCase
 
         $this->assertSame(0, (int) ($second['facets']['property_types']['apartment'] ?? 0));
         $this->assertSame(0, $second['results']->total());
+    }
+
+    public function test_a_property_without_map_coordinates_can_be_searched_and_reserved(): void
+    {
+        $property = Property::factory()->create([
+            'status' => 'available',
+            'is_published' => true,
+            'formatted_address' => '20 Example Road, Lagos',
+            'latitude' => null,
+            'longitude' => null,
+            'same_day_booking' => true,
+        ]);
+        $filters = [...$this->filters(), 'property_id' => $property->id];
+        $market = app(MarketplaceSearchService::class);
+
+        $results = $market->search($filters, false);
+        $this->assertSame(1, $results['results']->total());
+        $this->assertSame($property->id,
+            $results['results']->getCollection()->first()['property']->id);
+        $this->assertCount(0, $market->mapCursor($filters)['points']);
+
+        $room = $property->accommodationTypes()->firstOrFail();
+        $plan = $room->ratePlans()->first();
+        $hold = app(\\App\\Services\\Bookings\\AzariAvailabilityEngine::class)->hold(
+            $property,
+            \\Carbon\\CarbonImmutable::parse($filters['check_in']),
+            \\Carbon\\CarbonImmutable::parse($filters['check_out']),
+            2, 0, 1, null, $room->id, $plan?->id
+        );
+        $this->assertSame($property->id, $hold->property_id);
     }
 
     public function test_manual_address_form_exposes_optional_coordinates_without_any_geocoding_requirement(): void
