@@ -114,8 +114,8 @@
                 <a href="{{ route('public.apartments') }}">Apartments</a>
                 <a href="{{ route('public.rooms') }}">Rooms</a>
                 <a href="{{ route('availability.index') }}">Availability</a>
-                <a href="{{ route('public.concierge') }}">Services</a>
-                <a href="{{ route('public.local-guide') }}">Local guide</a>
+                <a href="{{ route('public.about') }}">About Resavar</a>
+                <a href="{{ route('public.booking-terms') }}">Booking terms</a>
             </div>
 
             <div class="footer-column">
