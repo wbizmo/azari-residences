@@ -189,9 +189,13 @@
             const field = event.target?.dataset?.azariAddress;
             if (field === 'latitude' || field === 'longitude') {
                 root.dataset.azariSuggestedCoordinates = 'false';
-            } else if (field === 'formatted_address' && root.dataset.azariSuggestedCoordinates === 'true') {
-                setField(root, 'latitude', '');
-                setField(root, 'longitude', '');
+            } else if (field === 'formatted_address') {
+                // Always invalidate an in-flight geolocation or reverse lookup,
+                // including before it has returned its first suggestion.
+                if (root.dataset.azariSuggestedCoordinates === 'true') {
+                    setField(root, 'latitude', '');
+                    setField(root, 'longitude', '');
+                }
                 root.dataset.azariSuggestedCoordinates = 'false';
                 generation++;
                 activeRequest?.abort();
