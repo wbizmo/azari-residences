@@ -11,8 +11,12 @@
         <a class="az-button" href="{{ route('azari.admin.bookings.receipt', $booking) }}" target="_blank" rel="noopener noreferrer">
             <span class="material-symbols-outlined" aria-hidden="true">print</span> Print invoice
         </a>
-        <a class="az-button" href="{{ route('azari.admin.bookings.documents', [$booking, 'confirmation']) }}" target="_blank" rel="noopener noreferrer">Confirmation PDF</a>
-        <a class="az-button" href="{{ route('azari.admin.bookings.documents', [$booking, 'invoice']) }}" target="_blank" rel="noopener noreferrer">Invoice PDF</a>
+        @if($booking->hasBookingApproval() && in_array($booking->status, ['confirmed', 'paid', 'checked_in', 'checked_out', 'completed'], true))
+            <a class="az-button" href="{{ route('azari.admin.bookings.documents', [$booking, 'confirmation']) }}" target="_blank" rel="noopener noreferrer">Confirmation PDF</a>
+        @endif
+        @if($booking->hasBookingApproval())
+            <a class="az-button" href="{{ route('azari.admin.bookings.documents', [$booking, 'invoice']) }}" target="_blank" rel="noopener noreferrer">Invoice PDF</a>
+        @endif
         @if($booking->receiptAvailable())
             <a class="az-button" href="{{ route('azari.admin.bookings.documents', [$booking, 'receipt']) }}" target="_blank" rel="noopener noreferrer">Receipt PDF</a>
         @endif
