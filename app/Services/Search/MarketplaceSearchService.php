@@ -12,7 +12,6 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Cursor;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -275,12 +274,14 @@ class MarketplaceSearchService
 
     public function filterOptions(): array
     {
-        return Cache::remember('public:search:filter-options', now()->addMinutes(10), fn () => [
+        // Amenity changes are infrequent and this bounded indexed lookup
+        // must be fresh immediately after an administrator updates options.
+        return [
             'amenities' => Amenity::query()
                 ->where('is_active', true)
                 ->orderBy('name')
                 ->get(['id', 'name', 'icon']),
-        ]);
+        ];
     }
 
     private function eligibleProperties(
@@ -612,46 +613,46 @@ SQL;
         // Dynamic counts depend on inventory, holds, moderation and listing
         // updates. A time-based cache can advertise stale availability and
         // misleading filters. Keep these indexed aggregations authoritative.
-            $base = $this->eligibleProperties($filters, $checkIn, $checkOut, $rooms, $guests);
+        $base = $this->eligibleProperties($filters, $checkIn, $checkOut, $rooms, $guests);
 
-            $propertyTypes = (clone $base)
-                ->selectRaw('property_type, COUNT(*) as aggregate')
-                ->whereNotNull('property_type')
-                ->groupBy('property_type')
-                ->orderByDesc('aggregate')
-                ->pluck('aggregate', 'property_type')
-                ->map(fn ($count) => (int) $count)
-                ->all();
+        $propertyTypes = (clone $base)
+            ->selectRaw('property_type, COUNT(*) as aggregate')
+            ->whereNotNull('property_type')
+            ->groupBy('property_type')
+            ->orderByDesc('aggregate')
+            ->pluck('aggregate', 'property_type')
+            ->map(fn ($count) => (int) $count)
+            ->all();
 
-            $locations = (clone $base)
-                ->selectRaw('location_id, COUNT(*) as aggregate')
-                ->whereNotNull('location_id')
-                ->groupBy('location_id')
-                ->pluck('aggregate', 'location_id')
-                ->map(fn ($count) => (int) $count)
-                ->all();
+        $locations = (clone $base)
+            ->selectRaw('location_id, COUNT(*) as aggregate')
+            ->whereNotNull('location_id')
+            ->groupBy('location_id')
+            ->pluck('aggregate', 'location_id')
+            ->map(fn ($count) => (int) $count)
+            ->all();
 
-            $eligibleIds = (clone $base)->select('properties.id');
+        $eligibleIds = (clone $base)->select('properties.id');
 
-            $amenities = DB::table('amenity_property')
-                ->join('amenities', 'amenities.id', '=', 'amenity_property.amenity_id')
-                ->whereIn('amenity_property.property_id', $eligibleIds->toBase())
-                ->selectRaw('amenities.id, amenities.name, COUNT(DISTINCT amenity_property.property_id) as aggregate')
-                ->groupBy('amenities.id', 'amenities.name')
-                ->orderByDesc('aggregate')
-                ->limit(30)
-                ->get()
-                ->map(fn ($row) => [
-                    'id' => (int) $row->id,
-                    'name' => $row->name,
-                    'count' => (int) $row->aggregate,
-                ])->all();
+        $amenities = DB::table('amenity_property')
+            ->join('amenities', 'amenities.id', '=', 'amenity_property.amenity_id')
+            ->whereIn('amenity_property.property_id', $eligibleIds->toBase())
+            ->selectRaw('amenities.id, amenities.name, COUNT(DISTINCT amenity_property.property_id) as aggregate')
+            ->groupBy('amenities.id', 'amenities.name')
+            ->orderByDesc('aggregate')
+            ->limit(30)
+            ->get()
+            ->map(fn ($row) => [
+                'id' => (int) $row->id,
+                'name' => $row->name,
+                'count' => (int) $row->aggregate,
+            ])->all();
 
-            return [
-                'property_types' => $propertyTypes,
-                'locations' => $locations,
-                'amenities' => $amenities,
-            ];
+        return [
+            'property_types' => $propertyTypes,
+            'locations' => $locations,
+            'amenities' => $amenities,
+        ];
     }
 
     private function cleanPrefix(string $value): string
