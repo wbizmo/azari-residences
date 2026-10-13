@@ -97,6 +97,47 @@ final class AccommodationOnlySearchRegressionTest extends TestCase
         }
     }
 
+    public function test_rate_filters_return_a_matching_plan_instead_of_an_unrelated_cheaper_plan(): void
+    {
+        $property = Property::factory()->create([
+            'status' => 'available',
+            'is_published' => true,
+            'same_day_booking' => true,
+        ]);
+        $type = $property->accommodationTypes()->firstOrFail();
+        $default = $type->ratePlans()->firstOrFail();
+        $default->update([
+            'is_refundable' => false,
+            'meal_plan' => 'Room only',
+            'sort_order' => 0,
+        ]);
+        $breakfast = RatePlan::query()->create([
+            'accommodation_type_id' => $type->id,
+            'name' => 'Flexible breakfast rate',
+            'code' => 'BREAKFAST',
+            'pricing_adjustment_type' => 'fixed',
+            'pricing_adjustment' => 1000,
+            'meal_plan' => 'Breakfast included',
+            'is_refundable' => true,
+            'is_active' => true,
+            'is_public' => true,
+            'sort_order' => 1,
+        ]);
+
+        $result = app(MarketplaceSearchService::class)->search([
+            ...$this->filters(), 'free_cancellation' => true, 'breakfast' => true,
+        ], false)['results']->getCollection()->first();
+
+        $this->assertNotNull($result);
+        $this->assertSame($breakfast->id, $result['rate_plan']->id);
+
+        $forced = app(MarketplaceSearchService::class)->search([
+            ...$this->filters(), 'free_cancellation' => true,
+            'rate_plan_id' => $default->id,
+        ], false)['results'];
+        $this->assertCount(0, $forced->getCollection());
+    }
+
     public function test_dynamic_facets_refresh_immediately_after_a_property_is_unpublished(): void
     {
         $property = Property::factory()->create([
