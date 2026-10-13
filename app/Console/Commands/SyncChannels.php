@@ -12,6 +12,10 @@ class SyncChannels extends Command
     protected $description = 'Synchronize active external accommodation channel connections.';
     public function handle(): int
     {
+        if (config('reserva.accommodation_only', true)) {
+            $this->info('External channel synchronisation is retired for accommodation-only Resavar.');
+            return self::SUCCESS;
+        }
         ChannelConnection::query()->where('is_active',true)->where(fn($q)=>$q->whereNull('next_retry_at')->orWhere('next_retry_at','<=',now()))
             ->orderBy('id')->chunkById(50, function($connections): void {
                 foreach ($connections as $connection) $this->option('inline') ? SyncChannelConnection::dispatchSync($connection->id) : SyncChannelConnection::dispatch($connection->id);
