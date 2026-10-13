@@ -42,6 +42,7 @@ class BookingManagementController extends Controller
     {
         $booking->load([
             'property',
+            'approval',
             'accommodationType',
             'ratePlan',
             'refunds',

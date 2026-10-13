@@ -17,6 +17,17 @@ class BookingDocumentService
     {
         $booking->loadMissing(['property', 'payments', 'user']);
 
+        // An unpaid request is not a confirmation or invoice.
+        if ($booking->requiresApproval()) {
+            if (! $booking->hasBookingApproval() && in_array($type, ['confirmation', 'invoice'], true)) {
+                abort(409, 'This request has not been approved. No booking confirmation or invoice exists yet.');
+            }
+            if ($type === 'confirmation'
+                && ! in_array($booking->status, ['confirmed', 'paid', 'check_in', 'checked_in', 'checked_out', 'completed'], true)) {
+                abort(409, 'Booking approval is not a paid or confirmed reservation.');
+            }
+        }
+
         // Never render a foreign payment against another guest's booking.
         if ($payment?->exists) {
             abort_unless((int) $payment->booking_id === (int) $booking->getKey(), 404);

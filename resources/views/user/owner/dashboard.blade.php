@@ -17,7 +17,10 @@
 <section class="az-user-panel">
     <header class="az-user-panel-header">
         <div><h2 class="az-user-panel-title">Your property portfolio</h2><p class="az-user-panel-subtitle">Submit, monitor and manage properties offered through Resavar.</p></div>
-        <a class="az-user-button az-user-button--dark" href="{{ route('user.owner.listings.create') }}">Add property</a>
+        <div class="az-user-actions">
+            <a class="az-user-button az-user-button--light" href="{{ route('user.owner.booking-requests.index') }}">Review booking requests</a>
+            <a class="az-user-button az-user-button--dark" href="{{ route('user.owner.listings.create') }}">Add property</a>
+        </div>
     </header>
     <div class="az-user-panel-body">
         @forelse($listings as $listing)

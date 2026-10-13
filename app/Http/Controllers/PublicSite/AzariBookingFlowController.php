@@ -48,7 +48,9 @@ class AzariBookingFlowController extends Controller
 
         return redirect()
             ->route('azari.booking.review', $booking->reference)
-            ->with('success', 'Guest details saved. Review the booking and continue to payment.');
+            ->with('success', $booking->isAwaitingApproval()
+                ? 'Your accommodation request was submitted. The owner or Resavar administrator must approve it before payment.'
+                : 'Guest details saved. Review the booking and continue to payment.');
     }
 
     public function review(Request $request, string $reference)
@@ -75,6 +77,11 @@ class AzariBookingFlowController extends Controller
 
         $this->authorizeBooking($request, $booking);
         abort_unless(in_array($booking->status, ['pending', 'pending_payment'], true), 422);
+
+        if (! $booking->hasBookingApproval()) {
+            return redirect()->route('azari.booking.summary', $booking->reference)
+                ->with('status', 'Request submitted. Awaiting owner or administrator approval.');
+        }
 
         $schedule = $payments->forBooking($booking);
 

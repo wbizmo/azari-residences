@@ -23,6 +23,7 @@ class UserBookingController extends Controller
             'ratePlan',
             'tripItinerary' => fn ($q) => $q->where('user_id', $request->user()->id)->select(['id','name','user_id']),
             'payments',
+            'approval',
             'modificationRequests' => fn ($q) => $q->where('status', 'pending'),
         ]);
 
@@ -42,6 +43,7 @@ class UserBookingController extends Controller
                 }),
             'cancelled' => $query->where('status', 'cancelled'),
             'pending-payment' => $query
+                ->where('status', '!=', 'pending')
                 ->whereNotIn('status', ['cancelled', 'completed', 'checked_out', 'no_show'])
                 // A historical failed payment must not make an already paid
                 // booking appear to owe money. Use verified settled amounts.
@@ -92,6 +94,7 @@ class UserBookingController extends Controller
                 'ratePlan.paymentPolicy',
                 'guests',
                 'payments.refunds',
+            'approval',
                 'refunds',
                 'modificationRequests',
                 'serviceRequests',

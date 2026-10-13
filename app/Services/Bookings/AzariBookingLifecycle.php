@@ -50,6 +50,22 @@ class AzariBookingLifecycle
                 ]);
             }
 
+            if (in_array($to, ['pending_payment', 'approved', 'confirmed', 'paid'], true)
+                && ! $locked->hasBookingApproval()) {
+                throw ValidationException::withMessages([
+                    'status' => 'The accommodation request must be reviewed before confirmation or payment.',
+                ]);
+            }
+
+            if ($locked->requiresApproval()
+                && $locked->expires_at?->isPast()
+                && in_array($locked->status, ['pending', 'pending_payment'], true)
+                && in_array($to, ['pending_payment', 'approved', 'confirmed', 'paid'], true)) {
+                throw ValidationException::withMessages([
+                    'status' => 'The accommodation request or payment deadline has passed.',
+                ]);
+            }
+
             if ($to === 'confirmed') {
                 $schedule = app(\App\Services\Payments\PaymentScheduleService::class)->forBooking($locked);
                 if (! $schedule['confirmation_threshold_met']) {

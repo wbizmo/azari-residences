@@ -11,8 +11,12 @@
         <a class="az-button" href="{{ route('azari.admin.bookings.receipt', $booking) }}" target="_blank" rel="noopener noreferrer">
             <span class="material-symbols-outlined" aria-hidden="true">print</span> Print invoice
         </a>
-        <a class="az-button" href="{{ route('azari.admin.bookings.documents', [$booking, 'confirmation']) }}" target="_blank" rel="noopener noreferrer">Confirmation PDF</a>
-        <a class="az-button" href="{{ route('azari.admin.bookings.documents', [$booking, 'invoice']) }}" target="_blank" rel="noopener noreferrer">Invoice PDF</a>
+        @if($booking->hasBookingApproval() && in_array($booking->status, ['confirmed', 'paid', 'checked_in', 'checked_out', 'completed'], true))
+            <a class="az-button" href="{{ route('azari.admin.bookings.documents', [$booking, 'confirmation']) }}" target="_blank" rel="noopener noreferrer">Confirmation PDF</a>
+        @endif
+        @if($booking->hasBookingApproval())
+            <a class="az-button" href="{{ route('azari.admin.bookings.documents', [$booking, 'invoice']) }}" target="_blank" rel="noopener noreferrer">Invoice PDF</a>
+        @endif
         @if($booking->receiptAvailable())
             <a class="az-button" href="{{ route('azari.admin.bookings.documents', [$booking, 'receipt']) }}" target="_blank" rel="noopener noreferrer">Receipt PDF</a>
         @endif
@@ -20,6 +24,20 @@
     </div>
 </section>
 
+@if($booking->approval)
+<section class="az-panel" aria-label="Manual accommodation request review">
+    <h2>Booking request review</h2>
+    <p><strong>Review status:</strong> {{ Str::headline($booking->approval->status) }}</p>
+    <p><strong>Review deadline:</strong> {{ $booking->expires_at?->format('j M Y, H:i') ?? 'Closed' }}</p>
+    @if($booking->approval->review_note)
+        <p><strong>Response:</strong> {{ $booking->approval->review_note }}</p>
+    @endif
+    @if(in_array($booking->approval->status, ['submitted', 'under_review'], true))
+        <a class="az-button" href="{{ route('azari.admin.booking-requests.index') }}">Open approval queue</a>
+    @endif
+    <p>Approval does not mean payment was received. Confirm payment separately using the regular reconciliation workflow.</p>
+</section>
+@endif
 <div class="az-detail-grid">
     <section class="az-panel">
         <h2>Stay details</h2>

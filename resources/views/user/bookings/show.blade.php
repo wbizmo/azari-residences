@@ -11,6 +11,37 @@
     $directionsUrl = $showLocation ? $booking->directionsUrl() : null;
 @endphp
 
+@if($booking->approval)
+<section class="az-user-panel" aria-labelledby="review-state-heading" style="margin-bottom:18px">
+    <header class="az-user-panel-header"><div>
+        <h2 id="review-state-heading" class="az-user-panel-title">Accommodation request status</h2>
+        <p class="az-user-panel-subtitle">{{ match ($booking->approval->status) {
+            'submitted' => 'Request submitted. Owner/admin review pending.',
+            'under_review' => 'Your request is under review.',
+            'approved' => 'Approved. Please follow the payment policy to confirm your stay.',
+            'declined' => 'The accommodation request was declined.',
+            'expired' => 'The accommodation request expired.',
+            default => 'Booking request history',
+        } }}</p>
+    </div></header>
+    <div class="az-user-panel-body">
+        <p><strong>Review window:</strong> {{ $booking->expires_at?->format('j M Y, H:i') ?: 'Closed' }}</p>
+        @if($booking->approval->review_note)
+            <p><strong>Response:</strong> {{ $booking->approval->review_note }}</p>
+        @endif
+        @if($booking->approval->proposed_check_in)
+            <p>Suggested dates: {{ $booking->approval->proposed_check_in->format('j M Y') }} –
+                {{ $booking->approval->proposed_check_out?->format('j M Y') }}.
+                This is a suggestion, not an accepted change, booking or payment quote.</p>
+            <a class="az-user-button az-user-button--light" href="{{ route('availability.index') }}">Search those dates and submit a new request</a>
+        @endif
+        @if($booking->isAwaitingApproval())
+            <p>No payment has been requested. This stay is not confirmed.</p>
+        @endif
+    </div>
+</section>
+@endif
+
 <section class="az-user-panel" aria-label="Private itinerary grouping" style="margin-bottom:18px">
     <header class="az-user-panel-header">
         <div>
@@ -115,8 +146,12 @@
 </div>
 
 <div class="az-user-actions" style="margin-bottom:18px">
-    <a class="az-user-button az-user-button--light" target="_blank" href="{{ route('user.bookings.documents', [$booking->reference, 'confirmation']) }}">Booking confirmation</a>
-    <a class="az-user-button az-user-button--light" target="_blank" href="{{ route('user.bookings.documents', [$booking->reference, 'invoice']) }}">Invoice PDF</a>
+    @if($booking->hasBookingApproval() && in_array($booking->status, ['confirmed', 'paid', 'checked_in', 'checked_out', 'completed'], true))
+        <a class="az-user-button az-user-button--light" target="_blank" href="{{ route('user.bookings.documents', [$booking->reference, 'confirmation']) }}">Booking confirmation</a>
+    @endif
+    @if($booking->hasBookingApproval())
+        <a class="az-user-button az-user-button--light" target="_blank" href="{{ route('user.bookings.documents', [$booking->reference, 'invoice']) }}">Invoice PDF</a>
+    @endif
     <a class="az-user-button az-user-button--light" href="{{ route('user.bookings.phase2.messages', $booking->reference) }}">Messages</a>
     <a class="az-user-button az-user-button--light" href="{{ route('user.bookings.phase2.arrival', $booking->reference) }}">Arrival</a>
     @if($receiptAvailable)<a class="az-user-button az-user-button--light" target="_blank" href="{{ route('user.bookings.documents', [$booking->reference, 'receipt']) }}">Receipt PDF</a>@endif

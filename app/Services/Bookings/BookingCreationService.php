@@ -6,6 +6,7 @@ use App\Models\Booking;
 use App\Models\BookingGuest;
 use App\Models\BookingHold;
 use App\Models\BookingStatusHistory;
+use App\Models\AccommodationBookingApproval;
 use App\Support\LocalDate;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -175,6 +176,9 @@ class BookingCreationService
                 }
             }
 
+            $requiresApproval = (bool) config('reserva.bookings.require_approval', true);
+            $initialStatus = $requiresApproval ? 'pending' : 'pending_payment';
+
             $booking = Booking::query()->create([
                 'reference' => $this->reference(),
                 'user_id' => $user->id,
@@ -198,7 +202,7 @@ class BookingCreationService
                 'adults' => $lockedHold->adults,
                 'children' => $lockedHold->children,
                 'rooms' => $lockedHold->rooms,
-                'status' => 'pending_payment',
+                'status' => $initialStatus,
                 'verification_status' => 'unverified',
                 'currency' => $quote['currency'],
                 'property_timezone' => LocalDate::propertyTimezone($property),
@@ -219,9 +223,9 @@ class BookingCreationService
                 'property_formatted_address' => $property->formatted_address ?: $property->location,
                 'property_latitude' => $property->latitude,
                 'property_longitude' => $property->longitude,
-                'expires_at' => now()->addMinutes(
-                    (int) config('azari.booking.unpaid_booking_minutes', 60)
-                ),
+                'expires_at' => $requiresApproval
+                    ? now()->addHours(max(1, (int) config('reserva.bookings.review_hours', 24)))
+                    : now()->addMinutes((int) config('azari.booking.unpaid_booking_minutes', 60)),
             ]);
 
             foreach ($data['adults'] as $index => $adult) {
@@ -249,12 +253,21 @@ class BookingCreationService
                 ]);
             }
 
+            if ($requiresApproval) {
+                AccommodationBookingApproval::query()->create([
+                    'booking_id' => $booking->id,
+                    'status' => 'submitted',
+                ]);
+            }
+
             BookingStatusHistory::query()->create([
                 'booking_id' => $booking->id,
                 'changed_by' => $user->id,
                 'from_status' => null,
-                'to_status' => 'pending_payment',
-                'note' => 'Booking created and awaiting payment.',
+                'to_status' => $initialStatus,
+                'note' => $requiresApproval
+                    ? 'Accommodation request submitted for owner or administrator approval. No payment has been collected.'
+                    : 'Booking created and awaiting payment.',
                 'metadata' => ['channel' => 'registered'],
             ]);
 

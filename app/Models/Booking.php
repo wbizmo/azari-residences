@@ -7,9 +7,9 @@ use App\Support\LocalDate;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Booking extends Model
 {
@@ -47,6 +47,40 @@ class Booking extends Model
             'tax_total' => 'decimal:2', 'total' => 'decimal:2',
             'property_latitude' => 'decimal:7', 'property_longitude' => 'decimal:7',
         ];
+    }
+
+    public function approval(): HasOne
+    {
+        return $this->hasOne(AccommodationBookingApproval::class, 'booking_id');
+    }
+
+    public function requiresApproval(): bool
+    {
+        return $this->relationLoaded('approval')
+            ? $this->approval !== null
+            : $this->approval()->exists();
+    }
+
+    public function isAwaitingApproval(): bool
+    {
+        if ($this->status !== 'pending') {
+            return false;
+        }
+
+        return $this->relationLoaded('approval')
+            ? in_array($this->approval?->status, ['submitted', 'under_review'], true)
+            : $this->approval()->whereIn('status', ['submitted', 'under_review'])->exists();
+    }
+
+    public function hasBookingApproval(): bool
+    {
+        // Most booking cards and detail views eager-load the review.
+        // Avoid extra SQL per row and do not infer approval from payment.
+        $approval = $this->relationLoaded('approval')
+            ? $this->approval
+            : $this->approval()->first(['id', 'booking_id', 'status']);
+
+        return $approval === null || $approval->status === 'approved';
     }
 
     public function tripItinerary(): BelongsTo { return $this->belongsTo(TripItinerary::class); }
@@ -131,7 +165,10 @@ class Booking extends Model
 
     public function canAcceptPayment(): bool
     {
-        return ! $this->isCancelled() && ! $this->isPaid() && $this->balanceDue() > 0;
+        return ! $this->isCancelled() && $this->hasBookingApproval()
+            && ! (in_array($this->status, ['pending', 'pending_payment'], true)
+                && $this->expires_at?->isPast())
+            && ! $this->isPaid() && $this->balanceDue() > 0;
     }
 
     public function successfulPaymentsTotal(): float

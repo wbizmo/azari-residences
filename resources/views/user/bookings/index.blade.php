@@ -96,7 +96,16 @@
                             </p>
                         </div>
                         <span class="az-user-status {{ in_array($booking->status,['pending','pending_payment'])?'az-user-status--warning':($booking->status==='cancelled'?'az-user-status--danger':'') }}">
-                            {{ str_replace('_',' ',$booking->status) }}
+                            {{ ($booking->status === 'cancelled' && ! in_array($booking->approval?->status, ['declined', 'expired'], true))
+                                ? 'Cancelled'
+                                : ($booking->approval ? match ($booking->approval->status) {
+                                'submitted' => 'Request submitted',
+                                'under_review' => 'Under review',
+                                'approved' => $booking->status === 'pending_payment' ? 'Approved · payment due' : Str::headline($booking->status),
+                                'declined' => 'Request declined',
+                                'expired' => 'Request expired',
+                                default => Str::headline($booking->status),
+                            } : str_replace('_',' ',$booking->status)) }}
                         </span>
                     </a>
                 @endforeach

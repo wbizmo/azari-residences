@@ -27,6 +27,10 @@ class BookingController extends Controller
 
     public function store(Request $request, AvailabilityService $service)
     {
+        // Legacy form bypasses locked inventory, verified guest details and
+        // the manual approval queue. Route retained for old URLs only.
+        abort_if((bool) config('reserva.bookings.require_approval', true), 410,
+            'Use the Resavar accommodation search and secure booking request flow.');
         $data = $request->validate([
             'property_id' => ['required', 'integer'], 'guest_name' => ['required', 'string'], 'guest_email' => ['required', 'email'],
             'guest_phone' => ['nullable', 'string'], 'check_in' => ['required', 'date'], 'check_out' => ['required', 'date', 'after:check_in'],

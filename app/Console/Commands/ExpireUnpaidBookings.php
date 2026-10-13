@@ -3,6 +3,8 @@
 namespace App\Console\Commands;
 
 use App\Models\Booking;
+use App\Models\AccommodationBookingApproval;
+use App\Models\BookingStatusHistory;
 use App\Models\Payment;
 use App\Services\Communications\AzariTransactionalMailService;
 use Illuminate\Console\Command;
@@ -51,6 +53,39 @@ class ExpireUnpaidBookings extends Command
 
                     if (! $booking) {
                         continue;
+                    }
+
+                    // The existing expiry worker also owns the review TTL.
+                    // Do not leave a "submitted" approval record on a
+                    // cancelled booking or tell guests payment was attempted.
+                    $review = AccommodationBookingApproval::query()
+                        ->where('booking_id', $booking->id)
+                        ->whereIn('status', ['submitted', 'under_review', 'approved'])
+                        ->first();
+
+                    if ($review) {
+                        $previousApprovalStatus = $review->status;
+                        $review->forceFill([
+                            'status' => 'expired',
+                            'reviewed_at' => $cutoff,
+                            'review_note' => $previousApprovalStatus === 'approved'
+                                ? 'Approved request expired without verified payment.'
+                                : 'No approval was received before the review deadline.',
+                        ])->save();
+                        $booking->forceFill([
+                            'cancellation_reason' => $previousApprovalStatus === 'approved'
+                                ? 'Approved booking payment window expired'
+                                : 'Accommodation request review window expired',
+                        ])->save();
+                        BookingStatusHistory::query()->create([
+                            'booking_id' => $booking->id,
+                            'from_status' => $previousApprovalStatus === 'approved' ? 'pending_payment' : 'pending',
+                            'to_status' => 'cancelled',
+                            'note' => $previousApprovalStatus === 'approved'
+                                ? 'Approved booking expired without verified payment.'
+                                : 'Accommodation request expired without approval or payment.',
+                            'metadata' => ['approval' => 'expired'],
+                        ]);
                     }
 
                     $mail->bookingCancelled($booking);
