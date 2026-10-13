@@ -109,7 +109,8 @@ final class AccommodationBookingApprovalService
             }
 
             if (! $locked->expires_at || $locked->expires_at->isPast()
-                || $locked->check_in?->isPast()) {
+                || ($locked->check_in
+                    && $locked->check_in->toDateString() < today(\App\Support\LocalDate::propertyTimezone($property))->toDateString())) {
                 throw ValidationException::withMessages([
                     'booking' => 'This booking request expired. Ask the guest to submit new dates.',
                 ]);
