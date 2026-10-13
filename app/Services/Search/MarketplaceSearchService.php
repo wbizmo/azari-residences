@@ -86,57 +86,19 @@ class MarketplaceSearchService
                 $rooms,
                 $reviewSummaries
             ): array {
-                $type = $property->publicAccommodationTypes->first();
-
-                if (! $type) {
-                    return ['property' => $property, 'unavailable' => true];
-                }
-
-                $requestedRatePlanId = isset($filters['rate_plan_id'])
-                    ? (int) $filters['rate_plan_id']
-                    : null;
-
-                $ratePlan = $requestedRatePlanId
-                    ? $type->ratePlans->first(fn ($plan) => (int) $plan->getKey() === $requestedRatePlanId)
-                    : $type->ratePlans->first();
-
-                // A removed, unpublished or mismatched requested plan must not
-                // be silently exchanged for a different price/policy.
-                if ($requestedRatePlanId && ! $ratePlan) {
-                    return ['property' => $property, 'unavailable' => true];
-                }
-
-                try {
-                    $this->availability->assertRules(
-                        $property,
-                        $checkIn,
-                        $checkOut,
-                        (int) ($filters['adults'] ?? 1),
-                        (int) ($filters['children'] ?? 0),
-                        $rooms,
-                        $type,
-                        $ratePlan
-                    );
-                } catch (ValidationException) {
-                    return ['property' => $property, 'unavailable' => true];
-                }
-
-                $quote = $this->pricing->quote(
-                    $property,
-                    $checkIn,
-                    $checkOut,
-                    [],
-                    $type,
-                    $ratePlan,
-                    $rooms
+                // The first (cheapest) room can have a closed arrival or
+                // minimum-stay rule while another room remains bookable.
+                // Use the same selection for results and map pins.
+                $selection = $this->selectBookableSelection(
+                    $property, $filters, $checkIn, $checkOut, $rooms
                 );
+                if ($selection === null) {
+                    return ['property' => $property, 'unavailable' => true];
+                }
 
                 return [
                     'property' => $property,
-                    'accommodation_type' => $type,
-                    'rate_plan' => $ratePlan,
-                    'remaining' => $this->availability->availableQuantity($type, $checkIn, $checkOut),
-                    'quote' => $quote,
+                    ...$selection,
                     'reviews' => $reviewSummaries->get($property->getKey(), [
                         'count' => 0,
                         'overall' => null,
@@ -199,7 +161,6 @@ class MarketplaceSearchService
         $adults = max(1, (int) ($filters['adults'] ?? 1));
         $children = max(0, (int) ($filters['children'] ?? 0));
         $guests = $adults + $children;
-        $requestedPlan = isset($filters['rate_plan_id']) ? (int) $filters['rate_plan_id'] : null;
 
         $query = $this->eligibleProperties($filters, $checkIn, $checkOut, $rooms, $guests)
             ->whereNotNull('properties.latitude')
@@ -218,29 +179,10 @@ class MarketplaceSearchService
         $points = [];
 
         foreach ($batch->items() as $property) {
-            // Mirror search(): do not silently show a different room/rate
-            // or a lower price on the map for the same stay.
-            $type = $property->publicAccommodationTypes->first();
-            if (! $type) {
-                continue;
-            }
-            $plan = $requestedPlan !== null
-                ? $type->ratePlans->first(fn ($rate) => (int) $rate->id === $requestedPlan)
-                : $type->ratePlans->first();
-
-            if ($requestedPlan !== null && ! $plan) {
-                continue;
-            }
-
-            try {
-                $this->availability->assertRules(
-                    $property, $checkIn, $checkOut, $adults, $children,
-                    $rooms, $type, $plan
-                );
-                $quote = $this->pricing->quote(
-                    $property, $checkIn, $checkOut, [], $type, $plan, $rooms
-                );
-            } catch (ValidationException) {
+            $selection = $this->selectBookableSelection(
+                $property, $filters, $checkIn, $checkOut, $rooms
+            );
+            if ($selection === null) {
                 continue;
             }
 
@@ -251,8 +193,8 @@ class MarketplaceSearchService
                 'url' => route('properties.show', $property),
                 'lat' => (float) $property->latitude,
                 'lng' => (float) $property->longitude,
-                'price' => (float) $quote['total'],
-                'currency' => $quote['currency'],
+                'price' => (float) $selection['quote']['total'],
+                'currency' => $selection['quote']['currency'],
             ];
         }
 
@@ -268,6 +210,67 @@ class MarketplaceSearchService
             'next_cursor' => $nextCursor,
             'batch_size' => 20,
         ];
+    }
+
+    /**
+     * Return a truly bookable room/rate combination instead of dropping an
+     * entire hotel when only its cheapest rate is restricted. The same
+     * authoritative booking rules and quote are used by list and map output.
+     *
+     * @return array{accommodation_type: mixed, rate_plan: mixed, remaining: int, quote: array}|null
+     */
+    private function selectBookableSelection(
+        Property $property,
+        array $filters,
+        CarbonImmutable $checkIn,
+        CarbonImmutable $checkOut,
+        int $rooms
+    ): ?array {
+        $requestedPlanId = isset($filters['rate_plan_id'])
+            ? (int) $filters['rate_plan_id']
+            : null;
+
+        foreach ($property->publicAccommodationTypes as $type) {
+            $plans = $requestedPlanId !== null
+                ? $type->ratePlans->filter(fn ($plan) => (int) $plan->getKey() === $requestedPlanId)
+                : ($type->ratePlans->isEmpty() ? collect([null]) : $type->ratePlans);
+
+            foreach ($plans as $plan) {
+                try {
+                    $this->availability->assertRules(
+                        $property, $checkIn, $checkOut,
+                        max(1, (int) ($filters['adults'] ?? 1)),
+                        max(0, (int) ($filters['children'] ?? 0)),
+                        $rooms, $type, $plan
+                    );
+
+                    // Search eligibility is a snapshot: checkout still
+                    // creates a transactionally locked authoritative hold.
+                    $remaining = $this->availability->availableQuantity(
+                        $type, $checkIn, $checkOut
+                    );
+                    if ($remaining < $rooms) {
+                        continue;
+                    }
+
+                    $quote = $this->pricing->quote(
+                        $property, $checkIn, $checkOut, [], $type, $plan, $rooms
+                    );
+
+                    return [
+                        'accommodation_type' => $type,
+                        'rate_plan' => $plan,
+                        'remaining' => $remaining,
+                        'quote' => $quote,
+                    ];
+                } catch (ValidationException) {
+                    // Try the next compatible rate or room type.
+                    continue;
+                }
+            }
+        }
+
+        return null;
     }
 
     public function filterOptions(): array
