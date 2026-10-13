@@ -3,6 +3,8 @@
 namespace App\Console\Commands;
 
 use App\Models\Booking;
+use App\Models\AccommodationBookingApproval;
+use App\Models\BookingStatusHistory;
 use App\Models\Payment;
 use App\Services\Communications\AzariTransactionalMailService;
 use Illuminate\Console\Command;
@@ -51,6 +53,32 @@ class ExpireUnpaidBookings extends Command
 
                     if (! $booking) {
                         continue;
+                    }
+
+                    // The existing expiry worker also owns the review TTL.
+                    // Do not leave a "submitted" approval record on a
+                    // cancelled booking or tell guests payment was attempted.
+                    $review = AccommodationBookingApproval::query()
+                        ->where('booking_id', $booking->id)
+                        ->whereIn('status', ['submitted', 'under_review'])
+                        ->first();
+
+                    if ($review) {
+                        $review->forceFill([
+                            'status' => 'expired',
+                            'reviewed_at' => $cutoff,
+                            'review_note' => 'No approval was received before the review deadline.',
+                        ])->save();
+                        $booking->forceFill([
+                            'cancellation_reason' => 'Accommodation request review window expired',
+                        ])->save();
+                        BookingStatusHistory::query()->create([
+                            'booking_id' => $booking->id,
+                            'from_status' => 'pending',
+                            'to_status' => 'cancelled',
+                            'note' => 'Accommodation request expired without approval or payment.',
+                            'metadata' => ['approval' => 'expired'],
+                        ]);
                     }
 
                     $mail->bookingCancelled($booking);
