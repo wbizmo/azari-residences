@@ -145,6 +145,18 @@
     transition: background-color .2s ease, transform .2s ease;
 }
 .auth.resavar-auth-unified .submit:hover { background: #113d80; }
+.auth.resavar-auth-unified .submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+}
+.auth.resavar-auth-unified .submit .material-symbols-outlined {
+    font-size: 18px;
+    color: currentColor;
+    line-height: 1;
+}
+
 .auth.resavar-auth-unified .submit:focus-visible,
 .auth.resavar-auth-unified a:focus-visible {
     outline: 3px solid var(--auth-focus);
