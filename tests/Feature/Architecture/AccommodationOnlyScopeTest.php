@@ -44,6 +44,7 @@ final class AccommodationOnlyScopeTest extends TestCase
             'azari.admin.travel.suppliers.store',
             'azari.admin.dining.store',
             'azari.admin.channels.sync',
+            'azari.admin.channels.events',
             'user.owner.channels.sync',
             'travel.supplier.webhook',
             'channels.webhook',
