@@ -15,8 +15,11 @@ final class AccommodationOnlyScopeTest extends TestCase
             self::assertTrue(Route::has($name), "Accommodation route {$name} must remain available.");
         }
 
-        self::assertFalse(in_array('resavar.non-accommodation', Route::getRoutes()
-            ->getByName('azari.admin.properties.store')->gatherMiddleware(), true));
+        foreach (['azari.admin.properties.store', 'public.payment.initialise', 'payments.webhook', 'payments.callback'] as $name) {
+            $route = Route::getRoutes()->getByName($name);
+            self::assertNotNull($route, "Preserve booking and payment route {$name}.");
+            self::assertNotContains('resavar.non-accommodation', $route->gatherMiddleware(), $name);
+        }
     }
 
     public function test_travel_supplier_webhooks_and_partner_api_are_gone_without_touching_booking_callbacks(): void
@@ -30,7 +33,7 @@ final class AccommodationOnlyScopeTest extends TestCase
     public function test_legacy_marketing_urls_redirect_to_stay_search(): void
     {
         foreach (['/restaurant', '/airport-transfers', '/services', '/concierge', '/housekeeping', '/local-guide'] as $path) {
-            $this->get($path)->assertStatus(301)->assertRedirect('/availability');
+            $this->get($path)->assertStatus(301)->assertRedirect(route('availability.index'));
         }
     }
 
