@@ -75,7 +75,7 @@ final class AccommodationHistoricalArchiveTest extends TestCase
         $admin = User::factory()->create(['is_admin' => true]);
         $record = $this->historicalRequest($owner);
 
-        $this->actingAs($owner)->get(route('azari.admin.archive.travel.index'))->assertForbidden();
+        $this->actingAs($owner)->get(route('azari.admin.archive.travel.index'))->assertNotFound();
 
         $this->actingAs($admin)->get(route('azari.admin.archive.travel.index'))
             ->assertOk()->assertSee($record->id)->assertDontSee('Never render my private details');
