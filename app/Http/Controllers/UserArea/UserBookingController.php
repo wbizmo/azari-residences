@@ -43,6 +43,7 @@ class UserBookingController extends Controller
                 }),
             'cancelled' => $query->where('status', 'cancelled'),
             'pending-payment' => $query
+                ->where('status', '!=', 'pending')
                 ->whereNotIn('status', ['cancelled', 'completed', 'checked_out', 'no_show'])
                 // A historical failed payment must not make an already paid
                 // booking appear to owe money. Use verified settled amounts.
