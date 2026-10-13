@@ -13,7 +13,8 @@ final class ProcessSandboxChannelEvents extends Command
 
     public function handle(ChannelSandboxEventProcessor $inbox, ChannelSandboxOutboxDispatcher $outbox): int
     {
-        if (! config('reserva.channels.sandbox_webhooks_enabled', false)
+        if (config('reserva.accommodation_only', true)
+            || ! config('reserva.channels.sandbox_webhooks_enabled', false)
             || app()->environment('production')) {
             $this->error('Sandbox processing is disabled; no external provider actions were performed.');
             return self::FAILURE;
