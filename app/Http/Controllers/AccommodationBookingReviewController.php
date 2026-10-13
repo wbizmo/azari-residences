@@ -17,6 +17,8 @@ final class AccommodationBookingReviewController extends Controller
         $isStaff = $actor->isStaff();
 
         $bookings = Booking::query()
+            ->where('status', 'pending')
+            ->where('expires_at', '>', now())
             ->whereHas('approval', fn ($q) => $q->whereIn('status', ['submitted', 'under_review']))
             ->when(! $isStaff, fn ($q) => $q->whereHas('property',
                 fn ($properties) => $properties->where('owner_id', $actor->getKey())))
