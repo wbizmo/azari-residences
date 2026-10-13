@@ -36,7 +36,7 @@
                 <input name="address_postal_code" value="{{ $value('address_postal_code') }}" maxlength="40" data-azari-address="address_postal_code" autocomplete="postal-code">
             </label>
             <label class="{{ $labelClass }}">Country code (optional, e.g. NG)
-                <input name="address_country_code" value="{{ $value('address_country_code') }}" maxlength="2" minlength="2" pattern="[A-Za-z]{2}" data-azari-address="address_country_code" autocomplete="country">
+                <input name="address_country_code" value="{{ $value('address_country_code') }}" maxlength="2" minlength="2" pattern="[A-Za-z]{2}" data-azari-address="address_country_code" autocomplete="off">
             </label>
         </div>
     </details>
