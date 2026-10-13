@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\TravelRequest;
+use App\Models\DiningRequest;
+use App\Models\TripAssembly;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -19,7 +21,13 @@ final class HistoricalTravelArchiveController extends Controller
             ->with(['offer:id,title'])
             ->latest('created_at')->paginate(30);
 
-        return response()->view('admin.archive.travel-index', compact('requests'))
+        $diningRequests = DiningRequest::query()
+            ->with('partner:id,name')
+            ->latest('created_at')->limit(50)->get();
+        $assemblies = TripAssembly::query()
+            ->latest('created_at')->limit(50)->get();
+
+        return response()->view('admin.archive.travel-index', compact('requests', 'diningRequests', 'assemblies'))
             ->header('Cache-Control', 'no-store, private');
     }
 }
