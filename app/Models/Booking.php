@@ -56,19 +56,31 @@ class Booking extends Model
 
     public function requiresApproval(): bool
     {
-        return $this->approval()->exists();
+        return $this->relationLoaded('approval')
+            ? $this->approval !== null
+            : $this->approval()->exists();
     }
 
     public function isAwaitingApproval(): bool
     {
-        return $this->status === 'pending'
-            && $this->approval()->whereIn('status', ['submitted', 'under_review'])->exists();
+        if ($this->status !== 'pending') {
+            return false;
+        }
+
+        return $this->relationLoaded('approval')
+            ? in_array($this->approval?->status, ['submitted', 'under_review'], true)
+            : $this->approval()->whereIn('status', ['submitted', 'under_review'])->exists();
     }
 
     public function hasBookingApproval(): bool
     {
-        return ! $this->requiresApproval()
-            || $this->approval()->where('status', 'approved')->exists();
+        // Most booking cards and detail views eager-load the review.
+        // Avoid extra SQL per row and do not infer approval from payment.
+        $approval = $this->relationLoaded('approval')
+            ? $this->approval
+            : $this->approval()->first(['id', 'booking_id', 'status']);
+
+        return $approval === null || $approval->status === 'approved';
     }
 
     public function tripItinerary(): BelongsTo { return $this->belongsTo(TripItinerary::class); }
