@@ -12,7 +12,6 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Cursor;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -86,57 +85,19 @@ class MarketplaceSearchService
                 $rooms,
                 $reviewSummaries
             ): array {
-                $type = $property->publicAccommodationTypes->first();
-
-                if (! $type) {
-                    return ['property' => $property, 'unavailable' => true];
-                }
-
-                $requestedRatePlanId = isset($filters['rate_plan_id'])
-                    ? (int) $filters['rate_plan_id']
-                    : null;
-
-                $ratePlan = $requestedRatePlanId
-                    ? $type->ratePlans->first(fn ($plan) => (int) $plan->getKey() === $requestedRatePlanId)
-                    : $type->ratePlans->first();
-
-                // A removed, unpublished or mismatched requested plan must not
-                // be silently exchanged for a different price/policy.
-                if ($requestedRatePlanId && ! $ratePlan) {
-                    return ['property' => $property, 'unavailable' => true];
-                }
-
-                try {
-                    $this->availability->assertRules(
-                        $property,
-                        $checkIn,
-                        $checkOut,
-                        (int) ($filters['adults'] ?? 1),
-                        (int) ($filters['children'] ?? 0),
-                        $rooms,
-                        $type,
-                        $ratePlan
-                    );
-                } catch (ValidationException) {
-                    return ['property' => $property, 'unavailable' => true];
-                }
-
-                $quote = $this->pricing->quote(
-                    $property,
-                    $checkIn,
-                    $checkOut,
-                    [],
-                    $type,
-                    $ratePlan,
-                    $rooms
+                // The first (cheapest) room can have a closed arrival or
+                // minimum-stay rule while another room remains bookable.
+                // Use the same selection for results and map pins.
+                $selection = $this->selectBookableSelection(
+                    $property, $filters, $checkIn, $checkOut, $rooms
                 );
+                if ($selection === null) {
+                    return ['property' => $property, 'unavailable' => true];
+                }
 
                 return [
                     'property' => $property,
-                    'accommodation_type' => $type,
-                    'rate_plan' => $ratePlan,
-                    'remaining' => $this->availability->availableQuantity($type, $checkIn, $checkOut),
-                    'quote' => $quote,
+                    ...$selection,
                     'reviews' => $reviewSummaries->get($property->getKey(), [
                         'count' => 0,
                         'overall' => null,
@@ -199,7 +160,6 @@ class MarketplaceSearchService
         $adults = max(1, (int) ($filters['adults'] ?? 1));
         $children = max(0, (int) ($filters['children'] ?? 0));
         $guests = $adults + $children;
-        $requestedPlan = isset($filters['rate_plan_id']) ? (int) $filters['rate_plan_id'] : null;
 
         $query = $this->eligibleProperties($filters, $checkIn, $checkOut, $rooms, $guests)
             ->whereNotNull('properties.latitude')
@@ -208,6 +168,7 @@ class MarketplaceSearchService
                 $this->applyTypeFilters($types, $filters, $checkIn, $checkOut, $rooms, $guests)
                     ->with(['ratePlans' => fn ($plans) => $plans
                         ->where('is_active', true)->where('is_public', true)
+                        ->with('paymentPolicy')
                         ->orderBy('sort_order')->orderBy('id')])
                     ->orderBy('base_rate')
                     ->orderBy('sort_order')
@@ -218,29 +179,10 @@ class MarketplaceSearchService
         $points = [];
 
         foreach ($batch->items() as $property) {
-            // Mirror search(): do not silently show a different room/rate
-            // or a lower price on the map for the same stay.
-            $type = $property->publicAccommodationTypes->first();
-            if (! $type) {
-                continue;
-            }
-            $plan = $requestedPlan !== null
-                ? $type->ratePlans->first(fn ($rate) => (int) $rate->id === $requestedPlan)
-                : $type->ratePlans->first();
-
-            if ($requestedPlan !== null && ! $plan) {
-                continue;
-            }
-
-            try {
-                $this->availability->assertRules(
-                    $property, $checkIn, $checkOut, $adults, $children,
-                    $rooms, $type, $plan
-                );
-                $quote = $this->pricing->quote(
-                    $property, $checkIn, $checkOut, [], $type, $plan, $rooms
-                );
-            } catch (ValidationException) {
+            $selection = $this->selectBookableSelection(
+                $property, $filters, $checkIn, $checkOut, $rooms
+            );
+            if ($selection === null) {
                 continue;
             }
 
@@ -251,8 +193,8 @@ class MarketplaceSearchService
                 'url' => route('properties.show', $property),
                 'lat' => (float) $property->latitude,
                 'lng' => (float) $property->longitude,
-                'price' => (float) $quote['total'],
-                'currency' => $quote['currency'],
+                'price' => (float) $selection['quote']['total'],
+                'currency' => $selection['quote']['currency'],
             ];
         }
 
@@ -270,14 +212,93 @@ class MarketplaceSearchService
         ];
     }
 
+    /**
+     * Return a truly bookable room/rate combination instead of dropping an
+     * entire hotel when only its cheapest rate is restricted. The same
+     * authoritative booking rules and quote are used by list and map output.
+     *
+     * @return array{accommodation_type: mixed, rate_plan: mixed, remaining: int, quote: array}|null
+     */
+    private function selectBookableSelection(
+        Property $property,
+        array $filters,
+        CarbonImmutable $checkIn,
+        CarbonImmutable $checkOut,
+        int $rooms
+    ): ?array {
+        $requestedPlanId = isset($filters['rate_plan_id'])
+            ? (int) $filters['rate_plan_id']
+            : null;
+
+        foreach ($property->publicAccommodationTypes as $type) {
+            // Inventory does not vary by rate plan; evaluate it once per
+            // room type rather than repeating booking/channel queries.
+            $remaining = $this->availability->availableQuantity(
+                $type, $checkIn, $checkOut
+            );
+            if ($remaining < $rooms) {
+                continue;
+            }
+
+            $plans = $requestedPlanId !== null
+                ? $type->ratePlans->filter(fn ($plan) => (int) $plan->getKey() === $requestedPlanId)
+                : ($type->ratePlans->isEmpty() ? collect([null]) : $type->ratePlans);
+
+            foreach ($plans as $plan) {
+                if (! empty($filters['free_cancellation']) && ! $plan?->is_refundable) {
+                    continue;
+                }
+                if (! empty($filters['breakfast'])
+                    && ! str_contains(mb_strtolower((string) ($plan?->meal_plan ?? '')), 'breakfast')) {
+                    continue;
+                }
+                if (! empty($filters['pay_later'])
+                    && (! $plan?->paymentPolicy?->is_active
+                        || ! in_array($plan->paymentPolicy->payment_type,
+                            ['pay_later', 'pay_at_property', 'deposit'], true))) {
+                    continue;
+                }
+
+                try {
+                    $this->availability->assertRules(
+                        $property, $checkIn, $checkOut,
+                        max(1, (int) ($filters['adults'] ?? 1)),
+                        max(0, (int) ($filters['children'] ?? 0)),
+                        $rooms, $type, $plan
+                    );
+
+                    // Checkout still creates a transactionally locked
+                    // authoritative hold; search availability is a snapshot.
+                    $quote = $this->pricing->quote(
+                        $property, $checkIn, $checkOut, [], $type, $plan, $rooms
+                    );
+
+                    return [
+                        'accommodation_type' => $type,
+                        'rate_plan' => $plan,
+                        'remaining' => $remaining,
+                        'quote' => $quote,
+                    ];
+                } catch (ValidationException) {
+                    // Try the next compatible rate or room type.
+                    continue;
+                }
+            }
+        }
+
+        return null;
+    }
+
     public function filterOptions(): array
     {
-        return Cache::remember('public:search:filter-options', now()->addMinutes(10), fn () => [
+        // Amenity changes are infrequent and this bounded indexed lookup
+        // must be fresh immediately after an administrator updates options.
+        return [
             'amenities' => Amenity::query()
                 ->where('is_active', true)
                 ->orderBy('name')
                 ->get(['id', 'name', 'icon']),
-        ]);
+        ];
     }
 
     private function eligibleProperties(
@@ -606,51 +627,49 @@ SQL;
         int $rooms,
         int $guests
     ): array {
-        $keyFilters = collect($filters)->except(['page', 'sort'])->sortKeys()->all();
-        $key = 'reserva:search-facets:'.hash('sha256', json_encode($keyFilters));
+        // Dynamic counts depend on inventory, holds, moderation and listing
+        // updates. A time-based cache can advertise stale availability and
+        // misleading filters. Keep these indexed aggregations authoritative.
+        $base = $this->eligibleProperties($filters, $checkIn, $checkOut, $rooms, $guests);
 
-        return Cache::remember($key, now()->addSeconds(60), function () use ($filters, $checkIn, $checkOut, $rooms, $guests): array {
-            $base = $this->eligibleProperties($filters, $checkIn, $checkOut, $rooms, $guests);
+        $propertyTypes = (clone $base)
+            ->selectRaw('property_type, COUNT(*) as aggregate')
+            ->whereNotNull('property_type')
+            ->groupBy('property_type')
+            ->orderByDesc('aggregate')
+            ->pluck('aggregate', 'property_type')
+            ->map(fn ($count) => (int) $count)
+            ->all();
 
-            $propertyTypes = (clone $base)
-                ->selectRaw('property_type, COUNT(*) as aggregate')
-                ->whereNotNull('property_type')
-                ->groupBy('property_type')
-                ->orderByDesc('aggregate')
-                ->pluck('aggregate', 'property_type')
-                ->map(fn ($count) => (int) $count)
-                ->all();
+        $locations = (clone $base)
+            ->selectRaw('location_id, COUNT(*) as aggregate')
+            ->whereNotNull('location_id')
+            ->groupBy('location_id')
+            ->pluck('aggregate', 'location_id')
+            ->map(fn ($count) => (int) $count)
+            ->all();
 
-            $locations = (clone $base)
-                ->selectRaw('location_id, COUNT(*) as aggregate')
-                ->whereNotNull('location_id')
-                ->groupBy('location_id')
-                ->pluck('aggregate', 'location_id')
-                ->map(fn ($count) => (int) $count)
-                ->all();
+        $eligibleIds = (clone $base)->select('properties.id');
 
-            $eligibleIds = (clone $base)->select('properties.id');
+        $amenities = DB::table('amenity_property')
+            ->join('amenities', 'amenities.id', '=', 'amenity_property.amenity_id')
+            ->whereIn('amenity_property.property_id', $eligibleIds->toBase())
+            ->selectRaw('amenities.id, amenities.name, COUNT(DISTINCT amenity_property.property_id) as aggregate')
+            ->groupBy('amenities.id', 'amenities.name')
+            ->orderByDesc('aggregate')
+            ->limit(30)
+            ->get()
+            ->map(fn ($row) => [
+                'id' => (int) $row->id,
+                'name' => $row->name,
+                'count' => (int) $row->aggregate,
+            ])->all();
 
-            $amenities = DB::table('amenity_property')
-                ->join('amenities', 'amenities.id', '=', 'amenity_property.amenity_id')
-                ->whereIn('amenity_property.property_id', $eligibleIds->toBase())
-                ->selectRaw('amenities.id, amenities.name, COUNT(DISTINCT amenity_property.property_id) as aggregate')
-                ->groupBy('amenities.id', 'amenities.name')
-                ->orderByDesc('aggregate')
-                ->limit(30)
-                ->get()
-                ->map(fn ($row) => [
-                    'id' => (int) $row->id,
-                    'name' => $row->name,
-                    'count' => (int) $row->aggregate,
-                ])->all();
-
-            return [
-                'property_types' => $propertyTypes,
-                'locations' => $locations,
-                'amenities' => $amenities,
-            ];
-        });
+        return [
+            'property_types' => $propertyTypes,
+            'locations' => $locations,
+            'amenities' => $amenities,
+        ];
     }
 
     private function cleanPrefix(string $value): string

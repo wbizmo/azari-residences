@@ -5,22 +5,6 @@
 
 <div class="az-address-fields {{ $wrapperClass }}" data-azari-property-address>
     <label class="{{ $labelClass }}">
-        Search property address
-        <input type="search" autocomplete="off" placeholder="Start typing an address" data-azari-address-search>
-        <small>Address suggestions use OpenStreetMap data. No Google API key is required, and manual entry remains available.</small>
-    </label>
-
-    <div data-azari-address-status role="status" aria-live="polite" hidden>
-        <span class="az-address-spinner" aria-hidden="true" hidden></span>
-        <span data-azari-address-status-text></span>
-    </div>
-    <div data-azari-address-results hidden></div>
-
-    <div style="margin:8px 0 12px">
-        <button type="button" data-azari-use-location style="border:1px solid #052058;background:#FFFFFF;border-radius:8px;padding:9px 12px;cursor:pointer">Use current location</button>
-    </div>
-
-    <label class="{{ $labelClass }}">
         Property address
         <input
             name="formatted_address"
@@ -30,19 +14,66 @@
             autocomplete="street-address"
             data-azari-address="formatted_address"
         >
-        <small>You can type or correct this address manually at any time.</small>
+        <small>Enter the full address directly. Maps and third-party address services are not required to save a property.</small>
     </label>
 
-    <div style="display:none" aria-hidden="true">
-        <input name="address_line_1" value="{{ $value('address_line_1') }}" data-azari-address="address_line_1">
-        <input name="address_line_2" value="{{ $value('address_line_2') }}" data-azari-address="address_line_2">
-        <input name="address_city" value="{{ $value('address_city') }}" data-azari-address="address_city">
-        <input name="address_region" value="{{ $value('address_region') }}" data-azari-address="address_region">
-        <input name="address_postal_code" value="{{ $value('address_postal_code') }}" data-azari-address="address_postal_code">
-        <input name="address_country_code" value="{{ $value('address_country_code') }}" data-azari-address="address_country_code">
-        <input name="latitude" value="{{ $value('latitude') }}" data-azari-address="latitude">
-        <input name="longitude" value="{{ $value('longitude') }}" data-azari-address="longitude">
-    </div>
+    <details class="az-address-optional-fields" style="margin-top:12px">
+        <summary>Additional address details (optional)</summary>
+        <div class="az-address-manual-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px;margin-top:12px">
+            <label class="{{ $labelClass }}">Street / building
+                <input name="address_line_1" value="{{ $value('address_line_1') }}" maxlength="255" data-azari-address="address_line_1" autocomplete="address-line1">
+            </label>
+            <label class="{{ $labelClass }}">Apartment / suite
+                <input name="address_line_2" value="{{ $value('address_line_2') }}" maxlength="255" data-azari-address="address_line_2" autocomplete="address-line2">
+            </label>
+            <label class="{{ $labelClass }}">City
+                <input name="address_city" value="{{ $value('address_city') }}" maxlength="120" data-azari-address="address_city" autocomplete="address-level2">
+            </label>
+            <label class="{{ $labelClass }}">State / region
+                <input name="address_region" value="{{ $value('address_region') }}" maxlength="120" data-azari-address="address_region" autocomplete="address-level1">
+            </label>
+            <label class="{{ $labelClass }}">Postal code
+                <input name="address_postal_code" value="{{ $value('address_postal_code') }}" maxlength="40" data-azari-address="address_postal_code" autocomplete="postal-code">
+            </label>
+            <label class="{{ $labelClass }}">Country code (optional, e.g. NG)
+                <input name="address_country_code" value="{{ $value('address_country_code') }}" maxlength="2" minlength="2" pattern="[A-Za-z]{2}" data-azari-address="address_country_code" autocomplete="off">
+            </label>
+        </div>
+    </details>
+
+    <details class="az-address-optional-fields" style="margin-top:12px">
+        <summary>Map coordinates (optional, can be entered manually)</summary>
+        <div class="az-address-manual-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px;margin-top:12px">
+            <label class="{{ $labelClass }}">Latitude
+                <input type="number" name="latitude" step="any" min="-90" max="90"
+                       value="{{ $value('latitude') }}" data-azari-address="latitude" inputmode="decimal">
+            </label>
+            <label class="{{ $labelClass }}">Longitude
+                <input type="number" name="longitude" step="any" min="-180" max="180"
+                       value="{{ $value('longitude') }}" data-azari-address="longitude" inputmode="decimal">
+            </label>
+        </div>
+        <small>Leave coordinates blank if unknown. A listing can be saved and booked without map coordinates.</small>
+    </details>
+
+    <details class="az-address-optional-fields" style="margin-top:12px">
+        <summary>Address suggestions (optional)</summary>
+        <p><small>Lookups use an external OpenStreetMap-based service only when you search here. You can ignore this section and enter the address yourself.</small></p>
+        <label class="{{ $labelClass }}">
+            Search for an address
+            <input type="search" autocomplete="off" placeholder="Search address suggestions" data-azari-address-search>
+        </label>
+
+        <div data-azari-address-status role="status" aria-live="polite" hidden>
+            <span class="az-address-spinner" aria-hidden="true" hidden></span>
+            <span data-azari-address-status-text></span>
+        </div>
+        <div data-azari-address-results hidden></div>
+
+        <div style="margin:8px 0 12px">
+            <button type="button" data-azari-use-location style="border:1px solid #052058;background:#FFFFFF;border-radius:8px;padding:9px 12px;cursor:pointer">Use current location</button>
+        </div>
+    </details>
 </div>
 
 @once
@@ -93,6 +124,7 @@
     const applyFeature = (root, feature) => {
         const values = normaliseFeature(feature);
         Object.entries(values).forEach(([key, value]) => setField(root, key, value));
+        root.dataset.azariSuggestedCoordinates = 'true';
         return values;
     };
 
@@ -151,6 +183,25 @@
             if (progress) progress.hidden = !busy;
         };
 
+        // A manual address edit must not retain unrelated coordinates from
+        // a previous suggested property. Explicitly typed coordinates stay.
+        root.addEventListener('input', (event) => {
+            const field = event.target?.dataset?.azariAddress;
+            if (field === 'latitude' || field === 'longitude') {
+                root.dataset.azariSuggestedCoordinates = 'false';
+            } else if (field === 'formatted_address') {
+                // Always invalidate an in-flight geolocation or reverse lookup,
+                // including before it has returned its first suggestion.
+                if (root.dataset.azariSuggestedCoordinates === 'true') {
+                    setField(root, 'latitude', '');
+                    setField(root, 'longitude', '');
+                }
+                root.dataset.azariSuggestedCoordinates = 'false';
+                generation++;
+                activeRequest?.abort();
+            }
+        });
+
         if (search) {
             search.addEventListener('input', () => {
                 // Immediately invalidate stale results when the input changes,
@@ -204,13 +255,19 @@
                 }
 
                 generation++;
+                const locationGeneration = generation;
                 activeRequest?.abort();
                 if (box) box.hidden = true;
                 showStatus('Finding your location…', true);
                 locationButton.disabled = true;
                 navigator.geolocation.getCurrentPosition(async ({ coords }) => {
+                    if (locationGeneration !== generation) {
+                        locationButton.disabled = false;
+                        return;
+                    }
                     setField(root, 'latitude', coords.latitude);
                     setField(root, 'longitude', coords.longitude);
+                    root.dataset.azariSuggestedCoordinates = 'true';
 
                     try {
                         const response = await fetch(`${reverseEndpoint}?lat=${encodeURIComponent(coords.latitude)}&lon=${encodeURIComponent(coords.longitude)}`, {
@@ -219,6 +276,7 @@
                         });
                         if (response.ok) {
                             const payload = await response.json();
+                            if (locationGeneration !== generation) return;
                             const feature = payload?.features?.[0];
                             if (feature) applyFeature(root, feature);
                             showStatus(feature ? 'Address found. Review it before saving.' : 'Location found. Enter the address manually.');
