@@ -46,10 +46,18 @@
 </head>
 
 <body>
-<main class="auth">
+<main class="auth resavar-auth-unified">
     <section class="visual">
         <img src="{{ asset('images/azari-guest-auth-suite.png') }}" alt="Luxury Resavar suite">
-        <span class="brand">Resavar</span>
+        <a href="{{ route('home') }}" class="brand resavar-auth-logo" aria-label="Resavar home">
+            <x-brand-logo variant="hero" dark />
+        </a>
+        <div class="resavar-auth-visual-copy">
+            <span class="resavar-auth-visual-kicker">WELCOME TO RESAVAR</span>
+            <h2>Every great stay<br>has a <em>beginning.</em></h2>
+            <p>Thoughtfully selected hotels and apartments. A simpler way to book, stay and feel at home.</p>
+            <span class="resavar-auth-visual-foot">DISCOVER &middot; REQUEST &middot; STAY</span>
+        </div>
     </section>
 
     <section class="panel">
@@ -108,7 +116,7 @@
                     @endif
                 </div>
 
-                <button class="submit" type="submit">Sign in</button>
+                <button class="submit" type="submit">Sign in<span class="material-symbols-outlined" aria-hidden="true">open_in_new</span></button>
             </form>
 
             <p class="switch">
