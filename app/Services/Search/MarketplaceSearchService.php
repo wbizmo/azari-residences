@@ -231,6 +231,15 @@ class MarketplaceSearchService
             : null;
 
         foreach ($property->publicAccommodationTypes as $type) {
+            // Inventory does not vary by rate plan; evaluate it once per
+            // room type rather than repeating booking/channel queries.
+            $remaining = $this->availability->availableQuantity(
+                $type, $checkIn, $checkOut
+            );
+            if ($remaining < $rooms) {
+                continue;
+            }
+
             $plans = $requestedPlanId !== null
                 ? $type->ratePlans->filter(fn ($plan) => (int) $plan->getKey() === $requestedPlanId)
                 : ($type->ratePlans->isEmpty() ? collect([null]) : $type->ratePlans);
@@ -258,15 +267,8 @@ class MarketplaceSearchService
                         $rooms, $type, $plan
                     );
 
-                    // Search eligibility is a snapshot: checkout still
-                    // creates a transactionally locked authoritative hold.
-                    $remaining = $this->availability->availableQuantity(
-                        $type, $checkIn, $checkOut
-                    );
-                    if ($remaining < $rooms) {
-                        continue;
-                    }
-
+                    // Checkout still creates a transactionally locked
+                    // authoritative hold; search availability is a snapshot.
                     $quote = $this->pricing->quote(
                         $property, $checkIn, $checkOut, [], $type, $plan, $rooms
                     );
