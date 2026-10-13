@@ -63,6 +63,11 @@ class PaymentEligibilityService
 
     public function acceptsPayment(Booking $booking): bool
     {
+        // Server-side guard covers direct gateway entry, retries and
+        // checkout links even when a guest bypasses the review page.
+        if (! $booking->hasBookingApproval()) {
+            return false;
+        }
         if ($this->isCancelled($booking) || $this->isFullyPaid($booking)) {
             return false;
         }
