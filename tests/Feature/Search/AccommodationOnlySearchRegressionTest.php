@@ -116,6 +116,24 @@ final class AccommodationOnlySearchRegressionTest extends TestCase
         $this->assertSame(0, $second['results']->total());
     }
 
+    public function test_active_amenity_filter_options_refresh_without_a_stale_provider_cache(): void
+    {
+        $service = app(MarketplaceSearchService::class);
+        $initial = $service->filterOptions()['amenities'];
+
+        $amenity = \App\Models\Amenity::query()->create([
+            'name' => 'Accessible entry - local test',
+            'icon' => 'accessible',
+            'is_active' => true,
+        ]);
+        $updated = $service->filterOptions()['amenities'];
+        $this->assertSame($initial->count() + 1, $updated->count());
+        $this->assertTrue($updated->contains('id', $amenity->id));
+
+        $amenity->update(['is_active' => false]);
+        $this->assertFalse($service->filterOptions()['amenities']->contains('id', $amenity->id));
+    }
+
     public function test_a_property_without_map_coordinates_can_be_searched_and_reserved(): void
     {
         $property = Property::factory()->create([
