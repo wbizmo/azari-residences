@@ -22,12 +22,14 @@ Schedule::command('model:prune')->daily();
 Schedule::command('azari:expire-unpaid-bookings')->everyFiveMinutes()->name('expire-unpaid-bookings')->withoutOverlapping();
 Schedule::command('azari:sitemap')->dailyAt('04:15')->name('public-sitemap')->withoutOverlapping();
 Schedule::command('azari:heartbeat')->everyMinute()->name('system-heartbeat')->withoutOverlapping();
-Schedule::command('azari:sync-channels')->everyTenMinutes()->name('channel-sync')->withoutOverlapping();
-if (config('travel.dining_enabled',false)) {
+if (! config('reserva.accommodation_only', true)) {
+    Schedule::command('azari:sync-channels')->everyTenMinutes()->name('channel-sync')->withoutOverlapping();
+}
+if (! config('reserva.accommodation_only', true) && config('travel.dining_enabled', false)) {
     Schedule::command('resavar:dining-arrival-reminders --limit=50')
         ->everyTenMinutes()->name('dining-arrival-reminders')->withoutOverlapping();
 }
-if (config('travel.webhooks_enabled', false)) {
+if (! config('reserva.accommodation_only', true) && config('travel.webhooks_enabled', false)) {
     Schedule::command('resavar:process-travel-webhooks --limit=50')
         ->everyMinute()->name('travel-supplier-event-inbox')->withoutOverlapping();
 }
