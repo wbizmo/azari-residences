@@ -146,6 +146,40 @@ final class AccommodationOnlySearchRegressionTest extends TestCase
         $this->assertSame($property->id, $hold->property_id);
     }
 
+    public function test_admin_can_create_property_with_manual_address_and_without_external_coordinates(): void
+    {
+        $admin = \App\Models\User::factory()->create(['is_admin' => true]);
+        $location = \App\Models\Location::factory()->create();
+        $roomType = \App\Models\RoomType::factory()->create();
+        $data = [
+            'name' => 'Manual Address Apartment',
+            'location_id' => $location->id,
+            'room_type_id' => $roomType->id,
+            'formatted_address' => '14 Independence Avenue, Lagos',
+            'bedrooms' => 1,
+            'bathrooms' => 1,
+            'max_guests' => 2,
+            'nightly_rate' => 42000,
+            'currency' => (string) config('localization.default_currency', 'NGN'),
+        ];
+
+        $this->actingAs($admin)->post(route('azari.admin.properties.store'), $data)
+            ->assertSessionHasNoErrors()->assertRedirect();
+
+        $saved = Property::query()->where('name', 'Manual Address Apartment')->firstOrFail();
+        $this->assertSame('14 Independence Avenue, Lagos', $saved->formatted_address);
+        $this->assertNull($saved->latitude);
+        $this->assertNull($saved->longitude);
+
+        $this->actingAs($admin)->post(route('azari.admin.properties.store'), [
+            ...$data,
+            'name' => 'Invalid Partial Coordinates',
+            'latitude' => 6.5244,
+        ])->assertSessionHasErrors('longitude');
+
+        $this->assertDatabaseMissing('properties', ['name' => 'Invalid Partial Coordinates']);
+    }
+
     public function test_manual_address_form_exposes_optional_coordinates_without_any_geocoding_requirement(): void
     {
         $markup = file_get_contents(resource_path('views/components/property-address-fields.blade.php'));
