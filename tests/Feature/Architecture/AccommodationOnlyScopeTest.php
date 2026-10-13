@@ -21,10 +21,10 @@ final class AccommodationOnlyScopeTest extends TestCase
 
     public function test_travel_supplier_webhooks_and_partner_api_are_gone_without_touching_booking_callbacks(): void
     {
-        $this->postJson('/webhooks/travel/unconfigured', [])->assertGone();
-        $this->postJson('/webhooks/channels/unconfigured', [])->assertGone();
-        $this->getJson('/api/partners/v1/stays')->assertGone();
-        $this->postJson('/api/partners/v1/intents', [])->assertGone();
+        $this->postJson('/webhooks/travel/unconfigured', [])->assertStatus(410);
+        $this->postJson('/webhooks/channels/unconfigured', [])->assertStatus(410);
+        $this->getJson('/api/partners/v1/stays')->assertStatus(410);
+        $this->postJson('/api/partners/v1/intents', [])->assertStatus(410);
     }
 
     public function test_legacy_marketing_urls_redirect_to_stay_search(): void
