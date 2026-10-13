@@ -127,6 +127,12 @@ class PaymentScheduleService
                 return $locked;
             }
 
+            if (! $locked->hasBookingApproval()) {
+                throw ValidationException::withMessages([
+                    'booking' => 'The accommodation request must be approved before confirmation.',
+                ]);
+            }
+
             $schedule = $this->forBooking($locked);
 
             if (
