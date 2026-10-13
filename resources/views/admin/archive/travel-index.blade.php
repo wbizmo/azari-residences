@@ -26,6 +26,24 @@
         </table>
     </div>
     {{ $requests->links() }}
+    <h2>Former dining requests (latest 50)</h2>
+    @forelse($diningRequests as $dining)
+        <p><strong>{{ $dining->id }}</strong> · guest #{{ $dining->user_id }} ·
+            {{ $dining->partner?->name ?? 'Unknown partner' }} ·
+            {{ str_replace('_', ' ', $dining->status) }}
+        </p>
+    @empty
+        <p>No archived dining requests.</p>
+    @endforelse
+    <h2>Former trip assemblies (latest 50)</h2>
+    @forelse($assemblies as $assembly)
+        <p><strong>{{ $assembly->id }}</strong> · guest #{{ $assembly->user_id }} ·
+            {{ str_replace('_', ' ', $assembly->status) }} ·
+            {{ $assembly->created_at?->format('j M Y') }}
+        </p>
+    @empty
+        <p>No archived trip assemblies.</p>
+    @endforelse
     <p>Do not interpret a supplier enquiry as proof of a captured payment. Verify financial evidence in the existing payment, refund and ledger modules.</p>
 </section>
 @endsection
