@@ -56,7 +56,8 @@ final class AccommodationBookingApprovalService
         CarbonImmutable $checkOut,
         string $note
     ): Booking {
-        if ($checkIn->isPast() || ! $checkIn->lessThan($checkOut) || mb_strlen(trim($note)) < 10) {
+        if ($checkIn->toDateString() < today()->toDateString()
+            || ! $checkIn->lessThan($checkOut) || mb_strlen(trim($note)) < 10) {
             throw ValidationException::withMessages(['proposal' => 'Choose valid future dates and explain the alternative.']);
         }
 
