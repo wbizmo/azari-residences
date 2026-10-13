@@ -60,23 +60,30 @@ class ExpireUnpaidBookings extends Command
                     // cancelled booking or tell guests payment was attempted.
                     $review = AccommodationBookingApproval::query()
                         ->where('booking_id', $booking->id)
-                        ->whereIn('status', ['submitted', 'under_review'])
+                        ->whereIn('status', ['submitted', 'under_review', 'approved'])
                         ->first();
 
                     if ($review) {
+                        $previousApprovalStatus = $review->status;
                         $review->forceFill([
                             'status' => 'expired',
                             'reviewed_at' => $cutoff,
-                            'review_note' => 'No approval was received before the review deadline.',
+                            'review_note' => $previousApprovalStatus === 'approved'
+                                ? 'Approved request expired without verified payment.'
+                                : 'No approval was received before the review deadline.',
                         ])->save();
                         $booking->forceFill([
-                            'cancellation_reason' => 'Accommodation request review window expired',
+                            'cancellation_reason' => $previousApprovalStatus === 'approved'
+                                ? 'Approved booking payment window expired'
+                                : 'Accommodation request review window expired',
                         ])->save();
                         BookingStatusHistory::query()->create([
                             'booking_id' => $booking->id,
-                            'from_status' => 'pending',
+                            'from_status' => $previousApprovalStatus === 'approved' ? 'pending_payment' : 'pending',
                             'to_status' => 'cancelled',
-                            'note' => 'Accommodation request expired without approval or payment.',
+                            'note' => $previousApprovalStatus === 'approved'
+                                ? 'Approved booking expired without verified payment.'
+                                : 'Accommodation request expired without approval or payment.',
                             'metadata' => ['approval' => 'expired'],
                         ]);
                     }
