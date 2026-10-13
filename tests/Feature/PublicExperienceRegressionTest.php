@@ -22,11 +22,13 @@ class PublicExperienceRegressionTest extends TestCase
     {
         $this->get(route('public.about'))->assertOk()->assertSee('team-azari.png');
         $this->get(route('public.contact'))->assertOk()->assertSee('contact-azari.png');
-        $this->get(route('public.local-guide'))->assertOk()->assertSee('local-guides-azari.png');
-        $this->get(route('public.concierge'))->assertOk()->assertSee('azari-concierge.png');
-        $this->get(route('public.housekeeping'))->assertOk()->assertSee('azari-housekeeping.png');
-        $this->get(route('public.restaurant'))->assertOk()->assertSee('azari-food.png');
-        $this->get(route('public.airport-transfers'))->assertOk()->assertSee('azari-airport.png');
+        // Previous travel and service campaign pages are preserved as
+        // permanent redirects rather than offering unsupported services.
+        foreach (['public.local-guide', 'public.concierge', 'public.housekeeping',
+            'public.restaurant', 'public.airport-transfers'] as $route) {
+            $this->get(route($route))->assertStatus(301)
+                ->assertRedirect(route('availability.index'));
+        }
     }
 
     public function test_contact_form_uses_mail_transport_and_environment_recipient(): void
