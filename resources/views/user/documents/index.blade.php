@@ -47,4 +47,11 @@
         @endif
     </div>
 </section>
+<section class="az-user-panel" style="margin-top:16px" aria-label="Archived historical requests">
+    <div class="az-user-panel-body">
+        <strong>Historical records</strong>
+        <p>Requests from retired travel services remain available for your own records. These are not new reservations or proof of payment.</p>
+        <a class="az-user-button az-user-button--light" href="{{ route('user.archive.travel.index') }}">View archived requests</a>
+    </div>
+</section>
 @endsection
