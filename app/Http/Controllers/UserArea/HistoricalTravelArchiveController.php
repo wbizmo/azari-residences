@@ -21,16 +21,16 @@ final class HistoricalTravelArchiveController extends Controller
             ->where('user_id', $request->user()->id)
             ->with(['offer:id,title'])
             ->latest('created_at')
-            ->paginate(20);
+            ->paginate(20, ['*'], 'requests_page')->withQueryString();
 
         $diningRequests = DiningRequest::query()
             ->where('user_id', $request->user()->id)
             ->with('partner:id,name')
-            ->latest('created_at')->limit(20)->get();
+            ->latest('created_at')->paginate(20, ['*'], 'dining_page')->withQueryString();
         $assemblies = TripAssembly::query()
             ->where('user_id', $request->user()->id)
             ->with('itinerary:id,name')
-            ->latest('created_at')->limit(20)->get();
+            ->latest('created_at')->paginate(20, ['*'], 'assemblies_page')->withQueryString();
 
         return response()->view('user.archive.travel-index', compact('requests', 'diningRequests', 'assemblies'))
             ->header('Cache-Control', 'no-store, private');
