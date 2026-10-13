@@ -44,6 +44,13 @@
                     <a href="{{ route($route) }}" class="az-nav-link {{ request()->routeIs(str_replace('.index','.*',$route)) || request()->routeIs($route) ? 'is-active' : '' }}"><span class="material-symbols-outlined" aria-hidden="true">{{ $icon }}</span><span>{{ $label }}</span></a>
                 @endif
             @endforeach
+            @if($adminActor?->isAdministrator() && Route::has('azari.admin.archive.travel.index'))
+                <a class="az-nav-link {{ request()->routeIs('azari.admin.archive.travel.*') ? 'is-active' : '' }}"
+                   href="{{ route('azari.admin.archive.travel.index') }}">
+                    <span class="material-symbols-outlined" aria-hidden="true">history_edu</span>
+                    <span>Historical records</span>
+                </a>
+            @endif
             @if(Route::has('azari.admin.staff.index') && $adminActor?->isAdministrator())
                 <a href="{{ route('azari.admin.staff.index') }}" class="az-nav-link {{ request()->routeIs('azari.admin.staff.*') ? 'is-active' : '' }}"><span class="material-symbols-outlined">badge</span><span>Staff</span></a>
             @endif
