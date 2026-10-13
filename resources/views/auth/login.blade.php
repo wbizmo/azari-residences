@@ -116,7 +116,7 @@
                     @endif
                 </div>
 
-                <button class="submit" type="submit">Sign in</button>
+                <button class="submit" type="submit">Sign in<span class="material-symbols-outlined" aria-hidden="true">open_in_new</span></button>
             </form>
 
             <p class="switch">
