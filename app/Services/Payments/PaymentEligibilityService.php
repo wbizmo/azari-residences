@@ -68,6 +68,11 @@ class PaymentEligibilityService
         if (! $booking->hasBookingApproval()) {
             return false;
         }
+
+        if (in_array($booking->status, ['pending', 'pending_payment'], true)
+            && $booking->expires_at?->isPast()) {
+            return false;
+        }
         if ($this->isCancelled($booking) || $this->isFullyPaid($booking)) {
             return false;
         }
