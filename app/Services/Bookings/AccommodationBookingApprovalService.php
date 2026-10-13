@@ -154,7 +154,8 @@ final class AccommodationBookingApprovalService
                 if (strtoupper((string) ($frozen['currency'] ?? '')) !== strtoupper((string) $quote['currency'])
                     || abs(round((float) ($frozen['total'] ?? -1), 2) - round((float) $quote['total'], 2)) >= 0.005
                     || (int) ($frozen['quantity'] ?? 1) !== (int) $locked->rooms
-                    || (int) ($frozen['rate_plan_id'] ?? 0) !== (int) ($plan?->getKey() ?? 0)) {
+                    || (int) ($frozen['rate_plan_id'] ?? 0) !== (int) ($plan?->getKey() ?? 0)
+                    || (array) ($frozen['policy'] ?? []) !== (array) ($quote['policy'] ?? [])) {
                     throw ValidationException::withMessages(['booking' => 'The original quote is stale. The guest must review and submit a new request.']);
                 }
 
