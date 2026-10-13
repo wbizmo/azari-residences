@@ -29,6 +29,9 @@ final class PhaseFourBatchTwoTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        // Exercise the historical adapter contracts only under an explicit
+        // legacy-sandbox opt-out; production remains accommodation-only.
+        config()->set('reserva.accommodation_only', false);
         config()->set('travel.dining_enabled', true);
         config()->set('travel.trip_assembly_enabled', true);
     }
