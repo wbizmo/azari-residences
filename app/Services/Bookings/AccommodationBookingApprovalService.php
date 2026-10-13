@@ -96,7 +96,8 @@ final class AccommodationBookingApprovalService
                     fn (Builder $q) => $q->lockForUpdate())
                 ->firstOrFail();
 
-            if ($decision === 'approved' && $review->status === 'approved') {
+            if (($decision === 'under_review' && $review->status === 'under_review' && $proposal === [])
+                || ($decision === 'approved' && $review->status === 'approved')) {
                 return $locked->load('approval'); // Idempotent retry.
             }
 
