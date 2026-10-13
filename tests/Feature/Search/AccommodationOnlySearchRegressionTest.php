@@ -137,10 +137,10 @@ final class AccommodationOnlySearchRegressionTest extends TestCase
 
         $room = $property->accommodationTypes()->firstOrFail();
         $plan = $room->ratePlans()->first();
-        $hold = app(\\App\\Services\\Bookings\\AzariAvailabilityEngine::class)->hold(
+        $hold = app(\App\Services\Bookings\AzariAvailabilityEngine::class)->hold(
             $property,
-            \\Carbon\\CarbonImmutable::parse($filters['check_in']),
-            \\Carbon\\CarbonImmutable::parse($filters['check_out']),
+            \Carbon\CarbonImmutable::parse($filters['check_in']),
+            \Carbon\CarbonImmutable::parse($filters['check_out']),
             2, 0, 1, null, $room->id, $plan?->id
         );
         $this->assertSame($property->id, $hold->property_id);
