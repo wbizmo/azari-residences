@@ -26,7 +26,7 @@
         </table>
     </div>
     {{ $requests->links() }}
-    <h2>Former dining requests (latest 50)</h2>
+    <h2>Former dining requests</h2>
     @forelse($diningRequests as $dining)
         <p><strong>{{ $dining->id }}</strong> · guest #{{ $dining->user_id }} ·
             {{ $dining->partner?->name ?? 'Unknown partner' }} ·
@@ -35,7 +35,8 @@
     @empty
         <p>No archived dining requests.</p>
     @endforelse
-    <h2>Former trip assemblies (latest 50)</h2>
+    {{ $diningRequests->links() }}
+    <h2>Former trip assemblies</h2>
     @forelse($assemblies as $assembly)
         <p><strong>{{ $assembly->id }}</strong> · guest #{{ $assembly->user_id }} ·
             {{ str_replace('_', ' ', $assembly->status) }} ·
@@ -44,6 +45,26 @@
     @empty
         <p>No archived trip assemblies.</p>
     @endforelse
+    {{ $assemblies->links() }}
+    <h2>Historical external calendar reservations</h2>
+    <div style="overflow-x:auto">
+        <table class="az-admin-table">
+            <thead><tr><th scope="col">Source record</th><th scope="col">Property</th><th scope="col">Dates</th><th scope="col">Status</th></tr></thead>
+            <tbody>
+                @forelse($channelReservations as $reservation)
+                    <tr>
+                        <td>{{ $reservation->id }}</td>
+                        <td>{{ $reservation->property?->name ?? 'Unavailable' }}</td>
+                        <td>{{ $reservation->starts_on?->format('j M Y') }} – {{ $reservation->ends_on?->format('j M Y') }}</td>
+                        <td>{{ str_replace('_', ' ', $reservation->status) }}</td>
+                    </tr>
+                @empty
+                    <tr><td colspan="4">No retained external calendar reservations.</td></tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+    {{ $channelReservations->links() }}
     <p>Do not interpret a supplier enquiry as proof of a captured payment. Verify financial evidence in the existing payment, refund and ledger modules.</p>
 </section>
 @endsection
