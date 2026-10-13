@@ -7,6 +7,7 @@ use App\Support\LocalDate;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -47,6 +48,27 @@ class Booking extends Model
             'tax_total' => 'decimal:2', 'total' => 'decimal:2',
             'property_latitude' => 'decimal:7', 'property_longitude' => 'decimal:7',
         ];
+    }
+
+    public function approval(): HasOne
+    {
+        return $this->hasOne(AccommodationBookingApproval::class, 'booking_id');
+    }
+
+    public function requiresApproval(): bool
+    {
+        return $this->approval()->exists();
+    }
+
+    public function isAwaitingApproval(): bool
+    {
+        return $this->approval()->whereIn('status', ['submitted', 'under_review'])->exists();
+    }
+
+    public function hasBookingApproval(): bool
+    {
+        return ! $this->requiresApproval()
+            || $this->approval()->where('status', 'approved')->exists();
     }
 
     public function tripItinerary(): BelongsTo { return $this->belongsTo(TripItinerary::class); }
@@ -131,7 +153,8 @@ class Booking extends Model
 
     public function canAcceptPayment(): bool
     {
-        return ! $this->isCancelled() && ! $this->isPaid() && $this->balanceDue() > 0;
+        return ! $this->isCancelled() && $this->hasBookingApproval()
+            && ! $this->isPaid() && $this->balanceDue() > 0;
     }
 
     public function successfulPaymentsTotal(): float
