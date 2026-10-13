@@ -23,6 +23,7 @@ class UserBookingController extends Controller
             'ratePlan',
             'tripItinerary' => fn ($q) => $q->where('user_id', $request->user()->id)->select(['id','name','user_id']),
             'payments',
+            'approval',
             'modificationRequests' => fn ($q) => $q->where('status', 'pending'),
         ]);
 
@@ -92,6 +93,7 @@ class UserBookingController extends Controller
                 'ratePlan.paymentPolicy',
                 'guests',
                 'payments.refunds',
+            'approval',
                 'refunds',
                 'modificationRequests',
                 'serviceRequests',
