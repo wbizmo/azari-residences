@@ -594,10 +594,10 @@
         <div class="site-container">
             <div class="section-heading section-heading-light">
                 <div>
-                    <span class="eyebrow">Guest services</span>
+                    <span class="eyebrow">The Resavar way</span>
 
                     <h2>
-                        {{ $content['services_title'] ?? 'Thoughtful services for every stay.' }}
+                        Find a stay that feels right.
                     </h2>
                 </div>
             </div>
@@ -605,24 +605,24 @@
             <div class="service-grid">
                 @foreach([
                     [
-                        'concierge',
-                        'Private concierge',
-                        'Personalised assistance before arrival, throughout your stay and until departure. Our concierge team can coordinate reservations, local recommendations and guest requests to ensure a seamless hospitality experience.',
+                        'hotel',
+                        'Hotels and apartments',
+                        'Explore hotels, serviced apartments and private stays listed directly by the people who manage them.',
                     ],
                     [
-                        'cleaning_services',
-                        'Housekeeping',
-                        'Professional housekeeping services maintain every stay to hotel-quality standards. Fresh linens, meticulous cleaning and scheduled servicing help every stay remain comfortable from the first night to the last.',
+                        'verified',
+                        'Properties reviewed',
+                        'Property submissions are reviewed before approval so you can compare accommodation with clearer information.',
                     ],
                     [
-                        'restaurant',
-                        'Dining reservations',
-                        'Enjoy access to carefully selected restaurants and local dining experiences. Our team can assist with reservations, recommendations and special arrangements tailored to your preferences.',
+                        'calendar_month',
+                        'Simple booking requests',
+                        'Choose your preferred dates and submit a request. You can follow its status in your Resavar account.',
                     ],
                     [
-                        'airport_shuttle',
-                        'Airport transfers',
-                        'Reliable airport pickup and drop-off services arranged through trusted transportation partners, providing a comfortable journey between the airport and your stay.',
+                        'support_agent',
+                        'Support for your stay',
+                        'Reach our team for help with booking requests, payments and changes through your account.',
                     ],
                 ] as [$icon, $title, $description])
                     <article class="service-card">
