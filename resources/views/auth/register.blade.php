@@ -124,7 +124,7 @@
                     </div>
                 </div>
 
-                <button class="submit" type="submit">Create account</button>
+                <button class="submit" type="submit">Create account<span class="material-symbols-outlined" aria-hidden="true">open_in_new</span></button>
             </form>
 
             <p class="switch">
