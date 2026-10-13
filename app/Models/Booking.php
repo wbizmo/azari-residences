@@ -61,7 +61,8 @@ class Booking extends Model
 
     public function isAwaitingApproval(): bool
     {
-        return $this->approval()->whereIn('status', ['submitted', 'under_review'])->exists();
+        return $this->status === 'pending'
+            && $this->approval()->whereIn('status', ['submitted', 'under_review'])->exists();
     }
 
     public function hasBookingApproval(): bool
@@ -153,6 +154,8 @@ class Booking extends Model
     public function canAcceptPayment(): bool
     {
         return ! $this->isCancelled() && $this->hasBookingApproval()
+            && ! (in_array($this->status, ['pending', 'pending_payment'], true)
+                && $this->expires_at?->isPast())
             && ! $this->isPaid() && $this->balanceDue() > 0;
     }
 
