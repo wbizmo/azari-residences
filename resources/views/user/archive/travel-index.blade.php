@@ -36,6 +36,7 @@
         @empty
             <p>No historical dining requests.</p>
         @endforelse
+        {{ $diningRequests->links() }}
         <h3>Historical trip records</h3>
         @forelse($assemblies as $assembly)
             <p><strong>{{ $assembly->itinerary?->name ?? 'Archived trip plan' }}</strong> ·
@@ -44,6 +45,7 @@
         @empty
             <p>No archived trip records.</p>
         @endforelse
+        {{ $assemblies->links() }}
         <p><a href="{{ route('user.bookings.index') }}">Return to accommodation bookings</a></p>
     </div>
 </section>
