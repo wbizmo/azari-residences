@@ -245,7 +245,7 @@ class PropertyOwnerController extends Controller
 
                 $completion = $completeness->sync($locked->load('user.ownerPayoutProfile'));
                 if ($intent === 'submit') {
-                    $mandatory = array_diff($completion['blockers'], ['amenities']);
+                    $mandatory = $completion['blockers'];
                     if ($mandatory !== []) {
                         throw ValidationException::withMessages([
                             'listing' => 'Complete these sections before submission: '.implode(', ', $mandatory).'.',
