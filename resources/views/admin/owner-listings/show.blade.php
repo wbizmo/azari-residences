@@ -10,6 +10,35 @@
 
 <div class="az-admin-card">
     <p><strong>Listing completeness:</strong> {{ $completion['score'] }}%</p>
+    <p><strong>Applicant type:</strong> {{ $listing->operator_type === 'hotel_operator' ? 'Hotel / hospitality operator' : ($listing->operator_type === 'individual' ? 'Individual owner' : 'Legacy application') }}</p>
+    @if($listing->operator_type === 'hotel_operator')
+        <p><strong>Legal business:</strong> {{ $listing->business_legal_name }} · {{ $listing->business_registration_number }}</p>
+        <p><strong>Business contact:</strong> {{ $listing->business_email }} · {{ $listing->business_phone }}</p>
+        <p><strong>Business address:</strong> {{ $listing->business_address }}</p>
+    @endif
+    <section aria-labelledby="legal-control-review" style="margin-block:18px">
+        <h2 id="legal-control-review">Confidential property control documents</h2>
+        <p>Download and verify original ownership or management authority. These documents are never part of public image galleries.</p>
+        @forelse($listing->controlDocuments()->latest('id')->get() as $proof)
+            <div style="padding:14px;border:1px solid #CAD5E6;border-radius:10px;margin-bottom:12px">
+                <p><strong>{{ $proof->original_name }}</strong> · {{ Str::headline($proof->status) }} · {{ number_format($proof->size_bytes / 1024, 1) }} KB</p>
+                <a href="{{ route('azari.admin.owner-listings.control-documents.download', [$listing, $proof]) }}">Download private evidence</a>
+                @if($proof->review_note)<p>Decision note: {{ $proof->review_note }}</p>@endif
+                @if($proof->status === 'pending' && in_array($listing->status, ['submitted', 'under_review', 'correction_requested'], true))
+                    <form method="POST" action="{{ route('azari.admin.owner-listings.control-documents.review', [$listing, $proof]) }}" class="az-admin-form">
+                        @csrf
+                        <label>Manual verification findings (at least 10 characters)
+                            <textarea name="review_note" maxlength="2000" minlength="10" required></textarea>
+                        </label>
+                        <button class="az-admin-button" type="submit" name="status" value="verified">Verify authority</button>
+                        <button class="az-admin-button" type="submit" name="status" value="rejected">Reject evidence</button>
+                    </form>
+                @endif
+            </div>
+        @empty
+            <p>No control document has been uploaded. Do not approve a new application without it.</p>
+        @endforelse
+    </section>
     @if(!$completion['publishable'])
         <div class="az-admin-alert az-admin-alert--danger">
             <strong>Publication blocked.</strong>
@@ -40,7 +69,7 @@
     <dl class="az-admin-detail-list">@foreach($listing->property_data as $key=>$value)@unless(is_array($value))<dt>{{ ucfirst(str_replace('_',' ',$key)) }}</dt><dd>{{ $value }}</dd>@endunless @endforeach</dl>
     <p><strong>Amenities:</strong> {{ $amenities->join(', ') ?: 'None selected' }}</p>
     <p><strong>Owner revenue:</strong> No Resavar platform commission is deducted from owner-property room sales.</p>
-    @if($listing->decline_reason)<p><strong>Previous decline:</strong> {{ $listing->decline_reason }}</p>@endif
+    @if($listing->decline_reason)<p><strong>{{ $listing->status === 'correction_requested' ? 'Corrections requested:' : 'Previous decline:' }}</strong> {{ $listing->decline_reason }}</p>@endif
 </div>
 
 @if($listing->status==='submitted')
@@ -86,6 +115,14 @@
         </label>
         <label>Internal notes<textarea name="admin_notes">{{ old('admin_notes') }}</textarea></label>
         <button class="az-admin-button">Approve and create owner-managed property</button>
+    </form>
+
+    <form method="post" action="{{ route('azari.admin.owner-listings.corrections',$listing) }}" class="az-admin-form az-admin-card">
+        @csrf
+        <h2>Request corrections</h2>
+        <p>Keep the application and its signed agreement intact. The owner can edit the same record and resubmit without duplicating the property.</p>
+        <label>Specific changes needed<textarea name="reason" minlength="10" maxlength="3000" required>{{ old('reason') }}</textarea></label>
+        <button class="az-admin-button" type="submit">Return to owner for corrections</button>
     </form>
 
     <form method="post" action="{{ route('azari.admin.owner-listings.decline',$listing) }}" class="az-admin-form az-admin-card">@csrf
