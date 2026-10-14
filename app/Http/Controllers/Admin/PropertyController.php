@@ -49,6 +49,10 @@ class PropertyController extends Controller
         try {
             $property = DB::transaction(function () use ($request, $ownership, $data, &$stored): Property {
                 $payload = $ownership->apply($data, null, $request->user());
+                // Creating an accommodation must not skip staff review.
+                $payload['is_published'] = false;
+                $payload['is_featured'] = false;
+                $payload['status'] = 'draft';
                 $property = Property::query()->create([
                     ...$payload,
                     ...$this->uploadedMedia($request, null, $stored),
@@ -107,6 +111,11 @@ class PropertyController extends Controller
                 $replacedCover = $locked->cover_image;
 
                 $payload = $ownership->apply($data, $locked, $request->user());
+                $hadPublication = (bool) $locked->is_published;
+                // All details edits invalidate the prior editorial review.
+                $payload['is_published'] = false;
+                $payload['is_featured'] = false;
+                $payload['status'] = 'draft';
                 $locked->fill([
                     ...$payload,
                     ...$this->uploadedMedia($request, $locked, $stored),
@@ -114,10 +123,14 @@ class PropertyController extends Controller
 
                 $locked->amenities()->sync($request->input('amenities', []));
                 $this->registerPendingPhotos($locked, $stored);
-                if ($locked->owner_id && $locked->is_published) {
-                    $locked->unsetRelation('amenities');
-                    $locked->unsetRelation('accommodationTypes');
-                    $ownership->assertPublishable($locked);
+                if ($hadPublication || $locked->publicationReviews()->latest('id')->first()?->status === 'approved_draft') {
+                    $locked->publicationReviews()->create([
+                        'reviewed_by' => $request->user()->id,
+                        'status' => 'unpublished',
+                        'review_note' => 'Property edited; previous quality approval invalidated.',
+                    ]);
+                    AuditLog::record('property.publication_invalidated', $locked,
+                        ['is_published' => $hadPublication], ['is_published' => false]);
                 }
 
                 AuditLog::record('property.updated_by_admin', $locked, $previous, $locked->only(array_keys($previous)), [
@@ -184,7 +197,13 @@ class PropertyController extends Controller
     private function queueImageDerivatives(array $paths): void
     {
         foreach ($paths as $path) {
-            GenerateResponsiveImageDerivatives::dispatch($path);
+            try {
+                GenerateResponsiveImageDerivatives::dispatch($path);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Optional property derivative failed', [
+                    'path' => $path, 'error' => $e->getMessage(),
+                ]);
+            }
         }
     }
 
@@ -278,6 +297,12 @@ class PropertyController extends Controller
             'sort_order' => ['nullable', 'integer', 'min:0'],
         ]);
 
+        if ($property?->exists && $request->boolean('is_published')) {
+            throw ValidationException::withMessages([
+                'is_published' => 'Use the dedicated reviewed publication workflow; editing cannot publish directly.',
+            ]);
+        }
+
         $location = Location::query()->findOrFail($data['location_id']);
         $roomType = RoomType::query()->findOrFail($data['room_type_id']);
 
@@ -313,7 +338,7 @@ class PropertyController extends Controller
         $data['slug'] = $slug;
 
         $data['currency'] = strtoupper((string) $data['currency']);
-        $data['timezone'] = $data['timezone'] ?: $location->timezone
+        $data['timezone'] = ($data['timezone'] ?? null) ?: $location->timezone
             ?: config('localization.platform_timezone', config('azari.timezone', 'UTC'));
         $data['is_featured'] = $request->boolean('is_featured');
         $data['is_published'] = $request->boolean('is_published');
