@@ -56,14 +56,21 @@ class OwnerMarketplaceController extends Controller
 
     public function markUnderReview(Request $request, PropertyListing $listing): RedirectResponse
     {
-        abort_unless($listing->status === 'submitted', 422);
+        DB::transaction(function () use ($request, $listing): void {
+            $locked = PropertyListing::query()->whereKey($listing->id)
+                ->lockForUpdate()->firstOrFail();
+            abort_unless($locked->status === 'submitted', 422,
+                'The listing has already moved to another review state.');
+            $locked->forceFill([
+                'status' => 'under_review',
+                'reviewed_by' => $request->user()->id,
+                'reviewed_at' => now(),
+            ])->save();
+            AuditLog::record('owner_listing.review_started', $locked,
+                ['status' => 'submitted'], ['status' => 'under_review']);
+        }, 3);
 
-        $listing->update([
-            'status' => 'under_review',
-            'reviewed_by' => $request->user()->id,
-            'reviewed_at' => now(),
-        ]);
-        $this->notifyOwner($listing, 'Your application is now under review by Resavar.');
+        $this->notifyOwner($listing->fresh(), 'Your application is now under review by Resavar.');
 
         return back()->with('status', 'Listing marked as under review.');
     }
@@ -208,24 +215,33 @@ class OwnerMarketplaceController extends Controller
 
     public function declineListing(Request $request, PropertyListing $listing): RedirectResponse
     {
-        abort_unless(in_array($listing->status, ['submitted', 'under_review'], true), 422);
-
         $data = $request->validate([
             'decline_reason' => ['required', 'string', 'min:10', 'max:3000'],
             'admin_notes' => ['nullable', 'string', 'max:3000'],
         ]);
 
-        $listing->update([
-            'status' => 'declined',
-            'decline_reason' => $data['decline_reason'],
-            'admin_notes' => $data['admin_notes'] ?? null,
-            'reviewed_by' => $request->user()->id,
-            'reviewed_at' => now(),
-            'declined_at' => now(),
-            'approved_at' => null,
-        ]);
+        DB::transaction(function () use ($request, $listing, $data): void {
+            $locked = PropertyListing::query()->whereKey($listing->id)
+                ->lockForUpdate()->firstOrFail();
+            abort_unless(in_array($locked->status, ['submitted', 'under_review'], true), 422,
+                'This listing has already been decided.');
 
-        $this->notifyOwner($listing, 'Your property application was declined: '.$data['decline_reason']);
+            $old = $locked->status;
+            $locked->forceFill([
+                'status' => 'declined',
+                'decline_reason' => $data['decline_reason'],
+                'admin_notes' => $data['admin_notes'] ?? null,
+                'reviewed_by' => $request->user()->id,
+                'reviewed_at' => now(),
+                'declined_at' => now(),
+                'approved_at' => null,
+            ])->save();
+            AuditLog::record('owner_listing.declined', $locked,
+                ['status' => $old], ['status' => 'declined'],
+                ['reviewer' => $request->user()->id]);
+        }, 3);
+
+        $this->notifyOwner($listing->fresh(), 'Your property application was declined: '.$data['decline_reason']);
 
         return back()->with('status', 'Listing declined with a reason visible to the owner.');
     }
