@@ -410,6 +410,9 @@ class PropertyOwnerController extends Controller
         array &$oldPublicPaths
     ): array {
         $draft = $intent === 'draft';
+        if (! $request->has('intent')) {
+            $request->merge(['intent' => $intent]);
+        }
         $existing = $listing?->property_data ?? [];
         $keys = [
             'name', 'location_id', 'room_type_id', 'formatted_address',
@@ -512,7 +515,7 @@ class PropertyOwnerController extends Controller
             $details['currency'] = strtoupper((string) $details['currency']);
         }
         if ($location) {
-            $details['timezone'] = $details['timezone'] ?: $location->timezone
+            $details['timezone'] = ($details['timezone'] ?? null) ?: $location->timezone
                 ?: config('localization.platform_timezone', config('azari.timezone', 'UTC'));
         }
         $details['is_featured'] = false;
