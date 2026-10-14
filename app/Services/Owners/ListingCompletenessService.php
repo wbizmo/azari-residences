@@ -11,7 +11,7 @@ class ListingCompletenessService
     {
         $data = $listing->property_data ?? [];
         $hasControlEvidence = $listing->operator_type === null
-            || $listing->controlDocuments()->exists();
+            || $listing->controlDocuments()->whereIn('status', ['pending', 'verified'])->exists();
         $hotelIdentity = $listing->operator_type !== 'hotel_operator'
             || (filled($listing->business_legal_name)
                 && filled($listing->business_registration_number)
