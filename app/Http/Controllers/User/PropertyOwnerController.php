@@ -483,7 +483,8 @@ class PropertyOwnerController extends Controller
             'gallery.*' => ['image', 'max:8192'],
             'remove_gallery' => ['nullable', 'array', 'max:25'],
             'remove_gallery.*' => ['string', 'max:1000'],
-            'proof_of_control' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png,webp', 'max:10240'],
+            'proof_of_control' => [$draft || $listing?->controlDocuments()->whereIn('status', ['pending', 'verified'])->exists()
+                ? 'nullable' : 'required', 'file', 'mimes:pdf,jpg,jpeg,png,webp', 'max:10240'],
             'amenities' => ['nullable', 'array', 'max:100'],
             'amenities.*' => ['integer', 'distinct', 'exists:amenities,id'],
             'owner_notes' => ['nullable', 'string', 'max:3000'],
