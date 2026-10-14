@@ -29,6 +29,7 @@ class PropertyPhotoModerationController extends Controller
         ]);
 
         DB::transaction(function () use ($request, $property, $photo, $data): void {
+            $lockedProperty = Property::query()->whereKey($property->id)->lockForUpdate()->firstOrFail();
             $locked = PropertyPhotoModeration::query()
                 ->whereKey($photo->id)
                 ->where('property_id', $property->id)
@@ -51,6 +52,19 @@ class PropertyPhotoModerationController extends Controller
                 'reviewed_by' => $request->user()->id,
                 'reviewed_at' => now(),
             ]);
+            if ($lockedProperty->is_published && $data['status'] !== 'approved') {
+                // Rejecting an active photo immediately revokes publication.
+                $lockedProperty->forceFill([
+                    'is_published' => false, 'is_featured' => false, 'status' => 'draft',
+                ])->save();
+                $lockedProperty->publicationReviews()->create([
+                    'reviewed_by' => $request->user()->id,
+                    'status' => 'unpublished',
+                    'review_note' => 'Published photo revoked during moderation.',
+                ]);
+                AuditLog::record('property.unpublished', $lockedProperty,
+                    ['is_published' => true], ['is_published' => false]);
+            }
             AuditLog::record(
                 'property_photo.reviewed', $locked, $before,
                 $locked->only(array_keys($before)),
