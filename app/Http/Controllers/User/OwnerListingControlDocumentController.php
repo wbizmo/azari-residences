@@ -20,9 +20,15 @@ final class OwnerListingControlDocumentController extends Controller
         abort_unless((int) $listing->user_id === (int) $request->user()->id, 404);
         abort_unless((int) $document->property_listing_id === (int) $listing->getKey(), 404);
 
-        return response()->download($service->readablePath($document), $document->original_name, [
+        $response = response()->download($service->readablePath($document), $document->original_name, [
             'Cache-Control' => 'private, no-store',
             'X-Content-Type-Options' => 'nosniff',
         ]);
+        // Symfony can mark file downloads public by default; override that
+        // explicitly for legally sensitive ownership/management evidence.
+        $response->setPrivate();
+        $response->headers->addCacheControlDirective('no-store');
+
+        return $response;
     }
 }
