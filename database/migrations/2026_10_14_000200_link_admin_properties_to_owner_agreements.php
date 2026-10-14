@@ -9,7 +9,7 @@ return new class extends Migration {
     {
         Schema::table('properties', function (Blueprint $table): void {
             $table->foreignId('owner_agreement_id')->nullable()
-                ->constrained('listing_agreements')->nullOnDelete();
+                ->constrained('listing_agreements')->restrictOnDelete();
         });
     }
 
