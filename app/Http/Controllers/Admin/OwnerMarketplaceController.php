@@ -143,10 +143,6 @@ class OwnerMarketplaceController extends Controller
                 || ! $locked->agreement->signed_at) {
                 abort(422, 'A signed, owner-matched agreement is required.');
             }
-            if (($data['publish_now'] ?? false)
-                && ! \App\Models\IdentityVerification::userIsVerified((int) $locked->user_id)) {
-                abort(422, 'The owner must pass identity verification before publishing.');
-            }
 
             $payload['owner_id'] = $locked->user_id;
             $payload['owner_listing_id'] = $locked->id;
