@@ -113,11 +113,21 @@ class OwnerMarketplaceController extends Controller
             $payload['slug'] = Str::slug($payload['name']).'-'.Str::lower(Str::random(5));
             $payload['cover_image'] = $locked->cover_image;
             $payload['gallery'] = $locked->gallery ?? [];
+            if (! $locked->agreement || (int) $locked->agreement->user_id !== (int) $locked->user_id
+                || ! $locked->agreement->signed_at) {
+                abort(422, 'A signed, owner-matched agreement is required.');
+            }
+            if (($data['publish_now'] ?? false)
+                && ! \App\Models\IdentityVerification::userIsVerified((int) $locked->user_id)) {
+                abort(422, 'The owner must pass identity verification before publishing.');
+            }
+
             $payload['owner_id'] = $locked->user_id;
             $payload['owner_listing_id'] = $locked->id;
+            $payload['owner_agreement_id'] = $locked->listing_agreement_id;
             $payload['owner_share_percentage'] = 100.00;
             $payload['managed_for_owner'] = true;
-            $payload['currency'] = (string) config('azari.currency', 'USD');
+            $payload['currency'] = strtoupper((string) ($payload['currency'] ?? config('azari.currency', 'USD')));
             $payload['is_published'] = (bool) ($data['publish_now'] ?? false);
             $payload['is_featured'] = (bool) ($data['feature_now'] ?? false);
             $payload['status'] = ($data['publish_now'] ?? false) ? 'available' : 'draft';

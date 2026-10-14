@@ -6,16 +6,21 @@
     </div>
     <div class="admin-table-wrap">
         <table class="admin-table">
-            <thead><tr><th>Property</th><th>Location</th><th>Bedrooms</th><th>Featured</th><th>Published</th><th></th></tr></thead>
+            <thead><tr><th>Property</th><th>Location</th><th>Ownership</th><th>Category</th><th>Bedrooms</th><th>Featured</th><th>Published</th><th></th></tr></thead>
             <tbody>
             @foreach($properties as $property)
                 <tr>
                     <td>{{ $property->name }}</td>
                     <td>{{ $property->location }}, {{ $property->country }}</td>
+                    <td>{{ $property->owner?->name ?? 'Resavar-managed' }}</td>
+                    <td>{{ Str::headline($property->property_type) }}</td>
                     <td>{{ $property->bedrooms }}</td>
                     <td>{{ $property->is_featured ? 'Yes' : 'No' }}</td>
                     <td>{{ $property->is_published ? 'Yes' : 'No' }}</td>
-                    <td><a href="{{ route('azari.admin.properties.edit', $property) }}">Edit</a></td>
+                    <td>
+                        <a href="{{ route('azari.admin.properties.edit', $property) }}">Edit</a> ·
+                        <a href="{{ route('azari.admin.properties.commercial', $property) }}">Room types & rates</a>
+                    </td>
                 </tr>
             @endforeach
             </tbody>

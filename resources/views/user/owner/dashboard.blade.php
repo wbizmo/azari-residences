@@ -35,6 +35,24 @@
 </section>
 
 <section class="az-user-panel">
+    <header class="az-user-panel-header"><div>
+        <h2 class="az-user-panel-title">Properties assigned by Resavar</h2>
+        <p class="az-user-panel-subtitle">These properties were created directly by an administrator and linked to your verified owner account.</p>
+    </div></header>
+    <div class="az-user-panel-body">
+        @forelse($assignedProperties as $assigned)
+            <a class="az-user-list-item" href="{{ route('user.owner.commercial.edit', $assigned) }}">
+                <div><h3>{{ $assigned->name }}</h3><p>{{ $assigned->location }} · Manage rooms, availability and rates</p></div>
+                <span class="az-user-status">{{ $assigned->is_published ? 'Published' : 'Draft' }}</span>
+            </a>
+        @empty
+            <p>No properties assigned directly by administration.</p>
+        @endforelse
+        <a href="{{ route('user.owner.listings.index') }}">View all properties</a>
+    </div>
+</section>
+
+<section class="az-user-panel">
     <header class="az-user-panel-header"><div><h2 class="az-user-panel-title">Recent account activity</h2><p class="az-user-panel-subtitle">Credits and completed withdrawal debits.</p></div><a href="{{ route('user.owner.earnings') }}">View statement</a></header>
     <div class="az-user-panel-body">
         @forelse($recentEntries as $entry)

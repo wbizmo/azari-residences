@@ -18,7 +18,6 @@ class ListingCompletenessService
             'media' => filled($listing->cover_image) || count($listing->gallery ?? []) > 0,
             'amenities' => count($listing->amenity_ids ?? []) > 0,
             'agreement' => filled($listing->listing_agreement_id),
-            'payout_profile' => $listing->user?->ownerPayoutProfile !== null,
         ];
 
         $completed = collect($checks)->filter()->count();
@@ -59,12 +58,11 @@ class ListingCompletenessService
         $checks = [
             'identity' => filled($property->name) && filled($property->property_type),
             'address' => filled($property->formatted_address) || filled($property->address_line_1) || filled($property->location),
-            'coordinates' => $property->latitude !== null && $property->longitude !== null,
             'description' => mb_strlen(trim((string) $property->description)) >= 30,
             'media' => filled($property->cover_image) || count($property->gallery ?? []) > 0,
             'amenities' => $property->amenities->isNotEmpty(),
-            'accommodation' => $property->accommodationTypes->contains(fn ($type) => $type->is_active && $type->total_inventory > 0),
-            'rate_plan' => $property->accommodationTypes->contains(fn ($type) => $type->ratePlans->contains(fn ($plan) => $plan->is_active)),
+            'accommodation' => $property->accommodationTypes->contains(fn ($type) => $type->is_active && $type->is_published && $type->total_inventory > 0),
+            'rate_plan' => $property->accommodationTypes->contains(fn ($type) => $type->ratePlans->contains(fn ($plan) => $plan->is_active && $plan->is_public)),
         ];
 
         $blockers = collect($checks)->filter(fn (bool $complete) => ! $complete)->keys()->values()->all();

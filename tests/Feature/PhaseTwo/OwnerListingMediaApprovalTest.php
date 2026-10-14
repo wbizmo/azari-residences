@@ -4,6 +4,7 @@ namespace Tests\Feature\PhaseTwo;
 
 use App\Http\Controllers\Admin\OwnerMarketplaceController;
 use App\Models\Property;
+use App\Models\IdentityVerification;
 use App\Models\PropertyListing;
 use App\Models\User;
 use App\Services\Owners\ListingCompletenessService;
@@ -25,6 +26,13 @@ class OwnerListingMediaApprovalTest extends TestCase
         Storage::disk('public')->put('owner-listings/covers/review.jpg', 'test-image');
         $admin = User::factory()->create(['is_admin' => true, 'is_active' => true]);
         $owner = User::factory()->create();
+        IdentityVerification::query()->create([
+            'user_id' => $owner->id,
+            'provider' => IdentityVerification::PROVIDER_DOJAH,
+            'reference' => 'listing-media-test-'.$owner->id,
+            'status' => IdentityVerification::STATUS_VERIFIED,
+            'verified_at' => now(),
+        ]);
         $source = Property::factory()->create();
 
         $listing = PropertyListing::query()->create([

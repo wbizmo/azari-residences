@@ -11,4 +11,19 @@
 @empty<div class="az-user-empty"><span class="material-symbols-outlined">apartment</span><h3>No applications</h3><p>Your submitted properties will appear here.</p></div>@endforelse
 {{ $listings->links() }}
 </div></section>
+<section class="az-user-panel" style="margin-top:18px">
+    <header class="az-user-panel-header"><div><h2 class="az-user-panel-title">Admin-assigned properties</h2>
+        <p class="az-user-panel-subtitle">Manage your assigned room types, unit inventory, pricing and calendar in the same Resavar system.</p></div></header>
+    <div class="az-user-panel-body">
+        @forelse($assignedProperties as $assigned)
+            <a class="az-user-list-item" href="{{ route('user.owner.commercial.edit', $assigned) }}">
+                <div><h3>{{ $assigned->name }}</h3><p>{{ $assigned->location }} · {{ $assigned->currency }}</p></div>
+                <span class="az-user-status">{{ $assigned->is_published ? 'Published' : 'Draft' }}</span>
+            </a>
+        @empty
+            <p>No properties have been assigned to you by an administrator.</p>
+        @endforelse
+        {{ $assignedProperties->links() }}
+    </div>
+</section>
 @endsection
