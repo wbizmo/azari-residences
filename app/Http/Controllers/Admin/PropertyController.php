@@ -67,7 +67,7 @@ class PropertyController extends Controller
                 ]);
                 return $property;
             }, 3);
-        } catch (\\Throwable $e) {
+        } catch (\Throwable $e) {
             $this->discardUploadedMedia($stored);
             throw $e;
         }
@@ -124,7 +124,7 @@ class PropertyController extends Controller
                     'source' => $locked->owner_listing_id ? 'owner_submission' : 'admin_direct',
                 ]);
             }, 3);
-        } catch (\\Throwable $e) {
+        } catch (\Throwable $e) {
             $this->discardUploadedMedia($stored);
             throw $e;
         }
