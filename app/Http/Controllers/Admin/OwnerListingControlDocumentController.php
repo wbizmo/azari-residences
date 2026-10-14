@@ -26,10 +26,15 @@ final class OwnerListingControlDocumentController extends Controller
         abort_unless((int) $document->property_listing_id === (int) $listing->id, 404);
         $path = $service->readablePath($document);
 
-        return response()->download($path, $document->original_name, [
+        $response = response()->download($path, $document->original_name, [
             'Cache-Control' => 'private, no-store',
             'X-Content-Type-Options' => 'nosniff',
         ]);
+        // Authenticated legal evidence must never be publicly cacheable.
+        $response->setPrivate();
+        $response->headers->addCacheControlDirective('no-store');
+
+        return $response;
     }
 
     public function review(
