@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
 class PropertyListing extends Model
@@ -40,12 +41,22 @@ class PropertyListing extends Model
 
     public function user(): BelongsTo { return $this->belongsTo(User::class); }
     public function agreement(): BelongsTo { return $this->belongsTo(ListingAgreement::class, 'listing_agreement_id'); }
+    public function controlDocuments(): HasMany
+    {
+        return $this->hasMany(PropertyListingControlDocument::class);
+    }
+
+    public function latestControlDocument(): ?PropertyListingControlDocument
+    {
+        return $this->controlDocuments()->latest('id')->first();
+    }
+
     public function approvedProperty(): BelongsTo { return $this->belongsTo(Property::class, 'approved_property_id'); }
     public function reviewedBy(): BelongsTo { return $this->belongsTo(User::class, 'reviewed_by'); }
     public function mediaReviewedBy(): BelongsTo { return $this->belongsTo(User::class, 'media_reviewed_by'); }
 
     public function isEditable(): bool
     {
-        return in_array($this->status, ['draft', 'declined'], true);
+        return in_array($this->status, ['draft', 'declined', 'correction_requested'], true);
     }
 }
