@@ -10,6 +10,8 @@ use App\Models\Property;
 use App\Models\PropertyListing;
 use App\Models\PropertyPhotoModeration;
 use App\Models\SiteSetting;
+use App\Notifications\OwnerListingStatusNotification;
+use Illuminate\Support\Facades\Log;
 use App\Models\WithdrawalRequest;
 use App\Services\Owners\ListingCompletenessService;
 use App\Services\Owners\OwnerWithdrawalService;
@@ -61,6 +63,7 @@ class OwnerMarketplaceController extends Controller
             'reviewed_by' => $request->user()->id,
             'reviewed_at' => now(),
         ]);
+        $this->notifyOwner($listing, 'Your application is now under review by Resavar.');
 
         return back()->with('status', 'Listing marked as under review.');
     }
@@ -96,6 +99,22 @@ class OwnerMarketplaceController extends Controller
                 422,
                 'This listing is incomplete: '.implode(', ', $completion['blockers']).'.'
             );
+
+            // Legacy listings have no operator discriminator; keep their
+            // historic review contract. New individual/hotel submissions
+            // require human-verified private ownership/management evidence.
+            if ($locked->operator_type !== null) {
+                $latestEvidence = $locked->controlDocuments()->latest('id')->first();
+                abort_unless($latestEvidence && $latestEvidence->status === 'verified', 422,
+                    'Verify the latest private proof-of-control document before approving this listing.');
+                if ($locked->operator_type === 'hotel_operator') {
+                    abort_unless(filled($locked->business_legal_name)
+                        && filled($locked->business_registration_number)
+                        && filled($locked->business_email)
+                        && filled($locked->business_phone), 422,
+                        'Hotel operator identity and contact details must be complete.');
+                }
+            }
 
             $files = collect([$locked->cover_image])
                 ->merge($locked->gallery ?? [])
@@ -181,6 +200,8 @@ class OwnerMarketplaceController extends Controller
             );
         }, 3);
 
+        $this->notifyOwner($listing->fresh(), 'Your property submission was approved. Any publication is shown separately in Property Centre.');
+
         return redirect()->route('azari.admin.owner-listings.show', $listing)
             ->with('status', 'Listing and its media reviewed and approved.');
     }
@@ -204,7 +225,50 @@ class OwnerMarketplaceController extends Controller
             'approved_at' => null,
         ]);
 
+        $this->notifyOwner($listing, 'Your property application was declined: '.$data['decline_reason']);
+
         return back()->with('status', 'Listing declined with a reason visible to the owner.');
+    }
+
+    public function requestCorrections(Request $request, PropertyListing $listing): RedirectResponse
+    {
+        $data = $request->validate([
+            'reason' => ['required', 'string', 'min:10', 'max:3000'],
+        ]);
+
+        DB::transaction(function () use ($listing, $request, $data): void {
+            $locked = PropertyListing::query()->whereKey($listing->id)
+                ->lockForUpdate()->firstOrFail();
+            abort_unless(in_array($locked->status, ['submitted', 'under_review'], true), 422,
+                'Only submitted listings can be returned for corrections.');
+
+            $old = $locked->status;
+            $locked->forceFill([
+                'status' => 'correction_requested',
+                'decline_reason' => $data['reason'],
+                'reviewed_by' => $request->user()->id,
+                'reviewed_at' => now(),
+            ])->save();
+            AuditLog::record('owner_listing.correction_requested', $locked,
+                ['status' => $old], ['status' => 'correction_requested'],
+                ['reviewer' => $request->user()->id]);
+        }, 3);
+
+        $this->notifyOwner($listing->fresh(), 'Resavar has requested corrections: '.$data['reason']);
+
+        return back()->with('status', 'Corrections requested. The owner can edit and resubmit the same application.');
+    }
+
+    private function notifyOwner(PropertyListing $listing, string $message): void
+    {
+        try {
+            $listing->user?->notify(OwnerListingStatusNotification::forListing($listing, $message));
+        } catch (\Throwable $e) {
+            Log::warning('Owner listing status notification failed', [
+                'listing_id' => $listing->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     public function agreementDownload(PropertyListing $listing): BinaryFileResponse
