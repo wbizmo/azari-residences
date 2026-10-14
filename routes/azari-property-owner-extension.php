@@ -5,6 +5,8 @@ use App\Http\Controllers\User\OwnerCommercialInventoryController;
 use App\Http\Controllers\User\OwnerChannelConnectionController;
 use App\Http\Controllers\User\PropertyOwnerController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\OwnerListingControlDocumentController as StaffProofController;
+use App\Http\Controllers\User\OwnerListingControlDocumentController as GuestProofController;
 
 Route::get('/list-your-property', function () {
     return auth()->check()
@@ -26,6 +28,9 @@ Route::prefix('user/property-centre')
         Route::post('/listings', [PropertyOwnerController::class, 'store'])->name('listings.store');
         Route::get('/listings/{listing}', [PropertyOwnerController::class, 'show'])->name('listings.show');
         Route::get('/listings/{listing}/edit', [PropertyOwnerController::class, 'edit'])->name('listings.edit');
+        Route::get('/listings/{listing}/control-documents/{document}/download',
+            [GuestProofController::class, 'download'])
+            ->middleware('throttle:30,1')->name('listings.control-documents.download');
         Route::put('/listings/{listing}', [PropertyOwnerController::class, 'update'])->name('listings.update');
 
         Route::get('/properties/{property}/commercial', [OwnerCommercialInventoryController::class, 'edit'])
@@ -62,6 +67,21 @@ Route::prefix('azaridevadmin/property-owners')
     ->group(function (): void {
         Route::get('/listings', [OwnerMarketplaceController::class, 'listings'])
             ->middleware('azari.permission:property-owners.view')->name('owner-listings.index');
+        Route::get('/listings/{listing}/control-documents/{document}/download',
+            [StaffProofController::class, 'download'])
+            ->middleware('azari.permission:property-owners.view')
+            ->middleware('throttle:30,1')
+            ->name('owner-listings.control-documents.download');
+        Route::post('/listings/{listing}/control-documents/{document}/review',
+            [StaffProofController::class, 'review'])
+            ->middleware('azari.permission:property-owners.review')
+            ->middleware('azari.step-up')->middleware('throttle:20,1')
+            ->name('owner-listings.control-documents.review');
+        Route::post('/listings/{listing}/corrections',
+            [OwnerMarketplaceController::class, 'requestCorrections'])
+            ->middleware('azari.permission:property-owners.review')
+            ->middleware('azari.step-up')->name('owner-listings.corrections');
+
         Route::get('/listings/{listing}', [OwnerMarketplaceController::class, 'showListing'])
             ->middleware('azari.permission:property-owners.view')->name('owner-listings.show');
         Route::post('/listings/{listing}/review', [OwnerMarketplaceController::class, 'markUnderReview'])
