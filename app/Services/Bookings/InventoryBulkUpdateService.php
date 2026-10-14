@@ -61,6 +61,10 @@ class InventoryBulkUpdateService
                 )
                 ->firstOrFail();
 
+            // Revalidate against the locked live room count, not the stale
+            // instance supplied by a preview or form submission.
+            $this->validateChanges($lockedType, $changes);
+
             if ($expectedRevision !== null
                 && ! hash_equals($this->revision($lockedType, $from, $to), $expectedRevision)) {
                 throw ValidationException::withMessages([
@@ -153,8 +157,11 @@ class InventoryBulkUpdateService
         CarbonImmutable $to,
         array $changes
     ): void {
-        if (! array_key_exists('sellable_inventory', $changes)
-            && ! array_key_exists('maintenance_inventory', $changes)) {
+        $capacityChange = array_key_exists('sellable_inventory', $changes)
+            || array_key_exists('maintenance_inventory', $changes);
+        $stayRuleChange = array_key_exists('minimum_stay', $changes)
+            || array_key_exists('maximum_stay', $changes);
+        if (! $capacityChange && ! $stayRuleChange) {
             return;
         }
 
@@ -166,7 +173,9 @@ class InventoryBulkUpdateService
             ->get()
             ->keyBy(fn (InventoryDate $row) => $row->date->toDateString());
 
-        $committed = $this->availability->committedQuantityByDate($type, $from, $to->addDay());
+        $committed = $capacityChange
+            ? $this->availability->committedQuantityByDate($type, $from, $to->addDay())
+            : collect();
 
         for ($date = $from; $date->lessThanOrEqualTo($to); $date = $date->addDay()) {
             $key = $date->toDateString();
@@ -179,6 +188,20 @@ class InventoryBulkUpdateService
                 ? (int) ($changes['maintenance_inventory'] ?? 0)
                 : (int) ($existing?->maintenance_inventory ?? 0);
             $reserved = (int) $committed->get($key, 0);
+            $minimumStay = $changes['minimum_stay'] ?? $existing?->minimum_stay
+                ?? $type->minimum_stay ?? 1;
+            $maximumStay = $changes['maximum_stay'] ?? $existing?->maximum_stay
+                ?? $type->maximum_stay;
+            if ($stayRuleChange && $maximumStay !== null
+                && (int) $maximumStay < (int) $minimumStay) {
+                throw ValidationException::withMessages([
+                    'maximum_stay' => "Maximum stay must not be below minimum stay on {$key}.",
+                ]);
+            }
+
+            if (! $capacityChange) {
+                continue;
+            }
 
             if ($maintenance > $sellable) {
                 throw ValidationException::withMessages([
@@ -381,7 +404,8 @@ class InventoryBulkUpdateService
     private function validateChanges(AccommodationType $type, array $changes): void
     {
         foreach (['sellable_inventory', 'maintenance_inventory', 'minimum_stay', 'maximum_stay'] as $key) {
-            if (array_key_exists($key, $changes) && $changes[$key] !== null && (int) $changes[$key] < 0) {
+            $minimum = in_array($key, ['minimum_stay', 'maximum_stay'], true) ? 1 : 0;
+            if (array_key_exists($key, $changes) && $changes[$key] !== null && (int) $changes[$key] < $minimum) {
                 throw ValidationException::withMessages([$key => 'Inventory and stay values cannot be negative.']);
             }
         }
@@ -400,8 +424,19 @@ class InventoryBulkUpdateService
             throw ValidationException::withMessages(['maximum_stay' => 'Maximum stay cannot be less than minimum stay.']);
         }
 
-        if (array_key_exists('price_override', $changes) && $changes['price_override'] !== null && (float) $changes['price_override'] < 0) {
-            throw ValidationException::withMessages(['price_override' => 'Price cannot be negative.']);
+        if (array_key_exists('price_override', $changes) && $changes['price_override'] !== null) {
+            $value = (string) $changes['price_override'];
+            // InventoryDate.price_override is persisted at DECIMAL(...,2).
+            // Never silently round a guest-visible manual rate.
+            $wholeUnits = in_array(strtoupper((string) $type->currency), [
+                'JPY', 'KRW', 'VND', 'XOF', 'XAF', 'XPF', 'CLP', 'RWF', 'UGX',
+            ], true);
+            $pattern = $wholeUnits ? '/^\\d+(?:\\.0{1,2})?$/' : '/^\\d+(?:\\.\\d{1,2})?$/';
+            if (! preg_match($pattern, $value)) {
+                throw ValidationException::withMessages([
+                    'price_override' => 'Enter a nonnegative nightly rate in the currency’s supported minor units.',
+                ]);
+            }
         }
     }
 }
