@@ -20,6 +20,7 @@ class Property extends Model
         'owner_id',
         'ownership_type',
         'owner_listing_id',
+        'owner_agreement_id',
         'owner_share_percentage',
         'managed_for_owner',
         'location_id',
@@ -112,6 +113,11 @@ class Property extends Model
     public function owner(): BelongsTo
     {
         return $this->belongsTo(User::class, 'owner_id');
+    }
+
+    public function ownerAgreement(): BelongsTo
+    {
+        return $this->belongsTo(ListingAgreement::class, 'owner_agreement_id');
     }
 
     public function ownerListing(): BelongsTo
@@ -343,6 +349,7 @@ class Property extends Model
             if ($property->ownership_type === 'azari') {
                 $property->owner_id = null;
                 $property->owner_listing_id = null;
+                $property->owner_agreement_id = null;
                 $property->managed_for_owner = false;
                 $property->owner_share_percentage = 100;
             } else {
