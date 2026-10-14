@@ -1,13 +1,13 @@
 @extends('layouts.user')
 @section('title',$listing->exists?'Edit Property Listing':'List Your Property')
 @section('kicker','Property submission')
-@section('page_title',$listing->exists?'Correct and resubmit':'List your property')
+@section('page_title',$listing->exists?'Complete your application':'List your property')
 @section('content')
 <div class="az-premium-page-head">
     <div>
         <span class="az-premium-kicker">Owner marketplace</span>
-        <h1>{{ $listing->exists?'Correct and resubmit':'List your property' }}</h1>
-        <p>Provide the exact property details and location. Approved listings can become bookable without duplicate data entry.</p>
+        <h1>{{ $listing->exists?'Continue your application':'List your property' }}</h1>
+        <p>Start with a private draft, then submit your completed hotel or property application for manual review. No map provider, payout gateway or automated ID check is required to submit.</p>
     </div>
 </div>
 
@@ -27,16 +27,48 @@
         $field = fn(string $name) => $errors->has($name) ? ' az-s78-field--error' : '';
     @endphp
 
+    <fieldset class="az-s78-permissions" style="margin-bottom:20px">
+        <legend>How will you operate this property?</legend>
+        <p>This information helps Resavar review your legal authority to host guests. Choose the arrangement that applies to you.</p>
+        <label class="az-s78-field">
+            <span>Applicant type</span>
+            <select name="operator_type" id="resavar-operator-type" required>
+                <option value="individual" @selected(old('operator_type', $listing->operator_type ?? 'individual') === 'individual')>Individual property owner or authorised host</option>
+                <option value="hotel_operator" @selected(old('operator_type', $listing->operator_type) === 'hotel_operator')>Hotel or hospitality business operator</option>
+            </select>
+        </label>
+        <div id="resavar-hotel-business" style="margin-top:12px">
+            <p>Hotel and hospitality businesses must identify the operating legal entity, registration and reachable contact person before submission.</p>
+            <div class="az-s78-form-grid">
+                <label class="az-s78-field"><span>Registered business / hotel operator name</span>
+                    <input name="business_legal_name" value="{{ old('business_legal_name', $listing->business_legal_name) }}" maxlength="180" data-business-required>
+                </label>
+                <label class="az-s78-field"><span>Business registration number</span>
+                    <input name="business_registration_number" value="{{ old('business_registration_number', $listing->business_registration_number) }}" maxlength="100" data-business-required>
+                </label>
+                <label class="az-s78-field"><span>Business contact email</span>
+                    <input type="email" name="business_email" value="{{ old('business_email', $listing->business_email) }}" maxlength="255" data-business-required>
+                </label>
+                <label class="az-s78-field"><span>Business contact telephone</span>
+                    <input type="tel" name="business_phone" value="{{ old('business_phone', $listing->business_phone) }}" maxlength="40" data-business-required>
+                </label>
+                <label class="az-s78-field is-full"><span>Business address (optional)</span>
+                    <input name="business_address" value="{{ old('business_address', $listing->business_address) }}" maxlength="500">
+                </label>
+            </div>
+        </div>
+    </fieldset>
+
     <div class="az-s78-form-grid">
         <label class="az-s78-field{{ $field('name') }}"><span>Property name</span><input name="name" value="{{ old('name',data_get($data,'name')) }}" required>@error('name')<small>{{ $message }}</small>@enderror</label>
         <label class="az-s78-field{{ $field('location_id') }}"><span>Location</span><select name="location_id" required><option value="">Select location</option>@foreach($locations as $location)<option value="{{ $location->id }}" @selected((string)old('location_id',data_get($data,'location_id'))===(string)$location->id)>{{ $location->name }} · {{ $location->city }}, {{ $location->country }}</option>@endforeach</select>@error('location_id')<small>{{ $message }}</small>@enderror</label>
-        <label class="az-s78-field{{ $field('room_type_id') }}"><span>Residence category</span><select name="room_type_id" required><option value="">Select category</option>@foreach($roomTypes as $type)<option value="{{ $type->id }}" @selected((string)old('room_type_id',data_get($data,'room_type_id'))===(string)$type->id)>{{ $type->name }}</option>@endforeach</select>@error('room_type_id')<small>{{ $message }}</small>@enderror</label>
+        <label class="az-s78-field{{ $field('room_type_id') }}"><span>Accommodation category</span><select name="room_type_id" required><option value="">Select category</option>@foreach($roomTypes as $type)<option value="{{ $type->id }}" @selected((string)old('room_type_id',data_get($data,'room_type_id'))===(string)$type->id)>{{ $type->name }}</option>@endforeach</select>@error('room_type_id')<small>{{ $message }}</small>@enderror</label>
 
         <x-property-address-fields :source="$data" wrapper-class="is-full" label-class="az-s78-field is-full" />
         @error('formatted_address')<small class="az-s78-field is-full">{{ $message }}</small>@enderror
 
         <label class="az-s78-field{{ $field('bedrooms') }}"><span>Bedrooms</span><input type="number" name="bedrooms" min="0" value="{{ old('bedrooms',data_get($data,'bedrooms',1)) }}" required>@error('bedrooms')<small>{{ $message }}</small>@enderror</label>
-        <label class="az-s78-field{{ $field('bathrooms') }}"><span>Bathrooms</span><input type="number" name="bathrooms" min="1" value="{{ old('bathrooms',data_get($data,'bathrooms',1)) }}" required>@error('bathrooms')<small>{{ $message }}</small>@enderror</label>
+        <label class="az-s78-field{{ $field('bathrooms') }}"><span>Bathrooms</span><input type="number" name="bathrooms" min="0" value="{{ old('bathrooms',data_get($data,'bathrooms',1)) }}" required>@error('bathrooms')<small>{{ $message }}</small>@enderror</label>
         <label class="az-s78-field{{ $field('max_guests') }}"><span>Maximum guests</span><input type="number" name="max_guests" min="1" value="{{ old('max_guests',data_get($data,'max_guests',2)) }}" required>@error('max_guests')<small>{{ $message }}</small>@enderror</label>
         <label class="az-s78-field{{ $field('minimum_stay') }}"><span>Minimum stay</span><input type="number" name="minimum_stay" min="1" value="{{ old('minimum_stay',data_get($data,'minimum_stay',1)) }}">@error('minimum_stay')<small>{{ $message }}</small>@enderror</label>
         <label class="az-s78-field{{ $field('maximum_stay') }}"><span>Maximum stay</span><input type="number" name="maximum_stay" min="1" value="{{ old('maximum_stay',data_get($data,'maximum_stay')) }}">@error('maximum_stay')<small>{{ $message }}</small>@enderror</label>
@@ -59,7 +91,7 @@
                 <p>No cover uploaded yet.</p>
             @endif
         </div>
-        <label class="az-s78-field is-full{{ $field('cover_image') }}"><span>{{ $listing->cover_image?'Replace cover image':'Cover image' }}</span><input type="file" name="cover_image" accept="image/*" {{ $listing->cover_image?'':'required' }}>@error('cover_image')<small>{{ $message }}</small>@enderror</label>
+        <label class="az-s78-field is-full{{ $field('cover_image') }}"><span>{{ $listing->cover_image?'Replace cover image':'Cover image' }}</span><input type="file" name="cover_image" accept="image/*">@error('cover_image')<small>{{ $message }}</small>@enderror</label>
 
         <div class="az-s78-field is-full">
             <span>Current gallery</span>
@@ -78,6 +110,27 @@
         </div>
         <label class="az-s78-field is-full"><span>Add gallery images</span><input type="file" name="gallery[]" accept="image/*" multiple>@error('gallery.*')<small>{{ $message }}</small>@enderror</label>
 
+        <fieldset class="az-s78-field is-full" style="border:1px solid #D0DBEA;border-radius:12px;padding:16px;min-width:0">
+            <legend><strong>Private proof of ownership or management authority</strong></legend>
+            <p>Upload a deed, lease, authorisation letter or other genuine evidence that you may offer this accommodation. Only you and authorised Resavar reviewers can download it. It will never appear on the public property page.</p>
+            <label>Proof document (PDF, JPEG, PNG or WebP, maximum 10 MB)
+                <input type="file" name="proof_of_control" accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf,image/jpeg,image/png,image/webp">
+            </label>
+            @error('proof_of_control')<small role="alert">{{ $message }}</small>@enderror
+            @if($listing->exists && $listing->controlDocuments()->exists())
+                <ul>
+                    @foreach($listing->controlDocuments()->latest('id')->get() as $proof)
+                        <li><a href="{{ route('user.owner.listings.control-documents.download', [$listing, $proof]) }}">{{ $proof->original_name }}</a>
+                            · {{ Str::headline($proof->status) }}
+                            @if($proof->status === 'rejected' && $proof->review_note)
+                                · {{ $proof->review_note }}
+                            @endif
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
+        </fieldset>
+
         <label class="az-s78-field is-full{{ $field('owner_notes') }}"><span>Notes for Resavar review</span><textarea name="owner_notes">{{ old('owner_notes',$listing->owner_notes) }}</textarea>@error('owner_notes')<small>{{ $message }}</small>@enderror</label>
     </div>
 
@@ -89,6 +142,36 @@
         @error('amenities.*')<small>{{ $message }}</small>@enderror
     </fieldset>
 
-    <div class="az-premium-actions"><button class="az-premium-button" type="submit">{{ $listing->exists?'Resubmit property':'Submit for review' }}</button></div>
+    <section class="az-s78-permissions" aria-labelledby="onboarding-checklist">
+        <h2 id="onboarding-checklist">Before you submit</h2>
+        <ul>
+            <li>Current signed owner-management agreement</li>
+            <li>Property category, accurate address, guest capacity, accommodation price and description</li>
+            <li>Hotel business identity and contact details, when applicable</li>
+            <li>At least one property photograph and a private ownership/management-authority document</li>
+            <li>Listing amenities, room and inventory details ready for staff review before publication</li>
+        </ul>
+        <p>A draft is private. Submitted listings are reviewed manually. Publishing is a separate decision and payout/bank verification happens later, when requesting a withdrawal.</p>
+    </section>
+    <div class="az-premium-actions" style="display:flex;flex-wrap:wrap;gap:12px">
+        <button class="az-premium-button" type="submit" name="intent" value="draft" formnovalidate>Save private draft</button>
+        <button class="az-premium-button" type="submit" name="intent" value="submit">
+            {{ $listing->exists?'Submit updated application':'Submit for Resavar review' }}
+        </button>
+    </div>
 </form>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const operator = document.getElementById('resavar-operator-type');
+    const panel = document.getElementById('resavar-hotel-business');
+    if (!operator || !panel) return;
+    const sync = () => {
+        const hotel = operator.value === 'hotel_operator';
+        panel.hidden = !hotel;
+        panel.querySelectorAll('[data-business-required]').forEach((field) => { field.required = hotel; });
+    };
+    operator.addEventListener('change', sync);
+    sync();
+});
+</script>
 @endsection
