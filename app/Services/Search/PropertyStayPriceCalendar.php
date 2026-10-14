@@ -89,8 +89,11 @@ class PropertyStayPriceCalendar
                 $this->availability->assertRules(
                     $property, $in, $out, $adults, $children, $rooms, $type, $ratePlan
                 );
-                if (! $this->availability->availableForProperty(
-                    $property, $in, $out, $rooms, $type?->getKey()
+                // For typed listings, the preloaded remainingByDate map is
+                // authoritative and already accounts for holds, bookings and
+                // property blocks. Requery only legacy untyped inventory.
+                if ($remaining === null && ! $this->availability->availableForProperty(
+                    $property, $in, $out, $rooms, null
                 )) {
                     $days[] = $entry;
                     continue;

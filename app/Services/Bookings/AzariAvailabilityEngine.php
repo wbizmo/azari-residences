@@ -51,7 +51,13 @@ class AzariAvailabilityEngine
             ]);
         }
 
-        $rooms = max(1, $rooms);
+        if ($rooms < 1 || $adults < 1 || $children < 0) {
+            throw ValidationException::withMessages([
+                'adults' => 'At least one adult and one unit are required, with no negative guest counts.',
+            ]);
+        }
+
+        $this->assertPropertyBookable($property);
 
         $sameDayAllowed = $accommodationType?->same_day_booking
             ?? $property->same_day_booking
@@ -84,12 +90,15 @@ class AzariAvailabilityEngine
             ?? $property->maximum_stay;
 
         if ($accommodationType && Schema::hasTable('inventory_dates')) {
-            $inventoryRules = InventoryDate::query()
+            // One bounded query includes checkout-day restrictions. Stay
+            // length limits apply only to occupied nights (exclusive checkout).
+            $calendarRows = InventoryDate::query()
                 ->where('accommodation_type_id', $accommodationType->getKey())
                 ->whereDate('date', '>=', $checkIn->toDateString())
-                ->whereDate('date', '<', $checkOut->toDateString())
-                ->get(['date', 'minimum_stay', 'maximum_stay']);
-
+                ->whereDate('date', '<=', $checkOut->toDateString())
+                ->get(['date', 'minimum_stay', 'maximum_stay', 'closed_to_arrival', 'closed_to_departure'])
+                ->keyBy(fn (InventoryDate $row) => $row->date->toDateString());
+            $inventoryRules = $calendarRows->except($checkOut->toDateString());
             $dateMinimum = $inventoryRules->pluck('minimum_stay')->filter()->max();
             $dateMaximum = $inventoryRules->pluck('maximum_stay')->filter()->min();
 
@@ -103,25 +112,13 @@ class AzariAvailabilityEngine
                     : (int) $dateMaximum;
             }
 
-            $arrivalClosed = InventoryDate::query()
-                ->where('accommodation_type_id', $accommodationType->getKey())
-                ->whereDate('date', $checkIn->toDateString())
-                ->where('closed_to_arrival', true)
-                ->exists();
-
-            if ($arrivalClosed) {
+            if ($calendarRows->get($checkIn->toDateString())?->closed_to_arrival) {
                 throw ValidationException::withMessages([
                     'check_in' => 'Arrival is closed for the selected date.',
                 ]);
             }
 
-            $departureClosed = InventoryDate::query()
-                ->where('accommodation_type_id', $accommodationType->getKey())
-                ->whereDate('date', $checkOut->toDateString())
-                ->where('closed_to_departure', true)
-                ->exists();
-
-            if ($departureClosed) {
+            if ($calendarRows->get($checkOut->toDateString())?->closed_to_departure) {
                 throw ValidationException::withMessages([
                     'check_out' => 'Departure is closed for the selected date.',
                 ]);
@@ -231,11 +228,25 @@ class AzariAvailabilityEngine
                 ]);
             }
 
-            if ($children > $childCapacity && $childCapacity > 0) {
+            if ($children > $childCapacity) {
                 throw ValidationException::withMessages([
                     'children' => "Maximum child capacity is {$childCapacity}.",
                 ]);
             }
+        }
+    }
+
+    private function propertyIsBookable(Property $property): bool
+    {
+        return (bool) $property->is_published && $property->status === 'available';
+    }
+
+    private function assertPropertyBookable(Property $property): void
+    {
+        if (! $this->propertyIsBookable($property)) {
+            throw ValidationException::withMessages([
+                'property_id' => 'This property is closed or unpublished and cannot accept new reservations.',
+            ]);
         }
     }
 
@@ -283,7 +294,7 @@ class AzariAvailabilityEngine
         ?int $ignoreBooking = null,
         ?string $ignoreHold = null
     ): bool {
-        if ($out->toDateString() <= $in->toDateString()) {
+        if ($out->toDateString() <= $in->toDateString() || ! $this->propertyIsBookable($property)) {
             return false;
         }
         $type = $this->resolveAccommodationType($property, $accommodationTypeId);
@@ -630,6 +641,10 @@ class AzariAvailabilityEngine
             return $this->unavailableCalendar($start, $days);
         }
 
+        if (! $this->propertyIsBookable($property)) {
+            return $this->unavailableCalendar($start, $days);
+        }
+
         $type = $this->resolveAccommodationType($property, $accommodationTypeId);
         if (! $type && ($accommodationTypeId !== null
             || (Schema::hasTable('accommodation_types')
@@ -664,7 +679,6 @@ class AzariAvailabilityEngine
         ?int $accommodationTypeId = null,
         ?int $ratePlanId = null
     ): BookingHold {
-        $rooms = max(1, $rooms);
         $accommodationType = $this->resolveAccommodationType($property, $accommodationTypeId);
         $ratePlan = $accommodationType
             ? $this->resolveRatePlan($accommodationType, $ratePlanId)
@@ -704,7 +718,7 @@ class AzariAvailabilityEngine
             $accommodationType,
             $ratePlan
         ): BookingHold {
-            Property::query()
+            $lockedProperty = Property::query()
                 ->whereKey($property->getKey())
                 ->when(
                     DB::connection()->getDriverName() !== 'sqlite',
@@ -717,6 +731,8 @@ class AzariAvailabilityEngine
                 ->where('expires_at', '<=', now())
                 ->delete();
 
+            $this->assertPropertyBookable($lockedProperty);
+            $lockedType = null;
             if ($accommodationType) {
                 $lockedType = AccommodationType::query()
                     ->whereKey($accommodationType->getKey())
@@ -736,21 +752,37 @@ class AzariAvailabilityEngine
                         'rooms' => 'The requested quantity is no longer available.',
                     ]);
                 }
-            } elseif (! $this->legacyAvailable($property->getKey(), $in, $out)) {
+            } elseif (! $this->legacyAvailable($lockedProperty->getKey(), $in, $out)) {
                 throw ValidationException::withMessages([
                     'property_id' => 'Accommodation is no longer available.',
                 ]);
             }
 
+            // Rules and public rate selection are checked again inside the
+            // property/type lock, so a closing calendar or edited policy cannot
+            // win the race against the earlier public preview.
+            $lockedRatePlan = $lockedType ? $this->resolveRatePlan(
+                $lockedType, $ratePlan?->getKey()
+            ) : null;
+            if ($ratePlan && ! $lockedRatePlan) {
+                throw ValidationException::withMessages([
+                    'rate_plan_id' => 'The selected rate plan was changed. Refresh your quotation.',
+                ]);
+            }
+            $this->assertRules(
+                $lockedProperty, $in, $out, $adults, $children, $rooms,
+                $lockedType, $lockedRatePlan
+            );
+
             // Capture the customer-visible amount before releasing the hold lock.
             // A later price change must require renewed customer consent.
             $heldQuote = app(AzariPricingEngine::class)->quote(
-                $property,
+                $lockedProperty,
                 $in,
                 $out,
                 [],
-                $accommodationType,
-                $ratePlan,
+                $lockedType,
+                $lockedRatePlan,
                 $rooms
             );
 
@@ -760,12 +792,12 @@ class AzariAvailabilityEngine
                     'quoted_at' => now()->toIso8601String(),
                     'total' => (string) $heldQuote['total'],
                     'currency' => (string) $heldQuote['currency'],
-                    'rate_plan_id' => $ratePlan?->getKey(),
+                    'rate_plan_id' => $lockedRatePlan?->getKey(),
                     'quantity' => $rooms,
                 ],
                 'property_id' => $property->getKey(),
-                'accommodation_type_id' => $accommodationType?->getKey(),
-                'rate_plan_id' => $ratePlan?->getKey(),
+                'accommodation_type_id' => $lockedType?->getKey(),
+                'rate_plan_id' => $lockedRatePlan?->getKey(),
                 'user_id' => $userId,
                 'check_in' => $in,
                 'check_out' => $out,
