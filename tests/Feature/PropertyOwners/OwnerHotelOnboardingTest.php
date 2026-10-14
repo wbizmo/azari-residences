@@ -178,7 +178,8 @@ final class OwnerHotelOnboardingTest extends TestCase
         $this->actingAs($owner)->post(route('user.owner.listings.store'), $data)->assertSessionHasNoErrors();
         $listing = PropertyListing::query()->where('user_id', $owner->id)->firstOrFail();
 
-        $this->actingAs($admin)->post(route('azari.admin.owner-listings.corrections', $listing), [
+        $this->actingAs($admin)->withSession(['auth.password_confirmed_at' => time()])
+            ->post(route('azari.admin.owner-listings.corrections', $listing), [
             'reason' => 'Please correct the legal business contact and upload the updated lease document.',
         ])->assertRedirect();
 
@@ -193,6 +194,26 @@ final class OwnerHotelOnboardingTest extends TestCase
         $this->assertSame(1, PropertyListing::query()->where('user_id', $owner->id)->count());
     }
 
+    public function test_private_control_document_is_never_public_and_another_owner_cannot_download_it(): void
+    {
+        Storage::fake('private');
+        Storage::fake('public');
+        $owner = $this->owner();
+        $other = $this->owner();
+        $this->actingAs($owner)->post(route('user.owner.listings.store'), $this->fullData([
+            'cover_image' => UploadedFile::fake()->image('front.jpg'),
+        ]))->assertSessionHasNoErrors();
+
+        $listing = PropertyListing::query()->where('user_id', $owner->id)->firstOrFail();
+        $document = $listing->controlDocuments()->firstOrFail();
+
+        Storage::disk('public')->assertMissing($document->path);
+        $this->actingAs($other)->get(route('user.owner.listings.control-documents.download', [$listing, $document]))
+            ->assertNotFound();
+        $this->actingAs($owner)->get(route('user.owner.listings.control-documents.download', [$listing, $document]))
+            ->assertOk()->assertHeader('Cache-Control', 'private, no-store');
+    }
+
     public function test_approval_requires_manual_private_control_document_review_for_new_submissions(): void
     {
         Storage::fake('private');
@@ -205,18 +226,21 @@ final class OwnerHotelOnboardingTest extends TestCase
         $listing = PropertyListing::query()->where('user_id', $owner->id)->firstOrFail();
 
         $review = $listing->controlDocuments()->firstOrFail();
-        $this->actingAs($admin)->post(route('azari.admin.owner-listings.control-documents.review', [$listing, $review]), [
+        $this->actingAs($admin)->withSession(['auth.password_confirmed_at' => time()])
+            ->post(route('azari.admin.owner-listings.control-documents.review', [$listing, $review]), [
             'status' => 'verified',
             'review_note' => 'Reviewed original authorization and matching registration evidence.',
         ])->assertRedirect();
         $this->assertSame('verified', $review->fresh()->status);
 
+        $otherOwner = $this->owner();
         $other = PropertyListing::query()->create([
-            'user_id' => $this->owner()->id,
-            'listing_agreement_id' => $this->owner()->listingAgreements()->first()->id,
+            'user_id' => $otherOwner->id,
+            'listing_agreement_id' => $otherOwner->listingAgreements()->first()->id,
             'status' => 'draft', 'property_data' => [],
         ]);
-        $this->actingAs($admin)->post(route('azari.admin.owner-listings.control-documents.review', [$other, $review]), [
+        $this->actingAs($admin)->withSession(['auth.password_confirmed_at' => time()])
+            ->post(route('azari.admin.owner-listings.control-documents.review', [$other, $review]), [
             'status' => 'rejected', 'review_note' => 'This is someone else’s document.',
         ])->assertNotFound();
     }
