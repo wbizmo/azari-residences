@@ -118,6 +118,15 @@ Route::prefix('azaridevadmin')->middleware(['auth.session', 'azari.staff'])->gro
         ->name('azari.admin.properties.commercial.rate-plans.store');
     Route::put('/properties/{property}/commercial/accommodations/{accommodationType}/rate-plans/{ratePlan}', [CommercialInventoryController::class, 'updateRatePlan'])
         ->name('azari.admin.properties.commercial.rate-plans.update');
+    Route::post('/properties/{property}/commercial/accommodations/{accommodationType}/calendar/preview', [CommercialInventoryController::class, 'previewCalendar'])
+        ->middleware(['azari.staff:administrator', 'throttle:30,1'])
+        ->name('azari.admin.properties.commercial.calendar.preview');
+    Route::post('/properties/{property}/commercial/accommodations/{accommodationType}/calendar', [CommercialInventoryController::class, 'applyCalendar'])
+        ->middleware(['azari.staff:administrator', 'throttle:15,1'])
+        ->name('azari.admin.properties.commercial.calendar.apply');
+    Route::post('/properties/{property}/commercial/calendar-changes/{log}/undo', [CommercialInventoryController::class, 'undoCalendar'])
+        ->middleware(['azari.staff:administrator', 'throttle:10,1'])
+        ->name('azari.admin.properties.commercial.calendar.undo');
 
     Route::middleware('azari.admin')->group(function (): void {
         Route::get('/staff', [StaffController::class, 'index'])->name('azari.admin.staff.index');
