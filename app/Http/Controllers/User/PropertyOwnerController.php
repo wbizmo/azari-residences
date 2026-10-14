@@ -10,6 +10,7 @@ use App\Models\ListingAgreement;
 use App\Models\Location;
 use App\Models\OwnerPayoutProfile;
 use App\Models\PropertyListing;
+use App\Models\Property;
 use App\Models\RoomType;
 use App\Models\SiteSetting;
 use App\Services\Owners\ListingCompletenessService;
@@ -34,6 +35,8 @@ class PropertyOwnerController extends Controller
 
         return view('user.owner.dashboard', [
             'listings' => $user->propertyListings()->latest()->take(5)->get(),
+            'assignedProperties' => Property::query()->where('owner_id', $user->id)
+                ->whereNull('owner_listing_id')->latest()->limit(6)->get(),
             'recentEntries' => $user->ownerLedgerEntries()->latest()->take(6)->get(),
             'balance' => $balances->balance($user, $currency),
             'pending' => $balances->pending($user, $currency),
@@ -111,6 +114,8 @@ class PropertyOwnerController extends Controller
     {
         return view('user.owner.listings-index', [
             'listings' => $request->user()->propertyListings()->latest()->paginate(10)->withQueryString(),
+            'assignedProperties' => Property::query()->where('owner_id', $request->user()->id)
+                ->whereNull('owner_listing_id')->latest()->paginate(10, ['*'], 'assigned_page')->withQueryString(),
         ]);
     }
 
