@@ -10,7 +10,18 @@ class ListingCompletenessService
     public function evaluate(PropertyListing $listing): array
     {
         $data = $listing->property_data ?? [];
+        $hasControlEvidence = $listing->operator_type === null
+            || $listing->controlDocuments()->exists();
+        $hotelIdentity = $listing->operator_type !== 'hotel_operator'
+            || (filled($listing->business_legal_name)
+                && filled($listing->business_registration_number)
+                && filled($listing->business_email)
+                && filled($listing->business_phone));
+
         $checks = [
+            'operator' => in_array($listing->operator_type, [null, 'individual', 'hotel_operator'], true),
+            'hotel_business' => $hotelIdentity,
+            'control_evidence' => $hasControlEvidence,
             'identity' => filled($data['name'] ?? null) && filled($data['property_type'] ?? null),
             'address' => filled($data['location'] ?? null) || filled($data['address_line_1'] ?? null),
             'capacity' => (int) ($data['max_guests'] ?? 0) > 0,
