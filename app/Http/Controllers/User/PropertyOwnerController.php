@@ -10,6 +10,14 @@ use App\Models\ListingAgreement;
 use App\Models\Location;
 use App\Models\OwnerPayoutProfile;
 use App\Models\PropertyListing;
+use App\Models\AuditLog;
+use App\Notifications\OwnerListingStatusNotification;
+use App\Services\Owners\OwnerListingControlDocumentService;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Database\UniqueConstraintViolationException;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Storage;
 use App\Models\Property;
 use App\Models\RoomType;
 use App\Models\SiteSetting;
@@ -20,7 +28,6 @@ use Dompdf\Dompdf;
 use Dompdf\Options;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -130,26 +137,7 @@ class PropertyOwnerController extends Controller
 
     public function store(Request $request, ListingCompletenessService $completeness): RedirectResponse
     {
-        $agreement = $this->currentAgreement($request);
-        abort_unless($agreement, 403);
-        $payload = $this->validatedListingPayload($request);
-
-        $listing = PropertyListing::query()->create([
-            'user_id' => $request->user()->id,
-            'listing_agreement_id' => $agreement->id,
-            'status' => 'submitted',
-            'property_data' => $payload['property_data'],
-            'amenity_ids' => $payload['amenity_ids'],
-            'cover_image' => $payload['cover_image'],
-            'gallery' => $payload['gallery'],
-            'proposed_owner_share_percentage' => $payload['proposed_owner_share_percentage'],
-            'owner_notes' => $payload['owner_notes'],
-            'submitted_at' => now(),
-        ]);
-
-        $completeness->sync($listing->load('user.ownerPayoutProfile'));
-
-        return redirect()->route('user.owner.listings.show', $listing)->with('status', 'Property submitted for Resavar review.');
+        return $this->saveListing($request, $completeness);
     }
 
     public function show(
@@ -157,8 +145,8 @@ class PropertyOwnerController extends Controller
         PropertyListing $listing,
         ListingCompletenessService $completeness
     ): View {
-        abort_unless($listing->user_id === $request->user()->id, 404);
-        $listing->load('user.ownerPayoutProfile');
+        abort_unless((int) $listing->user_id === (int) $request->user()->id, 404);
+        $listing->load(['controlDocuments', 'agreement', 'approvedProperty']);
         $completion = $completeness->evaluate($listing);
 
         return view('user.owner.listing-show', compact('listing', 'completion'));
@@ -166,31 +154,159 @@ class PropertyOwnerController extends Controller
 
     public function edit(Request $request, PropertyListing $listing): View
     {
-        abort_unless($listing->user_id === $request->user()->id && $listing->isEditable(), 403);
+        abort_unless((int) $listing->user_id === (int) $request->user()->id
+            && $listing->isEditable(), 404);
+
         return view('user.owner.listing-form', $this->formData($listing));
     }
 
-    public function update(Request $request, PropertyListing $listing, ListingCompletenessService $completeness): RedirectResponse
-    {
-        abort_unless($listing->user_id === $request->user()->id && $listing->isEditable(), 403);
-        $payload = $this->validatedListingPayload($request, $listing);
+    public function update(
+        Request $request,
+        PropertyListing $listing,
+        ListingCompletenessService $completeness
+    ): RedirectResponse {
+        abort_unless((int) $listing->user_id === (int) $request->user()->id
+            && $listing->isEditable(), 404);
 
-        $listing->update([
-            'status' => 'submitted',
-            'property_data' => $payload['property_data'],
-            'amenity_ids' => $payload['amenity_ids'],
-            'cover_image' => $payload['cover_image'],
-            'gallery' => $payload['gallery'],
-            'proposed_owner_share_percentage' => $payload['proposed_owner_share_percentage'],
-            'owner_notes' => $payload['owner_notes'],
-            'decline_reason' => null,
-            'submitted_at' => now(),
-            'declined_at' => null,
-        ]);
+        return $this->saveListing($request, $completeness, $listing);
+    }
 
-        $completeness->sync($listing->load('user.ownerPayoutProfile'));
+    private function saveListing(
+        Request $request,
+        ListingCompletenessService $completeness,
+        ?PropertyListing $listing = null
+    ): RedirectResponse {
+        $agreement = $this->currentAgreement($request);
+        abort_unless($agreement, 403);
 
-        return redirect()->route('user.owner.listings.show', $listing)->with('status', 'Listing resubmitted for review.');
+        $intent = $request->input('intent', 'submit');
+        if (! in_array($intent, ['draft', 'submit'], true)) {
+            throw ValidationException::withMessages(['intent' => 'Choose Save draft or Submit for review.']);
+        }
+
+        $newPublicPaths = [];
+        $oldPublicPaths = [];
+        $newPrivatePaths = [];
+        $payload = $this->validatedListingPayload($request, $listing, $intent, $newPublicPaths, $oldPublicPaths);
+
+        try {
+            $saved = DB::transaction(function () use (
+                $request, $listing, $agreement, $intent, $payload,
+                $completeness, &$newPrivatePaths
+            ): PropertyListing {
+                $locked = $listing ? PropertyListing::query()
+                    ->whereKey($listing->getKey())->lockForUpdate()->firstOrFail() : new PropertyListing;
+
+                abort_unless(! $locked->exists
+                    || ((int) $locked->user_id === (int) $request->user()->id && $locked->isEditable()), 404);
+
+                $previous = $locked->exists ? $locked->status : null;
+                $locked->fill([
+                    'user_id' => $request->user()->id,
+                    'listing_agreement_id' => $agreement->id,
+                    'operator_type' => $payload['operator_type'],
+                    'business_legal_name' => $payload['business_legal_name'],
+                    'business_registration_number' => $payload['business_registration_number'],
+                    'business_email' => $payload['business_email'],
+                    'business_phone' => $payload['business_phone'],
+                    'business_address' => $payload['business_address'],
+                    'listing_fingerprint' => $payload['listing_fingerprint'],
+                    'status' => 'draft',
+                    'property_data' => $payload['property_data'],
+                    'amenity_ids' => $payload['amenity_ids'],
+                    'cover_image' => $payload['cover_image'],
+                    'gallery' => $payload['gallery'],
+                    'proposed_owner_share_percentage' => $payload['proposed_owner_share_percentage'],
+                    'owner_notes' => $payload['owner_notes'],
+                ]);
+                $locked->save();
+
+                if ($request->hasFile('proof_of_control')) {
+                    $proof = app(OwnerListingControlDocumentService::class)
+                        ->append($locked, $request->file('proof_of_control'));
+                    $newPrivatePaths[] = $proof->path;
+                } elseif ($intent === 'submit' && $locked->operator_type !== null
+                    && ! $locked->controlDocuments()->exists()) {
+                    throw ValidationException::withMessages([
+                        'proof_of_control' => 'Upload a valid proof of control before submitting for review.',
+                    ]);
+                }
+
+                // An amended legal entity must submit fresh evidence. Prior
+                // verified documents stay retained but no longer authorize it.
+                if ($listing && (
+                    $listing->operator_type !== $locked->operator_type
+                    || $listing->business_legal_name !== $locked->business_legal_name
+                    || $listing->business_registration_number !== $locked->business_registration_number
+                )) {
+                    $locked->controlDocuments()->where('status', 'verified')
+                        ->update(['status' => 'superseded', 'updated_at' => now()]);
+                }
+
+                $completion = $completeness->sync($locked->load('user.ownerPayoutProfile'));
+                if ($intent === 'submit') {
+                    $mandatory = array_diff($completion['blockers'], ['amenities']);
+                    if ($mandatory !== []) {
+                        throw ValidationException::withMessages([
+                            'listing' => 'Complete these sections before submission: '.implode(', ', $mandatory).'.',
+                        ]);
+                    }
+                    $locked->forceFill([
+                        'status' => 'submitted',
+                        'submitted_at' => now(),
+                        'decline_reason' => null,
+                        'declined_at' => null,
+                        'reviewed_by' => null,
+                        'reviewed_at' => null,
+                        'approved_at' => null,
+                    ])->save();
+                } else {
+                    $locked->forceFill(['submitted_at' => null])->save();
+                }
+
+                AuditLog::record('owner_listing.'.($intent === 'submit' ? 'submitted' : 'draft_saved'),
+                    $locked, ['status' => $previous], ['status' => $locked->status],
+                    ['operator_type' => $locked->operator_type, 'has_control_proof' => $locked->controlDocuments()->exists()]);
+
+                return $locked;
+            }, 1);
+        } catch (\Throwable $e) {
+            Storage::disk('public')->delete($newPublicPaths);
+            Storage::disk('private')->delete($newPrivatePaths);
+            if ($e instanceof UniqueConstraintViolationException) {
+                throw ValidationException::withMessages([
+                    'name' => 'You already have an application for this property. Edit that application instead.',
+                ]);
+            }
+            throw $e;
+        }
+
+        foreach ($oldPublicPaths as $path) {
+            if ($path) {
+                ResponsiveImage::deleteDerivatives($path);
+                Storage::disk('public')->delete($path);
+            }
+        }
+        foreach ($newPublicPaths as $path) {
+            GenerateResponsiveImageDerivatives::dispatch($path);
+        }
+
+        if ($intent === 'submit') {
+            try {
+                $request->user()->notify(OwnerListingStatusNotification::forListing(
+                    $saved, 'Your property was submitted for Resavar staff review. You can track its status in Property Centre.'
+                ));
+            } catch (\Throwable $e) {
+                Log::warning('Owner listing submission notification failed', [
+                    'listing_id' => $saved->id, 'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
+        return redirect()->route('user.owner.listings.show', $saved)
+            ->with('status', $intent === 'submit'
+                ? 'Listing submitted for manual review. No property has been published yet.'
+                : 'Private draft saved. Continue whenever you are ready.');
     }
 
     public function earnings(Request $request): View
