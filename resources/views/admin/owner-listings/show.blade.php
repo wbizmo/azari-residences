@@ -85,9 +85,10 @@
 <div class="az-admin-grid">
     <form method="post" action="{{ route('azari.admin.owner-listings.approve',$listing) }}" class="az-admin-form az-admin-card">@csrf
         <h2>Approve listing</h2>
+        <p>Approval creates an unpublished accommodation draft. The separate Resavar property-quality review checks rights, address, every photo, amenities, rates and policies before publication.</p>
         <p><strong>Revenue treatment:</strong> Owner receives 100% of applicable owner-property room-sale revenue. Resavar platform commission: 0%.</p>
-        <label><input type="checkbox" name="publish_now" value="1"> Publish immediately</label>
-        <label><input type="checkbox" name="feature_now" value="1"> Feature immediately</label>
+
+
         @foreach(collect([$listing->cover_image])->merge($listing->gallery ?? [])->filter()->unique() as $image)
             @php($photoKey = hash('sha256', $image))
             <fieldset class="az-span-2" style="padding:14px;border:1px solid #cbd5e1;border-radius:10px">
