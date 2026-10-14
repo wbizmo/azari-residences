@@ -123,7 +123,7 @@ class PropertyController extends Controller
                 AuditLog::record('property.updated_by_admin', $locked, $previous, $locked->only(array_keys($previous)), [
                     'source' => $locked->owner_listing_id ? 'owner_submission' : 'admin_direct',
                 ]);
-            }, 3);
+            }, 1); // Media uploads are not safe to replay on SQL deadlock.
         } catch (\Throwable $e) {
             $this->discardUploadedMedia($stored);
             throw $e;
