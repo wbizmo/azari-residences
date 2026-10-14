@@ -79,7 +79,7 @@
                         <summary><strong>Add rate plan</strong></summary>
                         <form method="POST" action="{{ $rateStoreRoute }}" class="reserva-commercial-form">
                             @csrf
-                            @include('partials.commercial-rate-plan-fields', ['ratePlan' => new AppModelsRatePlan()])
+                            @include('partials.commercial-rate-plan-fields', ['ratePlan' => new \App\Models\RatePlan()])
                             <button class="{{ $ownerMode ? 'az-user-button az-user-button--dark' : 'button button-primary' }}" type="submit">Create rate plan</button>
                         </form>
                     </details>
@@ -91,7 +91,7 @@
             <summary><strong>Add accommodation type</strong></summary>
             <form method="POST" action="{{ $accommodationStoreRoute }}" class="reserva-commercial-form">
                 @csrf
-                @include('partials.commercial-inventory-type-fields', ['type' => new AppModelsAccommodationType(), 'roomTypes' => $roomTypes, 'currency' => $currency])
+                @include('partials.commercial-inventory-type-fields', ['type' => new \App\Models\AccommodationType(), 'roomTypes' => $roomTypes, 'currency' => $currency])
                 <button class="{{ $ownerMode ? 'az-user-button az-user-button--dark' : 'button button-primary' }}" type="submit">Create accommodation type</button>
             </form>
         </details>
