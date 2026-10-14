@@ -90,12 +90,15 @@ class AzariAvailabilityEngine
             ?? $property->maximum_stay;
 
         if ($accommodationType && Schema::hasTable('inventory_dates')) {
-            $inventoryRules = InventoryDate::query()
+            // One bounded query includes checkout-day restrictions. Stay
+            // length limits apply only to occupied nights (exclusive checkout).
+            $calendarRows = InventoryDate::query()
                 ->where('accommodation_type_id', $accommodationType->getKey())
                 ->whereDate('date', '>=', $checkIn->toDateString())
-                ->whereDate('date', '<', $checkOut->toDateString())
-                ->get(['date', 'minimum_stay', 'maximum_stay']);
-
+                ->whereDate('date', '<=', $checkOut->toDateString())
+                ->get(['date', 'minimum_stay', 'maximum_stay', 'closed_to_arrival', 'closed_to_departure'])
+                ->keyBy(fn (InventoryDate $row) => $row->date->toDateString());
+            $inventoryRules = $calendarRows->except($checkOut->toDateString());
             $dateMinimum = $inventoryRules->pluck('minimum_stay')->filter()->max();
             $dateMaximum = $inventoryRules->pluck('maximum_stay')->filter()->min();
 
@@ -109,25 +112,13 @@ class AzariAvailabilityEngine
                     : (int) $dateMaximum;
             }
 
-            $arrivalClosed = InventoryDate::query()
-                ->where('accommodation_type_id', $accommodationType->getKey())
-                ->whereDate('date', $checkIn->toDateString())
-                ->where('closed_to_arrival', true)
-                ->exists();
-
-            if ($arrivalClosed) {
+            if ($calendarRows->get($checkIn->toDateString())?->closed_to_arrival) {
                 throw ValidationException::withMessages([
                     'check_in' => 'Arrival is closed for the selected date.',
                 ]);
             }
 
-            $departureClosed = InventoryDate::query()
-                ->where('accommodation_type_id', $accommodationType->getKey())
-                ->whereDate('date', $checkOut->toDateString())
-                ->where('closed_to_departure', true)
-                ->exists();
-
-            if ($departureClosed) {
+            if ($calendarRows->get($checkOut->toDateString())?->closed_to_departure) {
                 throw ValidationException::withMessages([
                     'check_out' => 'Departure is closed for the selected date.',
                 ]);
