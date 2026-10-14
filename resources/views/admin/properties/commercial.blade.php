@@ -10,4 +10,6 @@
 </div>
 
 @include('partials.commercial-inventory-manager', ['property' => $property, 'roomTypes' => $roomTypes, 'ownerMode' => false])
+
+@include('admin.properties.partials.calendar-manager')
 @endsection
