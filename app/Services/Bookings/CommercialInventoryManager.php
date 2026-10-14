@@ -7,6 +7,7 @@ use App\Models\CancellationPolicy;
 use App\Models\PaymentPolicy;
 use App\Models\Property;
 use App\Models\RatePlan;
+use App\Services\Owners\PropertyPublicationService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -88,6 +89,9 @@ class CommercialInventoryManager
                 $type->code = 'RES-'.$lockedProperty->getKey().'-'.Str::upper(Str::random(6));
             }
 
+            app(PropertyPublicationService::class)->invalidateForEdit(
+                $lockedProperty, 'Accommodation capacity, room availability or base price changed.'
+            );
             $type->save();
 
             if (! $type->ratePlans()->exists()) {
@@ -117,6 +121,8 @@ class CommercialInventoryManager
         }
 
         return DB::transaction(function () use ($type, $data, $ratePlan): RatePlan {
+            $lockedProperty = Property::query()
+                ->whereKey($type->property_id)->lockForUpdate()->firstOrFail();
             $lockedType = AccommodationType::query()
                 ->lockForUpdate()
                 ->findOrFail($type->getKey());
@@ -175,6 +181,9 @@ class CommercialInventoryManager
                 'sort_order' => (int) ($data['sort_order'] ?? 0),
             ]);
 
+            app(PropertyPublicationService::class)->invalidateForEdit(
+                $lockedProperty, 'Public rate, payment or cancellation policy changed.'
+            );
             $ratePlan->save();
 
             return $ratePlan->refresh()->load(['cancellationPolicy', 'paymentPolicy']);
