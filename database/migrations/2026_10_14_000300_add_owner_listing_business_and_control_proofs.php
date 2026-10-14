@@ -10,6 +10,8 @@ return new class extends Migration
     {
         Schema::table('property_listings', function (Blueprint $table): void {
             $table->string('operator_type', 24)->nullable()->after('user_id');
+            $table->string('listing_fingerprint', 64)->nullable();
+            $table->unique(['user_id', 'listing_fingerprint'], 'owner_listing_user_fingerprint_unique');
             $table->string('business_legal_name', 180)->nullable();
             $table->string('business_registration_number', 100)->nullable();
             $table->string('business_email', 255)->nullable();
@@ -40,7 +42,7 @@ return new class extends Migration
 
         Schema::table('property_listings', function (Blueprint $table): void {
             $table->dropColumn([
-                'operator_type', 'business_legal_name', 'business_registration_number',
+                'operator_type', 'listing_fingerprint', 'business_legal_name', 'business_registration_number',
                 'business_email', 'business_phone', 'business_address',
             ]);
         });
