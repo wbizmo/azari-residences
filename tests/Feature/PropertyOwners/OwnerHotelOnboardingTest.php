@@ -50,6 +50,10 @@ final class OwnerHotelOnboardingTest extends TestCase
             'max_guests' => 2,
             'nightly_rate' => 45000,
             'currency' => (string) config('localization.default_currency', 'USD'),
+            'amenities' => [\App\Models\Amenity::query()->create([
+                'name' => 'Wi-Fi '.\Illuminate\Support\Str::random(5),
+                'is_active' => true,
+            ])->id],
             'short_description' => 'Comfortable hotel accommodation in Lagos.',
             'description' => str_repeat('Quiet, clean accommodation with reception and housekeeping. ', 2),
             'proof_of_control' => UploadedFile::fake()->create('hotel-lease.pdf', 80, 'application/pdf'),
