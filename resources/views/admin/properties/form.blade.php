@@ -116,9 +116,7 @@
     <label>Sort order<input name="sort_order" type="number" min="0" value="{{ old('sort_order', $property->sort_order ?? 0) }}"></label>
 
     <label><input type="checkbox" name="same_day_booking" value="1" @checked(old('same_day_booking', $property->same_day_booking))> Allow same-day booking</label>
-    <label><input type="checkbox" name="is_featured" value="1" @checked(old('is_featured', $property->is_featured))> Featured</label>
-    <label><input type="checkbox" name="is_published" value="1" @checked(old('is_published', $property->is_published))> Published</label>
-    <p class="admin-form-span-2">Publication of an owner-managed listing requires a signed owner agreement, eligible published room types, public rate plans, complete details and moderated photographs. Newly assigned properties must pass a separate review after the draft has been saved.</p>
+    <p class="admin-form-span-2">Save property details as a private draft. Public availability needs a separate quality review and publication decision. Editing live core details revokes its earlier publication.</p>
 
     <fieldset class="admin-form-span-2">
         <legend>Amenities</legend>
@@ -136,6 +134,50 @@
         Save property
     </button>
 </form>
+@if($property->exists && auth()->user()?->isAdministrator())
+<section class="admin-card" aria-labelledby="publication-review-heading" style="margin-top:24px">
+    <h2 id="publication-review-heading">Property quality review and publication</h2>
+    @php($latestPublication = $property->publicationReviews()->with('reviewer')->latest('id')->first())
+    <p role="status"><strong>Visibility:</strong> {{ $property->is_published ? 'Published' : 'Private draft' }}.
+       <strong>Latest decision:</strong> {{ $latestPublication ? Str::headline($latestPublication->status) : 'Not reviewed' }}.</p>
+    @if($latestPublication)
+        <p>{{ $latestPublication->review_note }} · {{ $latestPublication->reviewer?->name ?? 'System' }}
+           · {{ $latestPublication->created_at?->format('j M Y, H:i') }}</p>
+    @endif
+    <p>Before publication, staff must verify owner identity or signed authority, correct property address,
+        photo rights and alternative text, truthful amenities, sellable room inventory, pricing and tax display,
+        cancellation terms and payment terms. This is an independent human decision, not a payment or external ID check.</p>
+    @if(! $property->is_published && $latestPublication?->status !== 'approved_draft')
+        <form method="POST" action="{{ route('azari.admin.properties.publication.review', $property) }}" class="admin-form-grid">
+            @csrf
+            <label class="admin-form-span-2"><input type="checkbox" name="identity_checked" value="1" required> I inspected the signed owner rights / current property-control documents</label>
+            <label class="admin-form-span-2"><input type="checkbox" name="property_checked" value="1" required> I checked address, images, alt text, attribution and amenity claims</label>
+            <label class="admin-form-span-2"><input type="checkbox" name="terms_checked" value="1" required> I checked rooms, rates, tax display, cancellation and payment policies</label>
+            <label class="admin-form-span-2">Evidence reference and findings
+                <textarea name="review_note" minlength="20" maxlength="3000" required>{{ old('review_note') }}</textarea>
+            </label>
+            <button class="button button-primary" type="submit">Approve private draft</button>
+        </form>
+    @elseif($latestPublication?->status === 'approved_draft' && ! $property->is_published)
+        <form method="POST" action="{{ route('azari.admin.properties.publication.publish', $property) }}">
+            @csrf
+            <button class="button button-primary" type="submit">Publish reviewed accommodation</button>
+        </form>
+    @endif
+    @if($property->is_published || $latestPublication?->status === 'approved_draft')
+        <form method="POST" class="admin-form-grid"
+            action="{{ route('azari.admin.properties.publication.unpublish', $property) }}" style="margin-top:16px">
+            @csrf
+            <label>Reason for rollback or reopening review
+                <textarea name="reason" minlength="10" maxlength="2000" required></textarea>
+            </label>
+            <button class="button button-secondary" type="submit">Unpublish / reopen review</button>
+        </form>
+    @endif
+    <p>Publication, unpublication and revisions are auditable. Historic stays and booking IDs are never deleted.</p>
+</section>
+@endif
+
 @if($property->exists && auth()->user()?->is_admin)
     @include('admin.properties.photo-review', ['property' => $property])
 @endif
