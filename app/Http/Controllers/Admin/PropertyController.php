@@ -29,7 +29,7 @@ class PropertyController extends Controller
     {
         return view('admin.properties.index', [
             'properties' => Property::query()
-                ->with(['amenities', 'locationRecord', 'roomType'])
+                ->with(['amenities', 'locationRecord', 'roomType', 'owner:id,name'])
                 ->orderBy('sort_order')
                 ->latest()
                 ->paginate(config('azari.pagination.per_page', 10)),
