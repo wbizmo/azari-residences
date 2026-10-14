@@ -73,6 +73,8 @@ final class AdminPropertyOwnershipService
                 'ownership_type' => 'azari',
                 'managed_for_owner' => false,
                 'owner_share_percentage' => 100,
+                'is_featured' => ! empty($data['is_published']) && ! empty($data['is_featured']),
+                'status' => ! empty($data['is_published']) ? 'available' : 'draft',
             ]);
         }
 
@@ -116,6 +118,7 @@ final class AdminPropertyOwnershipService
             'owner_share_percentage' => $share,
             'is_published' => $publish,
             'is_featured' => $publish && (bool) ($data['is_featured'] ?? false),
+            'status' => $publish ? 'available' : 'draft',
         ]);
     }
 
