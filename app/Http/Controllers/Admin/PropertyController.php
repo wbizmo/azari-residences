@@ -66,7 +66,7 @@ class PropertyController extends Controller
                     'source' => 'admin_direct',
                 ]);
                 return $property;
-            }, 3);
+            }, 1); // A deadlock must not replay filesystem writes.
         } catch (\Throwable $e) {
             $this->discardUploadedMedia($stored);
             throw $e;
