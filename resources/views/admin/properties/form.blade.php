@@ -30,6 +30,40 @@
     @csrf
     @if($property->exists) @method('PUT') @endif
 
+    @if(auth()->user()?->isAdministrator())
+    <fieldset class="admin-form-span-2" style="border:1px solid #CAD5E6;border-radius:12px;padding:18px;min-width:0">
+        <legend style="padding:0 8px">Property ownership and management</legend>
+        <p>Leave the owner unassigned for a Resavar-managed property. To attach an independent owner, that account must be verified and have signed the current owner agreement. New owner-assigned properties are always saved as drafts.</p>
+        <label>Verified owner account
+            <select name="owner_id">
+                <option value="">Resavar-managed (no third-party owner)</option>
+                @foreach($owners as $owner)
+                    <option value="{{ $owner->id }}"
+                        @selected((string) old('owner_id', $property->owner_id) === (string) $owner->id)>
+                        {{ $owner->name }} · {{ $owner->email }}
+                    </option>
+                @endforeach
+            </select>
+        </label>
+        <label>Owner revenue share (%)
+            <input name="owner_share_percentage" type="number" min="0.01" max="100" step="0.01"
+                value="{{ old('owner_share_percentage', $property->owner_id ? $property->owner_share_percentage : config('azari.owners.default_owner_share_percentage', 100)) }}">
+            <small>Only applies to verified owner-managed properties. Resavar-managed properties are set to 100% platform share. Existing booking terms cannot be rewritten by reassignment.</small>
+        </label>
+        @if($property->exists)
+            <p>Origin: <strong>{{ $property->owner_listing_id ? 'Approved owner submission' : 'Created by administration' }}</strong>.
+                {{ $property->owner_id ? 'Managed for a property owner.' : 'Resavar-managed.' }}
+                @if($property->ownerAgreement)
+                    Owner agreement: signed {{ $property->ownerAgreement->signed_at?->format('j M Y') }},
+                    version {{ $property->ownerAgreement->version }}.
+                @elseif($property->owner_listing_id)
+                    Owner agreement evidence is preserved with the original listing submission.
+                @endif
+            </p>
+        @endif
+    </fieldset>
+    @endif
+
     <label>Name<input name="name" value="{{ old('name', $property->name) }}" required></label>
     <label>Slug<input name="slug" value="{{ old('slug', $property->slug) }}"></label>
 
@@ -44,7 +78,7 @@
         </select>
     </label>
 
-    <label>Residence category
+    <label>Property category
         <select name="room_type_id" required>
             <option value="">Select category</option>
             @foreach($roomTypes as $roomType)
@@ -57,8 +91,8 @@
 
     <x-property-address-fields :source="$property" wrapper-class="admin-form-span-2" />
 
-    <label>Bedrooms<input name="bedrooms" type="number" min="0" value="{{ old('bedrooms', $property->bedrooms ?? 1) }}" required></label>
-    <label>Bathrooms<input name="bathrooms" type="number" min="1" value="{{ old('bathrooms', $property->bathrooms ?? 1) }}" required></label>
+    <label>Bedrooms (0 for hotel rooms)<input name="bedrooms" type="number" min="0" value="{{ old('bedrooms', $property->bedrooms ?? 1) }}" required></label>
+    <label>Bathrooms (0 allowed for shared facilities)<input name="bathrooms" type="number" min="0" value="{{ old('bathrooms', $property->bathrooms ?? 1) }}" required></label>
     <label>Maximum guests<input name="max_guests" type="number" min="1" value="{{ old('max_guests', $property->max_guests ?? 2) }}" required></label>
     <label>Minimum stay<input name="minimum_stay" type="number" min="1" value="{{ old('minimum_stay', $property->minimum_stay ?? 1) }}"></label>
     <label>Maximum stay<input name="maximum_stay" type="number" min="1" value="{{ old('maximum_stay', $property->maximum_stay) }}"></label>
@@ -77,13 +111,14 @@
         <textarea name="description">{{ old('description', $property->description) }}</textarea>
     </label>
 
-    <label>Cover image<input name="cover_image" type="file" accept="image/*"></label>
+    <label>Cover image<input name="cover_image" type="file" accept="image/*"><small>New uploads remain hidden until an administrator approves each image and its attribution.</small></label>
     <label>Gallery images<input name="gallery[]" type="file" accept="image/*" multiple></label>
     <label>Sort order<input name="sort_order" type="number" min="0" value="{{ old('sort_order', $property->sort_order ?? 0) }}"></label>
 
     <label><input type="checkbox" name="same_day_booking" value="1" @checked(old('same_day_booking', $property->same_day_booking))> Allow same-day booking</label>
     <label><input type="checkbox" name="is_featured" value="1" @checked(old('is_featured', $property->is_featured))> Featured</label>
     <label><input type="checkbox" name="is_published" value="1" @checked(old('is_published', $property->is_published))> Published</label>
+    <p class="admin-form-span-2">Publication of an owner-managed listing requires a signed owner agreement, eligible published room types, public rate plans, complete details and moderated photographs. Newly assigned properties must pass a separate review after the draft has been saved.</p>
 
     <fieldset class="admin-form-span-2">
         <legend>Amenities</legend>
@@ -104,6 +139,25 @@
 @if($property->exists && auth()->user()?->is_admin)
     @include('admin.properties.photo-review', ['property' => $property])
 @endif
+@if($property->exists)
+<section class="admin-card" aria-labelledby="property-audit" style="margin-top:24px">
+    <h2 id="property-audit">Source and change history</h2>
+    <p>{{ $property->ownerListing ? 'Originally approved from owner submission '.$property->ownerListing->reference : 'This property was created directly by administration.' }}</p>
+    <p>Owner assignment and publication decisions are logged separately from booking, payment and photo-review activity.</p>
+    @forelse($auditEvents as $event)
+        <div style="border-bottom:1px solid #CAD5E6;padding:12px 0">
+            <strong>{{ str_replace('_', ' ', $event->action) }}</strong>
+            <p>{{ $event->actor?->name ?? 'System' }} · {{ $event->created_at?->format('j M Y, H:i') }}</p>
+            @if($event->old_values || $event->new_values)
+                <small>Recorded fields: {{ implode(', ', array_unique([...array_keys($event->old_values ?? []), ...array_keys($event->new_values ?? [])])) }}</small>
+            @endif
+        </div>
+    @empty
+        <p>No property change history has been recorded yet.</p>
+    @endforelse
+</section>
+@endif
+
 @if($property->exists && auth()->user()?->is_admin)
     <section class="admin-card" aria-label="Independent property claim verification" style="margin-top:24px">
         <h2>Independent claim verification</h2>
