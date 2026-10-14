@@ -120,6 +120,8 @@ class InventoryController extends Controller
 
     public function propertyStore(Request $request): RedirectResponse
     {
+        abort_if((bool) config('reserva.accommodation_only', true), 410,
+            'Use the Resavar property editor and separate audited publication flow.');
         $property = Property::query()->create($this->propertyPayload($request));
         $property->amenities()->sync($request->input('amenities', []));
 
@@ -139,6 +141,8 @@ class InventoryController extends Controller
 
     public function propertyUpdate(Request $request, Property $property): RedirectResponse
     {
+        abort_if((bool) config('reserva.accommodation_only', true), 410,
+            'Use the Resavar property editor and separate audited publication flow.');
         $property->update($this->propertyPayload($request, $property));
         $property->amenities()->sync($request->input('amenities', []));
 
@@ -149,6 +153,8 @@ class InventoryController extends Controller
 
     public function propertyDelete(Property $property): RedirectResponse
     {
+        abort_if((bool) config('reserva.accommodation_only', true), 410,
+            'Use the Resavar property editor and separate audited publication flow.');
         foreach ($property->images as $image) {
             ResponsiveImage::deleteDerivatives($image->path);
             Storage::disk('public')->delete($image->path);

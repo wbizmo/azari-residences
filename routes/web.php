@@ -74,6 +74,12 @@ Route::prefix('azaridevadmin')->middleware(['auth.session', 'azari.staff'])->gro
     Route::resource('properties', AdminPropertyController::class)
         ->except(['show', 'destroy'])
         ->names('azari.admin.properties');
+    Route::post('/properties/{property}/publication/review', [\App\Http\Controllers\Admin\PropertyPublicationController::class, 'review'])
+        ->middleware(['azari.staff:administrator', 'azari.step-up', 'throttle:10,1'])->name('azari.admin.properties.publication.review');
+    Route::post('/properties/{property}/publication/publish', [\App\Http\Controllers\Admin\PropertyPublicationController::class, 'publish'])
+        ->middleware(['azari.staff:administrator', 'azari.step-up', 'throttle:10,1'])->name('azari.admin.properties.publication.publish');
+    Route::post('/properties/{property}/publication/unpublish', [\App\Http\Controllers\Admin\PropertyPublicationController::class, 'unpublish'])
+        ->middleware(['azari.staff:administrator', 'azari.step-up', 'throttle:10,1'])->name('azari.admin.properties.publication.unpublish');
     Route::patch('/properties/{property}/photos/{photo}', [PropertyPhotoModerationController::class, 'update'])
         ->middleware(['azari.staff:administrator', 'throttle:20,1'])
         ->name('azari.admin.properties.photos.update');

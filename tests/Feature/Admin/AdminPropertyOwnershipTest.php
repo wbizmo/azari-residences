@@ -19,6 +19,14 @@ final class AdminPropertyOwnershipTest extends TestCase
 {
     use RefreshDatabase;
 
+    private static function fakePng(string $name): UploadedFile
+    {
+        // Real 1px PNG: no GD extension required by PHP 8.4 CLI.
+        return UploadedFile::fake()->createWithContent($name, base64_decode(
+            'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9WlLSecAAAAASUVORK5CYII='
+        ));
+    }
+
     private function admin(): User
     {
         return User::factory()->create(['is_admin' => true, 'is_active' => true]);
@@ -140,7 +148,7 @@ final class AdminPropertyOwnershipTest extends TestCase
             $this->data([
                 'name' => 'Photo Moderation Home',
                 'owner_id' => $owner->id,
-                'cover_image' => UploadedFile::fake()->image('front.jpg'),
+                'cover_image' => self::fakePng('front.png'),
             ]))->assertSessionHasNoErrors();
 
         $property = Property::query()->where('name', 'Photo Moderation Home')->firstOrFail();
@@ -208,7 +216,7 @@ final class AdminPropertyOwnershipTest extends TestCase
                 'name' => $property->name,
                 'slug' => $property->slug,
                 'owner_id' => User::factory()->create()->id,
-                'cover_image' => UploadedFile::fake()->image('new.jpg'),
+                'cover_image' => self::fakePng('new.png'),
             ]))->assertSessionHasErrors('owner_id');
 
         Storage::disk('public')->assertExists('properties/covers/previous.jpg');

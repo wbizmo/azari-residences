@@ -174,6 +174,11 @@ class Property extends Model
         return $this->publicPhotoPaths()->first();
     }
 
+    public function publicationReviews(): HasMany
+    {
+        return $this->hasMany(PropertyPublicationReview::class);
+    }
+
     public function photoModerations(): HasMany
     {
         return $this->hasMany(PropertyPhotoModeration::class);

@@ -5,6 +5,7 @@ namespace App\Services\Owners;
 use App\Models\Booking;
 use App\Models\BookingHold;
 use App\Models\IdentityVerification;
+use App\Models\PropertyListingControlDocument;
 use App\Models\ListingAgreement;
 use App\Models\Property;
 use App\Models\PropertyPhotoModeration;
@@ -22,8 +23,19 @@ final class AdminPropertyOwnershipService
     {
         $owner = User::query()->find($ownerId);
 
+        // A person can be identity-verified through the existing provider or
+        // via Resavar staff's manual approval of signed legal-control proof.
+        // Do not force Dojah when verified documentary evidence already exists.
+        $hasManualProof = PropertyListingControlDocument::query()
+            ->whereHas('listing', fn ($query) => $query
+                ->where('user_id', $ownerId)->where('status', 'approved'))
+            ->where('status', 'verified')
+            ->where('reviewed_at', '>=', now()->subYear())
+            ->exists();
+
         if (! $owner || $owner->isStaff() || $owner->isSuspended()
-            || ! $owner->hasVerifiedEmail() || ! IdentityVerification::userIsVerified($ownerId)) {
+            || ! $owner->hasVerifiedEmail()
+            || (! IdentityVerification::userIsVerified($ownerId) && ! $hasManualProof)) {
             throw ValidationException::withMessages([
                 'owner_id' => 'Choose a verified, active guest account, not a staff or unverified account.',
             ]);
