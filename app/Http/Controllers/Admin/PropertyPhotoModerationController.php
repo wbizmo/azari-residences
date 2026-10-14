@@ -52,7 +52,10 @@ class PropertyPhotoModerationController extends Controller
                 'reviewed_by' => $request->user()->id,
                 'reviewed_at' => now(),
             ]);
-            if ($lockedProperty->is_published && $data['status'] !== 'approved') {
+            if ($lockedProperty->is_published &&
+                ($data['status'] !== 'approved'
+                    || $before['alt_text'] !== trim((string) ($data['alt_text'] ?? ''))
+                    || $before['attribution'] !== trim((string) ($data['attribution'] ?? '')))) {
                 // Rejecting an active photo immediately revokes publication.
                 $lockedProperty->forceFill([
                     'is_published' => false, 'is_featured' => false, 'status' => 'draft',
@@ -60,7 +63,7 @@ class PropertyPhotoModerationController extends Controller
                 $lockedProperty->publicationReviews()->create([
                     'reviewed_by' => $request->user()->id,
                     'status' => 'unpublished',
-                    'review_note' => 'Published photo revoked during moderation.',
+                    'review_note' => 'Photo rights, description or moderation status changed after publication.',
                 ]);
                 AuditLog::record('property.unpublished', $lockedProperty,
                     ['is_published' => true], ['is_published' => false]);
