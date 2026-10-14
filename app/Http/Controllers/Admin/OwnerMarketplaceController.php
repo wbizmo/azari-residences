@@ -150,9 +150,11 @@ class OwnerMarketplaceController extends Controller
             $payload['owner_share_percentage'] = 100.00;
             $payload['managed_for_owner'] = true;
             $payload['currency'] = strtoupper((string) ($payload['currency'] ?? config('azari.currency', 'USD')));
-            $payload['is_published'] = (bool) ($data['publish_now'] ?? false);
-            $payload['is_featured'] = (bool) ($data['feature_now'] ?? false);
-            $payload['status'] = ($data['publish_now'] ?? false) ? 'available' : 'draft';
+            // Staff approval is a private draft. Release requires separate
+            // quality and commercial publication review by an administrator.
+            $payload['is_published'] = false;
+            $payload['is_featured'] = false;
+            $payload['status'] = 'draft';
 
             foreach ($files as $image) {
                 $hash = PropertyPhotoModeration::pathHash($image);
@@ -199,7 +201,7 @@ class OwnerMarketplaceController extends Controller
                 $locked,
                 ['status' => $previousStatus],
                 ['status' => 'approved', 'property_id' => $property->id],
-                ['media_count' => $files->count(), 'published' => (bool) ($data['publish_now'] ?? false)]
+                ['media_count' => $files->count(), 'published' => false]
             );
         }, 3);
 
