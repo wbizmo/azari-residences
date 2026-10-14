@@ -12,11 +12,21 @@ use App\Services\Owners\ListingCompletenessService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Process;
 use Tests\TestCase;
 
 final class OwnerHotelOnboardingTest extends TestCase
 {
     use RefreshDatabase;
+
+    private static function fakePng(string $name): UploadedFile
+    {
+        // A genuine 1x1 PNG fixture. Do not require optional GD to test
+        // secure upload validation and property listing persistence.
+        return UploadedFile::fake()->createWithContent($name, base64_decode(
+            'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9WlLSecAAAAASUVORK5CYII='
+        ));
+    }
 
     private function owner(): User
     {
@@ -85,7 +95,7 @@ final class OwnerHotelOnboardingTest extends TestCase
         Storage::fake('public');
         $owner = $this->owner();
         $data = $this->fullData([
-            'cover_image' => UploadedFile::fake()->image('hotel.jpg'),
+            'cover_image' => self::fakePng('hotel.png'),
         ]);
 
         $this->actingAs($owner)->post(route('user.owner.listings.store'), $data)
@@ -102,6 +112,23 @@ final class OwnerHotelOnboardingTest extends TestCase
         Storage::disk('private')->assertExists($document->path);
         $this->assertStringStartsWith('owner-control/', $document->path);
         $this->assertNotContains($document->path, $listing->gallery ?? []);
+    }
+
+    public function test_missing_optional_image_worker_never_invalidates_persisted_application(): void
+    {
+        Storage::fake('private');
+        Storage::fake('public');
+        Process::fake(['*' => Process::result('', 'Image resize dependency is unavailable', 1)]);
+        $owner = $this->owner();
+
+        $this->actingAs($owner)->post(route('user.owner.listings.store'), $this->fullData([
+            'cover_image' => self::fakePng('front.png'),
+        ]))->assertRedirect()->assertSessionHasNoErrors();
+
+        $listing = PropertyListing::query()->where('user_id', $owner->id)->firstOrFail();
+        $this->assertSame('submitted', $listing->status);
+        Storage::disk('public')->assertExists($listing->cover_image);
+        $this->assertCount(1, $listing->controlDocuments);
     }
 
     public function test_hotel_cannot_submit_without_business_contact_and_proof(): void
@@ -155,13 +182,13 @@ final class OwnerHotelOnboardingTest extends TestCase
         Storage::fake('public');
         $owner = $this->owner();
         $data = $this->fullData([
-            'cover_image' => UploadedFile::fake()->image('first.jpg'),
+            'cover_image' => self::fakePng('first.png'),
         ]);
         $this->actingAs($owner)->post(route('user.owner.listings.store'), $data)->assertSessionHasNoErrors();
 
         $duplicate = $this->fullData([
             'name' => '  CEDAR HARBOUR HOTEL ',
-            'cover_image' => UploadedFile::fake()->image('second.jpg'),
+            'cover_image' => self::fakePng('second.png'),
             'location_id' => $data['location_id'],
             'room_type_id' => $data['room_type_id'],
         ]);
@@ -177,7 +204,7 @@ final class OwnerHotelOnboardingTest extends TestCase
         $owner = $this->owner();
         $admin = User::factory()->create(['is_admin' => true, 'is_active' => true]);
         $data = $this->fullData([
-            'cover_image' => UploadedFile::fake()->image('hotel.jpg'),
+            'cover_image' => self::fakePng('hotel.png'),
         ]);
         $this->actingAs($owner)->post(route('user.owner.listings.store'), $data)->assertSessionHasNoErrors();
         $listing = PropertyListing::query()->where('user_id', $owner->id)->firstOrFail();
@@ -205,7 +232,7 @@ final class OwnerHotelOnboardingTest extends TestCase
         $owner = $this->owner();
         $other = $this->owner();
         $this->actingAs($owner)->post(route('user.owner.listings.store'), $this->fullData([
-            'cover_image' => UploadedFile::fake()->image('front.jpg'),
+            'cover_image' => self::fakePng('front.png'),
         ]))->assertSessionHasNoErrors();
 
         $listing = PropertyListing::query()->where('user_id', $owner->id)->firstOrFail();
@@ -214,8 +241,12 @@ final class OwnerHotelOnboardingTest extends TestCase
         Storage::disk('public')->assertMissing($document->path);
         $this->actingAs($other)->get(route('user.owner.listings.control-documents.download', [$listing, $document]))
             ->assertNotFound();
-        $this->actingAs($owner)->get(route('user.owner.listings.control-documents.download', [$listing, $document]))
-            ->assertOk()->assertHeader('Cache-Control', 'private, no-store');
+        $response = $this->actingAs($owner)->get(route('user.owner.listings.control-documents.download', [$listing, $document]))
+            ->assertOk();
+        $cache = (string) $response->headers->get('Cache-Control');
+        $this->assertStringContainsString('private', $cache);
+        $this->assertStringContainsString('no-store', $cache);
+        $this->assertStringNotContainsString('public', $cache);
     }
 
     public function test_approval_requires_manual_private_control_document_review_for_new_submissions(): void
@@ -225,7 +256,7 @@ final class OwnerHotelOnboardingTest extends TestCase
         $owner = $this->owner();
         $admin = User::factory()->create(['is_admin' => true, 'is_active' => true]);
         $this->actingAs($owner)->post(route('user.owner.listings.store'), $this->fullData([
-            'cover_image' => UploadedFile::fake()->image('hotel.jpg'),
+            'cover_image' => self::fakePng('hotel.png'),
         ]))->assertSessionHasNoErrors();
         $listing = PropertyListing::query()->where('user_id', $owner->id)->firstOrFail();
 

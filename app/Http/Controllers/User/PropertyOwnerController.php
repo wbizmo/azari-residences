@@ -288,7 +288,18 @@ class PropertyOwnerController extends Controller
             }
         }
         foreach ($newPublicPaths as $path) {
-            GenerateResponsiveImageDerivatives::dispatch($path);
+            try {
+                GenerateResponsiveImageDerivatives::dispatch($path);
+            } catch (\Throwable $exception) {
+                // Optional responsive images must never turn a successfully
+                // saved owner application into a 500 or a duplicate retry.
+                // The original public image remains saved and reviewable.
+                Log::warning('Owner listing responsive image derivative failed', [
+                    'listing_id' => $saved->id,
+                    'path' => $path,
+                    'error' => $exception->getMessage(),
+                ]);
+            }
         }
 
         if ($intent === 'submit') {
