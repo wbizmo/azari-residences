@@ -10,6 +10,7 @@
         ['azari.admin.s56.calendar','event_available','Availability','availability.view'],
 
         ['azari.admin.properties.index','apartment','Properties','properties.view'],
+        ['azari.admin.supply-readiness.index','fact_check','Supply readiness','properties.view'],
         ['azari.admin.inventory.index','inventory_2','Inventory & categories','properties.view'],
         ['azari.admin.locations.index','location_on','Locations','properties.view'],
 
