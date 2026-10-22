@@ -8,3 +8,6 @@
 
 /* All standalone guest/staff entrance and recovery screens share this contract. */
 @import './reserva/auth-foundation.css';
+
+/* Shared Blade component styles; the last scoped layer owns UI primitives. */
+@import './reserva/ui-foundation.css';
