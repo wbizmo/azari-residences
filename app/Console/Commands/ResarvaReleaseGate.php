@@ -76,6 +76,30 @@ class ResarvaReleaseGate extends Command
             }
         }
 
+        // Also catch future endpoints added to a retired route namespace;
+        // an allowlisted sample alone would not detect a new unguarded URL.
+        foreach (Route::getRoutes() as $route) {
+            $name = (string) $route->getName();
+            foreach ([
+                'user.travel.',
+                'azari.admin.travel.',
+                'user.dining.',
+                'azari.admin.dining.',
+                'user.owner.channels.',
+                'azari.admin.channels.',
+                'channels.',
+                'partner.v1.',
+                'travel.supplier.',
+            ] as $retiredPrefix) {
+                if (str_starts_with($name, $retiredPrefix)) {
+                    if (! in_array('resavar.non-accommodation', $route->gatherMiddleware(), true)) {
+                        return false;
+                    }
+                    break;
+                }
+            }
+        }
+
         foreach ([
             'user.archive.travel.index',
             'user.archive.travel.show',
