@@ -4,6 +4,7 @@ namespace App\Services\PhaseThree;
 use App\Models\AccommodationType;
 use App\Models\Booking;
 use Carbon\CarbonImmutable;
+use App\Support\LocalDate;
 use Illuminate\Validation\ValidationException;
 
 /** Evidence-based suggestions only; never changes existing prices or confirmed invoices. */
@@ -12,7 +13,7 @@ final class OwnerYieldAdvisor
     public function preview(AccommodationType $type, CarbonImmutable $from, CarbonImmutable $to, int $minimum = 0, int $maximum = 0): array
     {
         $days = (int) $from->diffInDays($to) + 1;
-        if ($to->lessThan($from) || $days > 31 || $from->lessThan(CarbonImmutable::today())) {
+        if ($to->lessThan($from) || $days > 31 || $from->lessThan(CarbonImmutable::today(LocalDate::propertyTimezone($type->property)))) {
             throw ValidationException::withMessages(['date'=>'Choose between 1 and 31 future dates.']);
         }
         $capacity = max(1, (int) $type->total_inventory);
