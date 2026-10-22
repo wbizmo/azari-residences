@@ -172,7 +172,10 @@ class CommercialInventoryManager
         $excessOverride = InventoryDate::query()
             ->where('accommodation_type_id', $type->getKey())
             ->whereDate('date', '>=', $start->toDateString())
-            ->where('sellable_inventory', '>', $proposed)
+            ->where(function ($query) use ($proposed): void {
+                $query->where('sellable_inventory', '>', $proposed)
+                    ->orWhere('maintenance_inventory', '>', $proposed);
+            })
             ->orderBy('date')
             ->first(['date']);
         if ($excessOverride) {
