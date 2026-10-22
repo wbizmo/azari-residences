@@ -3,6 +3,8 @@
 namespace Tests\Feature\Architecture;
 
 use App\Console\Commands\ResarvaReleaseGate;
+use App\Jobs\SyncChannelConnection;
+use App\Services\Channels\ChannelSyncService;
 use Illuminate\Support\Facades\Route;
 use ReflectionMethod;
 use Tests\TestCase;
@@ -76,6 +78,15 @@ final class AccommodationOnlyScopeTest extends TestCase
         Route::get('/__scope-regression-test', static fn () => 'not allowed')
             ->name('user.travel.unprotected-new-endpoint');
         self::assertFalse($method->invoke($command), 'A newly introduced travel route must not bypass retirement.');
+    }
+
+    public function test_pre_cutover_channel_jobs_and_manual_sync_do_not_contact_partners(): void
+    {
+        $sync = $this->mock(ChannelSyncService::class);
+        $sync->shouldNotReceive('sync');
+
+        (new SyncChannelConnection(999999))->handle($sync);
+        $this->artisan('azari:sync-channels')->assertExitCode(0);
     }
 
     public function test_travel_supplier_webhooks_and_partner_api_are_gone_without_touching_booking_callbacks(): void
