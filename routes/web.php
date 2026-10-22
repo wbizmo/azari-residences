@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\CommercialInventoryController;
 use App\Http\Controllers\Admin\ContentBlockController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\PropertyController as AdminPropertyController;
+use App\Http\Controllers\Admin\SupplyReadinessController;
 use App\Http\Controllers\Admin\PropertyClaimVerificationController;
 use App\Http\Controllers\Admin\PropertyPhotoModerationController;
 use App\Http\Controllers\Admin\SiteSettingController;
@@ -70,6 +71,10 @@ Route::prefix('azaridevadmin')->middleware(['auth.session', 'azari.staff'])->gro
     Route::put('/content/{contentBlock}', [ContentBlockController::class, 'update'])
         ->middleware('azari.staff:administrator')
         ->name('azari.admin.content.update');
+
+    Route::get('/supply-readiness', SupplyReadinessController::class)
+        ->middleware('azari.staff:administrator')
+        ->name('azari.admin.supply-readiness.index');
 
     Route::resource('properties', AdminPropertyController::class)
         ->except(['show', 'destroy'])
