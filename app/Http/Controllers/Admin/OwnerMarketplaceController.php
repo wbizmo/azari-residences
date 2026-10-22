@@ -322,10 +322,18 @@ class OwnerMarketplaceController extends Controller
         ]);
     }
 
-    public function showWithdrawal(WithdrawalRequest $withdrawal): View
+    public function showWithdrawal(Request $request, WithdrawalRequest $withdrawal): \Illuminate\Http\Response
     {
         $withdrawal->load(['user.ownerPayoutProfile', 'processedBy']);
-        return view('admin.owner-withdrawals.show', compact('withdrawal'));
+        if ($withdrawal->gateway === 'manual'
+            && $request->user()?->hasPermission('owner-withdrawals.process')
+            && (int) session('auth.password_confirmed_at', 0) >= now()->subMinutes(15)->timestamp) {
+            AuditLog::record('owner_withdrawal.receiving_details_viewed', $withdrawal,
+                [], [], ['sensitive_details_viewed' => true], $request->user()->getKey());
+        }
+        return response()->view('admin.owner-withdrawals.show', compact('withdrawal'))
+            ->header('Cache-Control', 'private, no-store, max-age=0')
+            ->header('Pragma', 'no-cache');
     }
 
     public function approveManualWithdrawal(
