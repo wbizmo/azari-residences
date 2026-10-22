@@ -34,6 +34,7 @@ class OwnerBalanceService
             ->where('currency', strtoupper($currency))
             ->whereIn('status', [
                 'pending',
+                'approved',
                 'processing',
                 'provider_sent',
                 'reconciliation_required',
