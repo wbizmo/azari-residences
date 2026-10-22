@@ -16,6 +16,9 @@ class WithdrawalRequest extends Model
         return [
             'amount' => 'decimal:2',
             'destination_snapshot' => 'array',
+            'receiving_details' => 'encrypted',
+            'manual_payment_evidence' => 'encrypted',
+            'approved_at' => 'datetime',
             'provider_response' => 'array',
             'requested_at' => 'datetime',
             'processing_started_at' => 'datetime',
@@ -54,7 +57,8 @@ class WithdrawalRequest extends Model
 
     public function isSafelyRetryable(): bool
     {
-        return $this->status === 'failed'
+        return $this->gateway !== 'manual'
+            && $this->status === 'failed'
             && blank($this->provider_reference)
             && blank($this->provider_sent_at)
             && blank($this->reconciliation_required_at);

@@ -27,7 +27,7 @@ class OwnerLedgerReconciliationService
 
         $pending = round((float) WithdrawalRequest::query()
             ->where('user_id', $owner->getKey())->where('currency', $currency)
-            ->whereIn('status', ['pending', 'processing', 'provider_sent', 'reconciliation_required'])
+            ->whereIn('status', ['pending', 'approved', 'processing', 'provider_sent', 'reconciliation_required'])
             ->sum('amount'), 2);
 
         $disputed = round((float) PaymentDispute::query()

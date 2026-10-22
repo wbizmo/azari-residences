@@ -9,6 +9,7 @@ use App\Models\Amenity;
 use App\Models\ListingAgreement;
 use App\Models\Location;
 use App\Models\OwnerPayoutProfile;
+use App\Models\OwnerLedgerEntry;
 use App\Models\PropertyListing;
 use App\Models\AuditLog;
 use App\Notifications\OwnerListingStatusNotification;
@@ -329,70 +330,65 @@ class PropertyOwnerController extends Controller
 
     public function withdrawals(Request $request, OwnerBalanceService $balances): View
     {
-        $currency = (string) config('azari.currency', 'USD');
-
+        $currencies = OwnerLedgerEntry::query()
+            ->where('user_id', $request->user()->getKey())
+            ->where('direction', 'credit')
+            ->distinct()->pluck('currency')
+            ->map(fn ($currency) => strtoupper((string) $currency))->unique()
+            ->filter(fn ($currency) => preg_match('/^[A-Z]{3}$/D', $currency)
+                && \App\Support\MinorMoney::digits($currency) === 2)
+            ->mapWithKeys(fn ($currency) => [$currency => $balances->available($request->user(), $currency)])
+            ->filter(fn ($available) => $available > 0)->all();
+        $currency = array_key_first($currencies) ?: (string) config('azari.currency', 'USD');
         return view('user.owner.withdrawals', [
             'withdrawals' => $request->user()->withdrawalRequests()->latest()->paginate(10)->withQueryString(),
-            'profile' => $request->user()->ownerPayoutProfile ?: new OwnerPayoutProfile,
             'currency' => $currency,
-            'available' => $balances->available($request->user(), $currency),
+            'available' => $currencies[$currency] ?? 0,
+            'availableCurrencies' => $currencies,
             'minimum' => (float) SiteSetting::valueFor('owner_withdrawal_minimum', 50),
-            'paypalEnabled' => filter_var(SiteSetting::valueFor('owner_paypal_enabled', '0'), FILTER_VALIDATE_BOOL),
-            'stripeEnabled' => filter_var(SiteSetting::valueFor('owner_stripe_enabled', '0'), FILTER_VALIDATE_BOOL),
             'withdrawalOpen' => $this->withdrawalOpen(),
+            'requestToken' => (string) Str::uuid(),
         ]);
     }
+
 
     public function updatePayoutProfile(Request $request): RedirectResponse
     {
-        $data = $request->validate([
-            'preferred_gateway' => ['required', Rule::in(['paypal', 'stripe'])],
-            'paypal_recipient' => ['nullable', 'string', 'max:255'],
-            'paypal_recipient_type' => ['nullable', Rule::in(['EMAIL', 'PHONE', 'PAYPAL_ID'])],
-            'stripe_connected_account_id' => ['nullable', 'string', 'max:255', 'regex:/^acct_[A-Za-z0-9]+$/'],
-        ]);
-
-        if ($data['preferred_gateway'] === 'paypal' && blank($data['paypal_recipient'] ?? null)) {
-            return back()->withErrors(['paypal_recipient' => 'Enter the PayPal payout recipient.']);
-        }
-        if ($data['preferred_gateway'] === 'stripe' && blank($data['stripe_connected_account_id'] ?? null)) {
-            return back()->withErrors(['stripe_connected_account_id' => 'Enter the Stripe connected account ID.']);
-        }
-
-        $request->user()->ownerPayoutProfile()->updateOrCreate([], $data + ['is_verified' => false]);
-        return back()->with('status', 'Withdrawal destination saved.');
+        // Retain legacy gateway profiles for historical financial audit, but
+        // never permit their modification for accommodation-only withdrawals.
+        abort(410, 'Automated payout profiles are retired. Enter receiving details with each manual request.');
     }
+
 
     public function requestWithdrawal(Request $request, OwnerWithdrawalService $withdrawals): RedirectResponse
     {
         abort_unless($this->withdrawalOpen(), 422, 'Withdrawals are not available today.');
-
-
-        $currency = (string) config('azari.currency', 'USD');
-        $minimum = (float) SiteSetting::valueFor('owner_withdrawal_minimum', 50);
-        $profile = $request->user()->ownerPayoutProfile;
-
-        abort_unless($profile, 422, 'Configure your payout destination first.');
-        abort_unless($profile->is_verified, 422, 'Your payout destination is awaiting Resavar verification.');
-
-        $gatewayEnabled = $profile->preferred_gateway === 'paypal'
-            ? filter_var(SiteSetting::valueFor('owner_paypal_enabled', '0'), FILTER_VALIDATE_BOOL)
-            : filter_var(SiteSetting::valueFor('owner_stripe_enabled', '0'), FILTER_VALIDATE_BOOL);
-        abort_unless($gatewayEnabled, 422, 'The selected payout gateway is currently unavailable.');
+        $currencies = OwnerLedgerEntry::query()
+            ->where('user_id', $request->user()->getKey())
+            ->where('direction', 'credit')->distinct()->pluck('currency')
+            ->map(fn ($currency) => strtoupper((string) $currency))->unique()->all();
 
         $data = $request->validate([
-            'amount' => ['required', 'numeric', 'min:'.$minimum],
+            'currency' => ['required', 'string', 'size:3', Rule::in($currencies)],
+            'amount' => ['required', 'string', 'regex:/^[0-9]{1,12}(\.[0-9]{1,2})?$/D'],
+            'receiving_details' => ['required', 'string', 'min:10', 'max:2000'],
             'owner_note' => ['nullable', 'string', 'max:1000'],
+            'request_token' => ['required', 'uuid'],
         ]);
 
         try {
-            $withdrawals->request($request->user(), $profile, $currency, (float) $data['amount'], $data['owner_note'] ?? null);
-        } catch (\RuntimeException $exception) {
-            return back()->withErrors(['amount' => $exception->getMessage()])->withInput();
+            $withdrawals->requestManual(
+                $request->user(), $data['currency'], $data['amount'],
+                $data['receiving_details'], $data['owner_note'] ?? null, $data['request_token']
+            );
+        } catch (\RuntimeException|\Illuminate\Validation\ValidationException $exception) {
+            return back()->withErrors(['amount' => $exception->getMessage()])
+                ->withInput($request->except(['receiving_details']));
         }
-
-        return back()->with('status', 'Withdrawal request submitted and the amount has been reserved.');
+        return redirect()->route('user.owner.withdrawals')
+            ->with('status', 'Manual withdrawal submitted. Funds reserved pending staff review; no transfer has been sent.');
     }
+
 
     private function currentAgreement(Request $request): ?ListingAgreement
     {

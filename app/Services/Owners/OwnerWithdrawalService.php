@@ -2,10 +2,13 @@
 
 namespace App\Services\Owners;
 
+use App\Models\AuditLog;
 use App\Models\OwnerLedgerEntry;
 use App\Models\OwnerPayoutProfile;
 use App\Models\User;
 use App\Models\WithdrawalRequest;
+use App\Models\SiteSetting;
+use App\Support\MinorMoney;
 use App\Services\Withdrawals\WithdrawalGatewayManager;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -75,8 +78,194 @@ class OwnerWithdrawalService
         }, 5);
     }
 
+
+    /**
+     * A manual request reserves only the owner's already-posted funds. Receiving
+     * details are encrypted by the model; no provider dispatch is attempted.
+     */
+    public function requestManual(
+        User $user,
+        string $currency,
+        string $amount,
+        string $receivingDetails,
+        ?string $ownerNote = null,
+        ?string $requestToken = null
+    ): WithdrawalRequest {
+        $currency = strtoupper(trim($currency));
+        $receivingDetails = trim($receivingDetails);
+        if (! preg_match('/^[A-Z]{3}$/D', $currency) || MinorMoney::digits($currency) !== 2) {
+            throw new RuntimeException('This currency is not supported for manual withdrawal yet.');
+        }
+        if (mb_strlen($receivingDetails) < 10 || mb_strlen($receivingDetails) > 2000) {
+            throw new RuntimeException('Enter receiving account details (10 to 2000 characters).');
+        }
+        $minor = MinorMoney::toMinor($amount, $currency);
+        $minimum = MinorMoney::toMinor((string) SiteSetting::valueFor('owner_withdrawal_minimum', '50'), $currency);
+        if ($minor <= 0 || $minor < $minimum) {
+            throw new RuntimeException('The requested amount is below the minimum for this currency.');
+        }
+        $token = $requestToken ?: (string) Str::uuid();
+        if (! Str::isUuid($token)) {
+            throw new RuntimeException('Invalid withdrawal request token.');
+        }
+        $idempotencyKey = 'owner-manual-'.$user->getKey().'-'.$token;
+
+        return DB::transaction(function () use (
+            $user, $currency, $minor, $receivingDetails, $ownerNote, $idempotencyKey
+        ): WithdrawalRequest {
+            // Serialize requests on the same owner and recheck all balances
+            // with the lock held; two requests cannot reserve the same funds.
+            $lockedUser = User::query()->whereKey($user->getKey())
+                ->when(DB::connection()->getDriverName() !== 'sqlite',
+                    fn ($q) => $q->lockForUpdate())->firstOrFail();
+
+            $prior = WithdrawalRequest::query()
+                ->where('user_id', $lockedUser->getKey())
+                ->where('idempotency_key', $idempotencyKey)->first();
+            if ($prior) {
+                return $prior;
+            }
+            if (! OwnerLedgerEntry::query()
+                ->where('user_id', $lockedUser->getKey())
+                ->where('currency', $currency)
+                ->where('direction', 'credit')->exists()) {
+                throw new RuntimeException('No posted owner earnings are available in this currency.');
+            }
+            $available = MinorMoney::toMinor(
+                number_format($this->balances->available($lockedUser, $currency), 2, '.', ''),
+                $currency
+            );
+            if ($minor > $available) {
+                throw new RuntimeException('The requested amount exceeds the settled, unreserved balance.');
+            }
+            $created = WithdrawalRequest::query()->create([
+                'reference' => $this->reference(),
+                'idempotency_key' => $idempotencyKey,
+                'user_id' => $lockedUser->getKey(),
+                'gateway' => 'manual',
+                'currency' => $currency,
+                'amount' => number_format($minor / 100, 2, '.', ''),
+                'status' => 'pending',
+                'destination_snapshot' => ['method' => 'manual', 'details' => 'Stored separately, encrypted'],
+                'receiving_details' => $receivingDetails,
+                'owner_note' => $ownerNote,
+                'requested_at' => now(),
+            ]);
+            AuditLog::record('owner_withdrawal.manual_requested', $created, [],
+                ['status' => 'pending', 'currency' => $currency, 'amount' => $created->amount],
+                ['receiving_details' => '[REDACTED]'], $lockedUser->getKey());
+            return $created;
+        }, 5);
+    }
+
+    public function approveManual(WithdrawalRequest $withdrawal, User $reviewer, string $note): WithdrawalRequest
+    {
+        return DB::transaction(function () use ($withdrawal, $reviewer, $note): WithdrawalRequest {
+            $owner = User::query()->whereKey($withdrawal->user_id)
+                ->when(DB::connection()->getDriverName() !== 'sqlite',
+                    fn ($q) => $q->lockForUpdate())->firstOrFail();
+            $locked = $this->lock($withdrawal);
+            if ($locked->gateway !== 'manual' || $locked->status !== 'pending') {
+                throw new RuntimeException('Only pending manual withdrawals may be approved.');
+            }
+            if (blank($locked->receiving_details)) {
+                throw new RuntimeException('Missing encrypted receiving instructions.');
+            }
+            $otherReservations = max(0, $this->balances->pending($owner, $locked->currency) - (float) $locked->amount);
+            $payable = $this->balances->balance($owner, $locked->currency)
+                - $otherReservations - $this->balances->disputeHeld($owner, $locked->currency);
+            if ($payable + 0.001 < (float) $locked->amount) {
+                throw new RuntimeException('A balance adjustment or dispute now prevents approval.');
+            }
+            $locked->update([
+                'status' => 'approved',
+                'approved_by' => $reviewer->getKey(),
+                'approved_at' => now(),
+                'admin_note' => $note,
+                'processed_by' => $reviewer->getKey(),
+            ]);
+            AuditLog::record('owner_withdrawal.manual_approved', $locked,
+                ['status' => 'pending'], ['status' => 'approved'], [], $reviewer->getKey());
+            return $locked->refresh();
+        }, 5);
+    }
+
+    public function markManualPaid(
+        WithdrawalRequest $withdrawal,
+        User $payer,
+        string $transferReference,
+        string $evidence
+    ): WithdrawalRequest {
+        $transferReference = trim($transferReference);
+        $evidence = trim($evidence);
+        if ($transferReference === '' || mb_strlen($evidence) < 10) {
+            throw new RuntimeException('A bank transfer reference and independent payment evidence are required.');
+        }
+        return DB::transaction(function () use ($withdrawal, $payer, $transferReference, $evidence): WithdrawalRequest {
+            // Same owner/withdrawal lock ordering used by approval and rejection.
+            User::query()->whereKey($withdrawal->user_id)
+                ->when(DB::connection()->getDriverName() !== 'sqlite',
+                    fn ($q) => $q->lockForUpdate())->firstOrFail();
+            $locked = $this->lock($withdrawal);
+            if ($locked->gateway !== 'manual' || $locked->status !== 'approved') {
+                throw new RuntimeException('Only approved, unpaid manual withdrawals can be marked paid.');
+            }
+            if ((int) $locked->approved_by === (int) $payer->getKey()) {
+                throw new RuntimeException('Payment recording must be completed by a different finance reviewer.');
+            }
+            if (OwnerLedgerEntry::query()->where('withdrawal_request_id', $locked->id)->exists()) {
+                throw new RuntimeException('This withdrawal already has a ledger debit.');
+            }
+            if (WithdrawalRequest::query()->where('gateway', 'manual')
+                ->where('provider_reference', $transferReference)
+                ->whereKeyNot($locked->getKey())->exists()) {
+                throw new RuntimeException('This bank transfer reference has already been recorded.');
+            }
+            $locked->update([
+                'provider_reference' => $transferReference,
+                'manual_payment_evidence' => $evidence,
+                'processed_by' => $payer->getKey(),
+            ]);
+            $this->recordDebit($locked, $transferReference);
+            $locked->update(['status' => 'processed', 'processed_at' => now()]);
+            AuditLog::record('owner_withdrawal.manual_paid', $locked,
+                ['status' => 'approved'], ['status' => 'processed'],
+                ['reference' => $transferReference, 'evidence' => '[REDACTED]'], $payer->getKey());
+            return $locked->refresh();
+        }, 5);
+    }
+
+    public function rejectManual(WithdrawalRequest $withdrawal, User $reviewer, string $reason): WithdrawalRequest
+    {
+        return DB::transaction(function () use ($withdrawal, $reviewer, $reason): WithdrawalRequest {
+            User::query()->whereKey($withdrawal->user_id)
+                ->when(DB::connection()->getDriverName() !== 'sqlite',
+                    fn ($q) => $q->lockForUpdate())->firstOrFail();
+            $locked = $this->lock($withdrawal);
+            if ($locked->gateway !== 'manual' || ! in_array($locked->status, ['pending', 'approved'], true)) {
+                throw new RuntimeException('Only unpaid manual withdrawals can be rejected.');
+            }
+            if (OwnerLedgerEntry::query()->where('withdrawal_request_id', $locked->id)->exists()) {
+                throw new RuntimeException('The funds have already been debited.');
+            }
+            $locked->update([
+                'status' => 'rejected',
+                'rejection_reason' => $reason,
+                'processed_by' => $reviewer->getKey(),
+                'rejected_at' => now(),
+            ]);
+            AuditLog::record('owner_withdrawal.manual_rejected', $locked,
+                ['status' => $withdrawal->status], ['status' => 'rejected'],
+                ['reason_recorded' => true], $reviewer->getKey());
+            return $locked->refresh();
+        }, 5);
+    }
+
     public function process(WithdrawalRequest $withdrawal, User $processor, ?string $adminNote = null): WithdrawalRequest
     {
+        if ((bool) config('reserva.accommodation_only', true) || $withdrawal->gateway === 'manual') {
+            throw new RuntimeException('Automated owner payout dispatch is disabled; use manual withdrawal review.');
+        }
         $claimed = DB::transaction(function () use ($withdrawal, $processor, $adminNote): WithdrawalRequest {
             $locked = $this->lock($withdrawal);
 
@@ -303,7 +492,9 @@ class OwnerWithdrawalService
                 'amount' => $withdrawal->amount,
                 'currency' => $withdrawal->currency,
                 'reference' => 'DEBIT-'.Str::upper(Str::random(14)),
-                'description' => 'Withdrawal '.$withdrawal->reference.' processed through '.ucfirst($withdrawal->gateway).'.',
+                'description' => $withdrawal->gateway === 'manual'
+                    ? 'Manually paid owner withdrawal '.$withdrawal->reference.'.'
+                    : 'Withdrawal '.$withdrawal->reference.' processed through '.ucfirst($withdrawal->gateway).'.',
                 'metadata' => ['provider_reference' => $providerReference],
             ]
         );
