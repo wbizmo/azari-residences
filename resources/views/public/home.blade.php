@@ -324,6 +324,15 @@
                         </p>
                     </noscript>
                 </form>
+                <div class="resavar-home-trust-strip">
+                    <span><span class="material-symbols-outlined" aria-hidden="true">event_available</span> Date-specific availability and rates</span>
+                    <span><span class="material-symbols-outlined" aria-hidden="true">shield</span> Accommodation-only search</span>
+                    @if(Route::has('public.list-property'))
+                        <a href="{{ route('public.list-property') }}">Own a property? List with Resavar
+                            <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+                        </a>
+                    @endif
+                </div>
             </div>
         </div>
     </section>
@@ -418,7 +427,8 @@
                         <a class="reserva-new-card" href="{{ route('properties.show', $property) }}">
                             <span class="reserva-new-card__media">
                                 @if($property->publicCoverImage())
-                                    <img src="{{ Storage::url($property->publicCoverImage()) }}" alt="{{ $property->name }}" loading="lazy" decoding="async">
+                                    <x-public.responsive-image :path="$property->publicCoverImage()" :alt="$property->name"
+                                        width="640" height="400" sizes="(max-width: 760px) 100vw, 50vw" />
                                 @else
                                     <img src="{{ asset('images/azari-residence-fallback.png') }}" alt="" loading="lazy" decoding="async">
                                 @endif
@@ -499,11 +509,13 @@
                             class="residence-image"
                         >
                             @if($property->publicCoverImage())
-                                <img
-                                    src="{{ Storage::url($property->publicCoverImage()) }}"
-                                    alt="{{ $property->name }}"
-                                    loading="lazy"
-                                >
+                                <x-public.responsive-image
+                                    :path="$property->publicCoverImage()"
+                                    :alt="$property->name"
+                                    width="640"
+                                    height="400"
+                                    sizes="(max-width: 680px) 100vw, (max-width: 1100px) 50vw, 33vw"
+                                />
                             @else
                                 <div class="residence-image-placeholder">
                                     <span
