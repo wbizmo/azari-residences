@@ -24,7 +24,11 @@ final class ReportAccommodationSupply extends Command
     public function handle(SupplyReadinessService $service): int
     {
         $value = $this->option('check-in') ?: now()->addDays(2)->toDateString();
-        $parsed = CarbonImmutable::createFromFormat('!Y-m-d', (string) $value);
+        try {
+            $parsed = CarbonImmutable::createFromFormat('!Y-m-d', (string) $value);
+        } catch (\Throwable) {
+            $parsed = false;
+        }
         if (! $parsed || $parsed->format('Y-m-d') !== $value || $parsed->isBefore(today())) {
             $this->error('Provide a valid future or current check-in date in YYYY-MM-DD format.');
             return self::FAILURE;
