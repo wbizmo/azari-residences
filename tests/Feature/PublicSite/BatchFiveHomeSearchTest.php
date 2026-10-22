@@ -71,6 +71,13 @@ final class BatchFiveHomeSearchTest extends TestCase
                 'label' => 'Sunny Bay Hotel'])
             ->assertDontSee('Sunny Bay Blocked')
             ->assertDontSee('Sunny Bay Private');
+
+        $available->update(['is_published' => false, 'status' => 'draft']);
+        $this->getJson(route('destinations.suggest', ['q' => 'Sunny Bay']))
+            ->assertOk()
+            ->assertHeader('Cache-Control', 'private, no-store')
+            ->assertDontSee('Sunny Bay Hotel');
+
     }
 
     public function test_homepage_query_preserves_destination_dates_and_guest_counts_in_canonical_results_url(): void
