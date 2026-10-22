@@ -2,7 +2,9 @@
 
 namespace Tests\Feature\Architecture;
 
+use App\Console\Commands\ResarvaReleaseGate;
 use Illuminate\Support\Facades\Route;
+use ReflectionMethod;
 use Tests\TestCase;
 
 final class AccommodationOnlyScopeTest extends TestCase
@@ -20,6 +22,55 @@ final class AccommodationOnlyScopeTest extends TestCase
             self::assertNotNull($route, "Preserve booking and payment route {$name}.");
             self::assertNotContains('resavar.non-accommodation', $route->gatherMiddleware(), $name);
         }
+    }
+
+    public function test_production_scope_cannot_be_reenabled_by_a_legacy_environment_flag(): void
+    {
+        $original = [];
+        foreach (['APP_ENV', 'RESAVAR_ACCOMMODATION_ONLY'] as $name) {
+            $original[$name] = [
+                'environment' => array_key_exists($name, $_ENV) ? $_ENV[$name] : null,
+                'server' => array_key_exists($name, $_SERVER) ? $_SERVER[$name] : null,
+                'process' => getenv($name),
+            ];
+        }
+
+        try {
+            $_ENV['APP_ENV'] = $_SERVER['APP_ENV'] = 'production';
+            $_ENV['RESAVAR_ACCOMMODATION_ONLY'] = $_SERVER['RESAVAR_ACCOMMODATION_ONLY'] = 'false';
+            putenv('APP_ENV=production');
+            putenv('RESAVAR_ACCOMMODATION_ONLY=false');
+
+            $productionConfiguration = require config_path('reserva.php');
+            self::assertTrue($productionConfiguration['accommodation_only']);
+        } finally {
+            foreach ($original as $name => $sources) {
+                if ($sources['environment'] === null) {
+                    unset($_ENV[$name]);
+                } else {
+                    $_ENV[$name] = $sources['environment'];
+                }
+                if ($sources['server'] === null) {
+                    unset($_SERVER[$name]);
+                } else {
+                    $_SERVER[$name] = $sources['server'];
+                }
+                $sources['process'] === false
+                    ? putenv($name)
+                    : putenv($name.'='.$sources['process']);
+            }
+        }
+    }
+
+    public function test_release_gate_rejects_legacy_activation_and_preserves_read_only_archives(): void
+    {
+        $method = new ReflectionMethod(ResarvaReleaseGate::class, 'legacyScopeSafe');
+        $command = new ResarvaReleaseGate;
+
+        self::assertTrue($method->invoke($command), 'Retired routes and background jobs must remain inaccessible.');
+
+        config()->set('reserva.accommodation_only', false);
+        self::assertFalse($method->invoke($command), 'A legacy product opt-in must fail the current release gate.');
     }
 
     public function test_travel_supplier_webhooks_and_partner_api_are_gone_without_touching_booking_callbacks(): void
