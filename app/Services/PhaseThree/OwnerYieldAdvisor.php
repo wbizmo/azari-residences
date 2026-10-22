@@ -12,7 +12,7 @@ final class OwnerYieldAdvisor
     public function preview(AccommodationType $type, CarbonImmutable $from, CarbonImmutable $to, int $minimum = 0, int $maximum = 0): array
     {
         $days = (int) $from->diffInDays($to) + 1;
-        if ($to->lessThan($from) || $days > 31 || $from->isPast()) {
+        if ($to->lessThan($from) || $days > 31 || $from->lessThan(CarbonImmutable::today())) {
             throw ValidationException::withMessages(['date'=>'Choose between 1 and 31 future dates.']);
         }
         $capacity = max(1, (int) $type->total_inventory);
@@ -59,8 +59,31 @@ final class OwnerYieldAdvisor
             in_array($connection->status, ['disconnected_pending_reconciliation','conflict'], true)
             || ($connection->fail_closed
                 && app(\App\Services\Channels\ChannelAvailabilityService::class)->isStale($connection)));
+        // Suggestions are never allowed to overwrite an owner's explicit
+        // manual nightly price or price a closed or sold-out calendar. Reuse
+        // the booking engine's authoritative remaining-by-night numbers,
+        // including current holds, maintenance and historic channel blocks.
+        $dateOverrides = \App\Models\InventoryDate::query()
+            ->where('accommodation_type_id', $type->id)
+            ->whereBetween('date', [$from->toDateString(), $to->toDateString()])
+            ->where(fn ($query) => $query->whereNotNull('price_override')
+                ->orWhere('closed_to_arrival', true)
+                ->orWhere('closed_to_departure', true))
+            ->exists();
+        $rateStops = \App\Models\DailyRate::query()
+            ->where('accommodation_type_id', $type->id)
+            ->whereBetween('date', [$from->toDateString(), $to->toDateString()])
+            ->where('stop_sell', true)->exists();
+        $remaining = app(\App\Services\Bookings\AzariAvailabilityEngine::class)
+            ->remainingByDate($type, $from, $to->addDay());
+        $unavailable = $remaining->count() !== $days
+            || $remaining->contains(fn ($rooms) => (int) $rooms < 1);
         $occupancy = min(1, $nights / ($capacity * $days));
-        $eligible = ! $oversold && ! $closed && ! $unsafeChannel && $bookings->count() >= 5 && $days >= 7;
+        $eligible = (int) $type->total_inventory > 0
+            && (bool) $type->is_active && (bool) $type->is_published
+            && ! $oversold && ! $closed && ! $dateOverrides
+            && ! $rateStops && ! $unavailable && ! $unsafeChannel
+            && $bookings->count() >= 5 && $days >= 7;
         $multiplier = $occupancy >= 0.8 ? 1.05 : ($occupancy <= 0.3 ? 0.97 : 1.0);
         return [
             'date_from'=>$from->toDateString(), 'date_to'=>$to->toDateString(),
@@ -73,7 +96,10 @@ final class OwnerYieldAdvisor
                 : ($oversold ? 'An individual calendar date is overcommitted; reconcile inventory first.'
                     : ($closed ? 'Closed or maintenance inventory cannot receive automated rate advice.'
                     : ($unsafeChannel ? 'An external calendar is stale or unresolved; reconcile it before approving rates.'
-                    : 'Insufficient confirmed demand evidence; no price recommendation.'))),
+                    : ($dateOverrides || $rateStops || $unavailable || ! $type->is_active
+                        || ! $type->is_published || $type->total_inventory < 1
+                        ? 'Calendar closures, owner overrides, insufficient inventory or inactive room types prohibit yield suggestions.'
+                        : 'Insufficient confirmed demand evidence; no price recommendation.')))),
             'applied'=>false,
         ];
     }
