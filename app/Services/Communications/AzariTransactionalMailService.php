@@ -762,7 +762,9 @@ class AzariTransactionalMailService
             'Withdrawal '.$withdrawal->reference.' received',
             [
                 'Resavar has received your withdrawal request and reserved the requested amount.',
-                'The request will be processed through your verified payout destination.',
+                $withdrawal->gateway === 'manual'
+                    ? 'Resavar staff will review this withdrawal and arrange the transfer manually. Submission does not mean funds were sent.'
+                    : 'The request will be processed through your verified payout destination.',
             ],
             'View withdrawal',
             $this->route('user.owner.withdrawals'),
@@ -795,9 +797,10 @@ class AzariTransactionalMailService
         $status = (string) $withdrawal->status;
 
         $copy = match ($status) {
+            'approved' => ['owner-withdrawal-approved', 'Withdrawal '.$withdrawal->reference.' approved', ['Your manual withdrawal was approved. The reserved funds await an external bank transfer.'], 'default', null],
             'processing' => ['owner-withdrawal-processing', 'Withdrawal '.$withdrawal->reference.' is processing', ['Resavar has started processing your withdrawal.'], 'default', null],
             'provider_sent' => ['owner-withdrawal-provider-sent', 'Withdrawal '.$withdrawal->reference.' sent to provider', ['The payout instruction has been accepted by the configured provider and is being finalised.'], 'default', null],
-            'processed' => ['owner-withdrawal-paid', 'Withdrawal '.$withdrawal->reference.' completed', ['Your withdrawal has been processed successfully.'], 'success', null],
+            'processed' => ['owner-withdrawal-paid', 'Withdrawal '.$withdrawal->reference.' completed', [$withdrawal->gateway === 'manual' ? 'Resavar recorded an independently verified external transfer for your withdrawal.' : 'Your withdrawal has been processed successfully.'], 'success', null],
             'failed' => ['owner-withdrawal-failed', 'Withdrawal '.$withdrawal->reference.' was not completed', ['The payout could not be confirmed successfully.', 'The reserved balance remains subject to the recorded withdrawal state and reconciliation outcome.'], 'danger', $withdrawal->last_error],
             'reconciliation_required' => ['owner-withdrawal-reconciliation', 'Withdrawal '.$withdrawal->reference.' requires reconciliation', ['The provider may have sent the payout, but Resavar could not finish recording it automatically.', 'Resavar will reconcile the provider outcome before any retry or release.'], 'warning', null],
             'rejected' => ['owner-withdrawal-rejected', 'Withdrawal '.$withdrawal->reference.' was rejected', ['Resavar rejected the withdrawal request.'], 'danger', $withdrawal->rejection_reason ?? $withdrawal->admin_note],
