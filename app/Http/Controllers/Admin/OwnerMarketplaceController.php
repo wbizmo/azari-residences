@@ -328,6 +328,37 @@ class OwnerMarketplaceController extends Controller
         return view('admin.owner-withdrawals.show', compact('withdrawal'));
     }
 
+    public function approveManualWithdrawal(
+        Request $request, WithdrawalRequest $withdrawal, OwnerWithdrawalService $withdrawals
+    ): RedirectResponse {
+        abort_unless($withdrawal->gateway === 'manual', 404);
+        $data = $request->validate(['admin_note' => ['required', 'string', 'min:10', 'max:3000']]);
+        try {
+            $withdrawals->approveManual($withdrawal, $request->user(), $data['admin_note']);
+        } catch (\RuntimeException $exception) {
+            return back()->withErrors(['withdrawal' => $exception->getMessage()]);
+        }
+        return back()->with('status', 'Withdrawal approved and funds remain reserved. No transfer has been sent.');
+    }
+
+    public function markManualWithdrawalPaid(
+        Request $request, WithdrawalRequest $withdrawal, OwnerWithdrawalService $withdrawals
+    ): RedirectResponse {
+        abort_unless($withdrawal->gateway === 'manual', 404);
+        $data = $request->validate([
+            'transfer_reference' => ['required', 'string', 'max:255'],
+            'payment_evidence' => ['required', 'string', 'min:10', 'max:3000'],
+        ]);
+        try {
+            $withdrawals->markManualPaid(
+                $withdrawal, $request->user(), $data['transfer_reference'], $data['payment_evidence']
+            );
+        } catch (\RuntimeException $exception) {
+            return back()->withErrors(['withdrawal' => $exception->getMessage()]);
+        }
+        return back()->with('status', 'Verified external payment recorded and owner ledger debited exactly once.');
+    }
+
     public function processWithdrawal(Request $request, WithdrawalRequest $withdrawal, OwnerWithdrawalService $withdrawals): RedirectResponse
     {
         $data = $request->validate(['admin_note' => ['nullable', 'string', 'max:3000']]);
@@ -342,8 +373,17 @@ class OwnerMarketplaceController extends Controller
         }
     }
 
-    public function rejectWithdrawal(Request $request, WithdrawalRequest $withdrawal): RedirectResponse
+    public function rejectWithdrawal(Request $request, WithdrawalRequest $withdrawal, OwnerWithdrawalService $withdrawals): RedirectResponse
     {
+        if ($withdrawal->gateway === 'manual') {
+            $data = $request->validate(['rejection_reason' => ['required', 'string', 'min:10', 'max:3000']]);
+            try {
+                $withdrawals->rejectManual($withdrawal, $request->user(), $data['rejection_reason']);
+            } catch (\RuntimeException $exception) {
+                return back()->withErrors(['withdrawal' => $exception->getMessage()]);
+            }
+            return back()->with('status', 'Manual withdrawal rejected and reserved funds released.');
+        }
         abort_unless(in_array($withdrawal->status, ['pending', 'failed'], true), 422);
         $data = $request->validate(['rejection_reason' => ['required', 'string', 'min:10', 'max:3000']]);
         $withdrawal->update([
