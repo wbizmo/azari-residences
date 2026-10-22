@@ -65,7 +65,7 @@ final class SupplyReadinessService
             if ($listing && $listing->operator_type !== null) {
                 $proof = $listing->controlDocuments()->latest('id')->first();
                 if (! $proof || $proof->status !== 'verified' || ! $proof->reviewed_at
-                    || $proof->reviewed_at < now()->subYear()->toDateTimeString()
+                    || \Carbon\Carbon::parse($proof->reviewed_at)->lt(now()->subYear())
                     || ! Storage::disk('private')->exists($proof->path)) {
                     $blockers[] = 'Verified owner-control document missing or stale';
                 }
