@@ -2,21 +2,21 @@
  * owner calendar, public search, guest account and administration widgets.
  * Logos and images are real checked-in Resavar assets; not placeholders. */
 :root {
-    --resava-auth-navy: var(--reserva-navy, #052058);
-    --resava-auth-ink: #142c52;
-    --resava-auth-muted: #485f7c;
-    --resava-auth-border: #a8b8ce;
-    --resava-auth-focus: #2464c6;
-    --resava-auth-cream: #f5f8fc;
-    --resava-auth-white: #fff;
-    --resava-auth-error: #95243d;
-    --resava-auth-radius: 14px;
-    --resava-auth-display: Georgia, 'Times New Roman', serif;
-    --resava-auth-ui: Inter, Montserrat, system-ui, sans-serif;
+    --resavar-auth-navy: var(--reserva-navy, #052058);
+    --resavar-auth-ink: #142c52;
+    --resavar-auth-muted: #485f7c;
+    --resavar-auth-border: #a8b8ce;
+    --resavar-auth-focus: #2464c6;
+    --resavar-auth-cream: #f5f8fc;
+    --resavar-auth-white: #fff;
+    --resavar-auth-error: #95243d;
+    --resavar-auth-radius: 14px;
+    --resavar-auth-display: Georgia, 'Times New Roman', serif;
+    --resavar-auth-ui: Inter, Montserrat, system-ui, sans-serif;
 }
 
 /* Standalone entrance + recovery use identical responsive shells. */
-body.resavar-auth-body { margin: 0; background: var(--resava-auth-cream); color: var(--resava-auth-ink); }
+body.resavar-auth-body { margin: 0; background: var(--resavar-auth-cream); color: var(--resavar-auth-ink); }
 body.resavar-auth-body .auth.resavar-auth-unified {
     min-height: 100vh;
     min-height: 100dvh;
@@ -24,16 +24,16 @@ body.resavar-auth-body .auth.resavar-auth-unified {
     overflow: visible;
     display: grid;
     grid-template-columns: minmax(0, 1.02fr) minmax(0, .98fr);
-    font-family: var(--resava-auth-ui);
-    background: var(--resava-auth-white);
-    color: var(--resava-auth-ink);
+    font-family: var(--resavar-auth-ui);
+    background: var(--resavar-auth-white);
+    color: var(--resavar-auth-ink);
 }
 body.resavar-auth-body .auth.resavar-auth-unified .visual {
     min-width: 0;
     display: block;
     position: relative;
     overflow: hidden;
-    background: var(--resava-auth-navy);
+    background: var(--resavar-auth-navy);
     isolation: isolate;
 }
 body.resavar-auth-body .auth.resavar-auth-unified .visual > img {
@@ -81,19 +81,19 @@ body.resavar-auth-body .auth.resavar-auth-unified .resavar-auth-visual-copy {
 }
 body.resavar-auth-body .auth.resavar-auth-unified .resavar-auth-visual-kicker {
     color: #d7e8ff;
-    font: 800 .73rem/1.5 var(--resava-auth-ui);
+    font: 800 .73rem/1.5 var(--resavar-auth-ui);
     letter-spacing: .17em;
     text-transform: uppercase;
 }
 body.resavar-auth-body .auth.resavar-auth-unified .resavar-auth-visual-copy h2 {
     margin: 16px 0;
-    font: 400 clamp(2.6rem, 4.9vw, 5.7rem)/1.03 var(--resava-auth-display);
+    font: 400 clamp(2.6rem, 4.9vw, 5.7rem)/1.03 var(--resavar-auth-display);
     letter-spacing: -.045em;
     color: #fff;
     text-wrap: balance;
 }
 body.resavar-auth-body .auth.resavar-auth-unified .resavar-auth-visual-copy h2 em {
-    font-family: var(--resava-auth-display);
+    font-family: var(--resavar-auth-display);
     font-weight: 400;
     color: #d8e9ff;
 }
@@ -122,7 +122,7 @@ body.resavar-auth-body .auth.resavar-auth-unified .panel {
     align-items: center;
     justify-items: center;
     padding: clamp(26px, 4.4vw, 74px);
-    background: radial-gradient(circle at 90% 0%,#eff5fd,transparent 34%),var(--resava-auth-white);
+    background: radial-gradient(circle at 90% 0%,#eff5fd,transparent 34%),var(--resavar-auth-white);
 }
 body.resavar-auth-body .auth.resavar-auth-unified .wrap {
     width: min(100%, 490px);
@@ -138,14 +138,14 @@ body.resavar-auth-body .auth.resavar-auth-unified .kicker {
 }
 body.resavar-auth-body .auth.resavar-auth-unified h1 {
     margin: 0;
-    color: var(--resava-auth-navy);
-    font: 400 clamp(2.3rem, 3.8vw, 3.9rem)/1.08 var(--resava-auth-display);
+    color: var(--resavar-auth-navy);
+    font: 400 clamp(2.3rem, 3.8vw, 3.9rem)/1.08 var(--resavar-auth-display);
     letter-spacing: -.04em;
     text-wrap: balance;
 }
 body.resavar-auth-body .auth.resavar-auth-unified .sub {
     margin: 16px 0 28px;
-    color: var(--resava-auth-muted);
+    color: var(--resavar-auth-muted);
     font-size: .95rem;
     line-height: 1.65;
 }
@@ -161,7 +161,7 @@ body.resavar-auth-body .auth.resavar-auth-unified .field label,
 body.resavar-auth-body .auth.resavar-auth-unified .az-standalone-auth-form label > span:first-child {
     display: block;
     margin-bottom: 8px;
-    color: var(--resava-auth-ink);
+    color: var(--resavar-auth-ink);
     font-size: .84rem;
     font-weight: 700;
 }
@@ -174,23 +174,23 @@ body.resavar-auth-body .auth.resavar-auth-unified .az-password-control__input {
     height: 52px;
     margin: 0;
     padding: 0 16px;
-    border: 1px solid var(--resava-auth-border);
+    border: 1px solid var(--resavar-auth-border);
     border-radius: 11px;
     background: #fff;
-    color: var(--resava-auth-navy);
-    font: 500 1rem/1.3 var(--resava-auth-ui);
+    color: var(--resavar-auth-navy);
+    font: 500 1rem/1.3 var(--resavar-auth-ui);
 }
 body.resavar-auth-body .auth.resavar-auth-unified .az-password-control__input { padding-inline-end: 56px; }
 body.resavar-auth-body .auth.resavar-auth-unified :is(input,button,a):focus-visible {
-    outline: 3px solid var(--resava-auth-focus);
+    outline: 3px solid var(--resavar-auth-focus);
     outline-offset: 3px;
     box-shadow: none;
 }
-body.resavar-auth-body .auth.resavar-auth-unified .field :is(input,[role=alert])[aria-invalid=true] { border-color: var(--resava-auth-error); }
+body.resavar-auth-body .auth.resavar-auth-unified .field :is(input,[role=alert])[aria-invalid=true] { border-color: var(--resavar-auth-error); }
 body.resavar-auth-body .auth.resavar-auth-unified .err,
 body.resavar-auth-body .auth.resavar-auth-unified .az-standalone-auth-form small {
     display: block;
-    color: var(--resava-auth-error);
+    color: var(--resavar-auth-error);
     font-size: .78rem;
     margin: 7px 0 0;
     line-height: 1.45;
@@ -209,10 +209,10 @@ body.resavar-auth-body .auth.resavar-auth-unified .remember {
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    color: var(--resava-auth-muted);
+    color: var(--resavar-auth-muted);
     font-size: .87rem;
 }
-body.resavar-auth-body .auth.resavar-auth-unified input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--resava-auth-navy); }
+body.resavar-auth-body .auth.resavar-auth-unified input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--resavar-auth-navy); }
 body.resavar-auth-body .auth.resavar-auth-unified .link,
 body.resavar-auth-body .auth.resavar-auth-unified .home {
     color: #164c9a;
@@ -231,11 +231,11 @@ body.resavar-auth-body .auth.resavar-auth-unified .az-standalone-auth-actions bu
     gap: 9px;
     margin: 0;
     padding: 12px 18px;
-    border: 1px solid var(--resava-auth-navy);
+    border: 1px solid var(--resavar-auth-navy);
     border-radius: 11px;
-    background: var(--resava-auth-navy);
+    background: var(--resavar-auth-navy);
     color: #fff;
-    font: 750 .95rem/1.4 var(--resava-auth-ui);
+    font: 750 .95rem/1.4 var(--resavar-auth-ui);
     cursor: pointer;
 }
 body.resavar-auth-body .auth.resavar-auth-unified :is(.submit,button[type=submit]):hover {
@@ -243,7 +243,7 @@ body.resavar-auth-body .auth.resavar-auth-unified :is(.submit,button[type=submit
 }
 body.resavar-auth-body .auth.resavar-auth-unified .az-standalone-auth-actions button.secondary {
     background: #fff;
-    color: var(--resava-auth-navy);
+    color: var(--resavar-auth-navy);
 }
 body.resavar-auth-body .auth.resavar-auth-unified :is(button,input)[disabled] { opacity: .55; cursor: not-allowed; }
 body.resavar-auth-body .auth.resavar-auth-unified .submit .material-symbols-outlined {
@@ -253,7 +253,7 @@ body.resavar-auth-body .auth.resavar-auth-unified .submit .material-symbols-outl
 }
 body.resavar-auth-body .auth.resavar-auth-unified .switch {
     margin: 24px 0 0;
-    color: var(--resava-auth-muted);
+    color: var(--resavar-auth-muted);
     font-size: .91rem;
     text-align: center;
 }
@@ -283,7 +283,7 @@ body.resavar-auth-body .auth.resavar-auth-unified .az-password-control__toggle {
     width: 42px;
     height: 42px;
     place-items: center;
-    color: var(--resava-auth-navy);
+    color: var(--resavar-auth-navy);
     background: transparent;
     border: 0;
     border-radius: 8px;
@@ -349,7 +349,7 @@ body.resavar-auth-body .auth.resavar-auth-unified .resavar-auth-guidance {
     border-left: 3px solid #2967bd;
     padding: 12px 15px;
     background: #eff5ff;
-    color: var(--resava-auth-ink);
+    color: var(--resavar-auth-ink);
     font-size: .85rem;
     line-height: 1.65;
 }
