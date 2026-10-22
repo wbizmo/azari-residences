@@ -343,3 +343,13 @@ body.resavar-auth-body .auth.resavar-auth-unified .resavar-auth-errors > ul { pa
     body.resavar-auth-body .auth.resavar-auth-unified *::before,
     body.resavar-auth-body .auth.resavar-auth-unified *::after { scroll-behavior: auto; transition: none; animation: none; }
 }
+
+body.resavar-auth-body .auth.resavar-auth-unified .resavar-auth-guidance {
+    margin: 0 0 19px;
+    border-left: 3px solid #2967bd;
+    padding: 12px 15px;
+    background: #eff5ff;
+    color: var(--resava-auth-ink);
+    font-size: .85rem;
+    line-height: 1.65;
+}
