@@ -35,7 +35,7 @@
 
                 <div class="azari-home-hero__actions">
                     <a
-                        href="{{ route('availability.index') }}"
+                        href="#availability"
                         class="button azari-home-hero__primary"
                     >
                         <span>Check availability</span>
@@ -64,7 +64,7 @@
                     <span class="eyebrow">Direct booking</span>
                     <h2>Find your stay</h2>
                     <p>
-                        Search by dates, guests and stay type.
+                        Choose a destination or property, dates, and your guests. Every result is checked against live accommodation availability.
                     </p>
                 </div>
 
@@ -73,8 +73,59 @@
                     method="GET"
                     action="{{ route('availability.search') }}"
                     data-availability-form
-                    novalidate
+                    data-home-search-form
                 >
+                    <div
+                        class="search-field reserva-destination-search"
+                        data-destination-search
+                        data-suggest-url="{{ route('destinations.suggest') }}"
+                    >
+                        <label for="destination">Destination</label>
+
+                        <div class="input-shell">
+                            <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
+
+                            <input
+                                id="destination"
+                                name="destination"
+                                type="search"
+                                value="{{ old('destination', session('azari_stay_search.destination')) }}"
+                                placeholder="City, neighbourhood or property"
+                                autocomplete="off"
+                                maxlength="120"
+                                spellcheck="false"
+                                role="combobox"
+                                aria-autocomplete="list"
+                                aria-expanded="false"
+                                aria-controls="reserva-destination-list"
+                                data-destination-input
+                            >
+                        </div>
+
+                        <input
+                            type="hidden"
+                            name="destination_type"
+                            value="{{ session('azari_stay_search.destination_type') }}"
+                            data-destination-type
+                        >
+                        <input
+                            type="hidden"
+                            name="destination_id"
+                            value="{{ session('azari_stay_search.destination_id') }}"
+                            data-destination-id
+                        >
+
+                        <div
+                            id="reserva-destination-list"
+                            class="reserva-destination-list"
+                            role="listbox"
+                            data-destination-list
+                            hidden
+                        ></div>
+                        <span class="sr-only" role="status" aria-live="polite" data-destination-status></span>
+                    </div>
+
+
 
                     <div class="search-field">
                         <label for="check_in">Check in</label>
@@ -90,7 +141,7 @@
                                 name="check_in"
                                 type="date"
                                 min="{{ now()->toDateString() }}"
-                                value="{{ session('azari_stay_search.check_in') }}"
+                                value="{{ old('check_in', session('azari_stay_search.check_in', now()->addDays(2)->toDateString())) }}"
                                 required
                             >
                         </div>
@@ -115,7 +166,7 @@
                                 name="check_out"
                                 type="date"
                                 min="{{ now()->addDay()->toDateString() }}"
-                                value="{{ session('azari_stay_search.check_out') }}"
+                                value="{{ old('check_out', session('azari_stay_search.check_out', now()->addDays(3)->toDateString())) }}"
                                 required
                             >
                         </div>
@@ -129,7 +180,6 @@
                     <div
                         class="search-field guest-selector"
                         data-guest-selector
-                        data-desktop-summary-label="Select guests"
                     >
                         <span class="field-label">Guests</span>
 
@@ -138,6 +188,8 @@
                             type="button"
                             data-guest-trigger
                             aria-expanded="false"
+                            aria-controls="resavar-home-guest-panel"
+                            aria-label="Choose adults, children and rooms"
                         >
                             <span
                                 class="material-symbols-outlined"
@@ -156,6 +208,7 @@
 
                         <div
                             class="guest-selector-panel"
+                            id="resavar-home-guest-panel"
                             data-guest-panel
                             hidden
                         >
@@ -232,54 +285,6 @@
                         >
                     </div>
 
-                    <div
-                        class="search-field reserva-destination-search"
-                        data-destination-search
-                        data-suggest-url="{{ route('destinations.suggest') }}"
-                    >
-                        <label for="destination">Destination</label>
-
-                        <div class="input-shell">
-                            <span class="material-symbols-outlined" aria-hidden="true">location_on</span>
-
-                            <input
-                                id="destination"
-                                name="destination"
-                                type="search"
-                                value="{{ session('azari_stay_search.destination') }}"
-                                placeholder="City or area"
-                                autocomplete="off"
-                                role="combobox"
-                                aria-autocomplete="list"
-                                aria-expanded="false"
-                                aria-controls="reserva-destination-list"
-                                data-destination-input
-                            >
-                        </div>
-
-                        <input
-                            type="hidden"
-                            name="destination_type"
-                            value="{{ session('azari_stay_search.destination_type') }}"
-                            data-destination-type
-                        >
-                        <input
-                            type="hidden"
-                            name="destination_id"
-                            value="{{ session('azari_stay_search.destination_id') }}"
-                            data-destination-id
-                        >
-
-                        <div
-                            id="reserva-destination-list"
-                            class="reserva-destination-list"
-                            role="listbox"
-                            data-destination-list
-                            hidden
-                        ></div>
-                        <span class="sr-only" role="status" aria-live="polite" data-destination-status></span>
-                    </div>
-
                     <div class="search-field">
                         <label for="room_type_id">Stay type</label>
 
@@ -305,17 +310,27 @@
                         class="availability-submit"
                         type="submit"
                     >
-                        <span>Search availability</span>
+                        <span>Find available stays</span>
 
                         <span
                             class="material-symbols-outlined"
                             aria-hidden="true"
                         >search</span>
                     </button>
+                    <noscript>
+                        <p class="resavar-home-search-noscript">
+                            JavaScript is optional. To adjust guest and room counts without it,
+                            <a href="{{ route('availability.index') }}">use the full accessible search form</a>.
+                        </p>
+                    </noscript>
                 </form>
             </div>
         </div>
     </section>
+    <a href="#availability" class="resavar-home-mobile-search" data-resavar-mobile-search-link hidden>
+        <span class="material-symbols-outlined" aria-hidden="true">search</span>
+        Search accommodation
+    </a>
 
     <section class="reserva-discovery-section resavar-recent-viewed" data-resavar-recent-viewed-host hidden aria-labelledby="resavar-recent-viewed-title">
         <div class="site-container">
@@ -545,14 +560,8 @@
 
                             <div class="residence-footer">
                                 <span>
-                                    From
-
-                                    <strong>
-                                        {{ $property->currency }}
-                                        {{ number_format($property->nightly_rate) }}
-                                    </strong>
-
-                                    / night
+                                    <strong>Check dates for live rates</strong>
+                                    Rates and availability confirmed when you search
                                 </span>
 
                                 <a
@@ -562,7 +571,7 @@
                                     <span
                                         class="material-symbols-outlined"
                                         aria-hidden="true"
-                                    >arrow_outward</span>
+                                    >arrow_forward</span>
                                 </a>
                             </div>
                         </div>
