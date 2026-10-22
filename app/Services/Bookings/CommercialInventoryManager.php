@@ -8,6 +8,7 @@ use App\Models\BookingHold;
 use App\Models\ChannelReservation;
 use App\Models\InventoryDate;
 use Carbon\CarbonImmutable;
+use App\Support\LocalDate;
 use App\Models\CancellationPolicy;
 use App\Models\PaymentPolicy;
 use App\Models\Property;
@@ -132,7 +133,7 @@ class CommercialInventoryManager
      */
     private function assertCapacityReductionSafe(AccommodationType $type, int $proposed): void
     {
-        $start = CarbonImmutable::today();
+        $start = CarbonImmutable::today(LocalDate::propertyTimezone($type->property));
         $latest = $start->addDays(366);
         $propertyId = $type->property_id;
 
