@@ -1,0 +1,148 @@
+/* Batch 04 shared primitives: high-contrast on light surfaces by default.
+ * Existing .azari-* compatibility classes remain for incremental migration. */
+:root {
+    --resavar-ui-radius-xs: 7px;
+    --resavar-ui-radius-sm: 10px;
+    --resavar-ui-radius-md: 16px;
+    --resavar-ui-radius-lg: 24px;
+    --resavar-ui-spacing-1: 4px;
+    --resavar-ui-spacing-2: 8px;
+    --resavar-ui-spacing-3: 12px;
+    --resavar-ui-spacing-4: 16px;
+    --resavar-ui-spacing-6: 24px;
+    --resavar-ui-spacing-8: 32px;
+    --resavar-ui-control: 46px;
+    --resavar-ui-focus: #2464c6;
+    --resavar-ui-surface: var(--reserva-white, #fff);
+    --resavar-ui-background: var(--reserva-surface-muted, #eef2f8);
+    --resavar-ui-foreground: var(--reserva-navy, #052058);
+    --resavar-ui-border: #a6b7cc;
+    --resavar-ui-muted: #4a607c;
+    --resavar-ui-error: #9d2840;
+}
+.resavar-ui-button {
+    display: inline-flex;
+    min-height: var(--resavar-ui-control);
+    max-width: 100%;
+    align-items: center;
+    justify-content: center;
+    gap: var(--resavar-ui-spacing-2);
+    padding: 10px 18px;
+    border: 1px solid transparent;
+    border-radius: var(--resavar-ui-radius-sm);
+    font: 700 .9rem/1.4 var(--reserva-font-sans, system-ui, sans-serif);
+    text-align: center;
+    text-decoration: none;
+    vertical-align: middle;
+    cursor: pointer;
+}
+.resavar-ui-button--primary {
+    background: var(--resavar-ui-foreground);
+    border-color: var(--resavar-ui-foreground);
+    color: #fff;
+}
+.resavar-ui-button--primary:hover { background: #143e80; border-color: #143e80; }
+.resavar-ui-button--secondary {
+    background: #fff;
+    border-color: var(--resavar-ui-foreground);
+    color: var(--resavar-ui-foreground);
+}
+.resavar-ui-button--secondary:hover { background: #eef4ff; }
+.resavar-ui-button--danger {
+    background: #8e2439;
+    border-color: #8e2439;
+    color: #fff;
+}
+.resavar-ui-button--danger:hover { background: #66162a; }
+.resavar-ui-button:is([disabled],[aria-disabled=true]) { opacity: .52; cursor: not-allowed; }
+.resavar-ui-button:focus-visible,
+.resavar-ui-control:focus-visible {
+    outline: 3px solid var(--resavar-ui-focus);
+    outline-offset: 3px;
+}
+.resavar-ui-field { display: grid; gap: var(--resavar-ui-spacing-2); min-width: 0; }
+.resavar-ui-field__label {
+    font-size: .85rem;
+    font-weight: 700;
+    color: var(--resavar-ui-foreground);
+}
+.resavar-ui-control {
+    min-height: var(--resavar-ui-control);
+    min-width: 0;
+    width: 100%;
+    border: 1px solid var(--resavar-ui-border);
+    border-radius: var(--resavar-ui-radius-sm);
+    background: var(--resavar-ui-surface);
+    padding: 9px 12px;
+    color: var(--resavar-ui-foreground);
+    font: inherit;
+}
+.resavar-ui-control[aria-invalid=true] { border-color: var(--resavar-ui-error); }
+.resavar-ui-field__error {
+    font-size: .8rem;
+    line-height: 1.4;
+    color: var(--resavar-ui-error);
+}
+.resavar-ui-card {
+    min-width: 0;
+    border: 1px solid var(--reserva-border, #d7dfe8);
+    border-radius: var(--resavar-ui-radius-md);
+    padding: var(--resavar-ui-spacing-6);
+    background: #fff;
+    color: var(--resavar-ui-foreground);
+    box-shadow: var(--shadow-card, 0 16px 40px rgba(5,32,88,.08));
+}
+.resavar-ui-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    max-width: 100%;
+    border: 1px solid #a9bfd5;
+    border-radius: 999px;
+    padding: 5px 10px;
+    color: #153d68;
+    background: #edf5ff;
+    font-size: .78rem;
+    font-weight: 700;
+    line-height: 1.3;
+}
+.resavar-ui-badge[data-status=approved],
+.resavar-ui-badge[data-status=paid],
+.resavar-ui-badge[data-status=confirmed] {
+    background: #e5f4eb;
+    color: #155b39;
+    border-color: #92bea7;
+}
+.resavar-ui-badge[data-status=rejected],
+.resavar-ui-badge[data-status=failed],
+.resavar-ui-badge[data-status=cancelled] {
+    color: #851d36;
+    border-color: #e1a8b6;
+    background: #fff0f3;
+}
+.resavar-ui-badge[data-status=pending],
+.resavar-ui-badge[data-status=under_review] {
+    color: #704400;
+    border-color: #d5b777;
+    background: #fff7e9;
+}
+.resavar-ui-empty {
+    display: grid;
+    justify-items: start;
+    gap: 8px;
+    padding: clamp(24px, 4vw, 40px);
+    border: 1px solid var(--reserva-border);
+    border-radius: var(--resavar-ui-radius-md);
+    background: #fff;
+    color: var(--resavar-ui-foreground);
+}
+.resavar-ui-empty > h2 { margin: 0; font-size: clamp(1.4rem, 2.4vw, 2rem); }
+.resavar-ui-empty > p { margin: 0; max-width: 50ch; line-height: 1.6; color: var(--resavar-ui-muted); }
+.resavar-ui-empty > .material-symbols-outlined { font-size: 30px; }
+@media (max-width: 480px) {
+    .resavar-ui-card { padding: 18px; }
+    .resavar-ui-button { width: auto; white-space: normal; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .resavar-ui-button { transition: none; animation: none; }
+}

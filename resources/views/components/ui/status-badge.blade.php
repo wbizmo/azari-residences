@@ -1,7 +1,5 @@
-@props([
-    'status',
-])
+@props(['status'])
 
-<span {{ $attributes->merge(['data-status' => $status]) }}>
+<span {{ $attributes->class(['resavar-ui-badge'])->merge(['data-status' => $status]) }}>
     {{ str($status)->replace('_', ' ')->title() }}
 </span>

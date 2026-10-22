@@ -65,6 +65,12 @@ jobs:
       - name: Build frontend
         run: npm run build
 
+      - name: Compile Blade templates
+        run: php artisan view:cache
+
+      - name: Batch 04 authentication presentation smoke tests
+        run: php artisan test tests/Feature/Architecture/BatchFourAuthDesignRegressionTest.php
+
       - name: Lightweight release gate
         run: php artisan azari:release-gate --ci
 
