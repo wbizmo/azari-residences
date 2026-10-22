@@ -274,9 +274,28 @@ class InventoryBulkUpdateService
             ->get()
             ->keyBy(fn (InventoryDate $row) => $row->date->toDateString());
         $committed = $this->availability->committedQuantityByDate($type, $from, $to->addDay());
+        // Calendar previews are conditional on the entire effective sales
+        // contract, not just day overrides: rate/policy edits, hotel closures
+        // or base-price changes must invalidate an old owner's approval.
+        $liveType = AccommodationType::query()->findOrFail($type->getKey());
+        $property = Property::query()->findOrFail($liveType->property_id);
+        $rates = DB::table('rate_plans')
+            ->where('accommodation_type_id', $liveType->getKey())
+            ->orderBy('id')->get()->toArray();
+        $dailyRates = DB::table('daily_rates')
+            ->where('accommodation_type_id', $liveType->getKey())
+            ->whereBetween('date', [$from->toDateString(), $to->toDateString()])
+            ->orderBy('date')->orderBy('rate_plan_id')->orderBy('id')->get()->toArray();
         $payload = [
-            'type' => $type->getKey(),
-            'capacity' => (int) $type->total_inventory,
+            'type' => $liveType->getKey(),
+            'capacity' => (int) $liveType->total_inventory,
+            'type_state' => $liveType->only([
+                'base_rate', 'weekend_rate', 'currency', 'minimum_stay',
+                'maximum_stay', 'is_active', 'is_published', 'updated_at',
+            ]),
+            'property_state' => $property->only(['is_published', 'status', 'updated_at']),
+            'rate_plans' => $rates,
+            'daily_rates' => $dailyRates,
             'from' => $from->toDateString(),
             'to' => $to->toDateString(),
             'nights' => [],
