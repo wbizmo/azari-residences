@@ -2,6 +2,7 @@
 
 namespace App\Services\Owners;
 
+use App\Models\AuditLog;
 use App\Models\OwnerLedgerEntry;
 use App\Models\OwnerPayoutProfile;
 use App\Models\User;
@@ -137,7 +138,7 @@ class OwnerWithdrawalService
             if ($minor > $available) {
                 throw new RuntimeException('The requested amount exceeds the settled, unreserved balance.');
             }
-            return WithdrawalRequest::query()->create([
+            $created = WithdrawalRequest::query()->create([
                 'reference' => $this->reference(),
                 'idempotency_key' => $idempotencyKey,
                 'user_id' => $lockedUser->getKey(),
@@ -150,6 +151,10 @@ class OwnerWithdrawalService
                 'owner_note' => $ownerNote,
                 'requested_at' => now(),
             ]);
+            AuditLog::record('owner_withdrawal.manual_requested', $created, [],
+                ['status' => 'pending', 'currency' => $currency, 'amount' => $created->amount],
+                ['receiving_details' => '[REDACTED]'], $lockedUser->getKey());
+            return $created;
         }, 5);
     }
 
@@ -179,6 +184,8 @@ class OwnerWithdrawalService
                 'admin_note' => $note,
                 'processed_by' => $reviewer->getKey(),
             ]);
+            AuditLog::record('owner_withdrawal.manual_approved', $locked,
+                ['status' => 'pending'], ['status' => 'approved'], [], $reviewer->getKey());
             return $locked->refresh();
         }, 5);
     }
@@ -221,6 +228,9 @@ class OwnerWithdrawalService
             ]);
             $this->recordDebit($locked, $transferReference);
             $locked->update(['status' => 'processed', 'processed_at' => now()]);
+            AuditLog::record('owner_withdrawal.manual_paid', $locked,
+                ['status' => 'approved'], ['status' => 'processed'],
+                ['reference' => $transferReference, 'evidence' => '[REDACTED]'], $payer->getKey());
             return $locked->refresh();
         }, 5);
     }
@@ -244,6 +254,9 @@ class OwnerWithdrawalService
                 'processed_by' => $reviewer->getKey(),
                 'rejected_at' => now(),
             ]);
+            AuditLog::record('owner_withdrawal.manual_rejected', $locked,
+                ['status' => $withdrawal->status], ['status' => 'rejected'],
+                ['reason_recorded' => true], $reviewer->getKey());
             return $locked->refresh();
         }, 5);
     }
