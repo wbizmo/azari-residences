@@ -216,7 +216,7 @@ class OwnerWithdrawalService
             }
             $locked->update([
                 'provider_reference' => $transferReference,
-                'reconciliation_note' => $evidence,
+                'manual_payment_evidence' => $evidence,
                 'processed_by' => $payer->getKey(),
             ]);
             $this->recordDebit($locked, $transferReference);
