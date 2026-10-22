@@ -3,6 +3,11 @@
 namespace App\Services\Bookings;
 
 use App\Models\AccommodationType;
+use App\Models\Booking;
+use App\Models\BookingHold;
+use App\Models\ChannelReservation;
+use App\Models\InventoryDate;
+use Carbon\CarbonImmutable;
 use App\Models\CancellationPolicy;
 use App\Models\PaymentPolicy;
 use App\Models\Property;
@@ -82,6 +87,15 @@ class CommercialInventoryManager
                 'sort_order' => (int) ($data['sort_order'] ?? 0),
             ];
 
+            // The property/type locks above are the same lock order as
+            // creation of a booking hold and edits of the nightly calendar.
+            // Never silently shrink a room category beneath accepted room
+            // nights, active holds, unreconciled channels or explicit nightly
+            // allotments. This check runs BEFORE unpublishing the property.
+            if ($type->exists && $payload['total_inventory'] < (int) $type->total_inventory) {
+                $this->assertCapacityReductionSafe($type, $payload['total_inventory']);
+            }
+
             $type->fill($payload);
             $type->property_id = $lockedProperty->getKey();
 
@@ -109,6 +123,70 @@ class CommercialInventoryManager
 
             return $type->refresh();
         }, 3);
+    }
+
+    /**
+     * Fail closed for historical and future occupancy while holding the
+     * property + type row locks. We deliberately do not rewrite sold rooms,
+     * prices, payments or bookings to make a smaller capacity fit.
+     */
+    private function assertCapacityReductionSafe(AccommodationType $type, int $proposed): void
+    {
+        $start = CarbonImmutable::today();
+        $latest = $start->addDays(366);
+        $propertyId = $type->property_id;
+
+        foreach ([
+            Booking::query()->where('property_id', $propertyId)
+                ->whereDate('check_out', '>', $start->toDateString())->max('check_out'),
+            BookingHold::query()->active()->where('property_id', $propertyId)
+                ->whereDate('check_out', '>', $start->toDateString())->max('check_out'),
+            ChannelReservation::query()->where('property_id', $propertyId)
+                ->whereDate('ends_on', '>', $start->toDateString())->max('ends_on'),
+        ] as $lastEnd) {
+            if ($lastEnd) {
+                $end = CarbonImmutable::parse($lastEnd)->startOfDay();
+                $latest = $end->greaterThan($latest) ? $end : $latest;
+            }
+        }
+        // Outside this bound an operator must first reconcile or explicitly
+        // retire long-term allocations. Do not silently ignore distant stays.
+        if ($latest->greaterThan($start->addYears(3))) {
+            throw ValidationException::withMessages([
+                'total_inventory' => 'Future reservations extend beyond the safe three-year capacity review. Reconcile them before lowering room count.',
+            ]);
+        }
+
+        $excessOverride = InventoryDate::query()
+            ->where('accommodation_type_id', $type->getKey())
+            ->whereDate('date', '>=', $start->toDateString())
+            ->where('sellable_inventory', '>', $proposed)
+            ->orderBy('date')
+            ->first(['date']);
+        if ($excessOverride) {
+            throw ValidationException::withMessages([
+                'total_inventory' => 'Existing calendar allotment on '.$excessOverride->date->toDateString()
+                    .' exceeds the proposed room count. Adjust the calendar first.',
+            ]);
+        }
+
+        // Use the canonical committed-night count; this includes legacy
+        // untyped bookings for the primary accommodation, holds and retained
+        // channel blocks, even though live provider synchronization is parked.
+        $engine = app(AzariAvailabilityEngine::class);
+        for ($cursor = $start; $cursor->lessThan($latest); $cursor = $end) {
+            $end = $cursor->addDays(366);
+            if ($end->greaterThan($latest)) {
+                $end = $latest;
+            }
+            $committed = $engine->committedQuantityByDate($type, $cursor, $end);
+            $over = $committed->first(fn ($occupied) => (int) $occupied > $proposed);
+            if ($over !== null) {
+                throw ValidationException::withMessages([
+                    'total_inventory' => 'The proposed room count is below an existing booking, hold or unreconciled external reservation. Keep booked capacity or adjust future unsold inventory.',
+                ]);
+            }
+        }
     }
 
     public function saveRatePlan(
