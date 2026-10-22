@@ -21,6 +21,8 @@ if (config('filesystems.media_backup_schedule_enabled', false)) {
 Schedule::command('model:prune')->daily();
 Schedule::command('azari:expire-unpaid-bookings')->everyFiveMinutes()->name('expire-unpaid-bookings')->withoutOverlapping();
 Schedule::command('azari:sitemap')->dailyAt('04:15')->name('public-sitemap')->withoutOverlapping();
+Schedule::command('resavar:report-supply-readiness')
+    ->weeklyOn(1, '06:30')->name('accommodation-supply-weekly')->withoutOverlapping();
 Schedule::command('azari:heartbeat')->everyMinute()->name('system-heartbeat')->withoutOverlapping();
 if (! config('reserva.accommodation_only', true)) {
     Schedule::command('azari:sync-channels')->everyTenMinutes()->name('channel-sync')->withoutOverlapping();
