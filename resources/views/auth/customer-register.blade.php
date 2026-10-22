@@ -2,5 +2,5 @@
     alternative missing the anti-abuse token and honeypot. --}}
 @include('auth.register', [
     'authFormToken' => $authFormToken
-        ?? app(\\App\\Support\\AuthAbuseGuard::class)->formToken('register'),
+        ?? app(\App\Support\AuthAbuseGuard::class)->formToken('register'),
 ])
