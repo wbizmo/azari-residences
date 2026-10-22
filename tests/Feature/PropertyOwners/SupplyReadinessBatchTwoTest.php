@@ -73,7 +73,7 @@ final class SupplyReadinessBatchTwoTest extends TestCase
             ->assertSee('Not publicly available')
             ->assertDontSee('Verified owner-control document missing or stale');
         $this->actingAs($admin)->get($url.'?check_in=2000-01-01&check_out=2000-01-02')
-            ->assertSessionHasNoErrors()->assertStatus(302)->assertRedirect();
+            ->assertSessionHasErrors('check_in')->assertRedirect();
     }
 
     public function test_only_independently_reviewed_published_and_quoted_property_is_date_bookable(): void
