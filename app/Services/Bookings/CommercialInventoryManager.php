@@ -138,10 +138,21 @@ class CommercialInventoryManager
 
         foreach ([
             Booking::query()->where('property_id', $propertyId)
+                ->whereIn('status', config('azari.booking.active_statuses', [
+                    'hold', 'pending', 'pending_payment', 'approved', 'confirmed',
+                    'paid', 'check_in', 'checked_in',
+                ]))
+                ->where(function ($query): void {
+                    $query->whereNotIn('status', ['pending', 'pending_payment'])
+                        ->orWhere(fn ($pending) => $pending
+                            ->whereIn('status', ['pending', 'pending_payment'])
+                            ->whereNotNull('expires_at')->where('expires_at', '>', now()));
+                })
                 ->whereDate('check_out', '>', $start->toDateString())->max('check_out'),
             BookingHold::query()->active()->where('property_id', $propertyId)
                 ->whereDate('check_out', '>', $start->toDateString())->max('check_out'),
             ChannelReservation::query()->where('property_id', $propertyId)
+                ->where('status', 'active')
                 ->whereDate('ends_on', '>', $start->toDateString())->max('ends_on'),
         ] as $lastEnd) {
             if ($lastEnd) {
