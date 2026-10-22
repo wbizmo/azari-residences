@@ -331,15 +331,47 @@ class Property extends Model
         // An address proof must not survive a changed property address or
         // coordinate. Other claim types remain independently evaluated.
         static::updated(function (self $property): void {
-            if ($property->wasChanged([
+            if (! Schema::hasTable('property_verified_claims')) {
+                return;
+            }
+
+            // Claims attested for a previous owner or signed agreement cannot
+            // legally pass to a different owner without independent review.
+            $ownershipChanged = $property->wasChanged(['owner_id', 'owner_agreement_id']);
+            $addressChanged = $property->wasChanged([
                 'formatted_address', 'address_line_1', 'address_city',
                 'address_region', 'address_country_code', 'latitude', 'longitude',
-            ]) && Schema::hasTable('property_verified_claims')) {
-                PropertyVerifiedClaim::query()
-                    ->where('property_id', $property->getKey())
-                    ->where('claim_type', 'address')
-                    ->where('status', 'verified')
-                    ->update(['status' => 'revoked', 'updated_at' => now()]);
+            ]);
+            if (! $ownershipChanged && ! $addressChanged) {
+                return;
+            }
+
+            $claims = PropertyVerifiedClaim::query()
+                ->where('property_id', $property->getKey())
+                ->where('status', 'verified');
+            if (! $ownershipChanged) {
+                $claims->where('claim_type', 'address');
+            }
+            $revokedTypes = (clone $claims)->pluck('claim_type')->all();
+            if ($revokedTypes !== []) {
+                $claims->update(['status' => 'revoked', 'updated_at' => now()]);
+                AuditLog::record('property.claims_revoked_on_change', $property, [], [
+                    'claim_types' => $revokedTypes,
+                    'reason' => $ownershipChanged ? 'ownership_changed' : 'address_changed',
+                ]);
+            }
+            if ($ownershipChanged && $property->is_published) {
+                // Deny new sales before a new owner signs, photographs are
+                // re-attested and staff complete a new publication review.
+                $property->forceFill([
+                    'is_published' => false, 'is_featured' => false, 'status' => 'draft',
+                ])->saveQuietly();
+                $property->publicationReviews()->create([
+                    'status' => 'unpublished',
+                    'review_note' => 'Ownership or owner agreement changed: review required.',
+                ]);
+                AuditLog::record('property.unpublished_on_ownership_change', $property,
+                    ['is_published' => true], ['is_published' => false]);
             }
         });
 
