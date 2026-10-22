@@ -1,0 +1,345 @@
+/* Batch 04: one authored auth design, deliberately scoped away from booking,
+ * owner calendar, public search, guest account and administration widgets.
+ * Logos and images are real checked-in Resavar assets; not placeholders. */
+:root {
+    --resava-auth-navy: var(--reserva-navy, #052058);
+    --resava-auth-ink: #142c52;
+    --resava-auth-muted: #485f7c;
+    --resava-auth-border: #a8b8ce;
+    --resava-auth-focus: #2464c6;
+    --resava-auth-cream: #f5f8fc;
+    --resava-auth-white: #fff;
+    --resava-auth-error: #95243d;
+    --resava-auth-radius: 14px;
+    --resava-auth-display: Georgia, 'Times New Roman', serif;
+    --resava-auth-ui: Inter, Montserrat, system-ui, sans-serif;
+}
+
+/* Standalone entrance + recovery use identical responsive shells. */
+body.resavar-auth-body { margin: 0; background: var(--resava-auth-cream); color: var(--resava-auth-ink); }
+body.resavar-auth-body .auth.resavar-auth-unified {
+    min-height: 100vh;
+    min-height: 100dvh;
+    height: auto;
+    overflow: visible;
+    display: grid;
+    grid-template-columns: minmax(0, 1.02fr) minmax(0, .98fr);
+    font-family: var(--resava-auth-ui);
+    background: var(--resava-auth-white);
+    color: var(--resava-auth-ink);
+}
+body.resavar-auth-body .auth.resavar-auth-unified .visual {
+    min-width: 0;
+    display: block;
+    position: relative;
+    overflow: hidden;
+    background: var(--resava-auth-navy);
+    isolation: isolate;
+}
+body.resavar-auth-body .auth.resavar-auth-unified .visual > img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    opacity: .91;
+}
+body.resavar-auth-body .auth.resavar-auth-unified .visual::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(180deg,rgba(5,32,88,.70) 0%,rgba(5,32,88,.06) 38%,rgba(5,32,88,.95) 100%);
+    pointer-events: none;
+}
+body.resavar-auth-body .auth.resavar-auth-unified .resavar-auth-logo {
+    position: absolute;
+    top: clamp(22px, 3vw, 54px);
+    left: clamp(22px, 3vw, 54px);
+    z-index: 3;
+    display: inline-flex;
+    max-width: calc(100% - 44px);
+    color: #fff;
+    text-decoration: none;
+}
+body.resavar-auth-body .auth.resavar-auth-unified .resavar-auth-logo img {
+    display: block;
+    width: clamp(135px, 15vw, 195px);
+    height: auto;
+    max-height: 64px;
+    object-fit: contain;
+}
+body.resavar-auth-body .auth.resavar-auth-unified .resavar-auth-visual-copy {
+    position: absolute;
+    z-index: 2;
+    left: clamp(22px, 4vw, 64px);
+    bottom: clamp(30px, 5vw, 74px);
+    right: clamp(22px, 4vw, 64px);
+    max-width: 650px;
+    color: #fff;
+}
+body.resavar-auth-body .auth.resavar-auth-unified .resavar-auth-visual-kicker {
+    color: #d7e8ff;
+    font: 800 .73rem/1.5 var(--resava-auth-ui);
+    letter-spacing: .17em;
+    text-transform: uppercase;
+}
+body.resavar-auth-body .auth.resavar-auth-unified .resavar-auth-visual-copy h2 {
+    margin: 16px 0;
+    font: 400 clamp(2.6rem, 4.9vw, 5.7rem)/1.03 var(--resava-auth-display);
+    letter-spacing: -.045em;
+    color: #fff;
+    text-wrap: balance;
+}
+body.resavar-auth-body .auth.resavar-auth-unified .resavar-auth-visual-copy h2 em {
+    font-family: var(--resava-auth-display);
+    font-weight: 400;
+    color: #d8e9ff;
+}
+body.resavar-auth-body .auth.resavar-auth-unified .resavar-auth-visual-copy p {
+    max-width: 440px;
+    color: #eef4ff;
+    font-size: 1rem;
+    line-height: 1.7;
+}
+body.resavar-auth-body .auth.resavar-auth-unified .resavar-auth-visual-foot {
+    display: block;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,.43);
+    color: #e8f1ff;
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+}
+body.resavar-auth-body .auth.resavar-auth-unified .panel {
+    min-width: 0;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow: visible;
+    display: grid;
+    align-items: center;
+    justify-items: center;
+    padding: clamp(26px, 4.4vw, 74px);
+    background: radial-gradient(circle at 90% 0%,#eff5fd,transparent 34%),var(--resava-auth-white);
+}
+body.resavar-auth-body .auth.resavar-auth-unified .wrap {
+    width: min(100%, 490px);
+    min-width: 0;
+}
+body.resavar-auth-body .auth.resavar-auth-unified .kicker {
+    margin: 0 0 12px;
+    color: #2255a1;
+    font-size: .74rem;
+    font-weight: 800;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+}
+body.resavar-auth-body .auth.resavar-auth-unified h1 {
+    margin: 0;
+    color: var(--resava-auth-navy);
+    font: 400 clamp(2.3rem, 3.8vw, 3.9rem)/1.08 var(--resava-auth-display);
+    letter-spacing: -.04em;
+    text-wrap: balance;
+}
+body.resavar-auth-body .auth.resavar-auth-unified .sub {
+    margin: 16px 0 28px;
+    color: var(--resava-auth-muted);
+    font-size: .95rem;
+    line-height: 1.65;
+}
+body.resavar-auth-body .auth.resavar-auth-unified .fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 15px;
+}
+body.resavar-auth-body .auth.resavar-auth-unified .field { min-width: 0; margin-bottom: 18px; }
+body.resavar-auth-body .auth.resavar-auth-unified .fields .field { margin-bottom: 0; }
+body.resavar-auth-body .auth.resavar-auth-unified .wide { grid-column: 1 / -1; }
+body.resavar-auth-body .auth.resavar-auth-unified .field label,
+body.resavar-auth-body .auth.resavar-auth-unified .az-standalone-auth-form label > span:first-child {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--resava-auth-ink);
+    font-size: .84rem;
+    font-weight: 700;
+}
+body.resavar-auth-body .auth.resavar-auth-unified .field input:not([type=checkbox]),
+body.resavar-auth-body .auth.resavar-auth-unified .az-standalone-auth-form input:not([type=checkbox]),
+body.resavar-auth-body .auth.resavar-auth-unified .az-password-control__input {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    height: 52px;
+    margin: 0;
+    padding: 0 16px;
+    border: 1px solid var(--resava-auth-border);
+    border-radius: 11px;
+    background: #fff;
+    color: var(--resava-auth-navy);
+    font: 500 1rem/1.3 var(--resava-auth-ui);
+}
+body.resavar-auth-body .auth.resavar-auth-unified .az-password-control__input { padding-inline-end: 56px; }
+body.resavar-auth-body .auth.resavar-auth-unified :is(input,button,a):focus-visible {
+    outline: 3px solid var(--resava-auth-focus);
+    outline-offset: 3px;
+    box-shadow: none;
+}
+body.resavar-auth-body .auth.resavar-auth-unified .field :is(input,[role=alert])[aria-invalid=true] { border-color: var(--resava-auth-error); }
+body.resavar-auth-body .auth.resavar-auth-unified .err,
+body.resavar-auth-body .auth.resavar-auth-unified .az-standalone-auth-form small {
+    display: block;
+    color: var(--resava-auth-error);
+    font-size: .78rem;
+    margin: 7px 0 0;
+    line-height: 1.45;
+}
+body.resavar-auth-body .auth.resavar-auth-unified .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin: 8px 0 24px;
+    font-size: .87rem;
+}
+body.resavar-auth-body .auth.resavar-auth-unified .check,
+body.resavar-auth-body .auth.resavar-auth-unified .remember {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--resava-auth-muted);
+    font-size: .87rem;
+}
+body.resavar-auth-body .auth.resavar-auth-unified input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--resava-auth-navy); }
+body.resavar-auth-body .auth.resavar-auth-unified .link,
+body.resavar-auth-body .auth.resavar-auth-unified .home {
+    color: #164c9a;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    font-weight: 700;
+}
+body.resavar-auth-body .auth.resavar-auth-unified .submit,
+body.resavar-auth-body .auth.resavar-auth-unified .az-standalone-auth-form button[type=submit],
+body.resavar-auth-body .auth.resavar-auth-unified .az-standalone-auth-actions button {
+    display: inline-flex;
+    width: 100%;
+    min-height: 52px;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    margin: 0;
+    padding: 12px 18px;
+    border: 1px solid var(--resava-auth-navy);
+    border-radius: 11px;
+    background: var(--resava-auth-navy);
+    color: #fff;
+    font: 750 .95rem/1.4 var(--resava-auth-ui);
+    cursor: pointer;
+}
+body.resavar-auth-body .auth.resavar-auth-unified :is(.submit,button[type=submit]):hover {
+    background: #153e7d;
+}
+body.resavar-auth-body .auth.resavar-auth-unified .az-standalone-auth-actions button.secondary {
+    background: #fff;
+    color: var(--resava-auth-navy);
+}
+body.resavar-auth-body .auth.resavar-auth-unified :is(button,input)[disabled] { opacity: .55; cursor: not-allowed; }
+body.resavar-auth-body .auth.resavar-auth-unified .submit .material-symbols-outlined {
+    color: currentColor;
+    font-size: 18px;
+    line-height: 1;
+}
+body.resavar-auth-body .auth.resavar-auth-unified .switch {
+    margin: 24px 0 0;
+    color: var(--resava-auth-muted);
+    font-size: .91rem;
+    text-align: center;
+}
+body.resavar-auth-body .auth.resavar-auth-unified .az-standalone-auth-form {
+    display: grid;
+    gap: 19px;
+}
+body.resavar-auth-body .auth.resavar-auth-unified .az-standalone-auth-form label { display: block; min-width: 0; }
+body.resavar-auth-body .auth.resavar-auth-unified .az-standalone-auth-form > a {
+    color: #164c9a;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+}
+body.resavar-auth-body .auth.resavar-auth-unified .az-standalone-auth-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+body.resavar-auth-body .auth.resavar-auth-unified .az-standalone-auth-actions form { flex: 1 1 200px; }
+body.resavar-auth-body .auth.resavar-auth-unified .az-password-control { position: relative; min-width: 0; }
+body.resavar-auth-body .auth.resavar-auth-unified .az-password-control__toggle {
+    position: absolute;
+    inset-inline-end: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: grid;
+    width: 42px;
+    height: 42px;
+    place-items: center;
+    color: var(--resava-auth-navy);
+    background: transparent;
+    border: 0;
+    border-radius: 8px;
+}
+body.resavar-auth-body .auth.resavar-auth-unified .az-password-control__icon { width: 22px; height: 22px; }
+body.resavar-auth-body .auth.resavar-auth-unified .resavar-auth-status {
+    margin: 0 0 22px;
+    padding: 14px;
+    border: 1px solid #90b5a0;
+    border-radius: 10px;
+    background: #eff9f2;
+    color: #164d32;
+    font-size: .9rem;
+}
+body.resavar-auth-body .auth.resavar-auth-unified .resavar-auth-errors {
+    padding: 12px 14px;
+    background: #fff3f5;
+    border: 1px solid #dc9eac;
+    border-radius: 10px;
+    color: #85203c;
+}
+body.resavar-auth-body .auth.resavar-auth-unified .resavar-auth-errors > ul { padding-left: 20px; margin-block: 10px 0; }
+@media (max-width: 900px) {
+    body.resavar-auth-body .auth.resavar-auth-unified {
+        grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr);
+    }
+    body.resavar-auth-body .auth.resavar-auth-unified .panel { padding: 30px 25px; }
+}
+@media (max-width: 700px) {
+    body.resavar-auth-body .auth.resavar-auth-unified { display: flex; flex-direction: column; }
+    body.resavar-auth-body .auth.resavar-auth-unified .visual { min-height: 210px; height: 210px; flex: none; }
+    body.resavar-auth-body .auth.resavar-auth-unified .visual > img { object-position: center 45%; }
+    body.resavar-auth-body .auth.resavar-auth-unified .resavar-auth-logo { top: 16px; left: 19px; }
+    body.resavar-auth-body .auth.resavar-auth-unified .resavar-auth-logo img { width: 132px; max-height: 46px; }
+    body.resavar-auth-body .auth.resavar-auth-unified .resavar-auth-visual-copy { bottom: 18px; left: 20px; right: 20px; }
+    body.resavar-auth-body .auth.resavar-auth-unified .resavar-auth-visual-kicker { font-size: .62rem; }
+    body.resavar-auth-body .auth.resavar-auth-unified .resavar-auth-visual-copy h2 {
+        font-size: clamp(1.65rem, 6.5vw, 2.1rem); margin: 7px 0 0;
+    }
+    body.resavar-auth-body .auth.resavar-auth-unified .resavar-auth-visual-copy p,
+    body.resavar-auth-body .auth.resavar-auth-unified .resavar-auth-visual-foot { display: none; }
+    body.resavar-auth-body .auth.resavar-auth-unified .panel {
+        min-height: 0;
+        width: 100%;
+        flex: 1;
+        padding: 30px clamp(17px, 5.3vw, 32px) 52px;
+    }
+    body.resavar-auth-body .auth.resavar-auth-unified .fields { grid-template-columns: minmax(0,1fr); }
+    body.resavar-auth-body .auth.resavar-auth-unified .wide { grid-column: auto; }
+}
+@media (max-width: 350px) {
+    body.resavar-auth-body .auth.resavar-auth-unified .panel { padding-inline: 16px; }
+    body.resavar-auth-body .auth.resavar-auth-unified .row { align-items: flex-start; flex-direction: column; }
+}
+@media (prefers-reduced-motion: reduce) {
+    body.resavar-auth-body .auth.resavar-auth-unified *,
+    body.resavar-auth-body .auth.resavar-auth-unified *::before,
+    body.resavar-auth-body .auth.resavar-auth-unified *::after { scroll-behavior: auto; transition: none; animation: none; }
+}
