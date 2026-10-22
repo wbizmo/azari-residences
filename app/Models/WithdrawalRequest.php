@@ -17,6 +17,7 @@ class WithdrawalRequest extends Model
             'amount' => 'decimal:2',
             'destination_snapshot' => 'array',
             'receiving_details' => 'encrypted',
+            'manual_payment_evidence' => 'encrypted',
             'approved_at' => 'datetime',
             'provider_response' => 'array',
             'requested_at' => 'datetime',
