@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Services\Search\DestinationSearchService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 
 class DestinationSearchController extends Controller
 {
@@ -20,15 +19,13 @@ class DestinationSearchController extends Controller
         $query = $search->normalize($data['q']);
         $limit = (int) ($data['limit'] ?? config('reserva.search.autocomplete_default_limit', 8));
 
-        $results = Cache::remember(
-            'reserva:destination-suggest:'.sha1(mb_strtolower($query).'|'.$limit),
-            now()->addSeconds((int) config('reserva.search.autocomplete_cache_seconds', 60)),
-            fn () => $search->suggest($query, $limit)->all()
-        );
+        // Live moderation/unpublication must remove an address/property suggestion
+        // immediately. Do not serve a now-private listing from the old minute cache.
+        $results = $search->suggest($query, $limit)->all();
 
         return response()->json([
             'query' => $query,
             'data' => $results,
-        ])->header('Cache-Control', 'private, max-age='.(int) config('reserva.search.autocomplete_cache_seconds', 60));
+        ])->header('Cache-Control', 'private, no-store');
     }
 }
