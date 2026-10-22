@@ -6,6 +6,8 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Console\Scheduling\Schedule;
 
 class ResarvaReleaseGate extends Command
 {
@@ -25,6 +27,7 @@ class ResarvaReleaseGate extends Command
             'filtered search is noindex' => $this->searchIndexingSafe(),
             'responsive image pipeline configured' => $this->responsiveImagePipelineSafe(),
             'public views avoid hard-coded currency symbols' => $this->currencyViewsSafe(),
+            'accommodation-only legacy routes and jobs retired' => $this->legacyScopeSafe(),
         ];
 
         if (! $this->option('ci')) {
@@ -36,6 +39,93 @@ class ResarvaReleaseGate extends Command
         $failed = false;
         foreach ($checks as $label => $ok) { $this->line(($ok ? '[PASS] ' : '[FAIL] ').$label); $failed = $failed || ! $ok; }
         return $failed ? self::FAILURE : self::SUCCESS;
+    }
+
+    /**
+     * Keep the old route names resolvable for historical bookmarks, but reject
+     * ALL new supplier/channel activity and keep historical archives GET-only.
+     * This runs in CI without reaching providers or mutating historical tables.
+     */
+    private function legacyScopeSafe(): bool
+    {
+        if (! (bool) config('reserva.accommodation_only', true)) {
+            return false;
+        }
+
+        foreach ([
+            'user.travel.index',
+            'user.travel.store',
+            'user.travel.cancel',
+            'user.dining.index',
+            'user.dining.store',
+            'user.itineraries.review-assembly',
+            'azari.admin.travel.index',
+            'azari.admin.travel.suppliers.store',
+            'azari.admin.dining.store',
+            'azari.admin.channels.sync',
+            'user.owner.channels.sync',
+            'travel.supplier.webhook',
+            'channels.webhook',
+            'partner.v1.intents',
+            'partner.v1.stays',
+            'channels.export',
+        ] as $name) {
+            $route = Route::getRoutes()->getByName($name);
+            if ($route === null || ! in_array('resavar.non-accommodation', $route->gatherMiddleware(), true)) {
+                return false;
+            }
+        }
+
+        // Also catch future endpoints added to a retired route namespace;
+        // an allowlisted sample alone would not detect a new unguarded URL.
+        foreach (Route::getRoutes() as $route) {
+            $name = (string) $route->getName();
+            foreach ([
+                'user.travel.',
+                'azari.admin.travel.',
+                'user.dining.',
+                'azari.admin.dining.',
+                'user.owner.channels.',
+                'azari.admin.channels.',
+                'channels.',
+                'partner.v1.',
+                'travel.supplier.',
+            ] as $retiredPrefix) {
+                if (str_starts_with($name, $retiredPrefix)) {
+                    if (! in_array('resavar.non-accommodation', $route->gatherMiddleware(), true)) {
+                        return false;
+                    }
+                    break;
+                }
+            }
+        }
+
+        foreach ([
+            'user.archive.travel.index',
+            'user.archive.travel.show',
+            'azari.admin.archive.travel.index',
+        ] as $name) {
+            $route = Route::getRoutes()->getByName($name);
+            if ($route === null || $route->methods() !== ['GET', 'HEAD']
+                || in_array('resavar.non-accommodation', $route->gatherMiddleware(), true)) {
+                return false;
+            }
+        }
+
+        $scheduled = collect(app(Schedule::class)->events())
+            ->map(static fn ($event): string => (string) $event->command)
+            ->implode("\n");
+        foreach ([
+            'azari:sync-channels',
+            'resavar:process-travel-webhooks',
+            'resavar:dining-arrival-reminders',
+        ] as $retiredCommand) {
+            if (str_contains($scheduled, $retiredCommand)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private function performanceBudgetsSafe(): bool

@@ -20,7 +20,7 @@ This note maps the code-level boundaries observed in October 2026. **It does not
 
 ## Runtime cutover guards
 
-- #250 turns on `RESAVAR_ACCOMMODATION_ONLY=true` by default and binds a **410 retirement guard** to non-accommodation routes, including all mutation endpoints and historic third-party supplier webhooks.
+- #250 turns on `RESAVAR_ACCOMMODATION_ONLY=true` by default. Batch #294 now **forces this scope in production even if the environment flag is false**, and binds a **410 retirement guard** to non-accommodation routes, including all mutation endpoints and historic third-party supplier webhooks.
 - Existing public legacy travel marketing URLs redirect to accommodation search with permanent redirects. Existing route names are preserved for compatibility with caches/bookmarks where applicable.
 - `azari:sync-channels`, `resavar:process-travel-webhooks`, and dining reminders are not scheduled while accommodation-only is enabled; manually invoked commands also guard the mode. Previously queued `SyncChannelConnection` jobs no-op before any external provider I/O.
 - Existing Pesapal and accommodation payment callbacks, quote/availability, booking reminders and guest communications must **not** be put behind the travel retirement guard.
@@ -35,7 +35,7 @@ This note maps the code-level boundaries observed in October 2026. **It does not
 4. Confirm guest/account archive tenant isolation and admin audit permissions; ensure no sensitive bank details, secrets, travel documents or preferences appear in HTML/logs.
 5. Confirm accommodation inventory, search, payment callbacks, receipts, support, owner creation and admin property creation still work. Verify sitemap and retired 301/410 outcomes.
 6. Roll back **the application deployment as one unit** if needed. Because #251 introduces no migrations, do **not** run destructive `migrate:rollback` on existing historical tables.
-7. A temporary `RESAVAR_ACCOMMODATION_ONLY=false` toggle exposes legacy route behavior and must **not** be used as the normal recovery path without review, provider authorization and reconciliation. Prefer rolling back only the application release after recording outstanding supplier financial obligations.
+7. `RESAVAR_ACCOMMODATION_ONLY=false` can expose legacy routes **only outside production** for isolated compatibility tests. Production ignores this flag and stays accommodation-only. Reactivating another product would require a new approved product decision and separately reviewed/released code; it is **not** a routine rollback mechanism. Prefer rolling back only the application release after recording outstanding supplier financial obligations. Run the revised scope release gate before promoting any application rollback.
 8. Owner remains responsible for live payment/provider verification and deployment acceptance. Local PHP/DB/browser regression proof and lightweight CI are separate gates.
 
 ## Post-cutover follow-up

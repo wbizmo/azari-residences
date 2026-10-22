@@ -8,7 +8,7 @@
 </p>
 
 <p align="center">
-A modern hotel and apartment booking platform built with Laravel, designed for premium hospitality businesses. The platform provides a seamless booking experience for guests while giving administrators complete control over rooms, apartments, reservations, payments, content, users, identities, services, and day-to-day operations through an intuitive management dashboard.
+A Laravel marketplace for accommodation stays — hotels, resorts, apartments, serviced apartments, villas, residences and holiday homes. Guests can find and request accommodation, while property owners and administrators manage listings, inventory, bookings, payments, moderation, content and support. Legacy travel integrations are retired from the active product, with historical audit records retained.
 </p>
 
 ---
@@ -17,7 +17,7 @@ A modern hotel and apartment booking platform built with Laravel, designed for p
 
 * Luxury hotel and serviced apartment booking
 * Apartment and room availability management
-* Online payment processing
+* Pesapal accommodation booking payments (configuration-dependent)
 * Booking verification portal
 * Guest dashboard
 * Admin dashboard
@@ -27,11 +27,8 @@ A modern hotel and apartment booking platform built with Laravel, designed for p
 * Booking history
 * User notifications
 * Support ticket system
-* Service requests
-* Concierge management
-* Housekeeping requests
-* Airport transfer requests
-* Restaurant reservations
+* Accommodation-related in-stay service and housekeeping requests
+* Read-only historical travel and channel record archives (authorized users only)
 * Content Management System (CMS)
 * Homepage section management
 * Navigation management
@@ -41,7 +38,11 @@ A modern hotel and apartment booking platform built with Laravel, designed for p
 * Role-based access control
 * Dynamic branding and logo management
 * SEO-optimized public pages
-* Production-ready architecture
+* Production-oriented architecture with separately gated operator acceptance
+
+---
+
+**Product boundary:** Resavar does not offer new flight tickets, transfers, rental cars, experiences, restaurant reservations or multi-product travel packages. The old code and financial records are preserved solely for controlled historical access and non-production compatibility testing. The operator-controlled launch and rollback procedures are documented in [Batch 01 scope and legacy parking](docs/refactoring/294-batch-one-scope-and-legacy-parking.md).
 
 ---
 

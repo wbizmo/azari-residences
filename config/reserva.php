@@ -1,9 +1,12 @@
 <?php
 
 return [
-    // Retire travel and channel-provider features without destroying their history.
-    // Restore only through an explicit operator-approved scope rollback.
-    'accommodation_only' => filter_var(env('RESAVAR_ACCOMMODATION_ONLY', true), FILTER_VALIDATE_BOOL),
+    // Never permit a production environment flag to silently reactivate retired
+    // flights, cars, dining, packages, supplier webhooks or channel syncs.
+    // Non-production legacy fixture suites may explicitly opt out; production
+    // product-scope changes require a reviewed code release and operator signoff.
+    'accommodation_only' => (string) env('APP_ENV', 'production') === 'production'
+        || filter_var(env('RESAVAR_ACCOMMODATION_ONLY', true), FILTER_VALIDATE_BOOL),
     'bookings' => [
         // New accommodation bookings are REQUESTS until owner/admin review.
         // An explicit false preserves the pre-refocus instant-booking contract.
