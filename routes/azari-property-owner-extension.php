@@ -97,6 +97,10 @@ Route::prefix('azaridevadmin/property-owners')
             ->middleware('azari.permission:owner-withdrawals.view')->name('owner-withdrawals.index');
         Route::get('/withdrawals/{withdrawal}', [OwnerMarketplaceController::class, 'showWithdrawal'])
             ->middleware('azari.permission:owner-withdrawals.view')->name('owner-withdrawals.show');
+        Route::post('/withdrawals/{withdrawal}/approve-manual', [OwnerMarketplaceController::class, 'approveManualWithdrawal'])
+            ->middleware('azari.permission:owner-withdrawals.process')->middleware('azari.step-up')->middleware('throttle:10,1')->name('owner-withdrawals.approve-manual');
+        Route::post('/withdrawals/{withdrawal}/mark-manual-paid', [OwnerMarketplaceController::class, 'markManualWithdrawalPaid'])
+            ->middleware('azari.permission:owner-withdrawals.process')->middleware('azari.step-up')->middleware('throttle:10,1')->name('owner-withdrawals.mark-manual-paid');
         Route::post('/withdrawals/{withdrawal}/process', [OwnerMarketplaceController::class, 'processWithdrawal'])
             ->middleware('azari.permission:owner-withdrawals.process')->middleware('azari.step-up')->name('owner-withdrawals.process');
         Route::post('/withdrawals/{withdrawal}/retry', [OwnerMarketplaceController::class, 'retryWithdrawal'])
