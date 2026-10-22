@@ -1,6 +1,7 @@
 import './azari-user-area.js';
 import './azari-frontend-ux.js';
 import './reserva-marketplace.js';
+import './resavar-home-search.js';
 import './reserva-property.js';
 import './resavar-voucher-code.js';
 // import './bootstrap';
