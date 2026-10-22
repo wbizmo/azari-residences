@@ -71,6 +71,11 @@ final class AccommodationOnlyScopeTest extends TestCase
 
         config()->set('reserva.accommodation_only', false);
         self::assertFalse($method->invoke($command), 'A legacy product opt-in must fail the current release gate.');
+
+        config()->set('reserva.accommodation_only', true);
+        Route::get('/__scope-regression-test', static fn () => 'not allowed')
+            ->name('user.travel.unprotected-new-endpoint');
+        self::assertFalse($method->invoke($command), 'A newly introduced travel route must not bypass retirement.');
     }
 
     public function test_travel_supplier_webhooks_and_partner_api_are_gone_without_touching_booking_callbacks(): void
