@@ -5,3 +5,6 @@
 @import './legacy/app-legacy.css';
 @import './reserva/reserva.css';
 @import './reserva/auth-refocus.css';
+
+/* All standalone guest/staff entrance and recovery screens share this contract. */
+@import './reserva/auth-foundation.css';
