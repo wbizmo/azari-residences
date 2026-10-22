@@ -149,12 +149,6 @@ class DestinationSearchService
 
     private function publishedProperties(Builder $query): Builder
     {
-        return $query
-            ->where('is_published', true)
-            ->where(function (Builder $status): void {
-                $status
-                    ->whereNull('status')
-                    ->orWhereNotIn('status', ['inactive', 'unavailable', 'maintenance', 'archived']);
-            });
+        return $query->discoverable();
     }
 }

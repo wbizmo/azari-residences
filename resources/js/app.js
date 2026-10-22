@@ -1,6 +1,7 @@
 import './azari-user-area.js';
 import './azari-frontend-ux.js';
 import './reserva-marketplace.js';
+import './resavar-home-search.js';
 import './reserva-property.js';
 import './resavar-voucher-code.js';
 // import './bootstrap';
@@ -454,8 +455,14 @@ document.querySelectorAll('[data-destination-search]').forEach((root) => {
     };
 
     input.addEventListener('input', () => {
+        // A typed edit immediately invalidates old suggestions and their
+        // selected IDs (not just after the 180 ms network debounce).
+        requestSequence++;
+        controller?.abort();
         typeInput.value = '';
         idInput.value = '';
+        options = [];
+        close();
         window.clearTimeout(timer);
         timer = window.setTimeout(search, 180);
     });
@@ -533,9 +540,15 @@ document.querySelectorAll('[data-availability-form]').forEach((form) => {
             return;
         }
 
-        const nextDay = new Date(`${checkIn.value}T00:00:00`);
-        nextDay.setDate(nextDay.getDate() + 1);
-        const minimumCheckout = nextDay.toISOString().slice(0, 10);
+        // Calendar dates are local days, not UTC instants. ISO serialization
+        // can subtract a day in positive offsets near DST/midnight.
+        const [year, month, day] = checkIn.value.split('-').map(Number);
+        const nextDay = new Date(year, month - 1, day + 1, 12);
+        const minimumCheckout = [
+            nextDay.getFullYear(),
+            String(nextDay.getMonth() + 1).padStart(2, '0'),
+            String(nextDay.getDate()).padStart(2, '0'),
+        ].join('-');
         checkOut.min = minimumCheckout;
 
         if (checkOut.value && checkOut.value < minimumCheckout) {

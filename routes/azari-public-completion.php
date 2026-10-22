@@ -4,7 +4,6 @@ use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Admin\RoomTypeController;
 use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
 use App\Http\Controllers\PublicSite\AvailabilitySearchController;
-use App\Http\Controllers\PublicSite\DestinationSearchController;
 use App\Http\Controllers\PublicSite\AzariAvailabilityController;
 use App\Http\Controllers\PublicSite\PropertyStayPriceCalendarController;
 use App\Http\Controllers\PublicSite\PublicPageController;
@@ -36,10 +35,6 @@ Route::get('/availability/map-points', [AzariAvailabilityController::class, 'map
 
 Route::get('/availability/search', AvailabilitySearchController::class)
     ->name('availability.search');
-
-Route::get('/destinations/suggest', DestinationSearchController::class)
-    ->middleware('throttle:30,1')
-    ->name('destinations.suggest');
 
 Route::get('/book-now', [PublicPageController::class, 'availability'])
     ->name('public.book-now');

@@ -33,9 +33,8 @@ class HomeController extends Controller
 
             'featuredResidences' => Property::query()
                 ->with(['locationRecord', 'roomType', 'amenities', 'photoModerations'])
-                ->where('is_published', true)
+                ->discoverable()
                 ->where('is_featured', true)
-                ->where('status', '!=', 'inactive')
                 ->orderBy('sort_order')
                 ->limit(6)
                 ->get(),
@@ -44,7 +43,7 @@ class HomeController extends Controller
                 ->where('is_active', true)
                 ->whereHas(
                     'properties',
-                    fn ($query) => $query->where('is_published', true)
+                    fn ($query) => $query->discoverable()
                 )
                 ->orderBy('sort_order')
                 ->orderBy('name')
@@ -54,7 +53,7 @@ class HomeController extends Controller
                 ->where('is_active', true)
                 ->whereHas(
                     'properties',
-                    fn ($query) => $query->where('is_published', true)
+                    fn ($query) => $query->discoverable()
                 )
                 ->orderBy('sort_order')
                 ->orderBy('name')
@@ -69,10 +68,10 @@ class HomeController extends Controller
 
             'popularLocations' => Location::query()
                 ->withCount(['properties as published_properties_count' => fn ($query) =>
-                    $query->where('is_published', true)
+                    $query->discoverable()
                 ])
                 ->where('is_active', true)
-                ->whereHas('properties', fn ($query) => $query->where('is_published', true))
+                ->whereHas('properties', fn ($query) => $query->discoverable())
                 ->orderByDesc('published_properties_count')
                 ->orderBy('sort_order')
                 ->limit(6)
@@ -80,15 +79,14 @@ class HomeController extends Controller
 
             'newResidences' => Property::query()
                 ->with(['locationRecord', 'roomType', 'photoModerations'])
-                ->where('is_published', true)
-                ->whereNotIn('status', ['inactive', 'unavailable', 'maintenance', 'archived'])
+                ->discoverable()
                 ->latest('id')
                 ->limit(4)
                 ->get(),
 
             'propertyTypeStats' => Property::query()
                 ->selectRaw('property_type, COUNT(*) as properties_count')
-                ->where('is_published', true)
+                ->discoverable()
                 ->whereNotNull('property_type')
                 ->groupBy('property_type')
                 ->orderByDesc('properties_count')

@@ -2,6 +2,7 @@
 @import './components.css';
 @import './authenticated.css';
 @import './discovery.css';
+@import './home-search.css';
 @import './property-availability.css';
 @import './property-rates.css';
 @import './search-results.css';

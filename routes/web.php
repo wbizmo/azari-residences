@@ -17,6 +17,7 @@ use App\Http\Controllers\PublicSite\PropertyController;
 use App\Http\Controllers\Admin\ChannelConnectionController;
 use App\Http\Controllers\PublicSite\ChannelCalendarController;
 use App\Http\Controllers\PublicSite\DestinationController;
+use App\Http\Controllers\PublicSite\DestinationSearchController;
 use App\Http\Controllers\HealthController;
 use Illuminate\Support\Facades\Route;
 
@@ -39,6 +40,11 @@ Route::get('/health/live', [HealthController::class, 'live'])->middleware('throt
 Route::get('/health/ready', [HealthController::class, 'ready'])->middleware('throttle:60,1')->name('health.ready');
 // Availability routes are registered in azari-public-completion.php
 Route::get('/residences/{property}', [PropertyController::class, 'show'])->name('properties.show');
+// Specific destination autocomplete must precede the catch-all destination
+// slug route. The old order swallowed /destinations/suggest as a location slug.
+Route::get('/destinations/suggest', DestinationSearchController::class)
+    ->middleware('throttle:30,1')
+    ->name('destinations.suggest');
 Route::get('/destinations/{location:slug}', [DestinationController::class, 'show'])->name('destinations.show');
 Route::get('/calendar/{token}.ics', ChannelCalendarController::class)->middleware(['throttle:120,1', 'resavar.non-accommodation'])->name('channels.export');
 

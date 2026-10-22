@@ -208,6 +208,23 @@ class Property extends Model
             ->where('is_published', true);
     }
 
+    /**
+     * Published accommodation supply suitable for DISCOVERY surfaces.
+     * This is not date-specific availability and must never be presented
+     * as an actual price quote or booking guarantee.
+     */
+    public function scopeDiscoverable(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
+    {
+        return $query
+            ->where('is_published', true)
+            ->where('status', 'available')
+            ->whereHas('publicAccommodationTypes', fn ($types) => $types
+                ->where('total_inventory', '>', 0)
+                ->whereHas('ratePlans', fn ($plans) => $plans
+                    ->where('is_active', true)
+                    ->where('is_public', true)));
+    }
+
     public function reviews(): HasMany
     {
         return $this->hasMany(Review::class)

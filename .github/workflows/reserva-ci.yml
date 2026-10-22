@@ -71,6 +71,9 @@ jobs:
       - name: Batch 04 authentication presentation smoke tests
         run: php artisan test tests/Feature/Architecture/BatchFourAuthDesignRegressionTest.php
 
+      - name: Batch 05 homepage discovery and URL handoff regression tests
+        run: php artisan test tests/Feature/PublicSite/BatchFiveHomeSearchTest.php
+
       - name: Lightweight release gate
         run: php artisan azari:release-gate --ci
 
