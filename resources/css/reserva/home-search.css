@@ -128,6 +128,50 @@ body.home-page {
     line-height: 1.6;
 }
 .home-page .resavar-home-search-noscript a { color: #164da0; text-decoration: underline; }
+.home-page .resavar-home-trust-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px 25px;
+    align-items: center;
+    border-top: 1px solid #e4ecf5;
+    padding: 12px clamp(16px, 2.5vw, 30px) 16px;
+    color: #405d7d;
+    font-size: .77rem;
+    font-weight: 650;
+    line-height: 1.4;
+}
+.home-page .resavar-home-trust-strip span {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+.home-page .resavar-home-trust-strip .material-symbols-outlined {
+    font-size: 18px;
+    color: #1a518e;
+}
+.home-page .resavar-home-trust-strip a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-inline-start: auto;
+    color: #164e9b;
+    font-weight: 800;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+.home-page .residence-image picture,
+.home-page .reserva-new-card__media picture {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+.home-page .residence-image picture img,
+.home-page .reserva-new-card__media picture img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
 .resavar-home-mobile-search { display: none; }
 .home-page .residence-footer > span { max-width: 72%; font-size: .77rem; color: #475f7f; line-height: 1.5; }
 .home-page .residence-footer > span strong {
